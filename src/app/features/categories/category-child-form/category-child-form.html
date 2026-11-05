@@ -1,0 +1,225 @@
+<h2 mat-dialog-title>{{ isEdit ? 'EDITAR CATEGORÍA HIJA' : 'NUEVA CATEGORÍA HIJA' }}</h2>
+<mat-dialog-content class="modal-content-container">
+    <mat-stepper [linear]="true" #stepper>
+
+        <ng-template matStepperIcon="edit">
+            <mat-icon>check</mat-icon>
+        </ng-template>
+        <ng-template matStepperIcon="done">
+            <mat-icon>check</mat-icon>
+        </ng-template>
+
+        <!-- PASO 1: IDENTIDAD -->        
+        <mat-step [stepControl]="identityForm">
+            <form [formGroup]="identityForm" class="form-step">
+                <ng-template matStepLabel>
+                    <span class="step-label-text">Identidad</span>
+                </ng-template>
+
+                <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>Nombre de la Subcategoría</mat-label>
+                    <input matInput formControlName="name" />
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>Grupo (Categoría Padre)</mat-label>
+                    <mat-select formControlName="parentCategoryId">
+                        <mat-option *ngFor="let padre of padres" [value]="padre.id">
+                            {{ padre.name }}
+                        </mat-option>
+                    </mat-select>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>Descripción (Opcional)</mat-label>
+                    <textarea matInput formControlName="description" rows="2"></textarea>
+                </mat-form-field>
+
+                <div class="stepper-actions">
+                    <button mat-raised-button color="primary" matStepperNext type="button"
+                        [disabled]="identityForm.invalid">Siguiente</button>
+                </div>
+            </form>
+        </mat-step>
+
+        <!-- PASO 2: REGLAS Y TRACKING -->
+        <ng-template matStepperIcon="done">
+            <mat-icon>check</mat-icon>
+        </ng-template>
+        <mat-step [stepControl]="rulesForm">
+            <form [formGroup]="rulesForm" class="form-step">
+                <ng-template matStepLabel>
+                    <span class="step-label-text">Reglas y Tracking</span>
+                </ng-template>
+
+                <!-- 1. CAMPO TRACKING Y RETORNABLE EN LA MISMA FILA -->
+                <div class="tracking-row">
+                    <mat-form-field appearance="outline" class="tracking-select">
+                        <mat-label>Modo de Tracking</mat-label>
+                        <mat-select formControlName="trackingMode">
+                            <mat-option *ngFor="let opt of trackingOptions" [value]="opt.value">
+                                {{ opt.label }}
+                            </mat-option>
+                        </mat-select>
+                    </mat-form-field>
+
+                    <mat-slide-toggle formControlName="isReturnable" color="primary" *ngIf="isTrackingConfigurable" class="tracking-toggle">
+                        Artículo Retornable
+                    </mat-slide-toggle>
+                </div>
+
+                <!-- 2. CAJA DE MODO LIBRE (Diseño calcado a tu captura) -->
+                <div class="naming-mode-notice" *ngIf="isTrackingConfigurable">
+                    <mat-form-field appearance="outline" class="full-width" *ngIf="!rulesForm.get('isNamingLibre')?.value" style="margin-bottom: 5px;">
+                        <mat-label>Método de Naming</mat-label>
+                        <mat-select formControlName="namingMethod">
+                            <mat-option *ngFor="let nMode of namingOptions" [value]="nMode">
+                                {{ nMode }}
+                            </mat-option>
+                        </mat-select>
+                    </mat-form-field>
+
+                    <div class="modo-libre-box" [class.active]="rulesForm.get('isNamingLibre')?.value">
+                        <div class="modo-libre-info" *ngIf="rulesForm.get('isNamingLibre')?.value">
+                            <mat-icon>info_outline</mat-icon>
+                            <span>Modo Libre activo: Configura tu fórmula en el paso 3.</span>
+                        </div>
+                        <div class="modo-libre-info inactive" *ngIf="!rulesForm.get('isNamingLibre')?.value">
+                            <mat-icon>info_outline</mat-icon>
+                            <span>Activa el Modo Libre para personalizar la fórmula.</span>
+                        </div>
+                        
+                        <mat-slide-toggle formControlName="isNamingLibre" color="accent">
+                            Modo Libre
+                        </mat-slide-toggle>
+                    </div>
+                </div>
+
+                <div class="stepper-actions">
+                    <button mat-button matStepperPrevious type="button">Atrás</button>
+                    <button mat-raised-button color="primary" matStepperNext type="button"
+                        [disabled]="rulesForm.invalid">Siguiente</button>
+                </div>
+            </form>
+        </mat-step>
+
+        <!-- PASO 3: ATRIBUTOS DINÁMICOS Y CONSTRUCTOR DE NOMBRAMIENTO -->
+        <mat-step [stepControl]="attributesForm" *ngIf="showAttributesStep">
+            <form [formGroup]="attributesForm" class="form-step">
+                <ng-template matStepLabel>
+                    <span class="step-label-text">Atributos y Naming</span>
+                </ng-template>
+
+                <ng-container *ngIf="rulesForm.get('isNamingLibre')?.value">
+                    <div class="naming-section-active">
+                        <div class="section-title-container">
+                            <span class="section-title">CONSTRUCTOR DE NOMBRAMIENTO (FÓRMULA)</span>
+                            <!-- Botón de información con Tooltip -->
+                            <button mat-icon-button type="button"
+                                matTooltip="Símbolos permitidos para concatenar: / - + | _ , . ; :. Las etiquetas alteradas se corregirán automáticamente al salir del campo."
+                                matTooltipPosition="above">
+                                <mat-icon style="color: #A2D149; font-size: 18px;">info_outline</mat-icon>
+                            </button>
+                        </div>
+
+                        <mat-form-field appearance="outline" class="full-width">
+                            <mat-label>Fórmula Personalizada</mat-label>
+                            <input matInput formControlName="namingCustom" (focus)="onNamingFocused()"
+                                (blur)="onNamingUnfocused()" />
+                        </mat-form-field>
+
+                        <div class="preview-box">
+                            <div class="preview-header">
+                                <span class="preview-label">Vista previa del nombre generado</span>
+                                <button mat-icon-button type="button" class="preview-toggle"
+                                    (click)="showPreviewInputs = !showPreviewInputs"
+                                    matTooltip="Editar valores de prueba">
+                                    <mat-icon style="font-size: 18px; color: #8895A5;">{{ showPreviewInputs ?
+                                        'expand_less' : 'expand_more' }}</mat-icon>
+                                </button>
+                            </div>
+
+                            <!-- Inputs dinámicos para los valores de prueba (se muestran si el panel está expandido) -->
+                            <div class="preview-inputs" *ngIf="showPreviewInputs">
+                                <p class="preview-hint">Ingresa valores de prueba para ver el resultado:</p>
+                                <div class="inputs-grid">
+                                    <div class="preview-input-group" *ngFor="let tag of getActiveTags()">
+                                        <label>{{ tag.replace('[', '').replace(']', '') }}</label>
+                                        <input type="text" [formControl]="getPreviewControl(tag)"
+                                            class="preview-input" />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <span class="preview-text">{{ formulaPreview }}</span>
+                        </div>
+
+                        <div class="tags-toolbar">
+                            <p class="tags-hint">Toca una etiqueta (sin duplicados):</p>
+                            <div class="tags-chips">
+                                <!-- Botones con color dinámico según su estado (active, warning, inactive) -->
+                                <button mat-stroked-button type="button" class="tag-btn"
+                                    [ngClass]="getTagStatus('Marca')" (click)="toggleTag('[Marca]')">Marca</button>
+                                <button mat-stroked-button type="button" class="tag-btn"
+                                    [ngClass]="getTagStatus('Código')" (click)="toggleTag('[Código]')">Código</button>
+                                <button mat-stroked-button type="button" class="tag-btn"
+                                    [ngClass]="getTagStatus('Serie')" (click)="toggleTag('[Serie]')">Serie</button>
+                                <button mat-stroked-button type="button" class="tag-btn"
+                                    [ngClass]="getTagStatus('Modelo')" (click)="toggleTag('[Modelo]')">Modelo</button>
+                                <button mat-stroked-button type="button" class="tag-btn"
+                                    [ngClass]="getTagStatus('Pres.')" (click)="toggleTag('[Pres.]')">Pres.</button>
+
+                                <button mat-stroked-button type="button" class="tag-btn dynamic"
+                                    *ngIf="attributesForm.get('label1')?.value"
+                                    [ngClass]="getTagStatus(attributesForm.get('label1')?.value)"
+                                    (click)="toggleTag('[' + attributesForm.get('label1')?.value + ']')">
+                                    {{ attributesForm.get('label1')?.value }}
+                                </button>
+                                <button mat-stroked-button type="button" class="tag-btn dynamic"
+                                    *ngIf="attributesForm.get('label2')?.value"
+                                    [ngClass]="getTagStatus(attributesForm.get('label2')?.value)"
+                                    (click)="toggleTag('[' + attributesForm.get('label2')?.value + ']')">
+                                    {{ attributesForm.get('label2')?.value }}
+                                </button>
+                                <button mat-stroked-button type="button" class="tag-btn dynamic"
+                                    *ngIf="attributesForm.get('label3')?.value"
+                                    [ngClass]="getTagStatus(attributesForm.get('label3')?.value)"
+                                    (click)="toggleTag('[' + attributesForm.get('label3')?.value + ']')">
+                                    {{ attributesForm.get('label3')?.value }}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </ng-container>
+
+                <p class="section-title" style="margin-top: 10px;">ATRIBUTOS DINÁMICOS (MÁX 6)</p>
+                <div class="attributes-grid">
+                    <div class="attr-row" *ngFor="let i of [1,2,3,4,5,6]">
+                        <mat-form-field appearance="outline" class="attr-input">
+                            <mat-label>Atributo {{ i }}</mat-label>
+                            <input matInput [formControlName]="'label' + i" />
+                        </mat-form-field>
+                        <mat-checkbox [formControlName]="'isUnique' + i" color="primary"
+                            [disabled]="!attributesForm.get('label' + i)?.value">
+                            Dato Único
+                        </mat-checkbox>
+                    </div>
+                </div>
+
+                <div class="stepper-actions">
+                    <button mat-button matStepperPrevious type="button">Atrás</button>
+                </div>
+            </form>
+        </mat-step>
+
+    </mat-stepper>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end" class="modal-actions">
+    <button mat-button mat-dialog-close class="btn-cancel">CANCELAR</button>
+    <button mat-raised-button color="primary" 
+        [disabled]="!isFormComplete || (rulesForm.get('isNamingLibre')?.value ? stepper.selectedIndex !== 2 : stepper.selectedIndex < 1)"
+        (click)="onSubmit()">
+        {{ isEdit ? 'ACTUALIZAR' : 'GUARDAR' }}
+    </button>
+</mat-dialog-actions>

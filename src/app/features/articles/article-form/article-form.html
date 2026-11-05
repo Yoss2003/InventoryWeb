@@ -1,0 +1,317 @@
+<div class="custom-modal">
+  <header class="modal-header">
+    <div class="title-area">
+      <span class="title-mark"><mat-icon>inventory_2</mat-icon></span>
+      <div>
+        <h2>ALTA DE ARTÍCULO</h2>
+        <p>Completa los datos del producto en tres pasos</p>
+      </div>
+    </div>
+
+    <nav class="steps-nav" aria-label="Etapas del artículo">
+      <button type="button" class="step" [class.active]="currentStep === 1"
+              [class.completed]="currentStep > 1" (click)="setStep(1)"
+              [attr.aria-current]="currentStep === 1 ? 'step' : null">
+        <span class="step-num"><mat-icon *ngIf="currentStep > 1">check</mat-icon><span *ngIf="currentStep <= 1">1</span></span>
+        <span class="step-text">Identidad</span>
+      </button>
+      <span class="step-divider"></span>
+      <button type="button" class="step" [class.active]="currentStep === 2"
+              [disabled]="!isIdentityComplete" (click)="setStep(2)"
+              [attr.aria-current]="currentStep === 2 ? 'step' : null">
+        <span class="step-num"><mat-icon *ngIf="currentStep > 2">check</mat-icon><span *ngIf="currentStep <= 2">2</span></span>
+        <span class="step-text">Logística</span>
+      </button>
+      <span class="step-divider"></span>
+      <button type="button" class="step" [class.active]="currentStep === 3"
+              [disabled]="!isIdentityComplete || logisticsForm.invalid" (click)="setStep(3)"
+              [attr.aria-current]="currentStep === 3 ? 'step' : null">
+        <span class="step-num">3</span><span class="step-text">Finanzas</span>
+      </button>
+    </nav>
+  </header>
+
+  <main class="modal-body">
+    <!-- PASO 1: opción 2: pestañas laterales y panel de datos -->
+    <section class="step-content identity-layout" *ngIf="currentStep === 1" aria-label="Identidad del artículo">
+      <nav class="sidebar-menu" aria-label="Secciones de identidad">
+        <button type="button" class="menu-item" [class.active]="activeSubTab === 'general'"
+                [attr.aria-pressed]="activeSubTab === 'general'" (click)="setSubTab('general')">
+          <mat-icon>sell</mat-icon><span>Datos generales</span>
+        </button>
+        <button type="button" class="menu-item" [class.active]="activeSubTab === 'attributes'"
+                [attr.aria-pressed]="activeSubTab === 'attributes'" (click)="setSubTab('attributes')">
+          <mat-icon>tune</mat-icon><span>Atributos</span>
+        </button>
+        <button type="button" class="menu-item" [class.active]="activeSubTab === 'images'"
+                [attr.aria-pressed]="activeSubTab === 'images'" (click)="setSubTab('images')">
+          <mat-icon>imagesmode</mat-icon><span>Imágenes</span>
+        </button>
+        <p class="sidebar-tip">Los datos se conservan al cambiar de pestaña.</p>
+      </nav>
+
+      <div class="form-container">
+        <form [formGroup]="identityForm" (ngSubmit)="goNextFromIdentity()">
+          <div class="card-section" *ngIf="activeSubTab === 'general'">
+            <div class="section-header">
+              <div class="section-icon"><mat-icon>sell</mat-icon></div>
+              <div class="section-heading"><h3>Datos generales</h3><p>Clasificación e identificación del artículo</p></div>
+            </div>
+
+            <div class="form-grid">
+              <div class="form-group">
+                <label for="article-category">Categoría <span class="required">*</span></label>
+                <select id="article-category" formControlName="categoryId" class="custom-select"
+                        [class.invalid]="isInvalid('identity', 'categoryId')">
+                  <option [ngValue]="null">Seleccionar categoría</option>
+                  <option *ngFor="let cat of categoriasHijas" [ngValue]="cat.id">{{ cat.name }}</option>
+                </select>
+                <span class="hint-text" *ngIf="currentTrackingMode">Modo de rastreo: {{ currentTrackingMode }}</span>
+                <span class="error-text" *ngIf="isInvalid('identity', 'categoryId')">Selecciona una categoría.</span>
+              </div>
+
+              <div class="form-group">
+                <label for="article-brand">Marca <span class="required">*</span></label>
+                <div class="field-with-button">
+                  <select id="article-brand" formControlName="brandId" class="custom-select"
+                          [class.invalid]="isInvalid('identity', 'brandId')">
+                    <option [ngValue]="null">Seleccionar marca</option>
+                    <option *ngFor="let marca of marcasFiltradas" [ngValue]="marca.id">{{ marca.name }}</option>
+                  </select>
+                  <button type="button" class="btn-icon btn-green" (click)="agregarNuevaMarca()"
+                          title="Agregar marca" aria-label="Agregar marca">
+                    <mat-icon>add</mat-icon>
+                  </button>
+                </div>
+                <span class="error-text" *ngIf="isInvalid('identity', 'brandId')">Selecciona una marca.</span>
+              </div>
+
+              <div class="form-group" *ngIf="currentTrackingMode === 'Estándar'">
+                <label for="article-barcode">Código de barras <span class="required">*</span></label>
+                <div class="input-with-actions">
+                  <input id="article-barcode" type="text" formControlName="barcode" class="custom-input"
+                         [class.invalid]="isInvalid('identity', 'barcode')" placeholder="Ingresa o escanea un código" />
+                  <input type="file" #camScanInput accept="image/*" capture="environment"
+                         (change)="scanBarcodeFromImage($event, 'barcode')" hidden>
+                  <input type="file" #galScanInput accept="image/*"
+                         (change)="scanBarcodeFromImage($event, 'barcode')" hidden>
+                  <button type="button" class="btn-icon btn-blue" (click)="camScanInput.click()"
+                          [disabled]="isScanning" title="Escanear con cámara" aria-label="Escanear código con cámara"><mat-icon>photo_camera</mat-icon></button>
+                  <button type="button" class="btn-icon btn-dark" (click)="galScanInput.click()"
+                          [disabled]="isScanning" title="Escanear desde imagen" aria-label="Escanear desde galería"><mat-icon>image</mat-icon></button>
+                </div>
+                <span class="error-text" *ngIf="isInvalid('identity', 'barcode')">El código de barras es obligatorio.</span>
+              </div>
+
+              <div class="form-group" *ngIf="currentTrackingMode === 'A Granel' || currentTrackingMode === 'Serializado'">
+                <label for="article-sku">Código SKU interno <span *ngIf="currentTrackingMode === 'A Granel'" class="required">*</span></label>
+                <input id="article-sku" type="text" formControlName="sku" class="custom-input"
+                       [class.invalid]="isInvalid('identity', 'sku')" placeholder="Ingresa el código interno" />
+                <span class="error-text" *ngIf="isInvalid('identity', 'sku')">El SKU es obligatorio en artículos a granel.</span>
+              </div>
+
+              <div class="form-group" *ngIf="currentTrackingMode !== 'Serializado'">
+                <label for="article-presentation">Presentación</label>
+                <input id="article-presentation" type="text" formControlName="presentation" class="custom-input"
+                       placeholder="Ej. Unidad, paquete, caja" />
+              </div>
+
+              <div class="form-group" *ngIf="currentTrackingMode === 'Serializado'">
+                <label for="article-serial">Número de serie / IMEI <span class="required">*</span></label>
+                <div class="input-with-actions">
+                  <input id="article-serial" type="text" formControlName="serialNumber" class="custom-input"
+                         [class.invalid]="isInvalid('identity', 'serialNumber')" placeholder="Ingresa o escanea la serie" />
+                  <input type="file" #camScanSerie accept="image/*" capture="environment"
+                         (change)="scanBarcodeFromImage($event, 'serialNumber')" hidden>
+                  <button type="button" class="btn-icon btn-blue" (click)="camScanSerie.click()"
+                          [disabled]="isScanning" title="Escanear número de serie" aria-label="Escanear serie"><mat-icon>qr_code_scanner</mat-icon></button>
+                </div>
+                <span class="error-text" *ngIf="isInvalid('identity', 'serialNumber')">La serie es obligatoria.</span>
+              </div>
+
+              <div class="form-group">
+                <label for="article-model">Modelo / versión</label>
+                <input id="article-model" type="text" formControlName="model" class="custom-input"
+                       placeholder="Ej. Modelo 2026" />
+              </div>
+
+              <div class="form-group grid-full name-group">
+                <label for="article-name">Nombre final del artículo <span class="required">*</span></label>
+                <div class="name-field">
+                  <input id="article-name" type="text" formControlName="name" class="custom-input"
+                         [class.invalid]="showNameError" [class.input-locked]="identityForm.get('name')?.disabled"
+                         [placeholder]="identityForm.get('name')?.disabled ? 'Se generará según la categoría' : 'Escribe el nombre del artículo'" />
+                  <mat-icon *ngIf="identityForm.get('name')?.disabled" title="Nombre generado automáticamente">lock</mat-icon>
+                </div>
+                <span class="hint-text">{{ identityForm.get('name')?.disabled ? 'El nombre se genera a partir de los datos ingresados.' : 'Esta categoría permite escribir el nombre manualmente.' }}</span>
+                <span class="error-text" *ngIf="showNameError">Completa los datos necesarios para obtener un nombre.</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="card-section" *ngIf="activeSubTab === 'attributes'">
+            <div class="section-header">
+              <div class="section-icon"><mat-icon>tune</mat-icon></div>
+              <div class="section-heading"><h3>Atributos</h3><p>Características definidas por la categoría</p></div>
+            </div>
+            <div class="empty-state" *ngIf="!selectedCategory">
+              <mat-icon>category</mat-icon>
+              <p>Selecciona una categoría en «Datos generales» para ver sus atributos.</p>
+              <button type="button" class="text-link" (click)="setSubTab('general')">Ir a datos generales</button>
+            </div>
+            <div class="empty-state" *ngIf="selectedCategory && attributeFields.length === 0">
+              <mat-icon>check_circle</mat-icon><p>Esta categoría no tiene atributos adicionales.</p>
+            </div>
+            <div class="form-grid" *ngIf="attributeFields.length > 0">
+              <div class="form-group" *ngFor="let field of attributeFields">
+                <label [for]="field.control">{{ field.label }}</label>
+                <input type="text" class="custom-input" [id]="field.control" [formControlName]="field.control"
+                       [placeholder]="'Ingresa ' + field.label.toLowerCase()" />
+              </div>
+            </div>
+          </div>
+
+          <div class="card-section" *ngIf="activeSubTab === 'images'">
+            <div class="section-header">
+              <div class="section-icon"><mat-icon>imagesmode</mat-icon></div>
+              <div class="section-heading"><h3>Imágenes y comprobante</h3><p>Adjunta una foto y el documento de respaldo</p></div>
+            </div>
+            <div class="media-grid">
+              <div class="media-field">
+                <label class="media-label">Foto principal</label>
+                <input #photoInput type="file" accept="image/*" (change)="onFileSelected($event, 'photo')" hidden>
+                <button *ngIf="!mainPhotoPreview" type="button" class="upload-box"
+                        (click)="photoInput.click()" aria-label="Seleccionar foto principal">
+                  <mat-icon>add_a_photo</mat-icon><strong>Seleccionar imagen</strong><small>JPG, PNG u otra imagen</small>
+                </button>
+                <div *ngIf="mainPhotoPreview" class="preview-box">
+                  <img [src]="mainPhotoPreview" alt="Vista previa del artículo" />
+                  <button type="button" class="btn-delete" (click)="removeFile('photo'); photoInput.value = ''"
+                          title="Quitar foto" aria-label="Quitar foto"><mat-icon>close</mat-icon></button>
+                </div>
+              </div>
+              <div class="media-field">
+                <label class="media-label">Comprobante</label>
+                <input #voucherInput type="file" accept="image/*,application/pdf" (change)="onFileSelected($event, 'voucher')" hidden>
+                <button *ngIf="!voucherPreview" type="button" class="upload-box"
+                        (click)="voucherInput.click()" aria-label="Seleccionar comprobante">
+                  <mat-icon>receipt_long</mat-icon><strong>Adjuntar comprobante</strong><small>Imagen o PDF</small>
+                </button>
+                <div *ngIf="voucherPreview" class="preview-box">
+                  <img *ngIf="!isVoucherPdf" [src]="voucherPreview" alt="Vista previa del comprobante" />
+                  <div *ngIf="isVoucherPdf" class="pdf-preview"><mat-icon>picture_as_pdf</mat-icon><span>{{ voucherFile?.name }}</span></div>
+                  <button type="button" class="btn-delete" (click)="removeFile('voucher'); voucherInput.value = ''"
+                          title="Quitar comprobante" aria-label="Quitar comprobante"><mat-icon>close</mat-icon></button>
+                </div>
+              </div>
+            </div>
+            <p class="helper-note"><mat-icon>info_outline</mat-icon> Los archivos se mantienen seleccionados al cambiar de pestaña.</p>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <!-- PASO 2: cuadrícula recomendada -->
+    <section class="step-content centered-card" *ngIf="currentStep === 2" aria-label="Logística del artículo">
+      <div class="card-section">
+        <div class="section-header">
+          <div class="section-icon lime"><mat-icon>inventory</mat-icon></div>
+          <div class="section-heading"><h3>Configuración logística</h3><p>Define cómo se compra, vende y contabiliza el producto.</p></div>
+        </div>
+        <form [formGroup]="logisticsForm" (ngSubmit)="goNextFromLogistics()">
+          <div class="tile-grid">
+            <div class="field-tile">
+              <div class="tile-label"><mat-icon>local_shipping</mat-icon><label for="acq-unit">Se compra por <span class="required">*</span></label></div>
+              <select id="acq-unit" formControlName="acqUnit" class="custom-select">
+                <option *ngFor="let u of unidades" [value]="u">{{ u }}</option>
+              </select>
+            </div>
+            <div class="field-tile">
+              <div class="tile-label"><mat-icon>shopping_cart</mat-icon><label for="sale-unit">Se vende por <span class="required">*</span></label></div>
+              <select id="sale-unit" formControlName="saleUnit" class="custom-select">
+                <option *ngFor="let u of unidades" [value]="u">{{ u }}</option>
+              </select>
+            </div>
+            <div class="field-tile">
+              <div class="tile-label"><mat-icon>layers</mat-icon><label for="conversion">Unidades de venta por paquete <span class="required">*</span></label></div>
+              <input id="conversion" type="number" min="0.01" step="any" formControlName="conversionFactor"
+                     class="custom-input" [class.invalid]="isInvalid('logistics', 'conversionFactor')" />
+              <span class="hint-text">Factor de conversión</span>
+              <span class="error-text" *ngIf="isInvalid('logistics', 'conversionFactor')">Ingresa un factor mayor que cero.</span>
+            </div>
+            <div class="field-tile">
+              <div class="tile-label"><mat-icon>warehouse</mat-icon><label for="article-stock">Stock total <span class="required">*</span></label></div>
+              <input id="article-stock" type="number" min="0" step="any" formControlName="stock" class="custom-input"
+                     [class.invalid]="isInvalid('logistics', 'stock')" />
+              <span class="hint-text">Expresado en unidades de venta</span>
+              <span class="error-text" *ngIf="isInvalid('logistics', 'stock')">Ingresa un stock válido.</span>
+            </div>
+          </div>
+          <p *ngIf="currentTrackingMode === 'Serializado'" class="helper-note"><mat-icon>info_outline</mat-icon> Para artículos serializados el stock inicial se fija en 1.</p>
+        </form>
+      </div>
+    </section>
+
+    <!-- PASO 3: panel de finanzas recomendado -->
+    <section class="step-content centered-card" *ngIf="currentStep === 3" aria-label="Finanzas del artículo">
+      <div class="card-section">
+        <div class="section-header">
+          <div class="section-icon lime"><mat-icon>bar_chart</mat-icon></div>
+          <div class="section-heading"><h3>Información financiera</h3><p>Registra costos y precios; revisa la rentabilidad estimada.</p></div>
+        </div>
+        <form [formGroup]="financeForm" (ngSubmit)="onSubmit()">
+          <div class="finance-fields">
+            <div class="finance-row">
+              <div class="finance-label"><mat-icon>payments</mat-icon><label for="acq-price">Costo de adquisición</label></div>
+              <div class="money-input">
+                <input id="acq-price" type="number" min="0" step="0.01" formControlName="acqPrice"
+                       class="custom-input" placeholder="0.00" [class.invalid]="isInvalid('finance', 'acqPrice')" />
+                <select formControlName="acqCurrency" class="custom-select" aria-label="Moneda de adquisición">
+                  <option *ngFor="let m of monedas" [value]="m.code">{{ m.code }}</option>
+                </select>
+              </div>
+            </div>
+            <div class="finance-row">
+              <div class="finance-label"><mat-icon>sell</mat-icon><label for="sale-price">Precio de venta (por unidad)</label></div>
+              <div class="money-input">
+                <input id="sale-price" type="number" min="0" step="0.01" formControlName="salePrice"
+                       class="custom-input" placeholder="0.00" [class.invalid]="isInvalid('finance', 'salePrice')" />
+                <select formControlName="saleCurrency" class="custom-select" aria-label="Moneda de venta">
+                  <option *ngFor="let m of monedas" [value]="m.code">{{ m.code }}</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="profitability-dashboard" [class.is-loss]="isLoss">
+            <div class="dash-header"><mat-icon>calculate</mat-icon><div><strong>Vista de rentabilidad (estimada)</strong><p>Cálculos por unidad de venta, expresados en soles</p></div></div>
+            <div class="dash-metrics" *ngIf="hasFinancialEstimate; else awaitingValues">
+              <div class="metric"><mat-icon>paid</mat-icon><span class="label">Utilidad por unidad</span><span class="value">S/ {{ utilityPerUnit | number:'1.2-2' }}</span></div>
+              <div class="metric"><mat-icon>percent</mat-icon><span class="label">Ganancia sobre costo</span><span class="value">{{ marginPercent | number:'1.2-2' }} %</span></div>
+              <div class="metric"><mat-icon>trending_up</mat-icon><span class="label">Relación venta/costo</span><span class="value">{{ profitabilityRatio | number:'1.2-2' }} x</span></div>
+            </div>
+            <ng-template #awaitingValues><div class="awaiting-values"><mat-icon>info_outline</mat-icon> Ingresa costos y precio de venta para ver la estimación.</div></ng-template>
+          </div>
+          <p class="helper-note">Cálculo orientativo: no incluye impuestos, descuentos ni costos adicionales. USD usa el tipo de cambio fijo configurado.</p>
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <footer class="modal-footer">
+    <button *ngIf="currentStep > 1" type="button" class="btn-text back" (click)="setStep(currentStep - 1)">
+      <mat-icon>arrow_back</mat-icon> Atrás
+    </button>
+    <span class="footer-spacer"></span>
+    <button type="button" class="btn-text" mat-dialog-close>Cancelar</button>
+    <button *ngIf="currentStep === 1" type="button" class="btn-pill-green" (click)="goNextFromIdentity()">
+      Siguiente: Logística <mat-icon>arrow_forward</mat-icon>
+    </button>
+    <button *ngIf="currentStep === 2" type="button" class="btn-pill-green" (click)="goNextFromLogistics()">
+      Siguiente: Finanzas <mat-icon>arrow_forward</mat-icon>
+    </button>
+    <button *ngIf="currentStep === 3" type="button" class="btn-pill-green" (click)="onSubmit()">
+      <mat-icon>save</mat-icon> Guardar artículo
+    </button>
+  </footer>
+</div>

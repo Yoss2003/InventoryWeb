@@ -1,0 +1,356 @@
+/* ANIMACIÓN SUAVE DEL MODAL DE MATERIAL */
+::ng-deep .mdc-dialog__surface {
+    transition: height 0.35s cubic-bezier(0.25, 0.8, 0.25, 1), 
+                max-height 0.35s cubic-bezier(0.25, 0.8, 0.25, 1),
+                min-height 0.35s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
+}
+
+.modal-content-container {
+    padding-top: 10px !important;
+    max-height: 75vh;
+    overflow-y: auto;
+    background-color: #1e1e1e !important;
+    color: #e0e0e0;
+}
+
+.form-step {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 15px;
+}
+
+.full-width {
+    width: 100%;
+}
+
+.toggle-container {
+    margin: 5px 0 10px 0;
+}
+
+.modo-libre-alert {
+    flex: 1;
+    color: #A2D149;
+    font-size: 12px;
+    background-color: #1C262E;
+    padding: 10px 12px;
+    border-radius: 6px;
+    border: 1px dashed #A2D149;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+/* BOTONES CENTRADOS Y CON MEJOR ESPACIO */
+.tags-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center; /* Centrar botones */
+    padding: 10px 0;
+}
+
+.tag-btn {
+    background-color: #1A2229 !important;
+    color: #8895A5 !important;
+    border: 1px solid #2E3842 !important;
+    font-size: 11px !important;
+    height: 34px !important; /* Un poco más de altura */
+    padding: 0 14px !important;
+
+    &:hover {
+        background-color: #1B4F5F !important;
+        color: white !important;
+    }
+
+    &.active {
+        background-color: #2E7D32 !important;
+        color: white !important;
+        border-color: #A2D149 !important;
+    }
+
+    &.warning {
+        background-color: #EFA72F !important;
+        color: #1C262E !important;
+        border-color: #fff !important;
+        font-weight: bold;
+    }
+}
+
+.attributes-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    max-height: 280px;
+    overflow-y: auto;
+    padding-right: 5px;
+}
+
+.attr-row {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    background-color: #232B35;
+    padding: 8px 12px;
+    border-radius: 6px;
+    border: 1px solid #2E3842;
+
+    .attr-input {
+        flex: 1;
+        margin-bottom: -1.25em;
+    }
+}
+
+.stepper-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.modal-actions {
+    padding: 15px 24px;
+    background-color: #161F27;
+    border-top: 1px solid #2E3842;
+}
+
+.section-title {
+    color: #A2D149;
+    font-size: 11px;
+    font-weight: bold;
+    letter-spacing: 1px;
+    margin-bottom: 8px;
+}
+
+.naming-section-active {
+    background-color: #232B35;
+    border: 1px solid #A2D149;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 15px;
+}
+
+.naming-header-inline {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+    background-color: #232B35;
+    border: 1px solid #2E3842;
+    padding: 12px 15px;
+    border-radius: 8px;
+    margin-top: 5px;
+}
+
+.section-title-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+/* VISTA PREVIA */
+.preview-box {
+    background-color: #161F27;
+    border: 1px dashed #2E3842;
+    padding: 10px 14px;
+    border-radius: 6px;
+    margin-bottom: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+
+    .preview-label {
+        color: #8895A5;
+        font-size: 10.5px;
+        text-transform: uppercase;
+        font-weight: 600;
+    }
+
+    .preview-text {
+        color: #A2D149;
+        font-size: 13.5px;
+        font-weight: bold;
+        font-family: monospace;
+    }
+}
+
+.preview-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.preview-inputs {
+    padding: 10px 0;
+    border-top: 1px dashed #2E3842;
+    border-bottom: 1px dashed #2E3842;
+    margin-bottom: 8px;
+
+    .preview-hint {
+        color: #8895A5;
+        font-size: 11px;
+        margin-bottom: 10px;
+    }
+
+    .inputs-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+        gap: 10px;
+    }
+}
+
+.preview-input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+
+    label {
+        color: #A2D149;
+        font-size: 10px;
+        font-weight: bold;
+        text-transform: uppercase;
+    }
+
+    .preview-input {
+        background-color: #1A2229;
+        border: 1px solid #2E3842;
+        color: #e0e0e0;
+        padding: 6px 8px;
+        border-radius: 4px;
+        font-size: 12px;
+        outline: none;
+
+        &:focus {
+            border-color: #A2D149;
+        }
+    }
+}
+
+.tracking-row {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    width: 100%;
+
+    .tracking-select {
+        flex: 1;
+    }
+    
+    .tracking-toggle {
+        margin-bottom: 1.25em; 
+    }
+}
+
+.modo-libre-box {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #1A2229;
+    border: 1px dashed #2E3842;
+    padding: 12px 16px;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+
+    &.active {
+        background-color: #1C262E;
+        border-color: #A2D149; /* Borde verde cuando está activo */
+        
+        .modo-libre-info {
+            color: #A2D149;
+        }
+    }
+
+    .modo-libre-info {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 12px;
+        
+        &.inactive {
+            color: #8895A5;
+        }
+
+        mat-icon {
+            font-size: 18px;
+            width: 18px;
+            height: 18px;
+        }
+    }
+}
+
+/* ANIMACIONES DEL STEPPER, ETIQUETAS Y CHECK VERDE */
+/* --- ANIMACIONES DEL STEPPER, ETIQUETAS Y CHECK VERDE --- */
+::ng-deep {
+    .mat-mdc-text-field-wrapper {
+        background-color: #232B35 !important;
+    }
+    .mat-mdc-form-field-flex {
+        background-color: transparent !important;
+    }
+    .mat-mdc-floating-label {
+        color: #8895A5 !important;
+    }
+
+    /* 1. Contenedor principal del encabezado (Quita fondo para que la línea se vea) */
+    .mat-stepper-horizontal {
+        background: transparent !important;
+    }
+
+    /* 2. La línea separadora: subirla para que pase exactamente por la mitad de los círculos */
+    .mat-stepper-horizontal-line {
+        border-top: 1px solid #2E3842 !important;
+        margin: 0 -10px !important;
+        position: relative;
+        top: 1px;
+    }
+
+    /* 3. La Pestaña/Burbuja: Fondo del color del modal para "tapar" la línea debajo de ella */
+    .mat-mdc-step-header {
+        pointer-events: auto !important;
+        padding: 8px 10px !important;
+        background-color: #1e1e1e !important;
+        z-index: 2; /* Para quedar encima de la línea */
+        border-radius: 30px; /* Redondear el fondo para que abrace al icono y texto */
+    }
+
+    /* 4. ¡EL CULPABLE DEL ESPACIO BLANCO! Aplastamos el contenedor nativo de Angular */
+    .mat-mdc-step-label-container {
+        max-width: 0 !important; /* Aplasta el ancho de raíz */
+        margin: 0 !important; /* Elimina los márgenes ocultos fijos de Angular */
+        padding: 0 !important;
+        opacity: 0 !important;
+        overflow: hidden !important;
+        transition: max-width 0.4s cubic-bezier(0.25, 0.8, 0.25, 1), 
+                    opacity 0.3s ease, 
+                    margin 0.3s ease !important;
+    }
+
+    /* 5. Al seleccionar la pestaña, el contenedor recién crece y aparece */
+    .mat-mdc-step-header[aria-selected="true"] .mat-mdc-step-label-container {
+        max-width: 200px !important;
+        opacity: 1 !important;
+        margin-left: 8px !important; /* Espacio separador entre el icono y el texto */
+    }
+
+    /* 6. Animación del texto deslizando lateralmente (slide-in) */
+    .step-label-text {
+        display: block;
+        font-size: 13px;
+        color: #e0e0e0;
+        font-weight: 600;
+        white-space: nowrap;
+        transform: translateX(-15px); /* Inicia escondido un poco a la izquierda */
+        transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+    }
+
+    .mat-mdc-step-header[aria-selected="true"] .step-label-text {
+        transform: translateX(0); /* Se desliza hasta su lugar normal */
+    }
+
+    /* 7. CHECK VERDE OBLIGATORIO (Superponiendo la especificidad de Material MDC) */
+    div.mat-mdc-step-icon.mat-mdc-step-icon-state-edit,
+    div.mat-mdc-step-icon.mat-mdc-step-icon-state-done {
+        background-color: #2E7D32 !important; 
+        color: #A2D149 !important;
+    }
+}

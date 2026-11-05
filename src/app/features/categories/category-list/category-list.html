@@ -1,0 +1,148 @@
+<mat-card class="dashboard-card">
+  <mat-card-header class="dashboard-card-header">
+    <mat-card-title>Maestro de Categorías</mat-card-title>
+    <div class="header-actions" style="display: flex; gap: 10px;">
+      <button mat-raised-button style="background-color: #A2D149; color: #1C262E; font-weight: bold;"
+        (click)="nuevaCategoriaHija()">
+        + CATEGORÍA HIJA
+      </button>
+      <button mat-raised-button color="primary" (click)="nuevaCategoriaPadre()">
+        + CATEGORÍA PADRE
+      </button>
+    </div>
+  </mat-card-header>
+
+  <mat-card-content>
+    <div style="display: flex; gap: 20px; align-items: center; margin-top: 15px; margin-bottom: 10px;">
+      <mat-form-field appearance="outline" style="flex: 1;">
+        <mat-label>Buscar grupo (Categoría Padre)...</mat-label>
+        <mat-icon matPrefix>search</mat-icon>
+        <input matInput (keyup)="applyFilter($event)">
+      </mat-form-field>
+
+      <mat-checkbox [(ngModel)]="mostrarInactivos" (change)="toggleInactivos()" color="primary">
+        Mostrar inactivos
+      </mat-checkbox>
+    </div>
+
+    <table mat-table [dataSource]="dataSource" multiTemplateDataRows class="dashboard-table mat-elevation-z2">
+
+      <ng-container matColumnDef="expand">
+        <th mat-header-cell *matHeaderCellDef style="width: 50px;"></th>
+        <td mat-cell *matCellDef="let element">
+          <button mat-icon-button
+            (click)="(expandedElement = expandedElement === element ? null : element); $event.stopPropagation()">
+            <mat-icon *ngIf="element.subcategorias?.length">
+              {{expandedElement === element ? 'expand_less' : 'expand_more'}}
+            </mat-icon>
+          </button>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="name">
+        <th mat-header-cell *matHeaderCellDef> Grupo (Padre) </th>
+        <td mat-cell *matCellDef="let element" style="font-weight: bold; font-size: 14px;"
+          [class.text-inactive]="!element.isActive">
+          {{element.name}}
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="description">
+        <th mat-header-cell *matHeaderCellDef> Descripción </th>
+        <td mat-cell *matCellDef="let element" [class.text-inactive]="!element.isActive">
+          {{element.description || 'Sin descripción'}}
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="isActive">
+        <th mat-header-cell *matHeaderCellDef> Estado </th>
+        <td mat-cell *matCellDef="let element">
+          <span [style.color]="element.isActive ? '#2ecc71' : '#e74c3c'">
+            {{element.isActive ? 'Activo' : 'Inactivo'}}
+          </span>
+        </td>
+      </ng-container>
+
+      <!-- Botones de Acción (Ocultos si está inactivo) -->
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef style="text-align: right;"> Acciones </th>
+        <td mat-cell *matCellDef="let element" style="text-align: right;">
+          <ng-container *ngIf="element.isActive; else inactivoLabel">
+            <button mat-icon-button color="primary" (click)="nuevaCategoriaPadre(element); $event.stopPropagation()">
+              <mat-icon>edit</mat-icon>
+            </button>
+            <button mat-icon-button color="warn" (click)="eliminarCategoria(element.id, $event)">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </ng-container>
+          <ng-template #inactivoLabel>
+            <span style="color: #606A72; font-size: 12px; font-style: italic; margin-right: 15px;">Sólo Lectura</span>
+          </ng-template>
+        </td>
+      </ng-container>
+
+      <!-- Nuevo Diseño de Detalle (Subcategorías) -->
+      <ng-container matColumnDef="expandedDetail">
+        <td mat-cell *matCellDef="let element" [attr.colspan]="columnsToDisplay.length" style="padding: 0;">
+          <div class="element-detail" [@detailExpand]="element == expandedElement ? 'expanded' : 'collapsed'">
+            <div class="sub-table-container" *ngIf="element.subcategorias?.length">
+
+              <table class="nested-table">
+                <thead>
+                  <tr>
+                    <th>Subcategoría</th>
+                    <th>Descripción</th>
+                    <th>Modo de Tracking</th>
+                    <th>Fórmula (Naming)</th>
+                    <th style="text-align: right;">Acciones</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let sub of element.subcategorias" [class.row-inactive]="!sub.isActive">
+                    <td class="col-name">{{sub.name}} <span class="badge inactive" *ngIf="!sub.isActive">INACTIVO</span>
+                    </td>
+                    <td class="col-desc">{{sub.description || 'N/A'}}</td>
+                    <td>
+                      <span class="badge tracking" *ngIf="sub.trackingMode">{{sub.trackingMode}}</span>
+                      <span *ngIf="!sub.trackingMode" class="text-muted">N/A</span>
+                    </td>
+                    <td>
+                      <span class="badge naming" *ngIf="sub.namingMethod">{{sub.namingMethod}}</span>
+                      <span *ngIf="!sub.namingMethod" class="text-muted">N/A</span>
+                    </td>
+                    <td style="text-align: right;">
+                      <ng-container *ngIf="sub.isActive; else inactivoSubLabel">
+                        <button mat-icon-button color="primary"
+                          (click)="nuevaCategoriaHija(sub); $event.stopPropagation()">
+                          <mat-icon style="font-size: 18px;">edit</mat-icon>
+                        </button>
+                        <button mat-icon-button color="warn"
+                          (click)="eliminarCategoria(sub.id, $event); $event.stopPropagation()">
+                          <mat-icon style="font-size: 18px;">delete</mat-icon>
+                        </button>
+                      </ng-container>
+                      <ng-template #inactivoSubLabel>
+                        <span class="text-muted" style="font-size: 11px; font-style: italic;">Solo Lectura</span>
+                      </ng-template>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+
+            </div>
+            <div *ngIf="!element.subcategorias?.length" class="empty-subs">
+              No hay subcategorías asignadas a este grupo.
+            </div>
+          </div>
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="columnsToDisplay"></tr>
+      <tr mat-row *matRowDef="let element; columns: columnsToDisplay;" class="element-row"
+        [class.expanded-row]="expandedElement === element" [class.row-inactive]="!element.isActive"
+        (click)="expandedElement = expandedElement === element ? null : element">
+      </tr>
+      <tr mat-row *matRowDef="let row; columns: ['expandedDetail']" class="detail-row"></tr>
+    </table>
+  </mat-card-content>
+</mat-card>

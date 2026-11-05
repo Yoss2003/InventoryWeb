@@ -1,0 +1,69 @@
+<h2 mat-dialog-title style="color: #EFA72F;">RETIRO Y TRASPASO DE STOCK</h2>
+
+<mat-dialog-content>
+  <form [formGroup]="traspasoForm" style="display: flex; flex-direction: column; gap: 15px; margin-top: 10px;">
+    
+    <div style="background-color: #1A2229; border: 1px solid #2E3842; padding: 15px; border-radius: 8px;">
+      <mat-form-field appearance="outline" style="width: 100%;">
+        <mat-label>Selecciona el Artículo</mat-label>
+        <mat-select formControlName="articleId">
+          <mat-option *ngFor="let item of articles" [value]="item.id">
+            {{ item.name }} (Stock Disp: {{ item.stock }})
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+      
+      <div style="display: flex; gap: 15px;">
+        <mat-form-field appearance="outline" style="flex: 1;">
+          <mat-label>Tipo de Retiro</mat-label>
+          <mat-select formControlName="retireType">
+            <mat-option value="Parcial">Retirar cantidad específica</mat-option>
+            <mat-option value="Total">Dar de baja todo el stock a 0</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" style="flex: 1;">
+          <mat-label>Cantidad a Retirar</mat-label>
+          <input matInput type="number" formControlName="amount" />
+          <mat-error *ngIf="traspasoForm.get('amount')?.hasError('maxStock')">
+            Supera el stock actual ({{selectedArticleStock}})
+          </mat-error>
+        </mat-form-field>
+      </div>
+    </div>
+
+    <!-- NUEVO: Campo Recipient (Destinatario) -->
+    <mat-form-field appearance="outline" style="width: 100%;">
+      <mat-label>Destinatario / Área que Recibe (Opcional)</mat-label>
+      <input matInput formControlName="recipient"/>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" style="width: 100%;">
+      <mat-label>Motivo del Traspaso/Baja (Obligatorio)</mat-label>
+      <textarea matInput formControlName="observation" rows="3"></textarea>
+    </mat-form-field>
+
+    <!-- NUEVO: Input File oculto para la evidencia -->
+    <input type="file" #fileInput (change)="onPhotoSelected($event)" style="display: none" accept="image/*" />
+    
+    <div style="display: flex; align-items: center; gap: 10px; background-color: #1C262E; padding: 15px; border-radius: 8px; border: 1px dashed #2E3842;">
+      <button mat-mini-fab style="background-color: #2E3842; color: #8895A5;" type="button" (click)="fileInput.click()">
+        <mat-icon>camera_alt</mat-icon>
+      </button>
+      <div style="display: flex; flex-direction: column;">
+        <span style="color: #E0E0E0; font-size: 13px; font-weight: bold;">Evidencia Fotográfica</span>
+        <!-- Muestra el nombre de la foto si se seleccionó una, o el texto por defecto -->
+        <span style="color: #A2D149; font-size: 11px;" *ngIf="selectedPhotoPath">{{ selectedPhotoPath }}</span>
+        <span style="color: #8895A5; font-size: 11px;" *ngIf="!selectedPhotoPath">Aún no se ha cargado imagen</span>
+      </div>
+    </div>
+
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end" style="background-color: #161F27; border-top: 1px solid #2E3842; padding: 15px 24px;">
+  <button mat-button mat-dialog-close style="color: #8895A5;">CANCELAR</button>
+  <button mat-raised-button style="background-color: #EFA72F; color: #11181D; font-weight: bold;" [disabled]="traspasoForm.invalid" (click)="onSubmit()">
+    CONFIRMAR RETIRO
+  </button>
+</mat-dialog-actions>
