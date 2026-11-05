@@ -464,3 +464,49 @@ button:focus-visible { outline: 2px solid $lime; outline-offset: 2px; }
   .btn-pill-green { padding: 9px 10px; font-size: 10px; }
   .money-input { grid-template-columns: minmax(0,1fr) 75px; }
 }
+
+/* Estado de conexión de catálogos */
+.catalog-retry {
+  border: 0;
+  background: transparent;
+  color: #a8d73d;
+  font: inherit;
+  font-size: 11px;
+  text-decoration: underline;
+  cursor: pointer;
+  margin-left: 5px;
+  padding: 0;
+}
+
+
+// Selector Material: desplegable con contraste real (no usa el menú nativo de Windows).
+:host ::ng-deep .inventory-select.mat-mdc-form-field {
+  display: block;
+  width: 100%;
+  --mdc-outlined-text-field-outline-color: #6c8094;
+  --mdc-outlined-text-field-hover-outline-color: #b4c5d6;
+  --mdc-outlined-text-field-focus-outline-color: #a8d73d;
+  --mdc-outlined-text-field-container-shape: 7px;
+  --mat-select-enabled-trigger-text-color: #f4f8fd;
+  --mat-select-placeholder-text-color: #b3c4d5;
+  --mat-select-enabled-arrow-color: #e7eef7;
+  --mat-select-focused-arrow-color: #a8d73d;
+}
+:host ::ng-deep .inventory-select .mat-mdc-text-field-wrapper {
+  height: 43px;
+  background: #111922;
+}
+:host ::ng-deep .inventory-select .mat-mdc-form-field-infix {
+  min-height: 43px;
+  padding-top: 10px;
+  padding-bottom: 9px;
+}
+:host ::ng-deep .inventory-select .mat-mdc-select-value {
+  font-size: 13px;
+  color: #f4f8fd;
+}
+:host ::ng-deep .inventory-select .mat-mdc-form-field-subscript-wrapper { display: none; }
+:host ::ng-deep .inventory-select.invalid .mdc-notched-outline__leading,
+:host ::ng-deep .inventory-select.invalid .mdc-notched-outline__notch,
+:host ::ng-deep .inventory-select.invalid .mdc-notched-outline__trailing { border-color: #fb8585 !important; }
+.field-with-button .inventory-select { flex: 1 1 auto; min-width: 0; }

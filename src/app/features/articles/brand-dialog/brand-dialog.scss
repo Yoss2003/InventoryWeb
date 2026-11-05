@@ -1,0 +1,48 @@
+:host {
+  display: block;
+  color: #edf1f5;
+  font-family: Roboto, 'Segoe UI', sans-serif;
+}
+* { box-sizing: border-box; }
+.brand-modal { background: #121a22; color: #edf1f5; max-height: min(84dvh, 690px); display: flex; flex-direction: column; min-width: 0; }
+.brand-header { padding: 19px 22px; border-bottom: 1px solid #334353; display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+.brand-heading { display: flex; gap: 12px; align-items: center; min-width: 0; }
+.header-icon { display: grid; place-items: center; background: #293922; color: #a8d73d; width: 42px; height: 42px; border-radius: 10px; flex: none; }
+h2 { font-size: 19px; margin: 0; line-height: 1.35; }
+p { margin: 0; }
+.brand-heading p { color: #9dabbd; font-size: 12px; margin-top: 4px; }
+.close-button { appearance: none; border: none; background: transparent; color: #b3c0cd; cursor: pointer; padding: 6px; }
+.close-button:hover { color: #fff; }
+.brand-content { padding: 19px 22px 24px; overflow-y: auto; min-height: 0; }
+.section-row { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+h3 { font-size: 14px; margin: 0 0 12px; font-weight: 700; }
+h3 span { color: #a8d73d; }
+.refresh-button { border: none; background: transparent; color: #a8d73d; display: flex; align-items: center; gap: 4px; cursor: pointer; font: inherit; font-size: 12px; padding: 3px 2px 10px; }
+.refresh-button mat-icon { font-size: 16px; width: 16px; height: 16px; }
+.search-field { width: 100%; display: flex; align-items: center; gap: 9px; padding: 0 11px; border: 1px solid #526376; border-radius: 8px; background: #101720; color: #99aab9; }
+.search-field:focus-within { border-color: #a8d73d; }
+.search-field mat-icon { width: 19px; height: 19px; font-size: 19px; }
+.search-field input { min-width: 0; flex: 1; border: 0; outline: 0; color: #edf1f5; background: transparent; padding: 11px 0; font: inherit; font-size: 13px; }
+.brand-list { min-height: 80px; max-height: 224px; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; margin-top: 11px; padding: 1px; }
+.brand-option { display: flex; align-items: center; justify-content: space-between; gap: 12px; background: #1c2834; border: 1px solid #334557; color: #ebf3fc; padding: 11px 12px; text-align: left; border-radius: 8px; font: inherit; font-size: 13px; cursor: pointer; }
+.brand-option:hover, .brand-option:focus-visible { border-color: #a8d73d; background: #283629; }
+.brand-option.selected { border-color: #8cb12a; }
+.brand-action { color: #a8d73d; display: grid; place-items: center; }
+.brand-action mat-icon { font-size: 19px; width: 19px; height: 19px; }
+.list-hint, .section-description { color: #a0adbd; font-size: 11px; line-height: 1.45; margin-top: 9px; }
+.separator { border-top: 1px solid #364858; margin: 20px 0; }
+.new-brand-form { display: flex; flex-direction: column; gap: 7px; margin-top: 12px; }
+.new-brand-form label { font-size: 12px; font-weight: 650; }
+.new-brand-row { display: flex; align-items: stretch; gap: 9px; }
+.new-brand-row input { min-width: 0; flex: 1; border-radius: 7px; border: 1px solid #526376; background: #101720; color: #f0f4fa; padding: 11px 12px; font: inherit; font-size: 13px; outline: none; }
+.new-brand-row input:focus { border-color: #a8d73d; }
+.save-button { border: 0; border-radius: 8px; background: #91bd2c; color: #142208; font-size: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 5px; padding: 10px 13px; cursor: pointer; }
+.save-button mat-icon { font-size: 18px; width: 18px; height: 18px; }
+button:disabled { opacity: .5; cursor: not-allowed; }
+.feedback { display: block; font-size: 11px; line-height: 1.5; margin-top: 7px; }
+.error { color: #ff9f9f; }
+.feedback button { border: 0; background: transparent; color: #a8d73d; cursor: pointer; text-decoration: underline; }
+.list-message { color: #b3c0cf; font-size: 12px; padding: 16px 9px; }
+.brand-footer { display: flex; justify-content: flex-end; padding: 13px 22px; border-top: 1px solid #334353; }
+.cancel-button { background: #263440; border: 1px solid #435366; color: #f0f4fa; padding: 9px 17px; border-radius: 8px; cursor: pointer; }
+@media (max-width: 430px) { .brand-header, .brand-content, .brand-footer { padding-left: 14px; padding-right: 14px; } .new-brand-row { flex-direction: column; } .save-button { width: 100%; } }

@@ -1,90 +1,39 @@
-// Include theming for Angular Material with `mat.theme()`.
-// This Sass mixin will define CSS variables that are used for styling Angular Material
-// components according to the Material 3 design spec.
-// Learn more about theming and how to use it for your application's
-// custom components at https://material.angular.dev/guide/theming
 @use '@angular/material' as mat;
 
-html {
-  height: 100%;
-  @include mat.theme(
-    (
-      color: (
-        primary: mat.$azure-palette,
-        tertiary: mat.$blue-palette,
-      ),
-      typography: Roboto,
-      density: 0,
-    )
-  );
+html { height: 100%; @include mat.theme((color: (primary: mat.$azure-palette, tertiary: mat.$blue-palette), typography: Roboto, density: 0)); }
+body { color-scheme: light; background-color: var(--mat-sys-surface); color: var(--mat-sys-on-surface); font: var(--mat-sys-body-medium); margin: 0; height: 100%; }
+html, body { height: 100%; margin: 0; padding: 0; background-color: #1e1e1e; overflow: hidden; }
+.dashboard-card { margin-bottom: 20px; border-radius: 8px; background-color: #2b2b2b !important; color: white !important; }
+.dashboard-card-header { display: flex !important; justify-content: space-between !important; align-items: center !important; width: 100%; height: 60px; padding: 0 16px; box-sizing: border-box; }
+.dashboard-table { width: 100%; background-color: #2b2b2b !important; }
+.mat-mdc-header-cell { background-color: #1a1a1a !important; font-weight: 600 !important; color: #a0a0a0 !important; text-transform: uppercase; font-size: 12px; border-bottom: 1px solid #444 !important; }
+.mat-mdc-cell { color: #e0e0e0 !important; border-bottom: 1px solid #444 !important; }
+.mat-mdc-dialog-container .mdc-dialog__surface { transition: height 0.3s ease-out, min-height 0.3s ease-out, max-height 0.3s ease-out !important; overflow: hidden; }
+
+// Dropdown de alta de artículo: oscurecer y separar las opciones, sin resalte azul nativo.
+.mat-mdc-select-panel.inventory-select-options {
+  background: #21313f !important;
+  border: 1px solid #8ba2b8;
+  border-radius: 9px !important;
+  box-shadow: 0 18px 40px rgba(0,0,0,.62) !important;
+  padding: 6px !important;
+  max-height: 310px !important;
+  --mat-option-label-text-color: #eff5fa;
+  --mat-option-selected-state-label-text-color: #d7f79a;
+  --mat-option-hover-state-layer-color: rgba(168,215,61,.14);
+  --mat-option-focus-state-layer-color: rgba(168,215,61,.14);
+  --mat-option-selected-state-layer-color: rgba(168,215,61,.2);
 }
-
-body {
-  // Default the application to a light color theme. This can be changed to
-  // `dark` to enable the dark color theme, or to `light dark` to defer to the
-  // user's system settings.
-  color-scheme: light;
-
-  // Set a default background, font and text colors for the application using
-  // Angular Material's system-level CSS variables. Learn more about these
-  // variables at https://material.angular.dev/guide/system-variables
-  background-color: var(--mat-sys-surface);
-  color: var(--mat-sys-on-surface);
-  font: var(--mat-sys-body-medium);
-
-  // Reset the user agent margin.
-  margin: 0;
-  height: 100%;
+.mat-mdc-select-panel.inventory-select-options .mat-mdc-option {
+  color: #eff5fa !important;
+  min-height: 45px;
+  border-radius: 6px;
+  margin: 2px 0;
+  border-bottom: 1px solid rgba(185,204,223,.1);
 }
-/* You can add global styles to this file, and also import other style files */
-
-html, body {
-  height: 100%;
-  margin: 0;
-  padding: 0;
-  background-color: #1e1e1e;
-  overflow: hidden;
+.mat-mdc-select-panel.inventory-select-options .mat-mdc-option:hover,
+.mat-mdc-select-panel.inventory-select-options .mat-mdc-option.mdc-list-item--selected {
+  background: #374b36 !important;
+  color: #dcffa5 !important;
 }
-
-.dashboard-card {
-  margin-bottom: 20px;
-  border-radius: 8px;
-  background-color: #2b2b2b !important;
-  color: white !important;
-}
-
-.dashboard-card-header {
-  display: flex !important;
-  justify-content: space-between !important;
-  align-items: center !important;
-  width: 100%;
-  height: 60px;
-  padding: 0 16px;
-  box-sizing: border-box;
-}
-
-.dashboard-table {
-  width: 100%;
-  background-color: #2b2b2b !important;
-}
-
-.mat-mdc-header-cell {
-  background-color: #1a1a1a !important;
-  font-weight: 600 !important;
-  color: #a0a0a0 !important;
-  text-transform: uppercase;
-  font-size: 12px;
-  border-bottom: 1px solid #444 !important;
-}
-
-.mat-mdc-cell {
-  color: #e0e0e0 !important;
-  border-bottom: 1px solid #444 !important;
-}
-
-.mat-mdc-dialog-container {
-  .mdc-dialog__surface {
-    transition: height 0.3s ease-out, min-height 0.3s ease-out, max-height 0.3s ease-out !important;
-    overflow: hidden; /* Evita parpadeos de scrollbar durante la animación */
-  }
-}
+.mat-mdc-select-panel.inventory-select-options .mdc-list-item__primary-text { color: inherit !important; }

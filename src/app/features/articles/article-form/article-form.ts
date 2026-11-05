@@ -1,18 +1,18 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
-import { MatDialogRef, MatDialogModule, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { MatDialog, MatDialogRef, MatDialogModule, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { HttpErrorResponse } from '@angular/common/http';
 import { MatIconModule } from '@angular/material/icon';
+import { MatSelectModule } from '@angular/material/select';
+import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { BrowserMultiFormatReader } from '@zxing/browser';
 
 import { CategoryService } from '../../categories/services/category';
-
-interface BrandOption {
-  id: number;
-  categoryId: number;
-  name: string;
-}
+import { BrandService } from '../../../core/services/brands';
+import { Brand } from '../../../core/models/brand.model';
+import { BrandDialogComponent, BrandDialogData } from '../brand-dialog/brand-dialog';
 
 interface AttributeField {
   control: string;
@@ -22,13 +22,16 @@ interface AttributeField {
 @Component({
   selector: 'app-article-form',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, MatDialogModule, MatIconModule],
+  imports: [CommonModule, ReactiveFormsModule, MatDialogModule, MatIconModule, MatSelectModule, MatFormFieldModule],
   templateUrl: './article-form.html',
   styleUrls: ['./article-form.scss']
 })
 export class ArticleFormComponent implements OnInit {
   private fb = inject(FormBuilder);
+  private cdr = inject(ChangeDetectorRef);
   private categoryService = inject(CategoryService);
+  private brandService = inject(BrandService);
+  private dialog = inject(MatDialog);
   private snackBar = inject(MatSnackBar);
   public dialogRef = inject(MatDialogRef<ArticleFormComponent>);
   public data = inject(MAT_DIALOG_DATA, { optional: true });
@@ -38,8 +41,12 @@ export class ArticleFormComponent implements OnInit {
   financeForm!: FormGroup;
 
   categoriasHijas: any[] = [];
-  marcasGlobales: BrandOption[] = [];
-  marcasFiltradas: BrandOption[] = [];
+  marcasGlobales: Brand[] = [];
+  marcasFiltradas: Brand[] = [];
+  isLoadingCategories = false;
+  isLoadingBrands = false;
+  categoriesError = '';
+  brandsError = '';
   unidades = ['Unidad', 'Caja', 'Metros', 'Kilos', 'Gramos', 'Litros'];
 
   // IMPORTANTE: cotización fija original, no es el tipo de cambio de hoy.
@@ -114,18 +121,23 @@ export class ArticleFormComponent implements OnInit {
     return this.categoriasHijas.find(cat => Number(cat.id) === Number(id)) ?? null;
   }
 
-  get attributeFields(): AttributeField[] {
-    const category = this.selectedCategory;
-    if (!category) return [];
+  // Referencias estables: evita recrear los inputs en cada pulsación.
+  attributeFields: AttributeField[] = [];
+  trackByAttribute(_index: number, field: AttributeField): string { return field.control; }
 
-    const fields: AttributeField[] = [];
-    for (let i = 1; i <= 6; i++) {
-      const label = category[`label${i}`];
-      if (typeof label === 'string' && label.trim()) {
-        fields.push({ control: `attr${i}`, label: label.trim() });
+  private refreshAttributeFields(category: any | null): void {
+    this.attributeFields = [];
+    if (category) {
+      for (let i = 1; i <= 6; i++) {
+        const label = category[`label${i}`];
+        if (typeof label === 'string' && label.trim()) {
+          this.attributeFields.push({ control: `attr${i}`, label: label.trim() });
+        }
       }
     }
-    return fields;
+    if (!this.attributeFields.length && this.activeSubTab === 'attributes') {
+      this.activeSubTab = 'general';
+    }
   }
 
   get isIdentityComplete(): boolean {
@@ -149,20 +161,77 @@ export class ArticleFormComponent implements OnInit {
   }
 
   loadCatalogs(): void {
-    this.categoryService.getCategories().subscribe({
-      next: (cats) => {
-        this.categoriasHijas = cats.filter(cat => cat.parentCategoryId != null && cat.isActive);
-      },
-      error: () => this.snackBar.open('No se pudieron cargar las categorías.', 'Cerrar', { duration: 3500 })
-    });
+    this.loadCategories();
+    this.loadBrands();
+  }
 
-    // Se conservan las marcas de prueba que venían en el archivo original.
-    // Aún no están conectadas a un servicio real de marcas.
-    this.marcasGlobales = [
-      { id: 1, categoryId: 1, name: 'Lenovo' },
-      { id: 2, categoryId: 1, name: 'HP' },
-      { id: 3, categoryId: 2, name: 'CommScope' }
-    ];
+  loadCategories(refresh = false): void {
+    this.isLoadingCategories = true;
+    this.categoriesError = '';
+    this.categoryService.getCategories(refresh).subscribe({
+      next: (cats) => {
+        // Solo subcategorías activas, nunca categorías padre ni inactivas.
+        this.categoriasHijas = (Array.isArray(cats) ? cats : [])
+          .filter(c => c.isActive && c.parentCategoryId != null && Number(c.parentCategoryId) > 0)
+          .sort((a, b) => a.name.localeCompare(b.name, 'es'));
+        this.isLoadingCategories = false;
+        if (!this.categoriasHijas.length) {
+          this.categoriesError = 'La API no devolvió categorías hijas activas.';
+        }
+        const currentId = this.identityForm.get('categoryId')?.value;
+        if (currentId != null && !this.categoriasHijas.some(c => Number(c.id) === Number(currentId))) {
+          this.identityForm.get('categoryId')?.setValue(null);
+        } else if (currentId != null) {
+          this.handleCategoryChange(currentId);
+        }
+        this.cdr.markForCheck();
+      },
+      error: (error: HttpErrorResponse) => {
+        this.isLoadingCategories = false;
+        this.categoriasHijas = [];
+        this.categoriesError = error.status === 0
+          ? 'No se pudo conectar con la API de categorías.'
+          : `No se pudieron cargar las categorías (HTTP ${error.status}).`;
+        this.cdr.markForCheck();
+      }
+    });
+  }
+
+  loadBrands(selectedBrandId?: number, refresh = false): void {
+    this.isLoadingBrands = true;
+    this.brandsError = '';
+    this.brandService.getBrands(refresh).subscribe({
+      next: (brands) => {
+        this.marcasGlobales = (Array.isArray(brands) ? brands : [])
+          .filter(b => b.isActive);
+        this.isLoadingBrands = false;
+        this.filterBrandsForSelectedCategory();
+        if (selectedBrandId != null) {
+          const brand = this.marcasFiltradas.find(b => Number(b.id) === Number(selectedBrandId));
+          if (brand) this.identityForm.get('brandId')?.setValue(brand.id);
+          else this.brandsError = 'La nueva marca no aparece aún en el catálogo. Actualiza el listado.';
+        }
+        this.cdr.markForCheck();
+      },
+      error: (error: HttpErrorResponse) => {
+        this.isLoadingBrands = false;
+        this.brandsError = error.status === 0
+          ? 'No se pudo conectar con la API de marcas.'
+          : `No se pudieron cargar las marcas (HTTP ${error.status}).`;
+        this.cdr.markForCheck();
+      }
+    });
+  }
+
+  private filterBrandsForSelectedCategory(): void {
+    const categoryId = this.identityForm.get('categoryId')?.value;
+    this.marcasFiltradas = categoryId == null ? [] : this.marcasGlobales
+      .filter(b => Number(b.categoryId) === Number(categoryId))
+      .sort((a, b) => a.name.localeCompare(b.name, 'es'));
+    const brandId = this.identityForm.get('brandId')?.value;
+    if (brandId != null && !this.marcasFiltradas.some(b => Number(b.id) === Number(brandId))) {
+      this.identityForm.get('brandId')?.setValue(null);
+    }
   }
 
   setupSubscriptions(): void {
@@ -195,6 +264,7 @@ export class ArticleFormComponent implements OnInit {
   }
 
   setSubTab(tab: 'general' | 'attributes' | 'images'): void {
+    if (tab === 'attributes' && !this.attributeFields.length) return;
     this.activeSubTab = tab;
   }
 
@@ -222,6 +292,7 @@ export class ArticleFormComponent implements OnInit {
   handleCategoryChange(catId: number | string | null): void {
     const category = this.categoriasHijas.find(cat => Number(cat.id) === Number(catId));
     this.currentTrackingMode = '';
+    this.refreshAttributeFields(category);
     this.marcasFiltradas = [];
     this.identityForm.get('brandId')?.setValue(null, { emitEvent: false });
 
@@ -238,12 +309,10 @@ export class ArticleFormComponent implements OnInit {
       this.identityForm.get('name')?.disable({ emitEvent: false });
     } else {
       const mode = String(category.trackingMode ?? '0').toLowerCase();
-      this.currentTrackingMode = (mode === 'serialized' || mode === '1') ? 'Serializado'
-        : (mode === 'bulk' || mode === '2') ? 'A Granel' : 'Estándar';
+      this.currentTrackingMode = (mode === 'serialized' || mode === 'serializado' || mode === '1') ? 'Serializado'
+        : (mode === 'bulk' || mode === 'a granel' || mode === '2') ? 'A Granel' : 'Estándar';
 
-      this.marcasFiltradas = this.marcasGlobales.filter(brand =>
-        Number(brand.categoryId) === Number(catId)
-      );
+      this.filterBrandsForSelectedCategory();
 
       if (this.currentTrackingMode === 'Serializado') {
         serial?.setValidators(Validators.required);
@@ -261,19 +330,34 @@ export class ArticleFormComponent implements OnInit {
   }
 
   agregarNuevaMarca(): void {
-    const catId = this.identityForm.get('categoryId')?.value;
-    if (catId == null) {
-      this.snackBar.open('Primero selecciona una categoría.', 'Cerrar', { duration: 3000 });
+    const category = this.selectedCategory;
+    if (!category) {
+      this.snackBar.open('Primero selecciona una categoría hija.', 'Cerrar', { duration: 3000 });
       return;
     }
-    const nuevaMarca = prompt('Ingresa el nombre de la nueva marca:')?.trim();
-    if (!nuevaMarca) return;
-    const id = Math.max(0, ...this.marcasGlobales.map(m => m.id)) + 1;
-    const brand = { id, categoryId: Number(catId), name: nuevaMarca };
-    this.marcasGlobales.push(brand);
-    this.marcasFiltradas = [...this.marcasFiltradas, brand];
-    this.identityForm.get('brandId')?.setValue(id);
-    this.snackBar.open('Marca añadida a este formulario (no guardada en el catálogo).', 'Cerrar', { duration: 3500 });
+
+    const data: BrandDialogData = {
+      categoryId: Number(category.id),
+      categoryName: String(category.name),
+      inventoryId: Number(category.inventoryId),
+      selectedBrandId: this.identityForm.get('brandId')?.value ?? null
+    };
+    const dialogRef = this.dialog.open(BrandDialogComponent, {
+      width: '530px',
+      maxWidth: 'calc(100vw - 20px)',
+      autoFocus: 'first-tabbable',
+      restoreFocus: true,
+      data
+    });
+    dialogRef.afterClosed().subscribe((brand?: Brand) => {
+      if (brand && Number(this.selectedCategory?.id) === Number(brand.categoryId)) {
+        // La API confirmó el ID: actualizar el selector inmediatamente, sin otro GET.
+        this.marcasGlobales = [...this.marcasGlobales.filter(b => Number(b.id) !== Number(brand.id)), brand];
+        this.filterBrandsForSelectedCategory();
+        this.identityForm.get('brandId')?.setValue(brand.id);
+        this.cdr.markForCheck();
+      }
+    });
   }
 
   generateAutoName(): void {

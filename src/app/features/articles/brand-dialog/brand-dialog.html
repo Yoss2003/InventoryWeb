@@ -1,0 +1,73 @@
+<div class="brand-modal">
+  <header class="brand-header">
+    <div class="brand-heading">
+      <span class="header-icon"><mat-icon>sell</mat-icon></span>
+      <div>
+        <h2 id="brand-dialog-title">Marcas de la categoría</h2>
+        <p>{{ data.categoryName }}</p>
+      </div>
+    </div>
+    <button class="close-button" type="button" aria-label="Cerrar ventana de marcas"
+            [disabled]="isSaving" (click)="dialogRef.close()"><mat-icon>close</mat-icon></button>
+  </header>
+
+  <div class="brand-content">
+    <section aria-label="Marcas registradas">
+      <div class="section-row">
+        <h3>Marcas registradas <span *ngIf="!isLoading">({{ brands.length }})</span></h3>
+        <button type="button" class="refresh-button" (click)="loadBrands(true)" [disabled]="isLoading || isSaving">
+          <mat-icon>refresh</mat-icon> Actualizar
+        </button>
+      </div>
+
+      <label class="search-field">
+        <mat-icon>search</mat-icon>
+        <input type="search" [value]="query" (input)="onSearch($event)" placeholder="Buscar una marca..."
+               aria-label="Buscar marca" [disabled]="isLoading || isSaving" />
+      </label>
+
+      <div class="brand-list" role="group" aria-label="Seleccionar marca">
+        <p class="list-message" *ngIf="isLoading">Cargando marcas...</p>
+        <div *ngIf="errorMessage && !isLoading" class="feedback error" role="alert">
+          {{ errorMessage }}
+          <button type="button" (click)="loadBrands(true)">Reintentar</button>
+        </div>
+        <p class="list-message" *ngIf="!isLoading && !errorMessage && !filteredBrands.length">
+          {{ brands.length ? 'Ninguna marca coincide con tu búsqueda.' : 'No hay marcas activas registradas para esta categoría.' }}
+        </p>
+        <button type="button" class="brand-option" *ngFor="let brand of filteredBrands"
+                [class.selected]="selectedBrandId === brand.id" [disabled]="isSaving"
+                (click)="chooseBrand(brand)">
+          <span class="brand-name">{{ brand.name }}</span>
+          <span class="brand-action"><mat-icon>{{ selectedBrandId === brand.id ? 'check_circle' : 'arrow_forward' }}</mat-icon></span>
+        </button>
+      </div>
+      <p class="list-hint">Haz clic en una marca para seleccionarla en el artículo.</p>
+    </section>
+
+    <div class="separator"></div>
+
+    <section aria-label="Registrar nueva marca">
+      <h3>Nueva marca</h3>
+      <p class="section-description">Quedará registrada únicamente para la categoría <strong>{{ data.categoryName }}</strong>.</p>
+      <form [formGroup]="newBrandForm" (ngSubmit)="createBrand()" class="new-brand-form">
+        <label for="new-brand-name">Nombre de la marca</label>
+        <div class="new-brand-row">
+          <input id="new-brand-name" formControlName="name" type="text" maxlength="255"
+                 placeholder="Ej. Lenovo" autocomplete="off" />
+          <button type="submit" class="save-button" [disabled]="isSaving || newBrandForm.invalid">
+            <mat-icon>add</mat-icon> {{ isSaving ? 'Guardando...' : 'Agregar' }}
+          </button>
+        </div>
+        <span class="feedback error" *ngIf="newBrandForm.controls.name.touched && newBrandForm.controls.name.invalid">
+          Ingresa un nombre válido (máximo 255 caracteres).
+        </span>
+        <span class="feedback error" *ngIf="saveError" role="alert">{{ saveError }}</span>
+      </form>
+    </section>
+  </div>
+
+  <footer class="brand-footer">
+    <button type="button" class="cancel-button" (click)="dialogRef.close()" [disabled]="isSaving">Cerrar</button>
+  </footer>
+</div>

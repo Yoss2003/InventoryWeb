@@ -39,7 +39,7 @@
                 [attr.aria-pressed]="activeSubTab === 'general'" (click)="setSubTab('general')">
           <mat-icon>sell</mat-icon><span>Datos generales</span>
         </button>
-        <button type="button" class="menu-item" [class.active]="activeSubTab === 'attributes'"
+        <button *ngIf="attributeFields.length > 0" type="button" class="menu-item" [class.active]="activeSubTab === 'attributes'"
                 [attr.aria-pressed]="activeSubTab === 'attributes'" (click)="setSubTab('attributes')">
           <mat-icon>tune</mat-icon><span>Atributos</span>
         </button>
@@ -61,11 +61,17 @@
             <div class="form-grid">
               <div class="form-group">
                 <label for="article-category">Categoría <span class="required">*</span></label>
-                <select id="article-category" formControlName="categoryId" class="custom-select"
-                        [class.invalid]="isInvalid('identity', 'categoryId')">
-                  <option [ngValue]="null">Seleccionar categoría</option>
-                  <option *ngFor="let cat of categoriasHijas" [ngValue]="cat.id">{{ cat.name }}</option>
-                </select>
+                <mat-form-field appearance="outline" class="inventory-select" [class.invalid]="isInvalid('identity', 'categoryId')">
+                  <mat-select id="article-category" formControlName="categoryId" placeholder="Seleccionar categoría"
+                              panelClass="inventory-select-options">
+                    <mat-option [value]="null">Seleccionar categoría</mat-option>
+                    <mat-option *ngFor="let cat of categoriasHijas" [value]="cat.id">{{ cat.name }}</mat-option>
+                  </mat-select>
+                </mat-form-field>
+                <span class="hint-text" *ngIf="isLoadingCategories">Cargando categorías hijas...</span>
+                <span class="error-text" *ngIf="categoriesError" role="alert">{{ categoriesError }}
+                  <button type="button" class="catalog-retry" (click)="loadCategories(true)">Reintentar</button>
+                </span>
                 <span class="hint-text" *ngIf="currentTrackingMode">Modo de rastreo: {{ currentTrackingMode }}</span>
                 <span class="error-text" *ngIf="isInvalid('identity', 'categoryId')">Selecciona una categoría.</span>
               </div>
@@ -73,16 +79,26 @@
               <div class="form-group">
                 <label for="article-brand">Marca <span class="required">*</span></label>
                 <div class="field-with-button">
-                  <select id="article-brand" formControlName="brandId" class="custom-select"
-                          [class.invalid]="isInvalid('identity', 'brandId')">
-                    <option [ngValue]="null">Seleccionar marca</option>
-                    <option *ngFor="let marca of marcasFiltradas" [ngValue]="marca.id">{{ marca.name }}</option>
-                  </select>
+                  <mat-form-field appearance="outline" class="inventory-select" [class.invalid]="isInvalid('identity', 'brandId')">
+                    <mat-select id="article-brand" formControlName="brandId" placeholder="Seleccionar marca"
+                                [disabled]="!selectedCategory || isLoadingBrands"
+                                panelClass="inventory-select-options">
+                      <mat-option [value]="null">Seleccionar marca</mat-option>
+                      <mat-option *ngFor="let marca of marcasFiltradas" [value]="marca.id">{{ marca.name }}</mat-option>
+                    </mat-select>
+                  </mat-form-field>
                   <button type="button" class="btn-icon btn-green" (click)="agregarNuevaMarca()"
-                          title="Agregar marca" aria-label="Agregar marca">
+                          [disabled]="!selectedCategory"
+                          title="Ver y registrar marcas de esta categoría" aria-label="Gestionar marcas">
                     <mat-icon>add</mat-icon>
                   </button>
                 </div>
+                <span class="hint-text" *ngIf="!selectedCategory">Selecciona primero una categoría hija.</span>
+                <span class="hint-text" *ngIf="isLoadingBrands">Cargando marcas...</span>
+                <span class="hint-text" *ngIf="selectedCategory && !isLoadingBrands && !brandsError && !marcasFiltradas.length">No hay marcas registradas en esta categoría. Pulsa + para agregar una.</span>
+                <span class="error-text" *ngIf="brandsError" role="alert">{{ brandsError }}
+                  <button type="button" class="catalog-retry" (click)="loadBrands(undefined, true)">Reintentar</button>
+                </span>
                 <span class="error-text" *ngIf="isInvalid('identity', 'brandId')">Selecciona una marca.</span>
               </div>
 
@@ -163,7 +179,7 @@
               <mat-icon>check_circle</mat-icon><p>Esta categoría no tiene atributos adicionales.</p>
             </div>
             <div class="form-grid" *ngIf="attributeFields.length > 0">
-              <div class="form-group" *ngFor="let field of attributeFields">
+              <div class="form-group" *ngFor="let field of attributeFields; trackBy: trackByAttribute">
                 <label [for]="field.control">{{ field.label }}</label>
                 <input type="text" class="custom-input" [id]="field.control" [formControlName]="field.control"
                        [placeholder]="'Ingresa ' + field.label.toLowerCase()" />
@@ -222,15 +238,19 @@
           <div class="tile-grid">
             <div class="field-tile">
               <div class="tile-label"><mat-icon>local_shipping</mat-icon><label for="acq-unit">Se compra por <span class="required">*</span></label></div>
-              <select id="acq-unit" formControlName="acqUnit" class="custom-select">
-                <option *ngFor="let u of unidades" [value]="u">{{ u }}</option>
-              </select>
+              <mat-form-field appearance="outline" class="inventory-select">
+                <mat-select id="acq-unit" formControlName="acqUnit" panelClass="inventory-select-options">
+                  <mat-option *ngFor="let u of unidades" [value]="u">{{ u }}</mat-option>
+                </mat-select>
+              </mat-form-field>
             </div>
             <div class="field-tile">
               <div class="tile-label"><mat-icon>shopping_cart</mat-icon><label for="sale-unit">Se vende por <span class="required">*</span></label></div>
-              <select id="sale-unit" formControlName="saleUnit" class="custom-select">
-                <option *ngFor="let u of unidades" [value]="u">{{ u }}</option>
-              </select>
+              <mat-form-field appearance="outline" class="inventory-select">
+                <mat-select id="sale-unit" formControlName="saleUnit" panelClass="inventory-select-options">
+                  <mat-option *ngFor="let u of unidades" [value]="u">{{ u }}</mat-option>
+                </mat-select>
+              </mat-form-field>
             </div>
             <div class="field-tile">
               <div class="tile-label"><mat-icon>layers</mat-icon><label for="conversion">Unidades de venta por paquete <span class="required">*</span></label></div>
@@ -266,9 +286,11 @@
               <div class="money-input">
                 <input id="acq-price" type="number" min="0" step="0.01" formControlName="acqPrice"
                        class="custom-input" placeholder="0.00" [class.invalid]="isInvalid('finance', 'acqPrice')" />
-                <select formControlName="acqCurrency" class="custom-select" aria-label="Moneda de adquisición">
-                  <option *ngFor="let m of monedas" [value]="m.code">{{ m.code }}</option>
-                </select>
+                <mat-form-field appearance="outline" class="inventory-select" aria-label="Moneda de adquisición">
+                  <mat-select formControlName="acqCurrency" aria-label="Moneda de adquisición" panelClass="inventory-select-options">
+                    <mat-option *ngFor="let m of monedas" [value]="m.code">{{ m.code }}</mat-option>
+                  </mat-select>
+                </mat-form-field>
               </div>
             </div>
             <div class="finance-row">
@@ -276,9 +298,11 @@
               <div class="money-input">
                 <input id="sale-price" type="number" min="0" step="0.01" formControlName="salePrice"
                        class="custom-input" placeholder="0.00" [class.invalid]="isInvalid('finance', 'salePrice')" />
-                <select formControlName="saleCurrency" class="custom-select" aria-label="Moneda de venta">
-                  <option *ngFor="let m of monedas" [value]="m.code">{{ m.code }}</option>
-                </select>
+                <mat-form-field appearance="outline" class="inventory-select" aria-label="Moneda de venta">
+                  <mat-select formControlName="saleCurrency" aria-label="Moneda de venta" panelClass="inventory-select-options">
+                    <mat-option *ngFor="let m of monedas" [value]="m.code">{{ m.code }}</mat-option>
+                  </mat-select>
+                </mat-form-field>
               </div>
             </div>
           </div>
