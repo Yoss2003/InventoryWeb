@@ -30,3 +30,5 @@
 .assignment-dialog .assignment-return-submit { margin-top: 12px; border: 0; border-radius: 8px; padding: 10px 15px; color: #172300; background: #a3cc4b; cursor: pointer; font-weight: 700; }
 .assignment-dialog .assignment-return-submit:disabled { opacity: .45; cursor: not-allowed; }
 @media (max-width: 550px) { .assignment-dialog .assignment-return { grid-template-columns: 1fr; } }
+
+.assigned-serials{display:grid;gap:7px;margin:10px 0}.assigned-serials label{display:flex;gap:10px;align-items:center;padding:8px;background:#1c303e;border:1px solid #577184;border-radius:8px}.assigned-serials input{width:18px;height:18px;accent-color:#a2d149}

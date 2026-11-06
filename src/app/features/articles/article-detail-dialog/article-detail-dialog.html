@@ -27,11 +27,17 @@
         <div class="record-grid"><div *ngFor="let row of characteristics"><span>{{row.name}}</span><strong>{{row.value}}</strong></div></div>
         <div *ngFor="let d of a.details" class="record-series"><strong>SN: {{d.serialNumber}}</strong><span>{{d.attr1}} {{d.attr2}} {{d.attr3}} {{d.attr4}} {{d.attr5}} {{d.attr6}}</span></div>
       </section>
+      <section *ngIf="a.tracking === 1 && a.isActive"><h3>Registrar una unidad serializada</h3>
+        <p class="record-hint">Cada serie registrada incrementa el stock en una unidad y crea su movimiento de entrada.</p>
+        <div class="serial-register"><input [(ngModel)]="newSerial" maxlength="150" placeholder="Serie única" aria-label="Número de serie" />
+          <button type="button" [disabled]="savingSerial || !newSerial.trim()" (click)="addSerial()">{{savingSerial?'Guardando…':'Registrar serie'}}</button>
+        </div><small *ngIf="serialNotice">{{serialNotice}}</small>
+      </section>
       <section *ngIf="photo || voucher"><h3>Archivos asociados</h3><div class="record-media">
         <a *ngIf="photo" [href]="photo" target="_blank" rel="noopener"><img [src]="photo" alt="Foto del artículo" />Ver foto</a>
         <a *ngIf="voucher" [href]="voucher" target="_blank" rel="noopener"><span *ngIf="voucherIsPdf">Abrir PDF del comprobante</span><img *ngIf="!voucherIsPdf" [src]="voucher" alt="Comprobante" /></a>
       </div></section>
     </ng-container>
   </main>
-  <footer><button type="button" (click)="dialogRef.close()">Cerrar</button></footer>
+  <footer><button type="button" (click)="dialogRef.close(!!serialNotice)">Cerrar</button></footer>
 </div>

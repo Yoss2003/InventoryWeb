@@ -11,6 +11,7 @@ import { ArticleService } from '../../../core/services/articles';
 import { MovementService } from '../../../core/services/movement';
 import { AssignmentService, AssignmentRecipient } from '../../../core/services/assignments';
 import { Article } from '../../../core/models/article.model';
+import { SerialUnitsService, SerialUnit } from '../../../core/services/serial-units';
 
 @Component({
   selector: 'app-traspaso-form',
@@ -22,6 +23,7 @@ import { Article } from '../../../core/models/article.model';
 export class TraspasoFormComponent implements OnInit {
   private readonly fb = inject(FormBuilder);
   private readonly articlesApi = inject(ArticleService);
+  private readonly serialsApi = inject(SerialUnitsService);
   private readonly movementsApi = inject(MovementService);
   private readonly assignmentsApi = inject(AssignmentService);
   private readonly snackbar = inject(MatSnackBar);
@@ -29,10 +31,22 @@ export class TraspasoFormComponent implements OnInit {
   articles: Article[] = [];
   step = 1;
   get selectedArticle():Article|undefined {return this.articles.find(a=>a.id===Number(this.form.controls.articleId.value));}
+  availableSerials:SerialUnit[]=[];
+  selectedSerialIds:number[]=[];
+  serialError='';
+  get isSerialized():boolean {return !!this.selectedArticle &&
+    (Number(this.selectedArticle.tracking)===1 || /^(serialized|serializado|1)$/i.test(String(this.selectedArticle.trackingMode??'')));}
+  toggleSerial(id:number,checked:boolean):void {
+    this.selectedSerialIds=checked?[...this.selectedSerialIds,id]:this.selectedSerialIds.filter(x=>x!==id);
+    this.form.controls.amount.setValue(this.selectedSerialIds.length);
+  }
+  selectedSerial(id:number):boolean{return this.selectedSerialIds.includes(id);}
+
   get canAdvanceOperation():boolean {
     const qty=Number(this.form.controls.amount.value);
     return !!this.form.controls.operationType.value && !!this.selectedArticle &&
-      !!this.form.controls.retireType.value && this.selectedArticleStock>0 && qty>0 && qty<=this.selectedArticleStock;
+      !!this.form.controls.retireType.value && this.selectedArticleStock>0 && qty>0 && qty<=this.selectedArticleStock &&
+      (!this.isSerialized || (this.operationType==='Asignar' && Number.isInteger(qty) && this.selectedSerialIds.length===qty));
   }
   get canAdvanceRecipient():boolean {
     return !!this.form.controls.observation.value?.trim() &&
@@ -69,7 +83,8 @@ export class TraspasoFormComponent implements OnInit {
     const amount = Number(this.form.controls.amount.value);
     return !this.isSaving && this.form.valid && this.selectedArticleStock > 0 && amount > 0 &&
       amount <= this.selectedArticleStock &&
-      (this.operationType !== 'Asignar' || !!this.form.controls.recipientName.value?.trim());
+      (this.operationType !== 'Asignar' || !!this.form.controls.recipientName.value?.trim()) &&
+      (!this.isSerialized || (this.operationType === 'Asignar' && Number.isInteger(amount) && this.selectedSerialIds.length === amount));
   }
 
   ngOnInit(): void {
@@ -84,6 +99,11 @@ export class TraspasoFormComponent implements OnInit {
     this.form.controls.articleId.valueChanges.subscribe(id => {
       this.selectedArticleStock = Number(this.articles.find(a => a.id === Number(id))?.stock ?? 0);
       this.adjustQuantity();
+      this.availableSerials=[];this.selectedSerialIds=[];this.serialError='';
+      const article=this.articles.find(a=>a.id===Number(id));
+      if(article && (Number(article.tracking)===1 || /^(serialized|serializado|1)$/i.test(String(article.trackingMode??''))))
+        this.serialsApi.available(article.id).subscribe({next:rows=>this.availableSerials=rows,
+          error:()=>this.serialError='No se pudieron cargar las series disponibles.'});
     });
     this.form.controls.retireType.valueChanges.subscribe(() => this.adjustQuantity());
     this.form.controls.recipientUserId.valueChanges.subscribe(id => {
@@ -132,7 +152,8 @@ export class TraspasoFormComponent implements OnInit {
         articleId: Number(v.articleId), quantity: amount,
         recipientUserId: v.recipientUserId,
         recipientName: String(v.recipientName).trim(),
-        observation: String(v.observation), operationKey: crypto.randomUUID()
+        observation: String(v.observation), operationKey: crypto.randomUUID(),
+        detailIds: this.isSerialized ? this.selectedSerialIds : []
       }).subscribe({
         next: data => {
           if (!this.evidence) { this.saved(); return; }

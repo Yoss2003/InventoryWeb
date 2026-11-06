@@ -1,0 +1,9 @@
+<div class="lookup-page"><header><h1>Consultas SUNAT y tipo de cambio</h1><p>Datos obtenidos a través de la API de InventarioWeb (integración original de MAUI).</p></header>
+<p class="error" *ngIf="error" role="alert">{{error}}</p>
+<section><h2>Consultar RUC</h2><div class="lookup-inline"><input [(ngModel)]="ruc" maxlength="11" inputmode="numeric" placeholder="Número RUC (11 dígitos)"/><button (click)="searchRuc()" [disabled]="loadingRuc">{{loadingRuc?'Consultando…':'Consultar'}}</button></div>
+<div *ngIf="sunat" class="data"><p><strong>{{sunat.businessName}}</strong> · {{sunat.ruc}}</p><p>{{sunat.address||'Sin dirección'}}</p><p>Estado: {{sunat.estado||'Sin información'}} · Condición: {{sunat.condicion||'Sin información'}}</p></div></section>
+<section><h2>Tipo de cambio referencial</h2><button (click)="loadRates()" [disabled]="loadingRates">{{loadingRates?'Consultando…':'Consultar USD / EUR'}}</button><div class="rate-grid">
+<div class="data" *ngIf="usd"><strong>USD / PEN</strong><p>Compra: S/ {{usd.buyPrice}}</p><p>Venta: S/ {{usd.sellPrice}}</p><small>Fecha de fuente: {{usd.date|date:'dd/MM/yyyy'}}</small></div>
+<div class="data" *ngIf="eur"><strong>EUR / PEN</strong><p>Compra: S/ {{eur.buyPrice}}</p><p>Venta: S/ {{eur.sellPrice}}</p><small>Fecha de fuente: {{eur.date|date:'dd/MM/yyyy'}}</small></div>
+</div><small>Si la fecha no es la de hoy, corresponde a un dato histórico. Nunca se deben utilizar tasas inventadas como si fueran cotizaciones actuales.</small></section>
+</div>

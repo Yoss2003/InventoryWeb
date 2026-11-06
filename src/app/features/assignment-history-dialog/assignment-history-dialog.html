@@ -28,6 +28,9 @@
       <div *ngFor="let e of events" class="assignment-event"><strong>{{e.kind}} · {{e.quantity | number:'1.0-2'}}</strong><small>{{e.occurredAt | date:'dd/MM/yyyy HH:mm'}} · Movimiento #{{e.movementId}}</small><span>{{e.observation || 'Sin observaciones'}}</span></div>
     </section>
     <section *ngIf="data.remainingQuantity > 0" class="assignment-dialog__block"><h3><mat-icon>assignment_return</mat-icon> Registrar devolución</h3>
+      <div class="assigned-serials" *ngIf="isSerialized"><strong>Elige las series que se devolverán:</strong>
+        <label *ngFor="let unit of assignedSerials"><input type="checkbox" [checked]="selectedSerialIds.includes(unit.id)" (change)="toggleSerial(unit.id,$any($event.target).checked)" /> {{unit.serialNumber}}</label>
+      </div>
       <div class="assignment-return"><label>Cantidad <input [(ngModel)]="amount" type="number" min="0.01" [max]="data.remainingQuantity" step="0.01" /></label><label>Motivo <input [(ngModel)]="observation" maxlength="2000" placeholder="Observación opcional" /></label></div>
       <button type="button" class="assignment-return-submit" (click)="returnArticle()" [disabled]="!canReturn">{{isSaving ? 'Registrando...' : 'Confirmar devolución'}}</button>
     </section>

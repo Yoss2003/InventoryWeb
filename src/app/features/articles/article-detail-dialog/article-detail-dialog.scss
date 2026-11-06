@@ -16,3 +16,5 @@
 .record-dialog footer { flex:none; display:flex; justify-content:flex-end; padding:12px 20px; background:#21303c; border-top:1px solid #405568; }
 .record-dialog footer button { border:1px solid #5c7285; color:#eef4fc; background:#253746; padding:8px 15px; border-radius:8px; cursor:pointer; }
 @media (max-width:600px) { .record-grid { grid-template-columns:1fr; } }
+
+.serial-register{display:flex;gap:10px;align-items:center}.serial-register input{flex:1;background:#111c25;border:1px solid #567084;color:#e6f4fa;padding:10px;border-radius:8px}.serial-register button{background:#5e801d;color:#f1f8e8;border:0;border-radius:9px;padding:10px 15px;cursor:pointer}.serial-register button:disabled{opacity:.5}.record-hint{color:#a8c0d0}

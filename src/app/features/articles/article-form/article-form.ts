@@ -876,7 +876,8 @@ export class ArticleFormComponent implements OnInit, OnDestroy {
       brandId: Number(identity.brandId), code, barcode: identity.barcode || null,
       name: String(identity.name).trim(), model: identity.model || 'Sin modelo',
       presentation: identity.presentation || null, serialNumber: identity.serialNumber || null,
-      tracking: mode, stock: Number(logistics.stock),
+      tracking: mode, stock: !this.isEditMode && mode === 1 && detail.serialNumber
+        ? 1 : Number(logistics.stock),
       measurementUnit: logistics.saleUnit,
       acquisitionUnit: logistics.acqUnit, saleUnit: logistics.saleUnit,
       conversionFactor: Number(logistics.conversionFactor),

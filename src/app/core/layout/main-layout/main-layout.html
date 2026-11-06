@@ -8,6 +8,8 @@
       <a mat-list-item routerLink="/dashboard/salidas" routerLinkActive="active-link" title="Salidas" aria-label="Salidas"><mat-icon matListItemIcon>remove_circle</mat-icon><span class="sidebar-label" matListItemTitle>Salidas</span></a>
       <a mat-list-item routerLink="/dashboard/asignaciones" routerLinkActive="active-link" title="Artículos asignados" aria-label="Artículos asignados"><mat-icon matListItemIcon>assignment_ind</mat-icon><span class="sidebar-label" matListItemTitle>Asignados</span></a>
       <a mat-list-item routerLink="/dashboard/compartir-inventario" routerLinkActive="active-link" title="Compartir inventario" aria-label="Compartir inventario"><mat-icon matListItemIcon>group_add</mat-icon><span class="sidebar-label" matListItemTitle>Compartir</span></a>
+      <a mat-list-item routerLink="/dashboard/consultas" routerLinkActive="active-link" title="Consultas SUNAT y cambio" aria-label="Consultas SUNAT y cambio"><mat-icon matListItemIcon>currency_exchange</mat-icon><span matListItemTitle class="sidebar-label">Consultas</span></a>
+      <a mat-list-item *ngIf="isDeveloper" routerLink="/dashboard/gestion-dev" routerLinkActive="active-link" title="Gestión Dev" aria-label="Gestión Dev"><mat-icon matListItemIcon>admin_panel_settings</mat-icon><span matListItemTitle class="sidebar-label">Gestión Dev</span></a>
     </mat-nav-list>
   </mat-sidenav>
   <mat-sidenav-content>

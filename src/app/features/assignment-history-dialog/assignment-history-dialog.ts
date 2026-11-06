@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { MatDialogModule, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { AssignmentService, AssignedArticle, AssignmentEvent } from '../../core/services/assignments';
+import { SerialUnitsService, SerialUnit } from '../../core/services/serial-units';
 
 @Component({
   selector: 'app-assignment-history-dialog', standalone: true,
@@ -15,18 +16,28 @@ export class AssignmentHistoryDialogComponent implements OnInit, OnDestroy {
   readonly data: AssignedArticle = inject(MAT_DIALOG_DATA);
   readonly dialogRef = inject(MatDialogRef<AssignmentHistoryDialogComponent>);
   private readonly api = inject(AssignmentService);
+  private readonly serialsApi = inject(SerialUnitsService);
   events: AssignmentEvent[] = [];
   loading = false;
   isSaving = false;
   amount = 1;
   observation = '';
+  assignedSerials:SerialUnit[]=[]; selectedSerialIds:number[]=[]; serialLoading=true;
+  get isSerialized():boolean{return this.assignedSerials.length>0;}
+  toggleSerial(id:number,on:boolean):void {
+    this.selectedSerialIds=on?[...this.selectedSerialIds,id]:this.selectedSerialIds.filter(x=>x!==id);
+    this.amount=this.selectedSerialIds.length;
+  }
   errorMessage = '';
   evidenceUrl: string | null = null;
 
-  get canReturn(): boolean { return Number(this.amount) > 0 && Number(this.amount) <= Number(this.data.remainingQuantity) && !this.isSaving; }
+  get canReturn(): boolean { return Number(this.amount) > 0 && Number(this.amount) <= Number(this.data.remainingQuantity) && !this.isSaving && !this.serialLoading &&
+    (!this.isSerialized || this.selectedSerialIds.length === Number(this.amount)); }
   ngOnInit(): void {
     this.loading = true;
     this.api.events(this.data.id).subscribe({ next: rows => { this.events = rows; this.loading = false; }, error: () => { this.loading = false; this.errorMessage = 'No se pudo cargar el historial.'; } });
+    this.serialsApi.assigned(this.data.id).subscribe({next:rows=>{this.assignedSerials=rows;this.serialLoading=false;},
+      error:()=>{this.serialLoading=false;this.errorMessage='No se pudieron consultar las series asignadas.';}});
     if (this.data.hasEvidence) this.api.getEvidence(this.data.id).subscribe({
       next: file => this.evidenceUrl = URL.createObjectURL(file), error: () => {} });
   }
@@ -35,7 +46,7 @@ export class AssignmentHistoryDialogComponent implements OnInit, OnDestroy {
     if (!this.canReturn) return;
     this.isSaving = true;
     this.errorMessage = '';
-    this.api.returnArticle(this.data.id, Number(this.amount), this.observation).subscribe({
+    this.api.returnArticle(this.data.id, Number(this.amount), this.observation,crypto.randomUUID(),this.isSerialized?this.selectedSerialIds:[]).subscribe({
       next: () => this.dialogRef.close(true),
       error: err => { this.isSaving = false; this.errorMessage = String(err?.error?.error ?? 'No se pudo registrar la devolución.'); }
     });

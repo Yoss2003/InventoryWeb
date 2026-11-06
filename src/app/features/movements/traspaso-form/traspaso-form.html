@@ -32,6 +32,13 @@
         </div>
         <div class="field info-block" *ngIf="selectedArticle"><label>Referencia de almacén</label><strong>{{selectedArticle.code}}</strong><small>Registro #{{selectedArticle.id}}</small></div>
       </div>
+      <div class="serial-selection" *ngIf="isSerialized">
+        <strong>Series disponibles · selecciona las unidades exactas</strong>
+        <label *ngFor="let unit of availableSerials"><input type="checkbox" [checked]="selectedSerial(unit.id)" (change)="toggleSerial(unit.id, $any($event.target).checked)" /> {{unit.serialNumber}} · #{{unit.id}}</label>
+        <small *ngIf="!availableSerials.length">No hay unidades disponibles. Registra primero sus series.</small>
+        <p class="transfer-error" *ngIf="operationType==='Baja'">El retiro definitivo de serializados debe registrarse como operación con serie e historial; usa Asignar para entregar custodia.</p>
+        <p class="transfer-error" *ngIf="serialError">{{serialError}}</p>
+      </div>
     </section>
     <section class="form-card wizard-page" *ngIf="step===2">
       <div class="card-heading"><mat-icon>person_pin</mat-icon><div><strong>Destinatario y propósito</strong><small>La custodia identifica a quién se entrega el artículo.</small></div></div>

@@ -123,3 +123,5 @@
   .login-panel { padding: 25px 22px; }
 }
 @media (prefers-reduced-motion: reduce) { .spinning { animation: none; } .login-submit { transition: none; } }
+
+.forgot-link{text-align:center;margin:12px 0}.forgot-link a{color:#b5de76;text-decoration:underline;text-underline-offset:3px}

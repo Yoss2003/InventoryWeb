@@ -43,7 +43,8 @@ export class ArticleListComponent implements OnInit {
     });
   }
   showDetail(row:ArticleRow):void{
-    this.dialog.open(ArticleDetailDialogComponent,{data:{id:row.id},width:'min(780px,calc(100vw - 24px))',maxWidth:'calc(100vw - 24px)',maxHeight:'calc(100dvh - 24px)'});
+    const ref=this.dialog.open(ArticleDetailDialogComponent,{data:{id:row.id},width:'min(780px,calc(100vw - 24px))',maxWidth:'calc(100vw - 24px)',maxHeight:'calc(100dvh - 24px)'});
+    ref.afterClosed().subscribe(changed=>{if(changed)this.load();});
   }
   create(): void { this.openEditor(null); }
   edit(row: ArticleRow, event: Event): void { event.stopPropagation(); if (row.isActive) this.openEditor(row.id); }

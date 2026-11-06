@@ -37,6 +37,7 @@ export interface AssignArticleRequest {
   quantity: number;
   observation?: string;
   operationKey: string;
+  detailIds?: number[];
 }
 @Injectable({ providedIn: 'root' })
 export class AssignmentService {
@@ -59,7 +60,7 @@ export class AssignmentService {
   getEvidence(id: number): Observable<Blob> {
     return this.http.get(`${this.base}/${id}/evidence`, { responseType: 'blob' });
   }
-  returnArticle(id: number, quantity: number, observation = '', operationKey = crypto.randomUUID()): Observable<{ remainingQuantity: number }> {
-    return this.http.post<{ remainingQuantity: number }>(`${this.base}/${id}/return`, { quantity, observation, operationKey });
+  returnArticle(id: number, quantity: number, observation = '', operationKey = crypto.randomUUID(), detailIds: number[] = []): Observable<{ remainingQuantity: number }> {
+    return this.http.post<{ remainingQuantity: number }>(`${this.base}/${id}/return`, { quantity, observation, operationKey, detailIds });
   }
 }

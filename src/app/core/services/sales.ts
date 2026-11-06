@@ -10,6 +10,7 @@ export interface QuickSaleRequest {
   paymentMethod: string;
   notes: string;
   operationKey: string;
+  detailIds?: number[];
 }
 @Injectable({providedIn:'root'})
 export class SalesService {
