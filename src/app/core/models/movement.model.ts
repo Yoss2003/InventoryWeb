@@ -15,5 +15,4 @@ export interface Movement {
   customerEmail?: string;
   companyId: number;
   photoPath?: string;
-  isSynced?: boolean;
 }

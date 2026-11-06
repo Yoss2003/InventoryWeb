@@ -1,0 +1,19 @@
+/* Estilos GLOBALES del contenedor Angular Material (se importan desde src/styles.scss). */
+.inventory-brand-dialog-pane {
+  max-height: calc(100dvh - 24px) !important;
+  max-width: calc(100vw - 24px) !important;
+  border-radius: 22px !important;
+}
+
+.inventory-brand-dialog-pane .mat-mdc-dialog-container {
+  border-radius: 22px !important;
+  overflow: hidden !important;
+}
+
+.inventory-brand-dialog-pane .mat-mdc-dialog-container .mdc-dialog__surface {
+  border: 1px solid #53697a !important;
+  border-radius: 22px !important;
+  overflow: hidden !important;
+  background: #17232f !important;
+  box-shadow: 0 22px 56px rgba(0, 0, 0, .48) !important;
+}

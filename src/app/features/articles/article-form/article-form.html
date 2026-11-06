@@ -52,6 +52,37 @@
 
       <div class="form-container">
         <form [formGroup]="identityForm" (ngSubmit)="goNextFromIdentity()">
+
+          <ng-template #presentationField>
+              <div class="form-group" *ngIf="currentTrackingMode !== 'Serializado'">
+                <label for="article-presentation">Presentación</label>
+                <input id="article-presentation" type="text" formControlName="presentation" class="custom-input"
+                       placeholder="Ej. Unidad, paquete, caja" />
+              </div>
+          </ng-template>
+
+          <ng-template #modelField>
+              <div class="form-group">
+                <label for="article-model">Modelo / versión</label>
+                <input id="article-model" type="text" formControlName="model" class="custom-input"
+                       placeholder="Ej. Modelo 2026" />
+              </div>
+          </ng-template>
+
+          <ng-template #nameField>
+              <div class="form-group grid-full name-group">
+                <label for="article-name">Nombre final del artículo <span class="required">*</span></label>
+                <div class="name-field">
+                  <input id="article-name" type="text" formControlName="name" class="custom-input"
+                         [class.invalid]="showNameError" [class.input-locked]="identityForm.get('name')?.disabled"
+                         [placeholder]="identityForm.get('name')?.disabled ? 'Se generará según la categoría' : 'Escribe el nombre del artículo'" />
+                  <mat-icon *ngIf="identityForm.get('name')?.disabled" title="Nombre generado automáticamente">lock</mat-icon>
+                </div>
+                <span class="hint-text">{{ identityForm.get('name')?.disabled ? 'El nombre se genera a partir de los datos ingresados.' : 'Esta categoría permite escribir el nombre manualmente.' }}</span>
+                <span class="error-text" *ngIf="showNameError">Completa los datos necesarios para obtener un nombre.</span>
+              </div>
+          </ng-template>
+
           <div class="card-section" *ngIf="activeSubTab === 'general'">
             <div class="section-header">
               <div class="section-icon"><mat-icon>sell</mat-icon></div>
@@ -126,11 +157,9 @@
                 <span class="error-text" *ngIf="isInvalid('identity', 'sku')">El SKU es obligatorio en artículos a granel.</span>
               </div>
 
-              <div class="form-group" *ngIf="currentTrackingMode !== 'Serializado'">
-                <label for="article-presentation">Presentación</label>
-                <input id="article-presentation" type="text" formControlName="presentation" class="custom-input"
-                       placeholder="Ej. Unidad, paquete, caja" />
-              </div>
+              <ng-container *ngIf="attributeFields.length === 0">
+                <ng-container *ngTemplateOutlet="presentationField"></ng-container>
+              </ng-container>
 
               <div class="form-group" *ngIf="currentTrackingMode === 'Serializado'">
                 <label for="article-serial">Número de serie / IMEI <span class="required">*</span></label>
@@ -145,30 +174,21 @@
                 <span class="error-text" *ngIf="isInvalid('identity', 'serialNumber')">La serie es obligatoria.</span>
               </div>
 
-              <div class="form-group">
-                <label for="article-model">Modelo / versión</label>
-                <input id="article-model" type="text" formControlName="model" class="custom-input"
-                       placeholder="Ej. Modelo 2026" />
-              </div>
+              <ng-container *ngIf="attributeFields.length === 0">
+                <ng-container *ngTemplateOutlet="modelField"></ng-container>
+              </ng-container>
 
-              <div class="form-group grid-full name-group">
-                <label for="article-name">Nombre final del artículo <span class="required">*</span></label>
-                <div class="name-field">
-                  <input id="article-name" type="text" formControlName="name" class="custom-input"
-                         [class.invalid]="showNameError" [class.input-locked]="identityForm.get('name')?.disabled"
-                         [placeholder]="identityForm.get('name')?.disabled ? 'Se generará según la categoría' : 'Escribe el nombre del artículo'" />
-                  <mat-icon *ngIf="identityForm.get('name')?.disabled" title="Nombre generado automáticamente">lock</mat-icon>
-                </div>
-                <span class="hint-text">{{ identityForm.get('name')?.disabled ? 'El nombre se genera a partir de los datos ingresados.' : 'Esta categoría permite escribir el nombre manualmente.' }}</span>
-                <span class="error-text" *ngIf="showNameError">Completa los datos necesarios para obtener un nombre.</span>
-              </div>
+              <ng-container *ngIf="attributeFields.length === 0">
+                <ng-container *ngTemplateOutlet="nameField"></ng-container>
+              </ng-container>
+
             </div>
           </div>
 
           <div class="card-section" *ngIf="activeSubTab === 'attributes'">
             <div class="section-header">
               <div class="section-icon"><mat-icon>tune</mat-icon></div>
-              <div class="section-heading"><h3>Atributos</h3><p>Características definidas por la categoría</p></div>
+              <div class="section-heading"><h3>Atributos</h3><p>Completa las características y revisa cómo se forma el nombre del artículo</p></div>
             </div>
             <div class="empty-state" *ngIf="!selectedCategory">
               <mat-icon>category</mat-icon>
@@ -179,11 +199,14 @@
               <mat-icon>check_circle</mat-icon><p>Esta categoría no tiene atributos adicionales.</p>
             </div>
             <div class="form-grid" *ngIf="attributeFields.length > 0">
+              <ng-container *ngTemplateOutlet="presentationField"></ng-container>
+              <ng-container *ngTemplateOutlet="modelField"></ng-container>
               <div class="form-group" *ngFor="let field of attributeFields; trackBy: trackByAttribute">
                 <label [for]="field.control">{{ field.label }}</label>
                 <input type="text" class="custom-input" [id]="field.control" [formControlName]="field.control"
                        [placeholder]="'Ingresa ' + field.label.toLowerCase()" />
               </div>
+              <ng-container *ngTemplateOutlet="nameField"></ng-container>
             </div>
           </div>
 
@@ -196,28 +219,90 @@
               <div class="media-field">
                 <label class="media-label">Foto principal</label>
                 <input #photoInput type="file" accept="image/*" (change)="onFileSelected($event, 'photo')" hidden>
-                <button *ngIf="!mainPhotoPreview" type="button" class="upload-box"
-                        (click)="photoInput.click()" aria-label="Seleccionar foto principal">
-                  <mat-icon>add_a_photo</mat-icon><strong>Seleccionar imagen</strong><small>JPG, PNG u otra imagen</small>
-                </button>
-                <div *ngIf="mainPhotoPreview" class="preview-box">
-                  <img [src]="mainPhotoPreview" alt="Vista previa del artículo" />
-                  <button type="button" class="btn-delete" (click)="removeFile('photo'); photoInput.value = ''"
-                          title="Quitar foto" aria-label="Quitar foto"><mat-icon>close</mat-icon></button>
+
+                <div class="upload-box photo-upload" *ngIf="!mainPhotoPreview && !isCameraOpen">
+                  <mat-icon>add_a_photo</mat-icon>
+                  <strong>{{ isOpeningCamera ? 'Abriendo cámara...' : 'Seleccionar imagen' }}</strong>
+                  <small>JPG, PNG u otra imagen</small>
+                  <div class="upload-actions">
+                    <button type="button" class="media-button primary" (click)="openPhotoCapture(photoInput)"
+                            [disabled]="isOpeningCamera" aria-label="Usar cámara del dispositivo">
+                      <mat-icon>photo_camera</mat-icon> Cámara
+                    </button>
+                    <button type="button" class="media-button" (click)="photoInput.click()"
+                            [disabled]="isOpeningCamera" aria-label="Elegir imagen desde archivos">
+                      <mat-icon>folder_open</mat-icon> Elegir archivo
+                    </button>
+                  </div>
+                </div>
+
+                <div class="camera-box" *ngIf="isCameraOpen">
+                  <video #cameraVideo class="camera-video" autoplay playsinline muted
+                         aria-label="Vista en directo de la cámara"></video>
+                  <div class="media-toolbar camera-toolbar">
+                    <button type="button" class="media-button primary" (click)="capturePhoto()"
+                            [disabled]="isCapturingPhoto">
+                      <mat-icon>camera</mat-icon> {{ isCapturingPhoto ? 'Capturando...' : 'Tomar foto' }}
+                    </button>
+                    <button type="button" class="media-button" (click)="stopCamera()">Cancelar</button>
+                  </div>
+                </div>
+
+                <div class="preview-box" *ngIf="mainPhotoPreview && !isCameraOpen">
+                  <img [src]="mainPhotoPreview" alt="Vista previa de la foto principal" />
+                  <button type="button" class="preview-expand" (click)="openMediaPreview('photo')"
+                          aria-label="Ampliar foto principal" title="Ver foto ampliada">
+                    <mat-icon>open_in_full</mat-icon> Ampliar
+                  </button>
+                  <div class="media-toolbar">
+                    <button type="button" class="media-button" (click)="openPhotoCapture(photoInput)"
+                            [disabled]="isOpeningCamera" aria-label="Cambiar foto usando la cámara">
+                      <mat-icon>photo_camera</mat-icon> Cámara
+                    </button>
+                    <button type="button" class="media-button" (click)="photoInput.click()"
+                            aria-label="Cambiar foto desde archivos">
+                      <mat-icon>sync</mat-icon> Cambiar
+                    </button>
+                    <button type="button" class="media-button danger" (click)="removeFile('photo')"
+                            aria-label="Eliminar fotografía seleccionada">
+                      <mat-icon>delete_outline</mat-icon> Quitar
+                    </button>
+                  </div>
                 </div>
               </div>
+
               <div class="media-field">
                 <label class="media-label">Comprobante</label>
                 <input #voucherInput type="file" accept="image/*,application/pdf" (change)="onFileSelected($event, 'voucher')" hidden>
-                <button *ngIf="!voucherPreview" type="button" class="upload-box"
-                        (click)="voucherInput.click()" aria-label="Seleccionar comprobante">
-                  <mat-icon>receipt_long</mat-icon><strong>Adjuntar comprobante</strong><small>Imagen o PDF</small>
-                </button>
+                <div *ngIf="!voucherPreview" class="upload-box voucher-upload">
+                  <mat-icon>receipt_long</mat-icon>
+                  <strong>Adjuntar comprobante</strong>
+                  <small>Imagen o PDF</small>
+                  <button type="button" class="media-button primary" (click)="voucherInput.click()"
+                          aria-label="Seleccionar comprobante de imagen o PDF">
+                    <mat-icon>folder_open</mat-icon> Elegir archivo
+                  </button>
+                </div>
+
                 <div *ngIf="voucherPreview" class="preview-box">
                   <img *ngIf="!isVoucherPdf" [src]="voucherPreview" alt="Vista previa del comprobante" />
-                  <div *ngIf="isVoucherPdf" class="pdf-preview"><mat-icon>picture_as_pdf</mat-icon><span>{{ voucherFile?.name }}</span></div>
-                  <button type="button" class="btn-delete" (click)="removeFile('voucher'); voucherInput.value = ''"
-                          title="Quitar comprobante" aria-label="Quitar comprobante"><mat-icon>close</mat-icon></button>
+                  <iframe *ngIf="isVoucherPdf && voucherPdfPreview" [src]="voucherPdfPreview"
+                          title="Vista previa del comprobante PDF" class="voucher-pdf-frame"></iframe>
+                  <button type="button" class="preview-expand" (click)="openMediaPreview('voucher')"
+                          aria-label="Ampliar comprobante" title="Ver comprobante ampliado">
+                    <mat-icon>open_in_full</mat-icon> Ampliar
+                  </button>
+                  <div class="media-toolbar">
+                    <span class="media-file-name" [title]="voucherFile?.name">{{ voucherFile?.name }}</span>
+                    <button type="button" class="media-button" (click)="voucherInput.click()"
+                            aria-label="Cambiar comprobante">
+                      <mat-icon>sync</mat-icon> Cambiar
+                    </button>
+                    <button type="button" class="media-button danger" (click)="removeFile('voucher')"
+                            aria-label="Eliminar comprobante seleccionado">
+                      <mat-icon>delete_outline</mat-icon> Quitar
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -339,3 +424,69 @@
     </button>
   </footer>
 </div>
+
+
+<!-- Visor ampliado. El elemento nativo dialog evita que el modal de artículo recorte su contenido. -->
+<dialog #mediaViewer class="media-lightbox" aria-labelledby="media-lightbox-title"
+        (close)="onMediaPreviewClosed()" (click)="onMediaBackdropClick($event)">
+  <div class="media-lightbox-shell">
+    <header class="media-lightbox-header">
+      <div class="media-lightbox-heading">
+        <mat-icon>{{ mediaPreviewKind === 'photo' ? 'photo_camera' : 'description' }}</mat-icon>
+        <div>
+          <h3 id="media-lightbox-title">{{ mediaPreviewKind === 'photo' ? 'Foto principal' : 'Comprobante' }}</h3>
+          <p [title]="mediaPreviewTitle">{{ mediaPreviewTitle }}</p>
+        </div>
+      </div>
+      <div class="media-lightbox-actions">
+        <ng-container *ngIf="!(mediaPreviewKind === 'voucher' && isVoucherPdf)">
+          <button type="button" class="media-viewer-control" title="Reducir 5 %" aria-label="Reducir zoom 5 %"
+                  [disabled]="mediaZoomPercent <= 25" (click)="adjustMediaZoom(-5)">
+            <mat-icon>remove</mat-icon>
+          </button>
+          <label class="media-viewer-zoom" aria-label="Porcentaje de ampliación">
+            <input type="number" min="25" max="500" step="5" inputmode="numeric"
+                   [value]="mediaZoomPercent" (change)="onMediaZoomInput($event)"
+                   aria-label="Zoom en porcentaje" title="Escribe el porcentaje de zoom" />
+            <span>%</span>
+          </label>
+          <button type="button" class="media-viewer-control" title="Ampliar 5 %" aria-label="Aumentar zoom 5 %"
+                  [disabled]="mediaZoomPercent >= 500" (click)="adjustMediaZoom(5)">
+            <mat-icon>add</mat-icon>
+          </button>
+          <button type="button" class="media-viewer-control" title="Restablecer tamaño" aria-label="Restablecer zoom"
+                  [disabled]="mediaPreviewZoom === 1" (click)="resetMediaZoom()">
+            <mat-icon>restart_alt</mat-icon>
+          </button>
+        </ng-container>
+        <button type="button" class="media-viewer-control close-viewer" (click)="closeMediaPreview()"
+                aria-label="Cerrar vista ampliada" title="Cerrar vista ampliada">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+    </header>
+
+    <div class="media-lightbox-body" [class.is-image]="!(mediaPreviewKind === 'voucher' && isVoucherPdf)"
+         [class.is-dragging]="isMediaDragging"
+         (pointerdown)="onMediaPointerDown($event)" (pointermove)="onMediaPointerMove($event)"
+         (pointerup)="onMediaPointerUp($event)" (pointercancel)="onMediaPointerUp($event)"
+         (lostpointercapture)="onMediaPointerUp($event)">
+      <img *ngIf="mediaPreviewKind === 'photo' && mainPhotoPreview"
+           class="media-lightbox-photo" [draggable]="false"
+           [style.transform]="'translate3d(' + mediaPanX + 'px, ' + mediaPanY + 'px, 0) scale(' + mediaPreviewZoom + ')'"
+           [src]="mainPhotoPreview" alt="Foto principal ampliada" />
+      <img *ngIf="mediaPreviewKind === 'voucher' && !isVoucherPdf && voucherPreview"
+           class="media-lightbox-photo" [draggable]="false"
+           [style.transform]="'translate3d(' + mediaPanX + 'px, ' + mediaPanY + 'px, 0) scale(' + mediaPreviewZoom + ')'"
+           [src]="voucherPreview" alt="Imagen del comprobante ampliada" />
+      <iframe *ngIf="mediaPreviewKind === 'voucher' && isVoucherPdf && voucherPdfPreview"
+              class="media-lightbox-pdf" [src]="voucherPdfPreview"
+              title="PDF del comprobante ampliado"></iframe>
+    </div>
+    <p class="media-lightbox-help">
+      {{ mediaPreviewKind === 'voucher' && isVoucherPdf
+        ? 'Utiliza los controles del visor PDF para desplazarte y ampliar.'
+        : 'Arrastra la imagen para moverte. Ajusta el zoom en pasos de 5 % o escribe el porcentaje. Pulsa Esc para cerrar.' }}
+    </p>
+  </div>
+</dialog>

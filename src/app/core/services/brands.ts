@@ -22,15 +22,33 @@ export class BrandService {
     return this.brandsCache$;
   }
 
-  invalidateCache(): void { this.brandsCache$ = undefined; }
+  invalidateCache(): void {
+    this.brandsCache$ = undefined;
+  }
 
   createBrand(data: CreateBrandRequest): Observable<Brand> {
     return this.http.post<Brand>(this.apiUrl, {
       inventoryId: data.inventoryId,
       categoryId: data.categoryId,
       name: data.name.trim(),
-      isActive: true,
-      isSynced: false
+      isActive: true
     }).pipe(tap(() => this.invalidateCache()));
+  }
+
+  updateBrand(brand: Brand, name: string): Observable<void> {
+    return this.http.put<void>(`${this.apiUrl}/${brand.id}`, {
+      id: brand.id,
+      inventoryId: brand.inventoryId,
+      categoryId: brand.categoryId,
+      companyId: brand.companyId,
+      name: name.trim(),
+      isActive: brand.isActive
+    }).pipe(tap(() => this.invalidateCache()));
+  }
+
+  deleteBrand(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/${id}`).pipe(
+      tap(() => this.invalidateCache())
+    );
   }
 }

@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, ElementRef, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { MatDialog, MatDialogRef, MatDialogModule, MAT_DIALOG_DATA } from '@angular/material/dialog';
@@ -7,6 +7,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatSelectModule } from '@angular/material/select';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { BrowserMultiFormatReader } from '@zxing/browser';
 
 import { CategoryService } from '../../categories/services/category';
@@ -26,9 +27,10 @@ interface AttributeField {
   templateUrl: './article-form.html',
   styleUrls: ['./article-form.scss']
 })
-export class ArticleFormComponent implements OnInit {
+export class ArticleFormComponent implements OnInit, OnDestroy {
   private fb = inject(FormBuilder);
   private cdr = inject(ChangeDetectorRef);
+  private sanitizer = inject(DomSanitizer);
   private categoryService = inject(CategoryService);
   private brandService = inject(BrandService);
   private dialog = inject(MatDialog);
@@ -59,11 +61,42 @@ export class ArticleFormComponent implements OnInit {
   isLoss = false;
   hasFinancialEstimate = false;
 
-  mainPhotoPreview: string | ArrayBuffer | null = null;
+  // Archivos seleccionados: se conservan al alternar las pestañas.
+  mainPhotoPreview: string | null = null;
   mainPhotoFile: File | null = null;
-  voucherPreview: string | ArrayBuffer | null = null;
+  voucherPreview: string | null = null;
   voucherFile: File | null = null;
+  voucherPdfPreview: SafeResourceUrl | null = null;
   isVoucherPdf = false;
+
+  @ViewChild('mediaViewer') mediaViewer?: ElementRef<HTMLDialogElement>;
+  mediaPreviewKind: 'photo' | 'voucher' | null = null;
+  mediaPreviewZoom = 1;
+  mediaPanX = 0;
+  mediaPanY = 0;
+  isMediaDragging = false;
+  private mediaPointerId: number | null = null;
+  private mediaDragOriginX = 0;
+  private mediaDragOriginY = 0;
+  private mediaDragStartX = 0;
+  private mediaDragStartY = 0;
+
+  get mediaZoomPercent(): number { return Math.round(this.mediaPreviewZoom * 100); }
+
+  get mediaPreviewTitle(): string {
+    if (this.mediaPreviewKind === 'photo') return this.mainPhotoFile?.name || 'Foto principal';
+    if (this.mediaPreviewKind === 'voucher') return this.voucherFile?.name || 'Comprobante';
+    return 'Vista ampliada';
+  }
+
+  @ViewChild('cameraVideo') cameraVideo?: ElementRef<HTMLVideoElement>;
+  isCameraOpen = false;
+  isOpeningCamera = false;
+  isCapturingPhoto = false;
+  private cameraStream: MediaStream | null = null;
+  private cameraRequestId = 0;
+  private photoObjectUrl: string | null = null;
+  private voucherObjectUrl: string | null = null;
 
   codeReader = new BrowserMultiFormatReader();
   isScanning = false;
@@ -80,6 +113,13 @@ export class ArticleFormComponent implements OnInit {
     this.initForms();
     this.setupSubscriptions();
     this.loadCatalogs();
+  }
+
+  ngOnDestroy(): void {
+    this.closeMediaPreview();
+    this.stopCamera();
+    this.releaseObjectUrl('photo');
+    this.releaseObjectUrl('voucher');
   }
 
   initForms(): void {
@@ -206,6 +246,7 @@ export class ArticleFormComponent implements OnInit {
           .filter(b => b.isActive);
         this.isLoadingBrands = false;
         this.filterBrandsForSelectedCategory();
+        this.generateAutoName();
         if (selectedBrandId != null) {
           const brand = this.marcasFiltradas.find(b => Number(b.id) === Number(selectedBrandId));
           if (brand) this.identityForm.get('brandId')?.setValue(brand.id);
@@ -259,12 +300,14 @@ export class ArticleFormComponent implements OnInit {
       this.goNextFromLogistics();
       return;
     }
+    if (step !== 1) this.stopCamera();
     this.currentStep = step;
     this.attemptedNext = false;
   }
 
   setSubTab(tab: 'general' | 'attributes' | 'images'): void {
     if (tab === 'attributes' && !this.attributeFields.length) return;
+    if (tab !== 'images') this.stopCamera();
     this.activeSubTab = tab;
   }
 
@@ -272,10 +315,16 @@ export class ArticleFormComponent implements OnInit {
     this.attemptedNext = true;
     this.identityForm.markAllAsTouched();
     if (!this.isIdentityComplete) {
-      this.activeSubTab = 'general';
+      // El nombre se muestra en Atributos únicamente cuando la categoría los configura.
+      const needsName = !String(this.identityForm.get('name')?.value ?? '').trim();
+      const identificationComplete = ['categoryId', 'brandId', 'barcode', 'sku', 'serialNumber']
+        .every(key => !this.identityForm.get(key)?.invalid);
+      this.activeSubTab = needsName && identificationComplete && this.attributeFields.length > 0
+        ? 'attributes' : 'general';
       this.snackBar.open('Completa los datos requeridos de Identidad.', 'Cerrar', { duration: 3200 });
       return;
     }
+    this.stopCamera();
     this.currentStep = 2;
   }
 
@@ -347,16 +396,12 @@ export class ArticleFormComponent implements OnInit {
       maxWidth: 'calc(100vw - 20px)',
       autoFocus: 'first-tabbable',
       restoreFocus: true,
+      disableClose: true,
       data
     });
-    dialogRef.afterClosed().subscribe((brand?: Brand) => {
-      if (brand && Number(this.selectedCategory?.id) === Number(brand.categoryId)) {
-        // La API confirmó el ID: actualizar el selector inmediatamente, sin otro GET.
-        this.marcasGlobales = [...this.marcasGlobales.filter(b => Number(b.id) !== Number(brand.id)), brand];
-        this.filterBrandsForSelectedCategory();
-        this.identityForm.get('brandId')?.setValue(brand.id);
-        this.cdr.markForCheck();
-      }
+    // El administrador cambia el catálogo, pero no selecciona automáticamente una marca.
+    dialogRef.afterClosed().subscribe((changed?: boolean) => {
+      if (changed) this.loadBrands(undefined, true);
     });
   }
 
@@ -406,45 +451,235 @@ export class ArticleFormComponent implements OnInit {
     return String(this.identityForm.get(control)?.value ?? '').trim();
   }
 
+  /** Abre la cámara tras la pulsación del usuario. Si falla, intenta abrir el selector de imágenes. */
+  async openPhotoCapture(photoInput: HTMLInputElement): Promise<void> {
+    if (this.isOpeningCamera || this.isCameraOpen) return;
+
+    if (typeof navigator === 'undefined' || !navigator.mediaDevices?.getUserMedia) {
+      photoInput.click();
+      return;
+    }
+
+    this.isOpeningCamera = true;
+    const requestId = ++this.cameraRequestId;
+    try {
+      // getUserMedia detecta una cámara disponible y solicita permiso cuando corresponde.
+      // No se depende de enumerateDevices(), que puede ocultar cámaras sin permiso.
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: false,
+        video: { facingMode: { ideal: 'environment' } }
+      });
+      if (requestId !== this.cameraRequestId) {
+        stream.getTracks().forEach(track => track.stop());
+        return;
+      }
+
+      this.cameraStream = stream;
+      this.isCameraOpen = true;
+      this.cdr.detectChanges(); // El <video> existe después de actualizar *ngIf.
+      const video = this.cameraVideo?.nativeElement;
+      if (!video) throw new Error('No se pudo inicializar la vista de cámara.');
+      video.srcObject = stream;
+      await video.play();
+    } catch {
+      if (requestId === this.cameraRequestId) {
+        this.stopCamera();
+        this.snackBar.open('No se pudo usar la cámara. Selecciona una imagen del equipo.', 'Cerrar', { duration: 3500 });
+        // Los navegadores pueden limitar la apertura automática después de una operación asíncrona.
+        // También queda disponible el botón «Elegir archivo».
+        photoInput.click();
+      }
+    } finally {
+      if (requestId === this.cameraRequestId) this.isOpeningCamera = false;
+      this.cdr.markForCheck();
+    }
+  }
+
+  async capturePhoto(): Promise<void> {
+    const video = this.cameraVideo?.nativeElement;
+    if (!this.isCameraOpen || !video || this.isCapturingPhoto) return;
+    if (!video.videoWidth || !video.videoHeight) {
+      this.snackBar.open('La cámara aún no está lista.', 'Cerrar', { duration: 2500 });
+      return;
+    }
+
+    this.isCapturingPhoto = true;
+    try {
+      const canvas = document.createElement('canvas');
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      const context = canvas.getContext('2d');
+      if (!context) throw new Error('No se pudo preparar la captura.');
+      context.drawImage(video, 0, 0, canvas.width, canvas.height);
+      const blob = await new Promise<Blob | null>(resolve => canvas.toBlob(resolve, 'image/jpeg', 0.92));
+      if (!blob) throw new Error('No se pudo generar la fotografía.');
+      const file = new File([blob], `foto-articulo-${Date.now()}.jpg`, { type: 'image/jpeg' });
+      this.setPhotoFile(file);
+    } catch {
+      this.snackBar.open('No se pudo capturar la fotografía. Intenta nuevamente.', 'Cerrar', { duration: 3500 });
+    } finally {
+      this.isCapturingPhoto = false;
+      this.cdr.markForCheck();
+    }
+  }
+
+  stopCamera(): void {
+    ++this.cameraRequestId; // Invalida solicitudes de permiso que sigan abiertas.
+    this.cameraStream?.getTracks().forEach(track => track.stop());
+    this.cameraStream = null;
+    const video = this.cameraVideo?.nativeElement;
+    if (video) video.srcObject = null;
+    this.isCameraOpen = false;
+    this.isOpeningCamera = false;
+  }
+
+  // Native <dialog> usa la capa superior del navegador, fuera del recorte
+  // del modal de artículo. Es válido para fotos y PDF locales.
+  openMediaPreview(kind: 'photo' | 'voucher'): void {
+    const available = kind === 'photo' ? !!this.mainPhotoPreview : !!this.voucherPreview;
+    if (!available) return;
+
+    this.mediaPreviewKind = kind;
+    this.resetMediaZoom();
+    const dialog = this.mediaViewer?.nativeElement;
+    if (dialog && !dialog.open) dialog.showModal();
+  }
+
+  closeMediaPreview(): void {
+    const dialog = this.mediaViewer?.nativeElement;
+    if (dialog?.open) dialog.close();
+    this.mediaPreviewKind = null;
+    this.resetMediaZoom();
+  }
+
+  onMediaPreviewClosed(): void {
+    this.mediaPreviewKind = null;
+    this.resetMediaZoom();
+  }
+
+  onMediaBackdropClick(event: MouseEvent): void {
+    if (event.target === event.currentTarget) this.closeMediaPreview();
+  }
+
+  // El porcentaje se mantiene como entero para evitar redondeos tras varios clics.
+  // Permite valores escritos libremente entre 25 % y 500 %.
+  private setMediaZoomPercent(percent: number): void {
+    if (!Number.isFinite(percent)) return;
+    this.mediaPreviewZoom = Math.round(Math.max(25, Math.min(500, percent))) / 100;
+  }
+
+  adjustMediaZoom(deltaPercent: number): void {
+    this.setMediaZoomPercent(this.mediaZoomPercent + deltaPercent);
+  }
+
+  onMediaZoomInput(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (input.value.trim()) this.setMediaZoomPercent(Number(input.value));
+    input.value = String(this.mediaZoomPercent);
+  }
+
+  resetMediaZoom(): void {
+    this.mediaPreviewZoom = 1;
+    this.mediaPanX = 0;
+    this.mediaPanY = 0;
+    this.isMediaDragging = false;
+    this.mediaPointerId = null;
+  }
+
+  // Pointer Events: funciona con mouse, lápiz y gestos táctiles.
+  // La captura del puntero permite arrastrar incluso al salir del recuadro.
+  onMediaPointerDown(event: PointerEvent): void {
+    if (!this.mediaPreviewKind || (this.mediaPreviewKind === 'voucher' && this.isVoucherPdf)) return;
+    if (event.pointerType === 'mouse' && event.button !== 0) return;
+    if (this.mediaPointerId !== null) return;
+
+    this.mediaPointerId = event.pointerId;
+    this.isMediaDragging = true;
+    this.mediaDragOriginX = event.clientX;
+    this.mediaDragOriginY = event.clientY;
+    this.mediaDragStartX = this.mediaPanX;
+    this.mediaDragStartY = this.mediaPanY;
+    (event.currentTarget as HTMLElement).setPointerCapture(event.pointerId);
+    event.preventDefault();
+  }
+
+  onMediaPointerMove(event: PointerEvent): void {
+    if (this.mediaPointerId !== event.pointerId) return;
+    this.mediaPanX = this.mediaDragStartX + event.clientX - this.mediaDragOriginX;
+    this.mediaPanY = this.mediaDragStartY + event.clientY - this.mediaDragOriginY;
+  }
+
+  onMediaPointerUp(event: PointerEvent): void {
+    if (this.mediaPointerId !== event.pointerId) return;
+    const target = event.currentTarget as HTMLElement;
+    if (target.hasPointerCapture(event.pointerId)) target.releasePointerCapture(event.pointerId);
+    this.mediaPointerId = null;
+    this.isMediaDragging = false;
+  }
+
   onFileSelected(event: Event, type: 'photo' | 'voucher'): void {
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0];
+    input.value = ''; // Elegir de nuevo el mismo archivo también dispara (change).
     if (!file) return;
 
     const isImage = file.type.startsWith('image/');
     const isPdf = file.type === 'application/pdf';
     if ((type === 'photo' && !isImage) || (type === 'voucher' && !isImage && !isPdf)) {
-      this.snackBar.open('Selecciona un archivo compatible.', 'Cerrar', { duration: 3000 });
-      input.value = '';
+      this.snackBar.open(type === 'photo' ? 'Selecciona un archivo de imagen.' : 'Selecciona una imagen o un PDF.', 'Cerrar', { duration: 3500 });
       return;
     }
-    if (type === 'photo') {
-      this.mainPhotoFile = file;
-      const reader = new FileReader();
-      reader.onload = () => this.mainPhotoPreview = reader.result;
-      reader.readAsDataURL(file);
-    } else {
-      this.voucherFile = file;
-      this.isVoucherPdf = isPdf;
-      if (isPdf) {
-        this.voucherPreview = file.name;
-      } else {
-        const reader = new FileReader();
-        reader.onload = () => this.voucherPreview = reader.result;
-        reader.readAsDataURL(file);
-      }
-    }
+
+    if (type === 'photo') this.setPhotoFile(file);
+    else this.setVoucherFile(file, isPdf);
+  }
+
+  private setPhotoFile(file: File): void {
+    if (this.mediaPreviewKind === 'photo') this.closeMediaPreview();
+    this.stopCamera();
+    this.releaseObjectUrl('photo');
+    this.mainPhotoFile = file;
+    this.photoObjectUrl = URL.createObjectURL(file);
+    this.mainPhotoPreview = this.photoObjectUrl;
+    this.cdr.markForCheck();
+  }
+
+  private setVoucherFile(file: File, isPdf: boolean): void {
+    if (this.mediaPreviewKind === 'voucher') this.closeMediaPreview();
+    this.releaseObjectUrl('voucher');
+    this.voucherFile = file;
+    this.isVoucherPdf = isPdf;
+    const objectUrl = URL.createObjectURL(file);
+    this.voucherObjectUrl = objectUrl;
+    this.voucherPreview = objectUrl;
+    this.voucherPdfPreview = isPdf
+      ? this.sanitizer.bypassSecurityTrustResourceUrl(objectUrl)
+      : null;
+    this.cdr.markForCheck();
   }
 
   removeFile(type: 'photo' | 'voucher'): void {
+    if (this.mediaPreviewKind === type) this.closeMediaPreview();
     if (type === 'photo') {
+      this.stopCamera();
+      this.releaseObjectUrl('photo');
       this.mainPhotoFile = null;
       this.mainPhotoPreview = null;
     } else {
+      this.releaseObjectUrl('voucher');
       this.voucherFile = null;
       this.voucherPreview = null;
+      this.voucherPdfPreview = null;
       this.isVoucherPdf = false;
     }
+    this.cdr.markForCheck();
+  }
+
+  private releaseObjectUrl(type: 'photo' | 'voucher'): void {
+    const url = type === 'photo' ? this.photoObjectUrl : this.voucherObjectUrl;
+    if (url) URL.revokeObjectURL(url);
+    if (type === 'photo') this.photoObjectUrl = null;
+    else this.voucherObjectUrl = null;
   }
 
   async scanBarcodeFromImage(event: Event, controlName: string): Promise<void> {

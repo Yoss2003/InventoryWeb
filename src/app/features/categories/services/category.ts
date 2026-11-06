@@ -30,4 +30,9 @@ export class CategoryService {
       tap(() => this.invalidateCache())
     );
   }
+  updateCategory(category: Category): Observable<void> {
+    return this.http.put<void>(`${this.apiUrl}/${category.id}`, category).pipe(
+      tap(() => this.invalidateCache())
+    );
+  }
 }
