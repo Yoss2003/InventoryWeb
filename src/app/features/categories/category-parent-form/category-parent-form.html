@@ -22,6 +22,15 @@
         </div>
       </div>
       <div class="field">
+        <label>Inventario / almacén <span class="required">*</span></label>
+        <mat-form-field appearance="outline" class="parent-inventory-select">
+          <mat-select formControlName="inventoryId" panelClass="inventory-select-options" placeholder="Seleccionar almacén">
+            <mat-option *ngFor="let i of inventories" [value]="i.id">{{ i.alias || i.inventoryName }}</mat-option>
+          </mat-select>
+        </mat-form-field>
+        <small *ngIf="!isEdit && !inventories.length">Necesitas un inventario registrado para crear categorías.</small>
+      </div>
+      <div class="field">
         <label for="parent-category-name">Nombre del grupo <span class="required">*</span></label>
         <input id="parent-category-name" class="parent-input" type="text" formControlName="name"
                maxlength="255" placeholder="Ej. Abarrotes" [class.invalid]="parentForm.get('name')?.invalid && parentForm.get('name')?.touched" />

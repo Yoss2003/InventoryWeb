@@ -54,3 +54,7 @@ button {font:inherit;cursor:pointer}
 .assignment-empty-received span {display:inline-block;border:1px solid #556a7c;border-radius:9px;background:#20303b;color:#c3d1de;font-size:11px;padding:9px 12px;margin-top:20px}
 @media(max-width:800px){.assignment-stats{grid-template-columns:1fr}.assignment-toolbar{flex-direction:column;align-items:stretch}.assignment-search{max-width:none}.assignment-page__header{align-items:flex-start}.assignment-page__header h1{font-size:19px}}
 @media(max-width:520px){.assignment-page__header{flex-wrap:wrap}.assignment-tabs{padding:8px;flex-wrap:wrap}.assignment-tabs button{flex:1;justify-content:center}.assignment-page__notice{padding:11px}.assignment-table-wrap{margin:0 9px 12px}}
+/* La tabla de custodias agrega un saldo y una fecha; no se fuerza ancho en móvil. */
+.assignment-table-wrap { overflow-x: auto; }
+.assignment-table { min-width: 900px; }
+.assignment-table tr { cursor: pointer; }

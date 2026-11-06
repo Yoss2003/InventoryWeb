@@ -1,0 +1,86 @@
+<div class="sale-dialog">
+  <header>
+    <div class="sale-header-icon"><mat-icon>point_of_sale</mat-icon></div>
+    <div>
+      <h2>Nueva venta (POS)</h2>
+      <p>Registro de compra, cliente y pago en tres etapas.</p>
+    </div><button type="button" (click)="dialogRef.close()" aria-label="Cerrar"><mat-icon>close</mat-icon></button>
+  </header>
+  <nav class="sale-steps" aria-label="Etapas de la venta">
+    <button type="button" [class.active]="step===1" (click)="goStep(1)"><span>1</span>Artículos</button><span
+      class="step-line"></span>
+    <button type="button" [class.active]="step===2" [disabled]="!canAdvanceArticle"
+      (click)="goStep(2)"><span>2</span>Comprador</button><span class="step-line"></span>
+    <button type="button" [class.active]="step===3" [disabled]="!canAdvanceArticle || !canAdvanceCustomer"
+      (click)="goStep(3)"><span>3</span>Pago</button>
+  </nav>
+  <main [formGroup]="form">
+    <section class="sale-step" *ngIf="step===1">
+      <div class="step-heading"><mat-icon>inventory_2</mat-icon>
+        <div><strong>Información del artículo</strong><small>Selecciona el producto, cantidad y precio.</small></div>
+      </div>
+      <div class="sale-grid">
+        <label class="wide">Artículo <span class="required">*</span><mat-form-field appearance="outline"><mat-select
+              formControlName="articleId" placeholder="Seleccionar artículo"
+              panelClass="inventory-select-options"><mat-option *ngFor="let item of articles"
+                [value]="item.id">{{item.name}} · stock
+                {{item.stock}}</mat-option></mat-select></mat-form-field></label>
+        <div class="article-summary wide" *ngIf="chosen">
+          <div><small>Código</small><strong>{{chosen.code}}</strong></div>
+          <div><small>Modelo</small><strong>{{chosen.model||'—'}}</strong></div>
+          <div><small>Seguimiento</small><strong>{{isSerialized?'Serializado':Number(chosen.trackingMode)===2?'A granel':'Estándar'}}</strong></div>
+          <div><small>Condición</small><strong>No detallada en este registro</strong></div>
+          <div><small>Stock</small><strong>{{chosen.stock}} {{chosen.measurementUnit}}</strong></div>
+        </div>
+        <label>Cantidad <span class="required">*</span><input formControlName="quantity" type="number" min="0.01"
+            step="0.01" /></label>
+        <label>Precio unitario (S/) <span class="required">*</span><input formControlName="unitPrice" type="number"
+            min="0" step="0.01" /></label>
+      </div>
+      <div class="sale-warning" *ngIf="isSerialized"><mat-icon>info_outline</mat-icon><span>La API de venta rápida
+          todavía no registra la serie exacta. Para evitar vender una unidad sin identificarla, se bloquea la
+          confirmación de artículos serializados hasta integrar su selección y baja atómica.</span></div>
+      <div class="serial-reference" *ngIf="isSerialized && availableSerials.length"><strong>Series registradas
+          (consulta):</strong><span *ngFor="let sn of availableSerials">{{sn}}</span></div>
+    </section>
+    <section class="sale-step" *ngIf="step===2">
+      <div class="step-heading"><mat-icon>badge</mat-icon>
+        <div><strong>Datos del comprador</strong><small>Identifica al cliente que recibirá los artículos.</small></div>
+      </div>
+      <div class="sale-grid">
+        <label class="wide">Nombre / razón social <span class="required">*</span><input formControlName="customerName"
+            type="text" maxlength="180" placeholder="Nombre de persona o empresa" /></label>
+      </div>
+      <div class="sale-warning muted"><mat-icon>info_outline</mat-icon><span>La consulta automática de DNI/RUC todavía
+          requiere una integración validada con un proveedor y almacenamiento del documento en la API. Esta versión
+          registra el nombre del comprador; no simula una verificación de identidad.</span></div>
+    </section>
+    <section class="sale-step" *ngIf="step===3">
+      <div class="step-heading"><mat-icon>payments</mat-icon>
+        <div><strong>Cierre de venta</strong><small>Confirma el total y selecciona la forma de pago.</small></div>
+      </div>
+      <div class="sale-grid">
+        <label class="wide">Método de pago <span class="required">*</span><mat-form-field
+            appearance="outline"><mat-select formControlName="paymentMethod"
+              panelClass="inventory-select-options"><mat-option *ngFor="let m of paymentMethods"
+                [value]="m">{{m}}</mat-option></mat-select></mat-form-field></label>
+        <label class="wide">Observaciones<textarea formControlName="notes" rows="2" maxlength="2000"></textarea></label>
+      </div>
+      <div class="checkout-summary">
+        <div><small>Artículo</small><strong>{{chosen?.name || '—'}}</strong></div>
+        <div><small>Cliente</small><strong>{{form.controls.customerName.value}}</strong></div>
+        <div><small>Cantidad</small><strong>{{form.controls.quantity.value}}</strong></div>
+        <div><small>Precio unitario</small><strong>S/ {{form.controls.unitPrice.value | number:'1.2-2'}}</strong></div>
+      </div>
+      <div class="sale-total"><span>Total de venta</span><strong>S/ {{total|number:'1.2-2'}}</strong></div>
+      <p class="sale-hint">Venta interna. No genera comprobante SUNAT ni procesa pagos externos.</p>
+    </section>
+  </main>
+  <footer>
+    <button type="button" (click)="step>1?goStep(step-1):dialogRef.close()">{{step>1?'Anterior':'Cancelar'}}</button>
+    <button type="button" class="confirm" *ngIf="step<3" [disabled]="step===1?!canAdvanceArticle:!canAdvanceCustomer"
+      (click)="goStep(step+1)">Siguiente <mat-icon>arrow_forward</mat-icon></button>
+    <button type="button" class="confirm" *ngIf="step===3" [disabled]="!canSubmit"
+      (click)="onSubmit()"><mat-icon>save</mat-icon>{{submitting?'Guardando...':'Confirmar venta'}}</button>
+  </footer>
+</div>

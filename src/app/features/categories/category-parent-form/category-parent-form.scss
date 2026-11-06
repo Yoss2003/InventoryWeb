@@ -79,3 +79,10 @@
   .parent-card { margin: 13px; padding: 13px; }
   .parent-footer { padding: 10px 13px; }
 }
+
+/* Selección de inventario con el mismo estilo que el alta de artículos. */
+:host ::ng-deep .parent-inventory-select { width:100%; --mdc-outlined-text-field-outline-color:#65788a; --mdc-outlined-text-field-focus-outline-color:#a8d73d; }
+:host ::ng-deep .parent-inventory-select .mat-mdc-text-field-wrapper { height:43px; background:#111a23; border-radius:7px; }
+:host ::ng-deep .parent-inventory-select .mat-mdc-form-field-infix { padding-top:10px; padding-bottom:9px; min-height:43px; }
+:host ::ng-deep .parent-inventory-select .mat-mdc-form-field-subscript-wrapper {display:none;}
+:host ::ng-deep .parent-inventory-select .mat-mdc-select-value { color:#ecf4fa; font-size:13px; }

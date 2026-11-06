@@ -3,7 +3,7 @@
     <div class="title-area">
       <span class="title-mark"><mat-icon>inventory_2</mat-icon></span>
       <div>
-        <h2>ALTA DE ARTÍCULO</h2>
+        <h2>{{ isEditMode ? 'EDITAR ARTÍCULO' : 'ALTA DE ARTÍCULO' }}</h2>
         <p>Completa los datos del producto en tres pasos</p>
       </div>
     </div>
@@ -419,8 +419,8 @@
     <button *ngIf="currentStep === 2" type="button" class="btn-pill-green" (click)="goNextFromLogistics()">
       Siguiente: Finanzas <mat-icon>arrow_forward</mat-icon>
     </button>
-    <button *ngIf="currentStep === 3" type="button" class="btn-pill-green" (click)="onSubmit()">
-      <mat-icon>save</mat-icon> Guardar artículo
+    <button *ngIf="currentStep === 3" type="button" class="btn-pill-green" [disabled]="isSaving" (click)="onSubmit()">
+      <mat-icon>save</mat-icon> {{ isSaving ? 'Guardando...' : isEditMode ? 'Actualizar artículo' : 'Guardar artículo' }}
     </button>
   </footer>
 </div>

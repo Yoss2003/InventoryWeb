@@ -1,46 +1,24 @@
 <mat-sidenav-container class="sidenav-container">
-  <mat-sidenav mode="side" [opened]="isSidebarOpen()" class="sidenav">
-    <div class="logo-container">
-      <h2>Inventario Pro</h2>
-    </div>
-    <mat-nav-list>
-      <a mat-list-item routerLink="/dashboard/articulos" routerLinkActive="active-link">
-        <mat-icon matListItemIcon>inventory_2</mat-icon>
-        <div matListItemTitle>Maestro de Artículos</div>
-      </a>
-      <a mat-list-item routerLink="/dashboard/categorias" routerLinkActive="active-link">
-        <mat-icon matListItemIcon>category</mat-icon>
-        <div matListItemTitle>Categorías</div>
-      </a>
-      <a mat-list-item routerLink="/dashboard/entradas" routerLinkActive="active-link">
-        <mat-icon matListItemIcon>add_circle</mat-icon>
-        <div matListItemTitle>Entradas</div>
-      </a>
-      <a mat-list-item routerLink="/dashboard/salidas" routerLinkActive="active-link">
-        <mat-icon matListItemIcon>remove_circle</mat-icon>
-        <div matListItemTitle>Salidas</div>
-      </a>
-      <a mat-list-item routerLink="/dashboard/asignaciones" routerLinkActive="active-link">
-        <mat-icon matListItemIcon>assignment_ind</mat-icon>
-        <div matListItemTitle>Artículos asignados</div>
-      </a>
+  <mat-sidenav mode="side" [opened]="true" class="sidenav" [class.expanded]="isSidebarOpen()" [class.collapsed]="!isSidebarOpen()">
+    <div class="logo-container"><span class="logo-mark"><mat-icon>inventory_2</mat-icon></span><span class="logo-label" [attr.aria-hidden]="!isSidebarOpen()">Inventario Pro</span></div>
+    <mat-nav-list aria-label="Navegación de inventario">
+      <a mat-list-item routerLink="/dashboard/articulos" routerLinkActive="active-link" title="Maestro de artículos" aria-label="Maestro de artículos"><mat-icon matListItemIcon>inventory_2</mat-icon><span class="sidebar-label" matListItemTitle>Artículos</span></a>
+      <a mat-list-item routerLink="/dashboard/categorias" routerLinkActive="active-link" title="Categorías" aria-label="Categorías"><mat-icon matListItemIcon>category</mat-icon><span class="sidebar-label" matListItemTitle>Categorías</span></a>
+      <a mat-list-item routerLink="/dashboard/entradas" routerLinkActive="active-link" title="Entradas" aria-label="Entradas"><mat-icon matListItemIcon>add_circle</mat-icon><span class="sidebar-label" matListItemTitle>Entradas</span></a>
+      <a mat-list-item routerLink="/dashboard/salidas" routerLinkActive="active-link" title="Salidas" aria-label="Salidas"><mat-icon matListItemIcon>remove_circle</mat-icon><span class="sidebar-label" matListItemTitle>Salidas</span></a>
+      <a mat-list-item routerLink="/dashboard/asignaciones" routerLinkActive="active-link" title="Artículos asignados" aria-label="Artículos asignados"><mat-icon matListItemIcon>assignment_ind</mat-icon><span class="sidebar-label" matListItemTitle>Asignados</span></a>
+      <a mat-list-item routerLink="/dashboard/compartir-inventario" routerLinkActive="active-link" title="Compartir inventario" aria-label="Compartir inventario"><mat-icon matListItemIcon>group_add</mat-icon><span class="sidebar-label" matListItemTitle>Compartir</span></a>
     </mat-nav-list>
   </mat-sidenav>
-
   <mat-sidenav-content>
-    <mat-toolbar color="primary" class="top-toolbar">
-      <button mat-icon-button (click)="toggleSidebar()" style="margin-right: 15px;">
-        <mat-icon>menu</mat-icon>
+    <mat-toolbar class="top-toolbar">
+      <button type="button" class="menu-trigger" (click)="toggleSidebar()" [attr.aria-expanded]="isSidebarOpen()" [attr.aria-label]="isSidebarOpen()?'Contraer menú':'Expandir menú'">
+        <span class="hamburger" [class.open]="isSidebarOpen()" aria-hidden="true"><span></span><span></span><span></span></span>
       </button>
-      <span>Panel de Gestión</span>
+      <span class="current-title">{{ currentTitle() }}</span>
       <span class="spacer"></span>
-      <button mat-icon-button (click)="logout()" title="Cerrar Sesión">
-        <mat-icon>logout</mat-icon>
-      </button>
+      <button mat-icon-button (click)="logout()" title="Cerrar sesión" aria-label="Cerrar sesión"><mat-icon>logout</mat-icon></button>
     </mat-toolbar>
-
-    <div class="main-content">
-      <router-outlet></router-outlet>
-    </div>
+    <div class="main-content"><router-outlet></router-outlet></div>
   </mat-sidenav-content>
 </mat-sidenav-container>

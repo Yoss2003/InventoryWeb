@@ -1,69 +1,75 @@
-<h2 mat-dialog-title style="color: #EFA72F;">RETIRO Y TRASPASO DE STOCK</h2>
-
-<mat-dialog-content>
-  <form [formGroup]="traspasoForm" style="display: flex; flex-direction: column; gap: 15px; margin-top: 10px;">
-    
-    <div style="background-color: #1A2229; border: 1px solid #2E3842; padding: 15px; border-radius: 8px;">
-      <mat-form-field appearance="outline" style="width: 100%;">
-        <mat-label>Selecciona el Artículo</mat-label>
-        <mat-select formControlName="articleId">
-          <mat-option *ngFor="let item of articles" [value]="item.id">
-            {{ item.name }} (Stock Disp: {{ item.stock }})
-          </mat-option>
-        </mat-select>
-      </mat-form-field>
-      
-      <div style="display: flex; gap: 15px;">
-        <mat-form-field appearance="outline" style="flex: 1;">
-          <mat-label>Tipo de Retiro</mat-label>
-          <mat-select formControlName="retireType">
-            <mat-option value="Parcial">Retirar cantidad específica</mat-option>
-            <mat-option value="Total">Dar de baja todo el stock a 0</mat-option>
-          </mat-select>
-        </mat-form-field>
-
-        <mat-form-field appearance="outline" style="flex: 1;">
-          <mat-label>Cantidad a Retirar</mat-label>
-          <input matInput type="number" formControlName="amount" />
-          <mat-error *ngIf="traspasoForm.get('amount')?.hasError('maxStock')">
-            Supera el stock actual ({{selectedArticleStock}})
-          </mat-error>
-        </mat-form-field>
+<div class="transfer-dialog">
+  <header class="transfer-header">
+    <span class="transfer-icon"><mat-icon>swap_horiz</mat-icon></span>
+    <div class="transfer-title"><h2>Registrar salida o asignación</h2><p>Entrega, custodia y baja de artículos con registro de movimientos.</p></div>
+    <button type="button" class="close-button" (click)="close()" aria-label="Cerrar"><mat-icon>close</mat-icon></button>
+  </header>
+  <nav class="wizard-nav" aria-label="Etapas del traspaso">
+    <button type="button" [class.active]="step===1" [class.done]="step>1" (click)="goStep(1)"><span>1</span>Artículo y salida</button>
+    <span class="step-line"></span>
+    <button type="button" [class.active]="step===2" [class.done]="step>2" [disabled]="!canAdvanceOperation" (click)="goStep(2)"><span>2</span>Destinatario</button>
+    <span class="step-line"></span>
+    <button type="button" [class.active]="step===3" [disabled]="!canAdvanceOperation || !canAdvanceRecipient" (click)="goStep(3)"><span>3</span>Confirmar</button>
+  </nav>
+  <div class="transfer-body" [formGroup]="form">
+    <div *ngIf="loadingError" class="transfer-error" role="alert">{{loadingError}}</div>
+    <section class="form-card wizard-page" *ngIf="step===1">
+      <div class="card-heading"><mat-icon>inventory_2</mat-icon><div><strong>Datos de la operación</strong><small>Elige un artículo y la cantidad que saldrá del almacén.</small></div></div>
+      <div class="form-grid">
+        <div class="field"><label>Operación <span class="required">*</span></label>
+          <mat-form-field appearance="outline" class="compact-select"><mat-select formControlName="operationType" panelClass="inventory-select-options"><mat-option value="Asignar">Asignación de custodia</mat-option><mat-option value="Baja">Baja / consumo definitivo</mat-option></mat-select></mat-form-field>
+        </div>
+        <div class="field"><label>Tipo de retiro <span class="required">*</span></label>
+          <mat-form-field appearance="outline" class="compact-select"><mat-select formControlName="retireType" panelClass="inventory-select-options"><mat-option value="Parcial">Cantidad parcial</mat-option><mat-option value="Total">Todo el stock disponible</mat-option></mat-select></mat-form-field>
+        </div>
+        <div class="field wide"><label>Artículo <span class="required">*</span></label>
+          <mat-form-field appearance="outline" class="compact-select"><mat-select formControlName="articleId" placeholder="Seleccionar artículo" panelClass="inventory-select-options"><mat-option *ngFor="let a of articles" [value]="a.id">{{a.name}} — {{a.stock}} {{a.measurementUnit}}</mat-option></mat-select></mat-form-field>
+        </div>
+        <div class="field"><label>Cantidad a retirar <span class="required">*</span></label>
+          <input type="number" min="0.01" step="0.01" class="compact-input" formControlName="amount" />
+          <small *ngIf="selectedArticle">Disponible: {{selectedArticleStock|number:'1.0-2'}} {{selectedArticle.measurementUnit}}</small>
+          <span class="transfer-error" *ngIf="selectedArticle && quantityExceedsStock">Cantidad superior al stock disponible.</span>
+        </div>
+        <div class="field info-block" *ngIf="selectedArticle"><label>Referencia de almacén</label><strong>{{selectedArticle.code}}</strong><small>Registro #{{selectedArticle.id}}</small></div>
       </div>
-    </div>
-
-    <!-- NUEVO: Campo Recipient (Destinatario) -->
-    <mat-form-field appearance="outline" style="width: 100%;">
-      <mat-label>Destinatario / Área que Recibe (Opcional)</mat-label>
-      <input matInput formControlName="recipient"/>
-    </mat-form-field>
-
-    <mat-form-field appearance="outline" style="width: 100%;">
-      <mat-label>Motivo del Traspaso/Baja (Obligatorio)</mat-label>
-      <textarea matInput formControlName="observation" rows="3"></textarea>
-    </mat-form-field>
-
-    <!-- NUEVO: Input File oculto para la evidencia -->
-    <input type="file" #fileInput (change)="onPhotoSelected($event)" style="display: none" accept="image/*" />
-    
-    <div style="display: flex; align-items: center; gap: 10px; background-color: #1C262E; padding: 15px; border-radius: 8px; border: 1px dashed #2E3842;">
-      <button mat-mini-fab style="background-color: #2E3842; color: #8895A5;" type="button" (click)="fileInput.click()">
-        <mat-icon>camera_alt</mat-icon>
-      </button>
-      <div style="display: flex; flex-direction: column;">
-        <span style="color: #E0E0E0; font-size: 13px; font-weight: bold;">Evidencia Fotográfica</span>
-        <!-- Muestra el nombre de la foto si se seleccionó una, o el texto por defecto -->
-        <span style="color: #A2D149; font-size: 11px;" *ngIf="selectedPhotoPath">{{ selectedPhotoPath }}</span>
-        <span style="color: #8895A5; font-size: 11px;" *ngIf="!selectedPhotoPath">Aún no se ha cargado imagen</span>
+    </section>
+    <section class="form-card wizard-page" *ngIf="step===2">
+      <div class="card-heading"><mat-icon>person_pin</mat-icon><div><strong>Destinatario y propósito</strong><small>La custodia identifica a quién se entrega el artículo.</small></div></div>
+      <div class="form-grid">
+        <div class="field wide" *ngIf="operationType==='Asignar'"><label>Cuenta del destinatario (opcional)</label>
+          <mat-form-field appearance="outline" class="compact-select"><mat-select formControlName="recipientUserId" panelClass="inventory-select-options" placeholder="Entidad externa / Sin cuenta"><mat-option [value]="null">Entidad externa / Sin cuenta</mat-option><mat-option *ngFor="let person of recipients" [value]="person.id">{{person.name}}</mat-option></mat-select></mat-form-field>
+          <small>Una cuenta vinculada podrá consultar sus propias asignaciones, sin abrir todo el almacén.</small>
+        </div>
+        <div class="field wide"><label>Persona o entidad {{operationType==='Asignar'?'*':'(opcional)'}}</label>
+          <input type="text" formControlName="recipientName" class="compact-input" maxlength="180" placeholder="Nombre del responsable o entidad" />
+        </div>
+        <div class="field wide"><label>Motivo / observaciones <span class="required">*</span></label>
+          <textarea formControlName="observation" rows="3" maxlength="2000" class="compact-input compact-area" placeholder="Describe la entrega y su propósito"></textarea>
+        </div>
       </div>
-    </div>
-
-  </form>
-</mat-dialog-content>
-
-<mat-dialog-actions align="end" style="background-color: #161F27; border-top: 1px solid #2E3842; padding: 15px 24px;">
-  <button mat-button mat-dialog-close style="color: #8895A5;">CANCELAR</button>
-  <button mat-raised-button style="background-color: #EFA72F; color: #11181D; font-weight: bold;" [disabled]="traspasoForm.invalid" (click)="onSubmit()">
-    CONFIRMAR RETIRO
-  </button>
-</mat-dialog-actions>
+    </section>
+    <section class="form-card wizard-page" *ngIf="step===3">
+      <div class="card-heading"><mat-icon>fact_check</mat-icon><div><strong>Resumen y confirmación</strong><small>Revisa la operación antes de actualizar el stock.</small></div></div>
+      <dl class="operation-summary">
+        <div><dt>Operación</dt><dd>{{operationType==='Asignar'?'Asignación de custodia':'Baja definitiva'}}</dd></div>
+        <div><dt>Artículo</dt><dd>{{selectedArticle?.name || '—'}}</dd></div>
+        <div><dt>Cantidad</dt><dd>{{form.controls.amount.value}} {{selectedArticle?.measurementUnit || ''}}</dd></div>
+        <div><dt>Destinatario</dt><dd>{{form.controls.recipientName.value || 'Baja interna'}}</dd></div>
+        <div class="wide"><dt>Motivo</dt><dd>{{form.controls.observation.value}}</dd></div>
+      </dl>
+      <div class="evidence-card" *ngIf="operationType==='Asignar'">
+        <div class="card-heading"><mat-icon>photo_camera</mat-icon><div><strong>Evidencia fotográfica (opcional)</strong><small>JPG/PNG/WEBP, máximo 8 MB.</small></div></div>
+        <input type="file" #fileInput accept="image/jpeg,image/png,image/webp" hidden (change)="onPhotoSelected($event)" />
+        <div class="evidence-row"><img *ngIf="evidencePreview" [src]="evidencePreview" alt="Evidencia seleccionada" />
+          <button type="button" class="outline-btn" (click)="fileInput.click()"><mat-icon>image</mat-icon>{{evidencePreview?'Cambiar':'Seleccionar imagen'}}</button>
+          <button *ngIf="evidencePreview" type="button" class="outline-btn danger" (click)="removePhoto()"><mat-icon>delete_outline</mat-icon>Quitar</button>
+        </div>
+      </div>
+    </section>
+  </div>
+  <footer class="transfer-footer">
+    <button type="button" class="outline-btn" [disabled]="isSaving" (click)="step>1?previousStep():close()">{{step>1?'Anterior':'Cancelar'}}</button>
+    <button type="button" class="submit-btn" *ngIf="step<3" [disabled]="step===1?!canAdvanceOperation:!canAdvanceRecipient" (click)="nextStep()">Siguiente <mat-icon>arrow_forward</mat-icon></button>
+    <button type="button" class="submit-btn" *ngIf="step===3" [disabled]="!canSubmit" (click)="onSubmit()"><mat-icon>save</mat-icon>{{isSaving?'Guardando...':'Confirmar operación'}}</button>
+  </footer>
+</div>

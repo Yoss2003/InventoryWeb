@@ -3,6 +3,8 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { MatDialog, MatDialogRef, MatDialogModule, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { HttpErrorResponse } from '@angular/common/http';
+import { forkJoin, of } from 'rxjs';
+import type { Observable } from 'rxjs';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSelectModule } from '@angular/material/select';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -13,6 +15,8 @@ import { BrowserMultiFormatReader } from '@zxing/browser';
 import { CategoryService } from '../../categories/services/category';
 import { BrandService } from '../../../core/services/brands';
 import { Brand } from '../../../core/models/brand.model';
+import { ArticleService } from '../../../core/services/articles';
+import { Article, ArticleDetail } from '../../../core/models/article.model';
 import { BrandDialogComponent, BrandDialogData } from '../brand-dialog/brand-dialog';
 
 interface AttributeField {
@@ -33,6 +37,7 @@ export class ArticleFormComponent implements OnInit, OnDestroy {
   private sanitizer = inject(DomSanitizer);
   private categoryService = inject(CategoryService);
   private brandService = inject(BrandService);
+  private articleService = inject(ArticleService);
   private dialog = inject(MatDialog);
   private snackBar = inject(MatSnackBar);
   public dialogRef = inject(MatDialogRef<ArticleFormComponent>);
@@ -101,6 +106,11 @@ export class ArticleFormComponent implements OnInit, OnDestroy {
   codeReader = new BrowserMultiFormatReader();
   isScanning = false;
   isEditMode = false;
+  isSaving = false;
+  private existingArticle: Article | null = null;
+  private editHydrated = false;
+  private removedPhoto = false;
+  private removedVoucher = false;
 
   currentStep = 1;
   activeSubTab: 'general' | 'attributes' | 'images' = 'general';
@@ -113,6 +123,15 @@ export class ArticleFormComponent implements OnInit, OnDestroy {
     this.initForms();
     this.setupSubscriptions();
     this.loadCatalogs();
+    if (this.isEditMode) {
+      this.articleService.getArticle(Number(this.data.id)).subscribe({
+        next: (article) => {
+          this.existingArticle = article;
+          this.applyExistingArticle();
+        },
+        error: () => this.snackBar.open('No se pudieron cargar los datos del artículo para editar.', 'Cerrar', { duration: 5000 })
+      });
+    }
   }
 
   ngOnDestroy(): void {
@@ -224,6 +243,7 @@ export class ArticleFormComponent implements OnInit, OnDestroy {
         } else if (currentId != null) {
           this.handleCategoryChange(currentId);
         }
+        this.applyExistingArticle();
         this.cdr.markForCheck();
       },
       error: (error: HttpErrorResponse) => {
@@ -252,6 +272,7 @@ export class ArticleFormComponent implements OnInit, OnDestroy {
           if (brand) this.identityForm.get('brandId')?.setValue(brand.id);
           else this.brandsError = 'La nueva marca no aparece aún en el catálogo. Actualiza el listado.';
         }
+        this.applyExistingArticle();
         this.cdr.markForCheck();
       },
       error: (error: HttpErrorResponse) => {
@@ -261,6 +282,74 @@ export class ArticleFormComponent implements OnInit, OnDestroy {
           : `No se pudieron cargar las marcas (HTTP ${error.status}).`;
         this.cdr.markForCheck();
       }
+    });
+  }
+
+  /** Aplica los datos de edición UNA sola vez, después de recibir artículo, categorías y marcas. */
+  private applyExistingArticle(): void {
+    if (this.editHydrated || !this.existingArticle || this.isLoadingBrands ||
+        this.isLoadingCategories || !this.categoriasHijas.length || !this.marcasGlobales.length) return;
+    const a = this.existingArticle;
+    if (!this.categoriasHijas.some(c => Number(c.id) === Number(a.categoryId))) {
+      this.snackBar.open('La categoría del artículo no está disponible para edición.', 'Cerrar', { duration: 4500 });
+      return;
+    }
+    this.editHydrated = true;
+    this.identityForm.get('categoryId')?.setValue(a.categoryId, { emitEvent: false });
+    this.handleCategoryChange(a.categoryId);
+    const detail: ArticleDetail | undefined = (a.details ?? a.articleDetails ?? [])[0];
+    let attrs: Record<string, string> = {};
+    try { attrs = a.characteristics ? JSON.parse(a.characteristics) : {}; } catch { /* dato legado libre */ }
+    this.identityForm.patchValue({
+      id: a.id, categoryId: a.categoryId, brandId: a.brandId ?? null,
+      barcode: a.barcode ?? '', sku: a.code ?? '', name: a.name,
+      model: a.model ?? '', presentation: a.presentation ?? '',
+      serialNumber: a.serialNumber ?? detail?.serialNumber ?? '',
+      attr1: detail?.attr1 ?? attrs['attr1'] ?? '',
+      attr2: detail?.attr2 ?? attrs['attr2'] ?? '',
+      attr3: detail?.attr3 ?? attrs['attr3'] ?? '',
+      attr4: detail?.attr4 ?? attrs['attr4'] ?? '',
+      attr5: detail?.attr5 ?? attrs['attr5'] ?? '',
+      attr6: detail?.attr6 ?? attrs['attr6'] ?? ''
+    }, { emitEvent: false });
+    this.logisticsForm.patchValue({
+      acqUnit: a.acquisitionUnit ?? 'Unidad', saleUnit: a.saleUnit ?? a.measurementUnit ?? 'Unidad',
+      conversionFactor: a.conversionFactor ?? 1, stock: a.stock
+    }, { emitEvent: false });
+    this.financeForm.patchValue({
+      acqPrice: a.acquisitionPrice ?? null,
+      acqCurrency: a.acquisitionCurrency ?? 'S/.',
+      salePrice: a.salePrice ?? null,
+      saleCurrency: a.saleCurrency ?? 'S/.'
+    }, { emitEvent: false });
+    this.filterBrandsForSelectedCategory();
+    this.identityForm.get('brandId')?.setValue(a.brandId ?? null, { emitEvent: false });
+    this.generateAutoName();
+    // El nombre histórico se mantiene intacto hasta que el usuario cambie un dato.
+    this.identityForm.get('name')?.setValue(a.name, { emitEvent: false });
+    if (a.mainPhotoPath) this.loadExistingMedia(a.id, 'photo');
+    if (a.mainVoucherPath) this.loadExistingMedia(a.id, 'voucher');
+    this.cdr.markForCheck();
+  }
+
+  private loadExistingMedia(id: number, kind: 'photo' | 'voucher'): void {
+    this.articleService.getMedia(id, kind).subscribe({
+      next: blob => {
+        const url = URL.createObjectURL(blob);
+        if (kind === 'photo') {
+          this.releaseObjectUrl('photo');
+          this.photoObjectUrl = url;
+          this.mainPhotoPreview = url;
+        } else {
+          this.releaseObjectUrl('voucher');
+          this.voucherObjectUrl = url;
+          this.isVoucherPdf = blob.type === 'application/pdf';
+          this.voucherPreview = url;
+          if (this.isVoucherPdf) this.voucherPdfPreview = this.sanitizer.bypassSecurityTrustResourceUrl(url);
+        }
+        this.cdr.markForCheck();
+      },
+      error: () => { /* Archivo legado no encontrado, se puede reemplazar. */ }
     });
   }
 
@@ -638,6 +727,7 @@ export class ArticleFormComponent implements OnInit, OnDestroy {
     if (this.mediaPreviewKind === 'photo') this.closeMediaPreview();
     this.stopCamera();
     this.releaseObjectUrl('photo');
+    this.removedPhoto = false;
     this.mainPhotoFile = file;
     this.photoObjectUrl = URL.createObjectURL(file);
     this.mainPhotoPreview = this.photoObjectUrl;
@@ -647,6 +737,7 @@ export class ArticleFormComponent implements OnInit, OnDestroy {
   private setVoucherFile(file: File, isPdf: boolean): void {
     if (this.mediaPreviewKind === 'voucher') this.closeMediaPreview();
     this.releaseObjectUrl('voucher');
+    this.removedVoucher = false;
     this.voucherFile = file;
     this.isVoucherPdf = isPdf;
     const objectUrl = URL.createObjectURL(file);
@@ -665,10 +756,12 @@ export class ArticleFormComponent implements OnInit, OnDestroy {
       this.releaseObjectUrl('photo');
       this.mainPhotoFile = null;
       this.mainPhotoPreview = null;
+      if (this.existingArticle?.mainPhotoPath) this.removedPhoto = true;
     } else {
       this.releaseObjectUrl('voucher');
       this.voucherFile = null;
       this.voucherPreview = null;
+      if (this.existingArticle?.mainVoucherPath) this.removedVoucher = true;
       this.voucherPdfPreview = null;
       this.isVoucherPdf = false;
     }
@@ -754,24 +847,95 @@ export class ArticleFormComponent implements OnInit, OnDestroy {
       return;
     }
 
-    // Datos del formulario verificados. Se conserva la estructura del payload original.
-    const payload = {
-      ...this.identityForm.getRawValue(),
-      ...this.logisticsForm.getRawValue(),
-      ...this.financeForm.getRawValue(),
-      companyId: 1,
-      inventoryId: 1,
-      isActive: true
+    if (this.isSaving) return;
+    const category = this.selectedCategory;
+    if (!category || Number(category.inventoryId) <= 0) {
+      this.snackBar.open('La categoría no tiene un almacén válido. Corrige su configuración.', 'Cerrar', { duration: 4500 });
+      return;
+    }
+    const identity = this.identityForm.getRawValue();
+    const logistics = this.logisticsForm.getRawValue();
+    const finance = this.financeForm.getRawValue();
+    const mode = this.currentTrackingMode === 'Serializado' ? 1 :
+      this.currentTrackingMode === 'A Granel' ? 2 : 0;
+    const code = String(identity.sku || identity.barcode || identity.serialNumber || '').trim();
+    if (!code) {
+      this.snackBar.open('Ingresa SKU, código de barras o número de serie.', 'Cerrar', { duration: 4000 });
+      return;
+    }
+    const attrs: Record<string, string> = {};
+    for (let i = 1; i <= 6; i++) attrs[`attr${i}`] = String(identity[`attr${i}`] ?? '').trim();
+    const detail: ArticleDetail = {
+      serialNumber: String(identity.serialNumber ?? '').trim(),
+      attr1: attrs['attr1'], attr2: attrs['attr2'], attr3: attrs['attr3'],
+      attr4: attrs['attr4'], attr5: attrs['attr5'], attr6: attrs['attr6'], isActive: true
     };
-
-    // IMPORTANTE: el onSubmit() original no llamaba a ArticleService;
-    // mostraba un mensaje de guardado simulado y cerraba el diálogo.
-    // No se finge éxito ni se cierra el diálogo hasta conectar el método real de API.
-    // Al integrar ArticleService, usar `payload`, mainPhotoFile y voucherFile
-    // según el contrato real del endpoint, y cerrar solo en el callback de éxito.
-    void payload;
-    this.snackBar.open('Formulario válido. Falta conectar el guardado real con ArticleService.', 'Cerrar', {
-      duration: 5500
+    const payload: Partial<Article> & { id: number } = {
+      id: this.existingArticle?.id ?? 0,
+      inventoryId: Number(category.inventoryId), categoryId: Number(category.id),
+      brandId: Number(identity.brandId), code, barcode: identity.barcode || null,
+      name: String(identity.name).trim(), model: identity.model || 'Sin modelo',
+      presentation: identity.presentation || null, serialNumber: identity.serialNumber || null,
+      tracking: mode, stock: Number(logistics.stock),
+      measurementUnit: logistics.saleUnit,
+      acquisitionUnit: logistics.acqUnit, saleUnit: logistics.saleUnit,
+      conversionFactor: Number(logistics.conversionFactor),
+      acquisitionPrice: finance.acqPrice == null ? null : Number(finance.acqPrice),
+      acquisitionCurrency: finance.acqCurrency,
+      salePrice: finance.salePrice == null ? null : Number(finance.salePrice),
+      saleCurrency: finance.saleCurrency,
+      characteristics: mode === 1 ? null : JSON.stringify(attrs),
+      details: mode === 1
+        ? [{...detail, ...(this.isEditMode && this.existingArticle?.details?.[0]?.id ?
+          {id: this.existingArticle.details[0].id, articleId: this.existingArticle.id} : {})}]
+        : undefined,
+      actionId: this.existingArticle?.actionId ?? 1,
+      isActive: this.existingArticle?.isActive ?? true,
+      companyId: this.existingArticle?.companyId ?? 0,
+      registrationDate: this.existingArticle?.registrationDate
+    };
+    this.isSaving = true;
+    const request$: Observable<Article | void> = this.isEditMode
+      ? this.articleService.updateArticle(payload)
+      : this.articleService.createArticle(payload);
+    request$.subscribe({
+      next: (saved: Article | void) => {
+        const articleId = this.existingArticle?.id ?? (saved as Article | undefined)?.id;
+        if (!articleId) {
+          this.isSaving = false;
+          this.snackBar.open('El servidor no devolvió el ID del artículo.', 'Cerrar', {duration: 5000});
+          return;
+        }
+        const mediaOperations: Observable<unknown>[] = [];
+        if (this.mainPhotoFile || this.voucherFile)
+          mediaOperations.push(this.articleService.uploadMedia(articleId, this.mainPhotoFile, this.voucherFile));
+        if (this.removedPhoto && !this.mainPhotoFile)
+          mediaOperations.push(this.articleService.deleteMedia(articleId, 'photo'));
+        if (this.removedVoucher && !this.voucherFile)
+          mediaOperations.push(this.articleService.deleteMedia(articleId, 'voucher'));
+        (mediaOperations.length ? forkJoin(mediaOperations) : of([])).subscribe({
+          next: () => {
+            this.isSaving = false;
+            this.snackBar.open('Artículo y archivos guardados correctamente.', 'Cerrar', { duration: 3300 });
+            this.dialogRef.close(true);
+          },
+          error: (error: HttpErrorResponse) => {
+            this.isSaving = false;
+            this.snackBar.open(`Artículo guardado, pero falló el archivo: ${this.readApiError(error)}`, 'Cerrar', { duration: 8500 });
+            this.dialogRef.close(true);
+          }
+        });
+      },
+      error: (error: HttpErrorResponse) => {
+        this.isSaving = false;
+        this.snackBar.open(this.readApiError(error), 'Cerrar', { duration: 7500 });
+      }
     });
+  }
+
+  private readApiError(error: HttpErrorResponse): string {
+    const body = error.error;
+    if (typeof body === 'string') return body.slice(0, 260);
+    return String(body?.error ?? body?.title ?? body?.message ?? `HTTP ${error.status}`);
   }
 }

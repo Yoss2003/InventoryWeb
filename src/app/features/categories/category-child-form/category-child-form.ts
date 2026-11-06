@@ -247,8 +247,8 @@ export class CategoryChildFormComponent implements OnInit {
         const attrs = this.attributesForm.getRawValue();
         const naming = !this.isTrackingConfigurable ? 'Nombre'
             : rules.isNamingLibre
-            ? this.normalizeFormula(String(attrs.namingCustom ?? ''))
-            : String(rules.namingMethod ?? '');
+                ? this.normalizeFormula(String(attrs.namingCustom ?? ''))
+                : String(rules.namingMethod ?? '');
         const units: number[] = Array.isArray(rules.selectedUnitIds)
             ? rules.selectedUnitIds.map(Number).sort((a: number, b: number) => a - b)
             : [];
@@ -260,9 +260,9 @@ export class CategoryChildFormComponent implements OnInit {
             isReturnable: Boolean(rules.isReturnable),
             naming,
             units,
-            attributes: [1,2,3,4,5,6].map(i => ({
-            name: this.normalizeAttributeLabel(String(attrs['label' + i] ?? '')),
-            isUnique: Boolean(attrs['isUnique' + i])
+            attributes: [1, 2, 3, 4, 5, 6].map(i => ({
+                name: this.normalizeAttributeLabel(String(attrs['label' + i] ?? '')),
+                isUnique: Boolean(attrs['isUnique' + i])
             }))
         });
     }
@@ -329,7 +329,7 @@ export class CategoryChildFormComponent implements OnInit {
         const extras = normalized.split(/\[[^\]]+\]/gu);
         return extras.every((part, index) =>
             part === '' || (index > 0 && index < extras.length - 1 &&
-            /^ ?[+|\/,.;:\-] ?$/u.test(part))
+                /^ ?[+|\/,.;:\-] ?$/u.test(part))
         );
     }
 
@@ -411,11 +411,11 @@ export class CategoryChildFormComponent implements OnInit {
         for (const tag of activeTags) {
             // Acceso directo al control para evitar fallos con el punto
             const control = this.previewControls[tag];
-            const val = control ? control.value : tag; 
-            
+            const val = control ? control.value : tag;
+
             // Si el campo está vacío, mostramos la etiqueta original para que no desaparezca
-            const displayVal = val ? val : tag; 
-            
+            const displayVal = val ? val : tag;
+
             const escapedTag = tag.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
             formula = formula.replace(new RegExp(escapedTag, 'g'), displayVal);
         }
@@ -454,7 +454,7 @@ export class CategoryChildFormComponent implements OnInit {
         return [1, 2, 3, 4, 5, 6].some(other =>
             other !== index &&
             String(this.attributesForm.get('label' + other)?.value ?? '')
-            .trim().normalize('NFC').toLocaleLowerCase('es') === name
+                .trim().normalize('NFC').toLocaleLowerCase('es') === name
         );
     }
 

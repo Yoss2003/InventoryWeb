@@ -1,0 +1,6 @@
+:host {display:block;color:#edf4f9;}.movement-dialog {background:#121b24;border:1px solid #526677;border-radius:17px;overflow:hidden;max-height:calc(100dvh - 24px);display:flex;flex-direction:column;}
+.movement-dialog header {background:#20303e;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:16px 20px;}
+.movement-dialog h2{margin:0;font-size:17px}.movement-dialog header button{background:#142331;color:#f1f4f8;border:1px solid #61788a;border-radius:8px;width:35px;height:35px;cursor:pointer}
+.movement-dialog main {overflow:auto;padding:18px 20px}.record-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px;}.record-grid>div{display:flex;flex-direction:column;gap:4px;min-width:0}.record-grid label,.movement-dialog section label{color:#aab9ca;font-size:11px}.record-grid strong{font-size:13px;overflow-wrap:anywhere}.movement-dialog section{border-top:1px solid #445668;margin-top:15px;padding-top:12px}.movement-dialog section p{color:#dce7ef;font-size:13px}
+.movement-dialog footer{background:#20303e;padding:11px 20px;display:flex;justify-content:flex-end}.movement-dialog footer button{background:#253745;border:1px solid #5b7284;border-radius:8px;color:#f3f7fa;padding:8px 15px;cursor:pointer}
+@media(max-width:520px){.record-grid{grid-template-columns:1fr}}

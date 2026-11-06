@@ -1,0 +1,37 @@
+<div class="record-dialog">
+  <header><div><h2>Ficha completa del artículo</h2><small>ID #{{ data.id }}</small></div><button type="button" (click)="dialogRef.close()"><mat-icon>close</mat-icon></button></header>
+  <main>
+    <p *ngIf="loading">Consultando artículo…</p><p *ngIf="error" role="alert">{{error}}</p>
+    <ng-container *ngIf="article as a">
+      <section><h3>Identificación</h3><div class="record-grid">
+        <div><span>Nombre</span><strong>{{a.name}}</strong></div>
+        <div><span>Código</span><strong>{{a.code}}</strong></div>
+        <div><span>Código de barras</span><strong>{{a.barcode || 'No registrado'}}</strong></div>
+        <div><span>Modelo</span><strong>{{a.model}}</strong></div>
+        <div><span>Presentación</span><strong>{{a.presentation || '—'}}</strong></div>
+        <div><span>Serie</span><strong>{{a.serialNumber || '—'}}</strong></div>
+        <div><span>Categoría / Marca</span><strong>#{{a.categoryId}} / #{{a.brandId}}</strong></div>
+        <div><span>Inventario</span><strong>#{{a.inventoryId}}</strong></div>
+        <div><span>Tracking</span><strong>{{a.tracking === 1 ? 'Serializado' : a.tracking === 2 ? 'A granel' : 'Estándar'}}</strong></div>
+        <div><span>Estado</span><strong>{{a.isActive ? 'Activo' : 'Inactivo'}}</strong></div>
+      </div></section>
+      <section><h3>Logística y finanzas</h3><div class="record-grid">
+        <div><span>Stock actual</span><strong>{{a.stock | number:'1.0-2'}}</strong></div>
+        <div><span>Unidad</span><strong>{{a.measurementUnit}}</strong></div>
+        <div><span>Compra / Venta</span><strong>{{a.acquisitionUnit || '—'}} / {{a.saleUnit || '—'}}</strong></div>
+        <div><span>Conversión</span><strong>{{a.conversionFactor ?? '—'}}</strong></div>
+        <div><span>Costo</span><strong>{{a.acquisitionPrice ?? '—'}} {{a.acquisitionCurrency}}</strong></div>
+        <div><span>Precio</span><strong>{{a.salePrice ?? '—'}} {{a.saleCurrency}}</strong></div>
+      </div></section>
+      <section *ngIf="characteristics.length || a.details?.length"><h3>Atributos y unidades serializadas</h3>
+        <div class="record-grid"><div *ngFor="let row of characteristics"><span>{{row.name}}</span><strong>{{row.value}}</strong></div></div>
+        <div *ngFor="let d of a.details" class="record-series"><strong>SN: {{d.serialNumber}}</strong><span>{{d.attr1}} {{d.attr2}} {{d.attr3}} {{d.attr4}} {{d.attr5}} {{d.attr6}}</span></div>
+      </section>
+      <section *ngIf="photo || voucher"><h3>Archivos asociados</h3><div class="record-media">
+        <a *ngIf="photo" [href]="photo" target="_blank" rel="noopener"><img [src]="photo" alt="Foto del artículo" />Ver foto</a>
+        <a *ngIf="voucher" [href]="voucher" target="_blank" rel="noopener"><span *ngIf="voucherIsPdf">Abrir PDF del comprobante</span><img *ngIf="!voucherIsPdf" [src]="voucher" alt="Comprobante" /></a>
+      </div></section>
+    </ng-container>
+  </main>
+  <footer><button type="button" (click)="dialogRef.close()">Cerrar</button></footer>
+</div>

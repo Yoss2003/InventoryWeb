@@ -1,33 +1,27 @@
-<h2 mat-dialog-title>{{ titulo }}</h2>
-
-<mat-dialog-content>
-  <form [formGroup]="movementForm" class="form-column" style="display: flex; flex-direction: column; gap: 15px; margin-top: 10px;">
-    
-    <mat-form-field appearance="outline">
-      <mat-label>Artículo</mat-label>
-      <mat-select formControlName="articleId">
-        @for(item of articles; track item.id) {
-          <mat-option [value]="item.id">{{ item.name }} (Stock: {{ item.stock }})</mat-option>
-        }
-      </mat-select>
-    </mat-form-field>
-
-    <mat-form-field appearance="outline">
-      <mat-label>Cantidad</mat-label>
-      <input matInput type="number" formControlName="amount" min="0.01" />
-    </mat-form-field>
-
-    <mat-form-field appearance="outline">
-      <mat-label>Observación (Opcional)</mat-label>
-      <textarea matInput formControlName="observation" rows="2"></textarea>
-    </mat-form-field>
-
+<div class="movement-modal">
+  <header class="movement-header"><span class="movement-icon"><mat-icon>inventory</mat-icon></span>
+    <div><h2>{{ data.actionId === 1 ? 'Nueva entrada de stock' : 'Nueva salida de stock' }}</h2><p>Registra un movimiento real en el inventario</p></div>
+    <button type="button" class="close" (click)="dialogRef.close()" aria-label="Cerrar"><mat-icon>close</mat-icon></button>
+  </header>
+  <form [formGroup]="form" (ngSubmit)="onSubmit()" autocomplete="off">
+    <main class="movement-body">
+      <div class="field"><label>Artículo <span>*</span></label>
+        <mat-form-field appearance="outline" class="inventory-select">
+          <mat-select formControlName="articleId" placeholder="Seleccionar artículo" panelClass="inventory-select-options">
+            <mat-option *ngFor="let a of articles" [value]="a.id">{{ a.name }} · {{ a.stock }} {{ a.measurementUnit }}</mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+      <div class="movement-grid">
+        <div class="field"><label>Cantidad <span>*</span></label><input type="number" min="0.01" step="0.01" formControlName="amount" /></div>
+        <div class="stock-panel"><small>Stock disponible</small><strong>{{ selected?.stock ?? '—' }}</strong><small>{{ selected?.measurementUnit || 'Selecciona un artículo' }}</small></div>
+      </div>
+      <div class="field"><label>Observación (opcional)</label><textarea rows="3" formControlName="observation" placeholder="Motivo del movimiento..."></textarea></div>
+      <p class="message" *ngIf="error" role="alert">{{ error }}</p>
+      <p class="hint" *ngIf="selected?.tracking === 1">Los artículos serializados requieren cantidades enteras.</p>
+    </main>
+    <footer><button type="button" (click)="dialogRef.close()">Cancelar</button>
+      <button type="submit" class="confirm" [disabled]="!canSave"><mat-icon>save</mat-icon>{{ saving ? 'Guardando...' : 'Confirmar movimiento' }}</button>
+    </footer>
   </form>
-</mat-dialog-content>
-
-<mat-dialog-actions align="end">
-  <button mat-button mat-dialog-close>Cancelar</button>
-  <button mat-raised-button color="primary" [disabled]="movementForm.invalid" (click)="onSubmit()">
-    Guardar Registro
-  </button>
-</mat-dialog-actions>
+</div>

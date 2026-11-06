@@ -21,3 +21,12 @@
 .assignment-dialog__footer.mat-mdc-dialog-actions {padding:12px 22px;min-height:0;border-top:1px solid #41586c;background:#1b2936;justify-content:flex-end}
 .assignment-dialog__footer button {border:1px solid #5f7488;background:#263745;color:#edf3fa;padding:9px 18px;border-radius:8px;font-size:12px;cursor:pointer}
 @media(max-width:540px){.assignment-dialog__grid{grid-template-columns:1fr}.assignment-dialog__header{padding:13px}.assignment-dialog__body.mat-mdc-dialog-content{padding:13px!important}}
+.assignment-dialog .assignment-event { padding: 10px 0; display: flex; flex-direction: column; gap: 3px; border-bottom: 1px solid #3b4a5a; }
+.assignment-dialog .assignment-event small { color: #aebccb; }
+.assignment-dialog .assignment-event span { font-size: 12px; }
+.assignment-dialog .assignment-return { display: grid; grid-template-columns: 110px 1fr; gap: 12px; }
+.assignment-dialog .assignment-return label { display: flex; flex-direction: column; gap: 6px; color: #c0ccdb; font-size: 11px; }
+.assignment-dialog .assignment-return input { width: 100%; background: #0f1821; border: 1px solid #677b8b; border-radius: 7px; padding: 9px; color: #eef4fc; font-size: 13px; }
+.assignment-dialog .assignment-return-submit { margin-top: 12px; border: 0; border-radius: 8px; padding: 10px 15px; color: #172300; background: #a3cc4b; cursor: pointer; font-weight: 700; }
+.assignment-dialog .assignment-return-submit:disabled { opacity: .45; cursor: not-allowed; }
+@media (max-width: 550px) { .assignment-dialog .assignment-return { grid-template-columns: 1fr; } }

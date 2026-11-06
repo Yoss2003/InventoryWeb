@@ -1,39 +1,16 @@
-<mat-card class="dashboard-card">
-  <mat-card-header class="dashboard-card-header">
-    <mat-card-title>Catálogo de Artículos</mat-card-title>
-    <div style="width: 140px;"></div>
-  </mat-card-header>
-  
-  <mat-card-content>
-    <table mat-table [dataSource]="dataSource" class="dashboard-table mat-elevation-z2">
-      
-      <ng-container matColumnDef="code">
-        <th mat-header-cell *matHeaderCellDef> Código </th>
-        <td mat-cell *matCellDef="let element"> {{element.code}} </td>
-      </ng-container>
-
-      <ng-container matColumnDef="name">
-        <th mat-header-cell *matHeaderCellDef> Nombre </th>
-        <td mat-cell *matCellDef="let element"> {{element.name}} </td>
-      </ng-container>
-
-      <ng-container matColumnDef="model">
-        <th mat-header-cell *matHeaderCellDef> Modelo </th>
-        <td mat-cell *matCellDef="let element"> {{element.model}} </td>
-      </ng-container>
-
-      <ng-container matColumnDef="stock">
-        <th mat-header-cell *matHeaderCellDef> Stock Actual </th>
-        <td mat-cell *matCellDef="let element"> <strong>{{element.stock}}</strong> </td>
-      </ng-container>
-
-      <ng-container matColumnDef="measurementUnit">
-        <th mat-header-cell *matHeaderCellDef> Unidad </th>
-        <td mat-cell *matCellDef="let element"> {{element.measurementUnit}} </td>
-      </ng-container>
-
-      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-    </table>
-  </mat-card-content>
-</mat-card>
+<section class="catalog-page">
+  <header><div><h1>Maestro de artículos</h1><p>Información relevante de productos e inventarios. Pulsa una fila para abrir su ficha completa.</p></div>
+    <div class="catalog-top-actions"><button type="button" class="create-item" (click)="create()"><mat-icon>add</mat-icon>Nuevo artículo</button><button type="button" class="reload" (click)="load()" [disabled]="loading"><mat-icon>refresh</mat-icon>Actualizar</button></div>
+  </header>
+  <div class="catalog-filters"><label><mat-icon>search</mat-icon><input type="search" [(ngModel)]="search" placeholder="Buscar artículo, marca, código…" /></label><label class="check"><input type="checkbox" [(ngModel)]="showInactive" /> Mostrar inactivos</label></div>
+  <div class="catalog-state" *ngIf="loading">Cargando artículos…</div><div class="catalog-state err" *ngIf="error">{{error}}</div>
+  <div class="catalog-table-wrap" *ngIf="!loading && !error">
+    <table><thead><tr><th>Código</th><th>Artículo</th><th>Categoría</th><th>Marca</th><th>Modelo</th><th>Stock</th><th>Unidad</th><th>Precio</th><th>Estado</th><th>Acciones</th></tr></thead>
+      <tbody><tr *ngFor="let a of visible" tabindex="0" (click)="showDetail(a)" (keydown.enter)="showDetail(a)">
+        <td>{{a.code}}</td><td><strong>{{a.name}}</strong></td><td>{{a.categoryName}}</td><td>{{a.brandName}}</td><td>{{a.model}}</td>
+        <td>{{a.stock | number:'1.0-2'}}</td><td>{{a.measurementUnit}}</td><td>{{a.salePrice ?? 0 | number:'1.2-2'}} {{a.saleCurrency}}</td><td><span [class.inactive]="!a.isActive" class="status">{{a.isActive?'Activo':'Inactivo'}}</span></td>
+        <td class="actions"><button type="button" title="Editar artículo" [disabled]="!a.isActive" (click)="edit(a,$event)"><mat-icon>edit</mat-icon></button><button type="button" class="danger" title="Dar de baja artículo" [disabled]="!a.isActive" (click)="delete(a,$event)"><mat-icon>delete_outline</mat-icon></button></td>
+      </tr></tbody></table>
+    <div *ngIf="visible.length===0" class="catalog-state">No hay registros que coincidan con los filtros.</div>
+  </div>
+</section>
