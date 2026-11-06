@@ -12,7 +12,7 @@
         <label class="wide">Artículo <span class="required">*</span><mat-form-field appearance="outline"><mat-select formControlName="articleId" placeholder="Seleccionar artículo" panelClass="inventory-select-options"><mat-option *ngFor="let item of articles" [value]="item.id">{{item.name}} · stock {{item.stock}}</mat-option></mat-select></mat-form-field></label>
         <div class="article-summary wide" *ngIf="chosen">
           <div><small>Código</small><strong>{{chosen.code}}</strong></div><div><small>Modelo</small><strong>{{chosen.model||'—'}}</strong></div>
-          <div><small>Seguimiento</small><strong>{{isSerialized?'Serializado':Number(chosen.tracking)===2?'A granel':'Estándar'}}</strong></div>
+          <div><small>Seguimiento</small><strong>{{ trackingLabel }}</strong></div>
           <div><small>Condición</small><strong>No detallada en este registro</strong></div>
           <div><small>Stock</small><strong>{{chosen.stock}} {{chosen.measurementUnit}}</strong></div>
         </div>

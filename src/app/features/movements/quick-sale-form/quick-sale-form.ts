@@ -71,6 +71,15 @@ export class QuickSaleFormComponent implements OnInit {
           error:()=>this.serialError='No se pudieron cargar las unidades disponibles.'});
     });
   }
+  get trackingLabel(): string {
+    const article = this.chosen;
+    if (!article) return '—';
+    if (this.isSerialized) return 'Serializado';
+    const mode = Number(article.tracking);
+    return mode === 2 || /^(a granel|bulk|2)$/i.test(String(article.trackingMode ?? ''))
+      ? 'A granel'
+      : 'Estándar';
+  }
   onSubmit():void{
     if(!this.canSubmit)return;
     this.submitting=true;
