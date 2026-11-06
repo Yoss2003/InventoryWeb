@@ -1,0 +1,46 @@
+<div class="parent-modal">
+  <header class="parent-header">
+    <div class="header-heading">
+      <span class="header-symbol"><mat-icon>category</mat-icon></span>
+      <div>
+        <h2>{{ isEdit ? 'EDITAR CATEGORÍA PADRE' : 'NUEVA CATEGORÍA PADRE' }}</h2>
+        <p>Organiza las categorías principales de tu inventario</p>
+      </div>
+    </div>
+    <button type="button" class="close-button" (click)="dialogRef.close()" aria-label="Cerrar">
+      <mat-icon>close</mat-icon>
+    </button>
+  </header>
+
+  <form [formGroup]="parentForm" (ngSubmit)="onSubmit()" class="parent-form" autocomplete="off">
+    <section class="parent-card">
+      <div class="section-header">
+        <span class="section-icon"><mat-icon>sell</mat-icon></span>
+        <div>
+          <h3>Datos de la categoría</h3>
+          <p>Información del grupo principal</p>
+        </div>
+      </div>
+      <div class="field">
+        <label for="parent-category-name">Nombre del grupo <span class="required">*</span></label>
+        <input id="parent-category-name" class="parent-input" type="text" formControlName="name"
+               maxlength="255" placeholder="Ej. Abarrotes" [class.invalid]="parentForm.get('name')?.invalid && parentForm.get('name')?.touched" />
+        <small class="field-error" *ngIf="parentForm.get('name')?.hasError('required') && parentForm.get('name')?.touched">Escribe el nombre del grupo.</small>
+      </div>
+      <div class="field">
+        <label for="parent-category-description">Descripción <span class="optional">(opcional)</span></label>
+        <textarea id="parent-category-description" class="parent-input parent-textarea" formControlName="description"
+                  rows="3" placeholder="¿Qué productos pertenecen a este grupo?"></textarea>
+      </div>
+      <p class="save-error" *ngIf="saveError" role="alert">{{ saveError }}</p>
+    </section>
+
+    <footer class="parent-footer">
+      <button type="button" class="button-secondary" (click)="dialogRef.close()" [disabled]="isSaving">Cancelar</button>
+      <button type="submit" class="button-primary" [disabled]="!canSave">
+        <mat-icon>{{ isEdit ? 'save' : 'add' }}</mat-icon>
+        {{ isSaving ? 'Guardando...' : isEdit ? 'Actualizar categoría' : 'Guardar categoría' }}
+      </button>
+    </footer>
+  </form>
+</div>

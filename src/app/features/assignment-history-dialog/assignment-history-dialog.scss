@@ -1,0 +1,23 @@
+.assignment-history-dialog-panel .mat-mdc-dialog-surface {background:#121b25!important;border:1px solid #53687b!important;border-radius:19px!important;overflow:hidden!important;color:#e9f1f8!important}
+.assignment-dialog {background:#121b25;color:#e9f1f8;font-family:Roboto,'Segoe UI',sans-serif;display:flex;flex-direction:column;max-height:calc(100dvh - 26px)}
+.assignment-dialog * {box-sizing:border-box}
+.assignment-dialog__header {background:#1c2a37;border-bottom:1px solid #495f73;padding:17px 22px;display:flex;align-items:center;justify-content:space-between;gap:15px}
+.assignment-dialog__title {display:flex;align-items:center;gap:11px;min-width:0}
+.assignment-dialog__icon {background:#2b3e25;color:#c4ee73;border-radius:11px;width:41px;height:41px;display:grid;place-items:center;flex:none}
+.assignment-dialog__header h2{margin:0;font-size:18px;font-weight:750}.assignment-dialog__header p{margin:3px 0 0;color:#a8bacc;font-size:12px}
+.assignment-dialog__close {border:1px solid #65798a;background:#1a2530;color:#e6eef6;border-radius:8px;display:grid;place-items:center;width:35px;height:35px;cursor:pointer}
+.assignment-dialog__body.mat-mdc-dialog-content {padding:19px 22px!important;max-height:none;overflow:auto;color:inherit}
+.assignment-dialog__notice {padding:11px 13px;border-radius:9px;background:#213449;border:1px solid #4d6d88;color:#c9dfef;font-size:12px;display:flex;gap:9px;align-items:flex-start;line-height:1.5;margin-bottom:17px}
+.assignment-dialog__notice mat-icon {font-size:18px;height:18px;width:18px;flex:none}
+.assignment-dialog__block {background:#17232f;border:1px solid #425668;border-radius:12px;padding:14px 16px;margin-bottom:12px}
+.assignment-dialog__block h3 {display:flex;gap:8px;align-items:center;margin:0 0 13px;padding-bottom:11px;border-bottom:1px solid #394f64;font-size:13px}
+.assignment-dialog__block h3 mat-icon {font-size:19px;height:19px;width:19px;color:#a8d73d}
+.assignment-dialog__grid {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px 18px}
+.assignment-dialog__grid>div {display:flex;flex-direction:column;gap:4px;min-width:0}
+.assignment-dialog__grid span {font-size:11px;color:#9db0c2}
+.assignment-dialog__grid strong {font-size:12px;overflow-wrap:anywhere;line-height:1.5}
+.assignment-dialog__notes {white-space:pre-wrap;overflow-wrap:anywhere;font-size:12px;line-height:1.5;color:#e0eaf3;margin:0 0 12px}
+.assignment-dialog__file {overflow-wrap:anywhere;color:#aebecd;font-size:11px;margin:0}
+.assignment-dialog__footer.mat-mdc-dialog-actions {padding:12px 22px;min-height:0;border-top:1px solid #41586c;background:#1b2936;justify-content:flex-end}
+.assignment-dialog__footer button {border:1px solid #5f7488;background:#263745;color:#edf3fa;padding:9px 18px;border-radius:8px;font-size:12px;cursor:pointer}
+@media(max-width:540px){.assignment-dialog__grid{grid-template-columns:1fr}.assignment-dialog__header{padding:13px}.assignment-dialog__body.mat-mdc-dialog-content{padding:13px!important}}

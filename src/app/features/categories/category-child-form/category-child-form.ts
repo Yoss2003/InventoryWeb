@@ -28,6 +28,7 @@ import type { Observable } from 'rxjs';
     styleUrl: './category-child-form.scss'
 })
 export class CategoryChildFormComponent implements OnInit {
+    private originalEditSnapshot = '';
     private fb = inject(FormBuilder);
     private categoryService = inject(CategoryService);
     private snackBar = inject(MatSnackBar);
@@ -81,8 +82,35 @@ export class CategoryChildFormComponent implements OnInit {
         });
     }
 
+    readonly formulaTagEnabled: boolean[] = Array(6).fill(false);
+
+    setDialogWidth(step: number): void {
+        this.dialogRef.updateSize(
+            step === 2 && this.showAttributesStep
+                ? 'min(1100px, calc(100vw - 32px))'
+                : 'min(700px, calc(100vw - 32px))'
+        );
+    }
+
+    isFormulaTagEnabled(i: number): boolean {
+        return Boolean(
+            this.formulaTagEnabled[i - 1] &&
+            String(this.attributesForm.get('label' + i)?.value ?? '').trim() &&
+            !this.hasDuplicateAttributeName(i)
+        );
+    }
+
+    setFormulaTagEnabled(i: number, enabled: boolean): void {
+        const label = String(this.attributesForm.get('label' + i)?.value ?? '').trim();
+        const allowed = Boolean(enabled && label && !this.hasDuplicateAttributeName(i));
+        this.formulaTagEnabled[i - 1] = allowed;
+        if (!allowed && label && this.getTagStatus(label) === 'active') {
+            this.toggleTag('[' + label + ']');
+        }
+    }
+
     ngOnInit() {
-        this.dialogRef.updateSize('min(1060px, calc(100vw - 24px))');
+        this.setDialogWidth(0);
         this.padres = this.data.padres || [];
 
         if (this.data.categoriaEdit) {
@@ -138,6 +166,12 @@ export class CategoryChildFormComponent implements OnInit {
             }
         });
         this.initializeAttributeLabels();
+        this.originalEditSnapshot = this.getEditSnapshot();
+
+        for (let i = 1; i <= 6; i++) {
+            const label = String(this.attributesForm.get('label' + i)?.value ?? '').trim();
+            this.formulaTagEnabled[i - 1] = Boolean(label && this.getTagStatus(label) === 'active');
+        }
     }
 
 
@@ -207,6 +241,36 @@ export class CategoryChildFormComponent implements OnInit {
         this.formulaBackup = formula;
     }
 
+    private getEditSnapshot(): string {
+        const identity = this.identityForm.getRawValue();
+        const rules = this.rulesForm.getRawValue();
+        const attrs = this.attributesForm.getRawValue();
+        const naming = !this.isTrackingConfigurable ? 'Nombre'
+            : rules.isNamingLibre
+            ? this.normalizeFormula(String(attrs.namingCustom ?? ''))
+            : String(rules.namingMethod ?? '');
+        const units: number[] = Array.isArray(rules.selectedUnitIds)
+            ? rules.selectedUnitIds.map(Number).sort((a: number, b: number) => a - b)
+            : [];
+        return JSON.stringify({
+            name: String(identity.name ?? '').trim(),
+            description: String(identity.description ?? '').trim(),
+            parentCategoryId: identity.parentCategoryId == null ? null : Number(identity.parentCategoryId),
+            trackingMode: rules.trackingMode,
+            isReturnable: Boolean(rules.isReturnable),
+            naming,
+            units,
+            attributes: [1,2,3,4,5,6].map(i => ({
+            name: this.normalizeAttributeLabel(String(attrs['label' + i] ?? '')),
+            isUnique: Boolean(attrs['isUnique' + i])
+            }))
+        });
+    }
+
+    get hasEditChanges(): boolean {
+        return !this.isEdit || this.getEditSnapshot() !== this.originalEditSnapshot;
+    }
+
     /** Renombra el token ya seleccionado, sin cambiar su estado ni sus conectores. */
     onAttributeLabelInput(i: number): void {
         const control = this.attributesForm.get('label' + i);
@@ -230,6 +294,7 @@ export class CategoryChildFormComponent implements OnInit {
             }
         }
         this.previousAttributeNames[i - 1] = cleaned;
+        if (!cleaned) this.formulaTagEnabled[i - 1] = false;
         const unique = this.attributesForm.get('isUnique' + i);
         if (!cleaned) {
             unique?.setValue(false, { emitEvent: false });
@@ -280,14 +345,27 @@ export class CategoryChildFormComponent implements OnInit {
 
     // Validación para habilitar el botón Guardar
     get isFormComplete(): boolean {
-        if (this.identityForm.invalid || this.rulesForm.invalid) return false;
-        if ([1, 2, 3, 4, 5, 6].some(i => this.hasDuplicateAttributeName(i))) return false;
-        const isLibre = this.rulesForm.get('isNamingLibre')?.value;
+        const name = String(this.identityForm.get('name')?.value ?? '').trim();
+        const parentId = this.identityForm.get('parentCategoryId')?.value;
+        const mode = this.rulesForm.get('trackingMode')?.value;
+
+        if (!name || !parentId || !mode || this.identityForm.invalid || this.rulesForm.invalid) {
+            return false;
+        }
+        if ([1, 2, 3, 4, 5, 6].some(i => this.hasDuplicateAttributeName(i))) {
+            return false;
+        }
         if (!this.isTrackingConfigurable) return true;
-        if (isLibre) return this.formulaIsValid(
-            this.normalizeFormula(String(this.attributesForm.get('namingCustom')?.value ?? ''))
+
+        if (!this.rulesForm.get('isNamingLibre')?.value) {
+            return Boolean(this.rulesForm.get('namingMethod')?.value);
+        }
+
+        const formula = this.normalizeFormula(
+            String(this.attributesForm.get('namingCustom')?.value ?? '')
         );
-        return true;
+        const uniqueTags = new Set(this.getActiveTags().map(tag => tag.toLocaleLowerCase('es')));
+        return this.formulaIsValid(formula) && uniqueTags.size >= 2;
     }
 
 
@@ -302,8 +380,6 @@ export class CategoryChildFormComponent implements OnInit {
         // Usamos .controls en lugar de .get() para evitar que Angular rompa la key por el punto de [Pres.]
         if (!this.previewControls[tag]) {
             let defaultVal = '';
-            if(tag === '[Marca]') defaultVal = 'Lenovo';
-            if(tag === '[Código]') defaultVal = 'LAP-001';
             this.previewControls[tag] = new FormControl(defaultVal);
         }
         return this.previewControls[tag];
@@ -395,7 +471,7 @@ export class CategoryChildFormComponent implements OnInit {
     }
 
     onSubmit() {
-        if (!this.isFormComplete) return;
+        if (!this.isFormComplete || !this.hasEditChanges) return;
 
         const rules = this.rulesForm.getRawValue();
         const attrs = this.attributesForm.getRawValue();

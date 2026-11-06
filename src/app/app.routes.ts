@@ -13,21 +13,26 @@ export const routes: Routes = [
     canActivate: [authGuard],
     children: [
       { path: '', redirectTo: 'articulos', pathMatch: 'full' },
-      { 
-        path: 'articulos', 
-        loadComponent: () => import('./features/articles/article-list/article-list').then(m => m.ArticleListComponent) 
+      {
+        path: 'articulos',
+        loadComponent: () => import('./features/articles/article-list/article-list').then(m => m.ArticleListComponent)
       },
-      { 
-        path: 'categorias', 
-        loadComponent: () => import('./features/categories/category-list/category-list').then(m => m.CategoryListComponent) 
+      {
+        path: 'categorias',
+        loadComponent: () => import('./features/categories/category-list/category-list').then(m => m.CategoryListComponent)
       },
-      { 
-        path: 'entradas', 
-        loadComponent: () => import('./features/movements/entradas/entradas').then(m => m.EntradasComponent) 
+      {
+        path: 'entradas',
+        loadComponent: () => import('./features/movements/entradas/entradas').then(m => m.EntradasComponent)
       },
-      { 
-        path: 'salidas', 
-        loadComponent: () => import('./features/movements/salidas/salidas').then(m => m.SalidasComponent) 
+      {
+        path: 'salidas',
+        loadComponent: () => import('./features/movements/salidas/salidas').then(m => m.SalidasComponent)
+      },
+      {
+        path: 'asignaciones',
+        loadComponent: () => import('./features/assignment-history/assignment-history')
+          .then(m => m.AssignmentHistoryComponent)
       }
     ]
   }

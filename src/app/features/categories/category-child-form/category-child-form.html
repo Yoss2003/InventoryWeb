@@ -13,7 +13,8 @@
   </header>
 
   <mat-dialog-content class="category-content">
-    <mat-stepper linear #stepper class="category-stepper">
+    <mat-stepper linear #stepper class="category-stepper"
+                 (selectionChange)="setDialogWidth($event.selectedIndex)">
       <ng-template matStepperIcon="edit"><mat-icon>check</mat-icon></ng-template>
       <ng-template matStepperIcon="done"><mat-icon>check</mat-icon></ng-template>
 
@@ -27,22 +28,28 @@
               <div><h3>Datos de la categoría</h3><p>Identificación y grupo al que pertenece</p></div>
             </div>
             <div class="identity-grid">
-              <mat-form-field appearance="outline">
-                <mat-label>Nombre de la subcategoría</mat-label>
-                <input matInput formControlName="name" maxlength="255" />
-                <mat-error *ngIf="identityForm.get('name')?.hasError('required')">Ingresa un nombre.</mat-error>
-              </mat-form-field>
-              <mat-form-field appearance="outline">
-                <mat-label>Grupo (categoría padre)</mat-label>
-                <mat-select formControlName="parentCategoryId">
-                  <mat-option *ngFor="let padre of padres" [value]="padre.id">{{ padre.name }}</mat-option>
-                </mat-select>
-                <mat-error *ngIf="identityForm.get('parentCategoryId')?.hasError('required')">Selecciona un grupo.</mat-error>
-              </mat-form-field>
-              <mat-form-field appearance="outline" class="field-wide">
-                <mat-label>Descripción (opcional)</mat-label>
-                <textarea matInput formControlName="description" rows="2"></textarea>
-              </mat-form-field>
+              <div class="category-field">
+                <label for="child-category-name">Nombre de la subcategoría <span class="required">*</span></label>
+                <input id="child-category-name" type="text" class="category-input" formControlName="name"
+                       maxlength="255" placeholder="Ej. Verano"
+                       [class.invalid]="identityForm.get('name')?.invalid && identityForm.get('name')?.touched" />
+                <span class="field-error" *ngIf="identityForm.get('name')?.invalid && identityForm.get('name')?.touched">Ingresa un nombre.</span>
+              </div>
+              <div class="category-field">
+                <label for="child-category-parent">Grupo (categoría padre) <span class="required">*</span></label>
+                <mat-form-field appearance="outline" class="inventory-select">
+                  <mat-select id="child-category-parent" formControlName="parentCategoryId"
+                              panelClass="inventory-select-options" placeholder="Selecciona un grupo">
+                    <mat-option *ngFor="let padre of padres" [value]="padre.id">{{ padre.name }}</mat-option>
+                  </mat-select>
+                </mat-form-field>
+                <span class="field-error" *ngIf="identityForm.get('parentCategoryId')?.invalid && identityForm.get('parentCategoryId')?.touched">Selecciona un grupo.</span>
+              </div>
+              <div class="category-field field-wide">
+                <label for="child-category-description">Descripción (opcional)</label>
+                <textarea id="child-category-description" class="category-input category-textarea"
+                          formControlName="description" rows="2" placeholder="Describe esta categoría"></textarea>
+              </div>
             </div>
           </section>
           <div class="step-actions">
@@ -63,23 +70,29 @@
               <div><h3>Comportamiento del artículo</h3><p>Define el seguimiento y la forma de nombrar los productos</p></div>
             </div>
             <div class="rules-grid">
-              <mat-form-field appearance="outline">
-                <mat-label>Modo de tracking</mat-label>
-                <mat-select formControlName="trackingMode">
-                  <mat-option *ngFor="let opt of trackingOptions" [value]="opt.value">{{ opt.label }}</mat-option>
-                </mat-select>
-              </mat-form-field>
+              <div class="category-field">
+                <label for="child-category-tracking">Modo de tracking <span class="required">*</span></label>
+                <mat-form-field appearance="outline" class="inventory-select">
+                  <mat-select id="child-category-tracking" formControlName="trackingMode"
+                              panelClass="inventory-select-options">
+                    <mat-option *ngFor="let opt of trackingOptions" [value]="opt.value">{{ opt.label }}</mat-option>
+                  </mat-select>
+                </mat-form-field>
+              </div>
               <div class="toggle-tile" *ngIf="isTrackingConfigurable">
                 <div><strong>Artículo retornable</strong><small>Puede devolverse después de una salida</small></div>
                 <mat-slide-toggle color="primary" formControlName="isReturnable" aria-label="Artículo retornable"></mat-slide-toggle>
               </div>
               <div class="naming-config" *ngIf="isTrackingConfigurable">
-                <mat-form-field appearance="outline" *ngIf="!rulesForm.get('isNamingLibre')?.value">
-                  <mat-label>Método de nombramiento</mat-label>
-                  <mat-select formControlName="namingMethod">
-                    <mat-option *ngFor="let option of namingOptions" [value]="option">{{ option }}</mat-option>
-                  </mat-select>
-                </mat-form-field>
+                <div class="category-field" *ngIf="!rulesForm.get('isNamingLibre')?.value">
+                  <label for="child-category-naming">Método de nombramiento</label>
+                  <mat-form-field appearance="outline" class="inventory-select">
+                    <mat-select id="child-category-naming" formControlName="namingMethod"
+                                panelClass="inventory-select-options">
+                      <mat-option *ngFor="let option of namingOptions" [value]="option">{{ option }}</mat-option>
+                    </mat-select>
+                  </mat-form-field>
+                </div>
                 <div class="toggle-tile naming-toggle" [class.enabled]="rulesForm.get('isNamingLibre')?.value">
                   <div><strong>Fórmula personalizada</strong><small>{{ rulesForm.get('isNamingLibre')?.value ? 'Configura el nombre en el siguiente paso' : 'Usa los atributos para formar nombres personalizados' }}</small></div>
                   <mat-slide-toggle color="primary" formControlName="isNamingLibre" aria-label="Activar fórmula personalizada"></mat-slide-toggle>
@@ -95,7 +108,7 @@
             <button type="button" class="action-button action-secondary" matStepperPrevious>
               <mat-icon>arrow_back</mat-icon> Anterior
             </button>
-            <button *ngIf="showAttributesStep" type="button" class="action-button action-next" matStepperNext [disabled]="rulesForm.invalid">
+            <button *ngIf="showAttributesStep && rulesForm.get('isNamingLibre')?.value" type="button" class="action-button action-next" matStepperNext [disabled]="rulesForm.invalid">
               Siguiente: Atributos <mat-icon>arrow_forward</mat-icon>
             </button>
           </div>
@@ -103,7 +116,7 @@
       </mat-step>
 
       <!-- Atributos y fórmula -->
-      <mat-step [stepControl]="attributesForm" *ngIf="showAttributesStep">
+      <mat-step [stepControl]="attributesForm" *ngIf="showAttributesStep && rulesForm.get('isNamingLibre')?.value">
         <ng-template matStepLabel>Atributos y nombre</ng-template>
         <form [formGroup]="attributesForm" class="step-form attributes-step">
           <div class="attributes-layout">
@@ -116,43 +129,60 @@
                 <div class="attr-row" *ngFor="let i of [1,2,3,4,5,6]" [class.has-duplicate]="hasDuplicateAttributeName(i)">
                   <div class="attr-topline">
                     <span>Atributo {{ i }}</span>
-                    <mat-checkbox color="primary" [formControlName]="'isUnique' + i"
-                                  [attr.aria-label]="'Valor único del atributo ' + i"
-                                  [matTooltip]="'Exigir un valor único para el atributo ' + i">
+                    <mat-checkbox color="primary"
+                                  [checked]="isFormulaTagEnabled(i)"
+                                  [disabled]="!attributesForm.get('label' + i)?.value || hasDuplicateAttributeName(i)"
+                                  (change)="setFormulaTagEnabled(i, $event.checked)"
+                                  [attr.aria-label]="'Habilitar atributo ' + i + ' para la fórmula'"
+                                  matTooltip="Habilitar o deshabilitar el botón de este atributo en la fórmula">
                     </mat-checkbox>
                   </div>
-                  <mat-form-field appearance="outline" class="attr-input">
-                    <mat-label>Nombre del atributo</mat-label>
-                    <input matInput [formControlName]="'label' + i" (input)="onAttributeLabelInput(i)"
-                           [attr.aria-invalid]="hasDuplicateAttributeName(i)" autocomplete="off" />
-                  </mat-form-field>
+                  <input type="text" class="category-input attr-input" [formControlName]="'label' + i"
+                         [class.invalid]="hasDuplicateAttributeName(i)" (input)="onAttributeLabelInput(i)"
+                         [attr.aria-label]="'Nombre del atributo ' + i"
+                         [attr.aria-invalid]="hasDuplicateAttributeName(i)"
+                         placeholder="Nombre del atributo" autocomplete="off" />
                   <span class="duplicate-note" *ngIf="hasDuplicateAttributeName(i)" role="alert">
                     Este nombre ya está utilizado.
                   </span>
                 </div>
               </div>
-              <p class="attribute-note"><mat-icon>info_outline</mat-icon> Usa _ para nombres compuestos. Las casillas controlan valores únicos; no se permiten nombres de atributos repetidos.</p>
+              <p class="attribute-note"><mat-icon>info_outline</mat-icon> La casilla habilita la etiqueta en la fórmula. Usa _ en nombres compuestos. No se permiten atributos repetidos.</p>
             </section>
 
             <section class="section-card formula-panel" *ngIf="rulesForm.get('isNamingLibre')?.value">
               <div class="section-heading">
                 <span class="section-icon"><mat-icon>functions</mat-icon></span>
                 <div><h3>Constructor de nombre</h3><p>Combina atributos para generar el nombre final</p></div>
+                <button type="button" class="formula-info-button"
+                        matTooltip="Separadores permitidos: + - | / , . ; : . Usa hasta un espacio junto a cada separador; nunca dentro de [etiqueta]. Usa _ para nombres compuestos."
+                        matTooltipPosition="above"
+                        aria-label="Información sobre los símbolos permitidos en la fórmula">
+                  <mat-icon>info_outline</mat-icon>
+                </button>
               </div>
-              <mat-form-field appearance="outline" class="formula-input">
-                <mat-label>Fórmula personalizada</mat-label>
-                <input matInput formControlName="namingCustom" spellcheck="false" autocomplete="off"
+              <div class="category-field formula-input">
+                <label for="child-category-formula">Fórmula personalizada</label>
+                <input id="child-category-formula" type="text" class="category-input" formControlName="namingCustom"
+                       spellcheck="false" autocomplete="off" placeholder="[Pres.] + [Marca] | [color]"
                        (focus)="onNamingFocused()" (input)="onNamingInput($event)" (blur)="onNamingUnfocused()" />
-                <mat-hint>Sin espacios dentro de [etiqueta]. Máximo un espacio junto a cada operador.</mat-hint>
-              </mat-form-field>
+                <span class="field-hint">Sin espacios dentro de [etiqueta]. Máximo un espacio a cada lado de los operadores.</span>
+              </div>
 
               <div class="tags-toolbar">
                 <p class="tags-hint">Pulsa una etiqueta para añadirla o quitarla:</p>
                 <div class="tags-chips">
                   <button type="button" *ngFor="let tag of ['Marca', 'Código', 'Serie', 'Modelo', 'Pres.']"
                           class="tag-btn" [ngClass]="getTagStatus(tag)" (click)="toggleTag('[' + tag + ']')">{{ tag }}</button>
-                  <button type="button" *ngFor="let label of attributeTags"
-                          class="tag-btn dynamic" [ngClass]="getTagStatus(label)" (click)="toggleTag('[' + label + ']')">{{ label }}</button>
+                  <ng-container *ngFor="let i of [1,2,3,4,5,6]">
+                    <button type="button" *ngIf="attributesForm.get('label' + i)?.value"
+                            class="tag-btn dynamic"
+                            [disabled]="!isFormulaTagEnabled(i)"
+                            [ngClass]="getTagStatus(attributesForm.get('label' + i)?.value)"
+                            (click)="toggleTag('[' + attributesForm.get('label' + i)?.value + ']')">
+                      {{ attributesForm.get('label' + i)?.value }}
+                    </button>
+                  </ng-container>
                 </div>
               </div>
 
@@ -196,7 +226,8 @@
   <mat-dialog-actions class="category-footer">
     <button type="button" class="action-button action-secondary" (click)="dialogRef.close()">Cancelar</button>
     <button type="button" class="action-button action-next action-submit"
-            [disabled]="!isFormComplete || (showAttributesStep ? stepper.selectedIndex < 2 : stepper.selectedIndex < 1)"
+            [disabled]="!isFormComplete || stepper.selectedIndex <
+              (showAttributesStep && rulesForm.get('isNamingLibre')?.value ? 2 : 1)" || (isEdit && !hasEditChanges)
             (click)="onSubmit()">
       <mat-icon>save</mat-icon> {{ isEdit ? 'Actualizar categoría' : 'Guardar categoría' }}
     </button>

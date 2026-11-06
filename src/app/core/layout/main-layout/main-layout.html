@@ -20,6 +20,10 @@
         <mat-icon matListItemIcon>remove_circle</mat-icon>
         <div matListItemTitle>Salidas</div>
       </a>
+      <a mat-list-item routerLink="/dashboard/asignaciones" routerLinkActive="active-link">
+        <mat-icon matListItemIcon>assignment_ind</mat-icon>
+        <div matListItemTitle>Artículos asignados</div>
+      </a>
     </mat-nav-list>
   </mat-sidenav>
 
@@ -34,7 +38,7 @@
         <mat-icon>logout</mat-icon>
       </button>
     </mat-toolbar>
-    
+
     <div class="main-content">
       <router-outlet></router-outlet>
     </div>

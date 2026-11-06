@@ -1,0 +1,40 @@
+<div class="assignment-dialog">
+  <header class="assignment-dialog__header">
+    <div class="assignment-dialog__title">
+      <span class="assignment-dialog__icon"><mat-icon>assignment</mat-icon></span>
+      <div><h2>Detalle de entrega</h2><p>Movimiento {{ data.movement.id != null ? '#' + data.movement.id : 'sin número' }}</p></div>
+    </div>
+    <button type="button" class="assignment-dialog__close" (click)="dialogRef.close()" aria-label="Cerrar"><mat-icon>close</mat-icon></button>
+  </header>
+  <mat-dialog-content class="assignment-dialog__body">
+    <div class="assignment-dialog__notice"><mat-icon>info_outline</mat-icon> Este registro confirma un movimiento histórico. La custodia actual y las devoluciones requieren el módulo de asignaciones.</div>
+    <section class="assignment-dialog__block">
+      <h3><mat-icon>inventory_2</mat-icon> Artículo</h3>
+      <div class="assignment-dialog__grid">
+        <div><span>Nombre</span><strong>{{ data.articleName }}</strong></div>
+        <div><span>Código</span><strong>{{ data.articleCode }}</strong></div>
+        <div><span>Modelo</span><strong>{{ data.article?.model || 'No registrado' }}</strong></div>
+        <div><span>ID de artículo</span><strong>{{ data.movement.articleId }}</strong></div>
+        <div><span>Unidad</span><strong>{{ data.article?.measurementUnit || 'No registrada' }}</strong></div>
+        <div><span>Cantidad entregada</span><strong>{{ data.amount | number:'1.0-2' }}</strong></div>
+      </div>
+    </section>
+    <section class="assignment-dialog__block">
+      <h3><mat-icon>person_pin</mat-icon> Entrega</h3>
+      <div class="assignment-dialog__grid">
+        <div><span>Destinatario registrado</span><strong>{{ data.recipient }}</strong></div>
+        <div><span>Fecha</span><strong>{{ data.movement.movementDate | date:'dd/MM/yyyy, HH:mm' }}</strong></div>
+        <div><span>Empleado responsable (ID)</span><strong>{{ data.movement.employeeId ?? 'No registrado' }}</strong></div>
+        <div><span>Identificador de empresa</span><strong>{{ data.movement.companyId }}</strong></div>
+      </div>
+    </section>
+    <section class="assignment-dialog__block">
+      <h3><mat-icon>description</mat-icon> Observaciones y respaldo</h3>
+      <p class="assignment-dialog__notes">{{ data.movement.observation || 'Sin observaciones.' }}</p>
+      <p class="assignment-dialog__file">Evidencia: {{ data.movement.photoPath || 'No registrada' }}</p>
+    </section>
+  </mat-dialog-content>
+  <mat-dialog-actions class="assignment-dialog__footer">
+    <button type="button" (click)="dialogRef.close()">Cerrar</button>
+  </mat-dialog-actions>
+</div>

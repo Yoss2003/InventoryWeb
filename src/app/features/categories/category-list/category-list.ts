@@ -109,7 +109,8 @@ export class CategoryListComponent implements OnInit {
     const padresActivos = this.dataSource.data.filter(p => p.isActive);
     
     const dialogRef = this.dialog.open(CategoryChildFormComponent, {
-      width: '720px',
+      width: 'min(1100px, calc(100vw - 32px))',
+      maxWidth: 'calc(100vw - 32px)',
       data: { 
         categoriaEdit: categoriaEdit || null,
         padres: padresActivos
