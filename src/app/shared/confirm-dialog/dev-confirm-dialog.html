@@ -1,0 +1,18 @@
+<section class="confirm-shell" role="document">
+  <div class="confirm-heading">
+    <span class="confirm-icon" [class.confirm-icon--danger]="data.tone === 'danger'">
+      <mat-icon aria-hidden="true">{{data.icon}}</mat-icon>
+    </span>
+    <div class="confirm-heading__text">
+      <h2 mat-dialog-title id="dev-confirm-title">{{data.title}}</h2>
+      <p>Confirma la operación antes de continuar.</p>
+    </div>
+  </div>
+  <mat-dialog-content class="confirm-description">{{data.message}}</mat-dialog-content>
+  <mat-dialog-actions align="end" class="confirm-actions">
+    <button type="button" mat-dialog-close class="confirm-cancel">Cancelar</button>
+    <button type="button" [mat-dialog-close]="true" class="confirm-accept" [class.confirm-accept--danger]="data.tone === 'danger'">
+      <mat-icon aria-hidden="true">check</mat-icon>{{data.confirmLabel}}
+    </button>
+  </mat-dialog-actions>
+</section>

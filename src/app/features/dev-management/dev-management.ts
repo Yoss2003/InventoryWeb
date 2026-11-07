@@ -5,6 +5,8 @@ import { Router } from '@angular/router';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
 import { MatIconModule } from '@angular/material/icon';
+import { MatDialog } from '@angular/material/dialog';
+import { DevConfirmDialogComponent, DevConfirmDialogData } from '../../shared/confirm-dialog/dev-confirm-dialog';
 import { Observable } from 'rxjs';
 import {
   DevManagementService, DevCompany, CompanyEdit, ResetPending, LicensePlan, RucLookupResult
@@ -27,6 +29,7 @@ export class DevManagementComponent implements OnInit, OnDestroy {
   private readonly platform = inject(PLATFORM_ID);
   private readonly cdr = inject(ChangeDetectorRef);
   private readonly toasts = inject(ToastService);
+  private readonly dialog = inject(MatDialog);
 
   readonly plans: LicensePlan[] = ['Básico', 'Pro', 'Plus', 'Max'];
   readonly developer = this.isDeveloper();
@@ -35,6 +38,7 @@ export class DevManagementComponent implements OnInit, OnDestroy {
   readonly trackPending = (_index: number, row: ResetPending): number => row.id;
 
   companies: DevCompany[] = [];
+  private readonly unavailableLogos = new Set<string>();
   pending: ResetPending[] = [];
   selectedId: number | null = null;
   loadingCompanies = false;
@@ -92,6 +96,18 @@ export class DevManagementComponent implements OnInit, OnDestroy {
   get currentUserCount(): number { return this.selectedCompany?.userCount ?? 0; }
   get durationLabel(): string { return this.form.plan === 'Max' ? '3 meses' : '1 mes'; }
   get renewDurationLabel(): string { return this.renewPlan === 'Max' ? '3 meses' : '1 mes'; }
+  /** La API devuelve una ruta pública del logo; si falla, solo esa fila muestra el ícono genérico. */
+  getCompanyLogoUrl(row: DevCompany): string | null {
+    const resolved = this.publicCompanies.publicLogoUrl(row.logoUrl);
+    return resolved && !this.unavailableLogos.has(resolved) ? resolved : null;
+  }
+
+  onCompanyLogoError(row: DevCompany): void {
+    const resolved = this.publicCompanies.publicLogoUrl(row.logoUrl);
+    if (resolved) this.unavailableLogos.add(resolved);
+    this.cdr.markForCheck();
+  }
+
   get logoPreview(): string | null {
     return this.logoFailed ? null : (this.temporaryLogoUrl ?? this.publicCompanies.publicLogoUrl(this.form.logoUrl));
   }
@@ -343,13 +359,22 @@ export class DevManagementComponent implements OnInit, OnDestroy {
           return;
         }
         if (!selectedImage) {
-          this.finishSave(wasEditing);
+          this.finishSave(wasEditing, false);
           return;
         }
         this.api.uploadLogo(savedId, selectedImage).subscribe({
           next: uploaded => {
+            if (!uploaded?.logoUrl) {
+              this.selectedId = savedId;
+              this.saving = false;
+              this.toasts.warning('La empresa se guardó, pero no se recibió la dirección del logo. Revisa el registro en CompanyLogos.', 'Verificar logo');
+              this.loadCompanies();
+              this.cdr.markForCheck();
+              return;
+            }
             this.form.logoUrl = uploaded.logoUrl;
-            this.finishSave(wasEditing);
+            this.unavailableLogos.delete(this.publicCompanies.publicLogoUrl(uploaded.logoUrl) ?? '');
+            this.finishSave(wasEditing, true);
           },
           error: e => {
             // La empresa ya se guardó. Conservar su ID para reintentar el logo sin crear un duplicado.
@@ -370,14 +395,27 @@ export class DevManagementComponent implements OnInit, OnDestroy {
     });
   }
 
-  private finishSave(wasEditing: boolean): void {
+  private finishSave(wasEditing: boolean, logoUploaded: boolean): void {
     this.saving = false;
     this.newCompany();
     this.toasts.success(wasEditing
-      ? 'Datos y logo de empresa actualizados sin renovar la licencia.'
-      : 'Empresa y licencia creadas correctamente.');
+      ? (logoUploaded ? 'Empresa y logo actualizados sin renovar la licencia.' : 'Datos de empresa actualizados sin renovar la licencia.')
+      : (logoUploaded ? 'Empresa, licencia y logo guardados correctamente.' : 'Empresa y licencia creadas correctamente.'));
     this.loadCompanies();
     this.cdr.markForCheck();
+  }
+
+  /** Confirmación coherente con el tema oscuro, con soporte de Escape y foco del teclado. */
+  private askConfirmation(data: DevConfirmDialogData, onConfirm: () => void): void {
+    this.dialog.open(DevConfirmDialogComponent, {
+      width: 'min(440px, calc(100vw - 32px))',
+      maxWidth: 'calc(100vw - 32px)',
+      autoFocus: 'first-tabbable',
+      restoreFocus: true,
+      data
+    }).afterClosed().subscribe((confirmed: boolean | undefined) => {
+      if (confirmed) onConfirm();
+    });
   }
 
   renewLicense(): void {
@@ -389,61 +427,93 @@ export class DevManagementComponent implements OnInit, OnDestroy {
       this.toasts.warning('El plan seleccionado admite menos usuarios que los que están activos.');
       return;
     }
-    if (!confirm(`¿Renovar la licencia de ${row.businessName} al plan ${this.renewPlan}? Se agregarán ${this.renewDurationLabel} a la vigencia según las reglas del servidor.`)) return;
-    this.renewing = true;
-    this.cdr.markForCheck();
-    this.api.renewLicense(row.id, { plan: this.renewPlan, maxUsers }).subscribe({
-      next: license => {
-        this.renewing = false;
-        this.form.plan = license.plan;
-        this.form.maxUsers = license.maxUsers;
-        this.form.licenseEnabled = license.isEnabled;
-        // Actualización optimista segura: los valores provienen de la respuesta de la API.
-        this.companies = this.companies.map(c => c.id === row.id ? { ...c, license } : c);
-        this.updateDaysRemaining(this.companies);
-        this.toasts.success('Licencia renovada. La fecha mostrada proviene del servidor.');
-        this.loadCompanies();
-        this.cdr.markForCheck();
-      },
-      error: e => {
-        this.renewing = false;
-        this.toasts.error(this.errorFromApi(e, 'No se pudo renovar la licencia.'), 'Error al renovar');
-        this.cdr.markForCheck();
-      }
+    const selectedPlan = this.renewPlan;
+    const duration = this.renewDurationLabel;
+    this.askConfirmation({
+      title: 'Renovar licencia',
+      message: `¿Renovar la licencia de «${row.businessName}» al plan ${selectedPlan}? Se añadirán ${duration} a su vigencia, según las reglas del servidor.`,
+      confirmLabel: 'Renovar licencia',
+      tone: 'primary',
+      icon: 'event_repeat'
+    }, () => {
+      if (this.saving || this.renewing || this.workingRequestId !== null) return;
+      this.renewing = true;
+      this.cdr.markForCheck();
+      this.api.renewLicense(row.id, { plan: selectedPlan, maxUsers }).subscribe({
+        next: license => {
+          this.renewing = false;
+          this.form.plan = license.plan;
+          this.form.maxUsers = license.maxUsers;
+          this.form.licenseEnabled = license.isEnabled;
+          this.companies = this.companies.map(c => c.id === row.id ? { ...c, license } : c);
+          this.updateDaysRemaining(this.companies);
+          this.toasts.success('Licencia renovada. La fecha mostrada proviene del servidor.');
+          this.loadCompanies();
+          this.cdr.markForCheck();
+        },
+        error: e => {
+          this.renewing = false;
+          this.toasts.error(this.errorFromApi(e, 'No se pudo renovar la licencia.'), 'Error al renovar');
+          this.cdr.markForCheck();
+        }
+      });
     });
   }
 
   deactivate(row: DevCompany): void {
-    if (this.isProtectedCompany(row) || this.workingRequestId !== null) return;
-    if (!confirm(`¿Desactivar ${row.businessName}? Solo es posible si no tiene registros asociados.`)) return;
-    this.workingRequestId = row.id;
-    this.cdr.markForCheck();
-    this.api.deactivate(row.id).subscribe({
-      next: () => {
-        this.workingRequestId = null;
-        this.toasts.success('Empresa desactivada.');
-        this.loadCompanies(); this.cdr.markForCheck();
-      },
-      error: e => {
-        this.workingRequestId = null;
-        this.toasts.error(this.errorFromApi(e, 'No se pudo desactivar la empresa.'), 'Error al desactivar');
-        this.cdr.markForCheck();
-      }
+    if (this.isProtectedCompany(row) || this.workingRequestId !== null || !row.isActive) return;
+    this.askConfirmation({
+      title: 'Desactivar empresa',
+      message: `¿Deseas desactivar «${row.businessName}»? Esta acción solo se permite si la empresa no tiene usuarios, inventarios ni otras operaciones asociadas. No se eliminarán registros.`,
+      confirmLabel: 'Sí, desactivar',
+      tone: 'danger',
+      icon: 'block'
+    }, () => {
+      if (this.isProtectedCompany(row) || this.workingRequestId !== null) return;
+      this.workingRequestId = row.id;
+      this.cdr.markForCheck();
+      this.api.deactivate(row.id).subscribe({
+        next: () => {
+          this.workingRequestId = null;
+          this.toasts.success(`Empresa «${row.businessName}» desactivada.`);
+          this.loadCompanies();
+          this.cdr.markForCheck();
+        },
+        error: e => {
+          this.workingRequestId = null;
+          this.toasts.error(this.errorFromApi(e, 'No se pudo desactivar la empresa.'), 'Error al desactivar');
+          this.cdr.markForCheck();
+        }
+      });
     });
   }
 
   review(req: ResetPending, approve: boolean): void {
     if (this.workingRecoveryId !== null) return;
-    if (!confirm(`${approve ? 'Aprobar' : 'Rechazar'} recuperación de ${req.username} en ${req.company}?`)) return;
-    const call: Observable<unknown> = approve ? this.api.approve(req.id) : this.api.reject(req.id);
-    this.workingRecoveryId = req.id; this.cdr.markForCheck();
-    call.subscribe({
-      next: () => {
-        this.workingRecoveryId = null;
-        this.toasts.success(approve ? 'Solicitud aprobada y correo enviado.' : 'Solicitud rechazada.');
-        this.loadPending(); this.cdr.markForCheck();
-      },
-      error: e => { this.workingRecoveryId = null; this.toasts.error(this.errorFromApi(e, 'No se pudo procesar la solicitud.'), 'Error de recuperación'); this.cdr.markForCheck(); }
+    this.askConfirmation({
+      title: approve ? 'Aprobar recuperación' : 'Rechazar recuperación',
+      message: `¿${approve ? 'Aprobar' : 'Rechazar'} la recuperación del usuario «${req.username}» en «${req.company}»?`,
+      confirmLabel: approve ? 'Sí, aprobar' : 'Sí, rechazar',
+      tone: approve ? 'primary' : 'danger',
+      icon: approve ? 'verified_user' : 'person_off'
+    }, () => {
+      if (this.workingRecoveryId !== null) return;
+      const call: Observable<unknown> = approve ? this.api.approve(req.id) : this.api.reject(req.id);
+      this.workingRecoveryId = req.id;
+      this.cdr.markForCheck();
+      call.subscribe({
+        next: () => {
+          this.workingRecoveryId = null;
+          this.toasts.success(approve ? 'Solicitud aprobada y correo enviado.' : 'Solicitud rechazada.');
+          this.loadPending();
+          this.cdr.markForCheck();
+        },
+        error: e => {
+          this.workingRecoveryId = null;
+          this.toasts.error(this.errorFromApi(e, 'No se pudo procesar la solicitud.'), 'Error de recuperación');
+          this.cdr.markForCheck();
+        }
+      });
     });
   }
 

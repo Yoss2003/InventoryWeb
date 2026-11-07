@@ -31,7 +31,12 @@
         <thead><tr><th>Empresa</th><th>Usuarios</th><th>Almacenes</th><th>Licencia</th><th>Vencimiento</th><th>Estado</th><th>Acciones</th></tr></thead>
         <tbody>
           <tr *ngFor="let c of filteredCompanies; trackBy: trackCompany" [class.selected-row]="selectedId === c.id">
-            <td class="company-cell"><div class="company-identity"><span class="company-mark" [style.borderColor]="c.primaryColorHex || '#54687b'"><mat-icon>domain</mat-icon></span><div><strong>{{c.businessName}}</strong><small>RUC {{c.ruc}}</small><small class="subtle">ID {{c.id}} · {{c.contactEmail || 'Sin correo'}}</small></div></div></td>
+            <td class="company-cell"><div class="company-identity"><span class="company-mark" [style.borderColor]="c.primaryColorHex || '#54687b'">
+              <ng-container *ngIf="getCompanyLogoUrl(c) as logo; else companyFallbackIcon">
+                <img [src]="logo" [alt]="'Logo de ' + c.businessName" loading="lazy" (error)="onCompanyLogoError(c)" />
+              </ng-container>
+              <ng-template #companyFallbackIcon><mat-icon [title]="c.logoUrl ? 'No se pudo mostrar el logo de la empresa' : 'Empresa sin logo'">domain</mat-icon></ng-template>
+            </span><div><strong>{{c.businessName}}</strong><small>RUC {{c.ruc}}</small><small class="subtle">ID {{c.id}} · {{c.contactEmail || 'Sin correo'}}</small></div></div></td>
             <td><strong>{{c.userCount}}</strong><small>{{c.totalUsers}} registrados</small><small>Cupo: {{displayLimit(c.license?.plan, c.license?.maxUsers)}}</small></td>
             <td class="number-cell">{{c.inventoryCount}}</td>
             <td><span class="plan-tag" [class.plan-max]="c.license?.plan === 'Max'">{{c.license?.plan || 'Sin licencia'}}</span></td>

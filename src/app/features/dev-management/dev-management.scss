@@ -141,3 +141,28 @@ td strong { font-size: 12.5px; }
 .inline-alert mat-icon { flex:none; font-size:19px; width:19px; height:19px; }
 .inline-alert--error { color:#ffc5c5; background:#3b282e; border:1px solid #805963; }
 @media(max-width:650px){ .table-search{width:100%;} .company-identity{align-items:flex-start;} .color-hex{max-width:none;} }
+
+/* Ajuste: máximo tres empresas visibles; el resto se recorre dentro de la tabla. */
+.companies-table {
+  max-height: 316px; /* cabecera de ~43px y tres filas de ~90px */
+  overflow-y: auto;
+  overflow-x: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #526d7d transparent;
+  overscroll-behavior: contain;
+}
+.companies-table::-webkit-scrollbar { width: 7px; height: 7px; }
+.companies-table::-webkit-scrollbar-track { background: transparent; }
+.companies-table::-webkit-scrollbar-thumb { background: #4b6373; border-radius: 20px; border: 2px solid #15212b; }
+.companies-table::-webkit-scrollbar-thumb:hover { background: #7292a5; }
+.companies-table thead th { top: 0; z-index: 3; }
+.companies-table tbody tr { height: 90px; }
+.company-mark { overflow: hidden; }
+.company-mark img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  padding: 2px;
+  object-fit: contain;
+  border-radius: 8px;
+}
