@@ -11,6 +11,7 @@ import {
 } from '../../core/services/dev-management';
 import { CompanyPublicService } from '../../core/services/companies';
 import { LoadingIndicatorComponent } from '../../shared/loading/loading-indicator';
+import { ToastService } from '../../shared/toast/toast.service';
 
 @Component({
   selector: 'app-dev-management',
@@ -25,6 +26,7 @@ export class DevManagementComponent implements OnInit, OnDestroy {
   private readonly router = inject(Router);
   private readonly platform = inject(PLATFORM_ID);
   private readonly cdr = inject(ChangeDetectorRef);
+  private readonly toasts = inject(ToastService);
 
   readonly plans: LicensePlan[] = ['Básico', 'Pro', 'Plus', 'Max'];
   readonly developer = this.isDeveloper();
@@ -39,8 +41,6 @@ export class DevManagementComponent implements OnInit, OnDestroy {
   loadingPending = false;
   companiesError = '';
   pendingError = '';
-  error = '';
-  notice = '';
   saving = false;
   renewing = false;
   workingRequestId: number | null = null;
@@ -117,6 +117,7 @@ export class DevManagementComponent implements OnInit, OnDestroy {
     this.rucLookupError = '';
     if (!/^\d{11}$/.test(ruc)) {
       this.rucLookupError = 'Ingresa un RUC de exactamente 11 dígitos.';
+      this.toasts.warning(this.rucLookupError, 'RUC inválido');
       return;
     }
     if (this.lookingUpRuc || this.saving) return;
@@ -135,6 +136,8 @@ export class DevManagementComponent implements OnInit, OnDestroy {
         if (requestGeneration !== this.lookupGeneration) return;
         this.lookingUpRuc = false;
         this.rucLookupError = this.errorFromApi(e, 'No se pudo consultar el RUC. Puedes completar los datos manualmente.');
+        if (this.rucNeedsConfiguration) this.toasts.warning(this.rucLookupError, 'Consulta RUC no configurada');
+        else this.toasts.error(this.rucLookupError, 'Error al consultar RUC');
         this.cdr.markForCheck();
       }
     });
@@ -149,6 +152,7 @@ export class DevManagementComponent implements OnInit, OnDestroy {
     const validTypes = ['image/png', 'image/jpeg', 'image/webp'];
     if (!validTypes.includes(file.type) || file.size <= 0 || file.size > 2 * 1024 * 1024) {
       this.logoInputError = 'Usa PNG, JPG o WebP de hasta 2 MB.';
+      this.toasts.warning(this.logoInputError, 'Archivo no admitido');
       input.value = '';
       this.cdr.markForCheck();
       return;
@@ -223,6 +227,7 @@ export class DevManagementComponent implements OnInit, OnDestroy {
       error: () => {
         this.loadingCompanies = false;
         this.companiesError = 'No se pudieron actualizar las empresas. Los datos visibles pueden estar desactualizados.';
+        this.toasts.error(this.companiesError, 'Error al cargar empresas');
         this.cdr.markForCheck();
       }
     });
@@ -237,6 +242,7 @@ export class DevManagementComponent implements OnInit, OnDestroy {
       error: () => {
         this.loadingPending = false;
         this.pendingError = 'No se pudieron actualizar las recuperaciones. Los datos visibles pueden estar desactualizados.';
+        this.toasts.error(this.pendingError, 'Error al cargar recuperaciones');
         this.cdr.markForCheck();
       }
     });
@@ -261,8 +267,6 @@ export class DevManagementComponent implements OnInit, OnDestroy {
     const currentPlan = row.license?.plan;
     this.renewPlan = this.isKnownPlan(currentPlan) ? currentPlan : 'Básico';
     this.logoFailed = false;
-    this.error = '';
-    this.notice = '';
     this.cdr.markForCheck();
   }
 
@@ -274,8 +278,6 @@ export class DevManagementComponent implements OnInit, OnDestroy {
     this.form = this.empty();
     this.renewPlan = 'Básico';
     this.logoFailed = false;
-    this.error = '';
-    this.notice = '';
     this.cdr.markForCheck();
   }
 
@@ -307,10 +309,8 @@ export class DevManagementComponent implements OnInit, OnDestroy {
 
   save(): void {
     if (this.saving || this.renewing) return;
-    this.error = '';
-    this.notice = '';
     const validation = this.validate();
-    if (validation) { this.error = validation; this.cdr.markForCheck(); return; }
+    if (validation) { this.toasts.warning(validation, 'Revisa el formulario'); this.cdr.markForCheck(); return; }
 
     const body: CompanyEdit = {
       ...this.form,
@@ -337,7 +337,7 @@ export class DevManagementComponent implements OnInit, OnDestroy {
         const savedId = originalId ?? responseId;
         if (!savedId) {
           this.saving = false;
-          this.error = 'La API no devolvió el identificador de la empresa creada.';
+          this.toasts.error('La API no devolvió el identificador de la empresa creada.', 'Error de respuesta');
           this.loadCompanies();
           this.cdr.markForCheck();
           return;
@@ -355,8 +355,8 @@ export class DevManagementComponent implements OnInit, OnDestroy {
             // La empresa ya se guardó. Conservar su ID para reintentar el logo sin crear un duplicado.
             this.selectedId = savedId;
             this.saving = false;
-            this.error = 'Los datos de la empresa se guardaron, pero el logo no pudo subirse: ' +
-              this.errorFromApi(e, 'inténtalo de nuevo desde Editar.');
+            this.toasts.warning('La empresa se guardó, pero el logo no pudo subirse: ' +
+              this.errorFromApi(e, 'inténtalo de nuevo desde Editar.'), 'Guardado parcial');
             this.loadCompanies();
             this.cdr.markForCheck();
           }
@@ -364,7 +364,7 @@ export class DevManagementComponent implements OnInit, OnDestroy {
       },
       error: e => {
         this.saving = false;
-        this.error = this.errorFromApi(e, 'No se pudo guardar la empresa.');
+        this.toasts.error(this.errorFromApi(e, 'No se pudo guardar la empresa.'), 'No se pudo guardar');
         this.cdr.markForCheck();
       }
     });
@@ -373,9 +373,9 @@ export class DevManagementComponent implements OnInit, OnDestroy {
   private finishSave(wasEditing: boolean): void {
     this.saving = false;
     this.newCompany();
-    this.notice = wasEditing
+    this.toasts.success(wasEditing
       ? 'Datos y logo de empresa actualizados sin renovar la licencia.'
-      : 'Empresa y licencia creadas correctamente.';
+      : 'Empresa y licencia creadas correctamente.');
     this.loadCompanies();
     this.cdr.markForCheck();
   }
@@ -383,12 +383,10 @@ export class DevManagementComponent implements OnInit, OnDestroy {
   renewLicense(): void {
     const row = this.selectedCompany;
     if (!row || !row.isActive || this.isSelectedProtected || this.saving || this.renewing) return;
-    this.error = '';
-    this.notice = '';
-    if (!this.isKnownPlan(this.renewPlan)) { this.error = 'Selecciona un plan válido.'; return; }
+    if (!this.isKnownPlan(this.renewPlan)) { this.toasts.warning('Selecciona un plan válido.'); return; }
     const maxUsers = this.planLimit(this.renewPlan);
     if (maxUsers < 0 || (maxUsers > 0 && maxUsers < row.userCount)) {
-      this.error = 'El plan seleccionado admite menos usuarios que los que están activos.';
+      this.toasts.warning('El plan seleccionado admite menos usuarios que los que están activos.');
       return;
     }
     if (!confirm(`¿Renovar la licencia de ${row.businessName} al plan ${this.renewPlan}? Se agregarán ${this.renewDurationLabel} a la vigencia según las reglas del servidor.`)) return;
@@ -403,13 +401,13 @@ export class DevManagementComponent implements OnInit, OnDestroy {
         // Actualización optimista segura: los valores provienen de la respuesta de la API.
         this.companies = this.companies.map(c => c.id === row.id ? { ...c, license } : c);
         this.updateDaysRemaining(this.companies);
-        this.notice = 'Licencia renovada. La fecha mostrada proviene del servidor.';
+        this.toasts.success('Licencia renovada. La fecha mostrada proviene del servidor.');
         this.loadCompanies();
         this.cdr.markForCheck();
       },
       error: e => {
         this.renewing = false;
-        this.error = this.errorFromApi(e, 'No se pudo renovar la licencia.');
+        this.toasts.error(this.errorFromApi(e, 'No se pudo renovar la licencia.'), 'Error al renovar');
         this.cdr.markForCheck();
       }
     });
@@ -423,12 +421,12 @@ export class DevManagementComponent implements OnInit, OnDestroy {
     this.api.deactivate(row.id).subscribe({
       next: () => {
         this.workingRequestId = null;
-        this.notice = 'Empresa desactivada.';
+        this.toasts.success('Empresa desactivada.');
         this.loadCompanies(); this.cdr.markForCheck();
       },
       error: e => {
         this.workingRequestId = null;
-        this.error = this.errorFromApi(e, 'No se pudo desactivar la empresa.');
+        this.toasts.error(this.errorFromApi(e, 'No se pudo desactivar la empresa.'), 'Error al desactivar');
         this.cdr.markForCheck();
       }
     });
@@ -442,10 +440,10 @@ export class DevManagementComponent implements OnInit, OnDestroy {
     call.subscribe({
       next: () => {
         this.workingRecoveryId = null;
-        this.notice = approve ? 'Solicitud aprobada y correo enviado.' : 'Solicitud rechazada.';
+        this.toasts.success(approve ? 'Solicitud aprobada y correo enviado.' : 'Solicitud rechazada.');
         this.loadPending(); this.cdr.markForCheck();
       },
-      error: e => { this.workingRecoveryId = null; this.error = this.errorFromApi(e, 'No se pudo procesar la solicitud.'); this.cdr.markForCheck(); }
+      error: e => { this.workingRecoveryId = null; this.toasts.error(this.errorFromApi(e, 'No se pudo procesar la solicitud.'), 'Error de recuperación'); this.cdr.markForCheck(); }
     });
   }
 
