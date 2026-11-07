@@ -14,10 +14,11 @@ import { CategoryService } from '../../../features/categories/services/category'
 import { Category } from '../../../core/models/category.model';
 import { CategoryParentFormComponent } from '../category-parent-form/category-parent-form';
 import { CategoryChildFormComponent } from '../category-child-form/category-child-form';
+import { LoadingIndicatorComponent } from '../../../shared/loading/loading-indicator';
 
 @Component({
   selector:'app-category-list',standalone:true,
-  imports:[MatTableModule,MatCardModule,MatButtonModule,MatIconModule,MatInputModule,MatCheckboxModule,FormsModule,CommonModule],
+  imports:[MatTableModule,MatCardModule,MatButtonModule,MatIconModule,MatInputModule,MatCheckboxModule,FormsModule,CommonModule,LoadingIndicatorComponent],
   templateUrl:'./category-list.html',styleUrl:'./category-list.scss',
   animations:[trigger('detailExpand',[
     state('collapsed,void',style({height:'0px',minHeight:'0'})),
@@ -34,12 +35,20 @@ export class CategoryListComponent implements OnInit {
   dataSource=new MatTableDataSource<Category>();
   expandedElement:Category|null=null;
   mostrarInactivos=false;
+  loading=false;hasLoaded=false;error='';
   private rawData:Category[]=[];
+  get rawDataCount():number{return this.rawData.length;}
   ngOnInit():void{this.loadData();}
   loadData():void{
+    if(this.loading)return;
+    this.loading=true;this.error='';this.cdr.markForCheck();
     this.categoryService.getCategories(true).subscribe({
-      next:data=>{this.rawData=data;this.processData();},
-      error:err=>this.snackbar.open(String(err?.error?.error??'Error cargando categorías'),'Cerrar',{duration:5500})
+      next:data=>{this.rawData=data;this.processData();this.loading=false;this.hasLoaded=true;this.cdr.markForCheck();},
+      error:err=>{
+        this.loading=false;this.hasLoaded=true;
+        this.error=String(err?.error?.error??'No fue posible actualizar categorías. Los datos anteriores pueden estar desactualizados.');
+        this.snackbar.open(this.error,'Cerrar',{duration:5500});this.cdr.markForCheck();
+      }
     });
   }
   processData():void{
@@ -51,7 +60,7 @@ export class CategoryListComponent implements OnInit {
         .sort((a,b)=>a.isActive===b.isActive?0:a.isActive?-1:1);
     });
     this.dataSource.data=parents.sort((a,b)=>a.isActive===b.isActive?0:a.isActive?-1:1);
-    this.cdr.detectChanges();
+    this.cdr.markForCheck();
   }
   toggleInactivos():void{this.processData();}
   applyFilter(event:Event):void{this.dataSource.filter=(event.target as HTMLInputElement).value.trim().toLowerCase();}
@@ -71,7 +80,7 @@ export class CategoryListComponent implements OnInit {
     if(!confirm('¿Desactivar esta categoría? Sus artículos e historial se conservarán.'))return;
     this.categoryService.deleteCategory(id).subscribe({
       next:()=>{this.snackbar.open('Categoría desactivada.','Cerrar',{duration:3000});this.loadData();},
-      error:err=>this.snackbar.open(String(err?.error?.error??err?.error?.message??'No se puede desactivar la categoría.'),'Cerrar',{duration:6200})
+      error:err=>this.snackbar.open(String(err?.error?.error??'No se pudo desactivar la categoría.'),'Cerrar',{duration:5500})
     });
   }
 }

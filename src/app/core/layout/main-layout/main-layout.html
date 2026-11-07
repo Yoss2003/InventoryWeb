@@ -1,4 +1,4 @@
-<mat-sidenav-container class="sidenav-container" autosize>
+<mat-sidenav-container class="sidenav-container" [class.sidebar-expanded]="isSidebarOpen()" [class.sidebar-collapsed]="!isSidebarOpen()">
   <mat-sidenav mode="side" [opened]="true" class="sidenav" [class.expanded]="isSidebarOpen()" [class.collapsed]="!isSidebarOpen()">
     <div class="logo-container"><span class="logo-mark"><mat-icon>inventory_2</mat-icon></span><span class="logo-label" [attr.aria-hidden]="!isSidebarOpen()">Inventario Pro</span></div>
     <mat-nav-list aria-label="Navegación de inventario">

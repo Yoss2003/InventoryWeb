@@ -3,7 +3,8 @@
     <div><h2>{{ data.actionId === 1 ? 'Nueva entrada de stock' : 'Nueva salida de stock' }}</h2><p>Registra un movimiento real en el inventario</p></div>
     <button type="button" class="close" (click)="dialogRef.close()" aria-label="Cerrar"><mat-icon>close</mat-icon></button>
   </header>
-  <form [formGroup]="form" (ngSubmit)="onSubmit()" autocomplete="off">
+  <app-loading-indicator *ngIf="loading" message="Cargando artículos del inventario..." />
+  <form *ngIf="!loading" [formGroup]="form" (ngSubmit)="onSubmit()" autocomplete="off">
     <main class="movement-body">
       <div class="field"><label>Artículo <span>*</span></label>
         <mat-form-field appearance="outline" class="inventory-select">
@@ -20,8 +21,11 @@
       <p class="message" *ngIf="error" role="alert">{{ error }}</p>
       <p class="hint" *ngIf="selected?.tracking === 1">Los artículos serializados requieren cantidades enteras.</p>
     </main>
-    <footer><button type="button" (click)="dialogRef.close()">Cancelar</button>
-      <button type="submit" class="confirm" [disabled]="!canSave"><mat-icon>save</mat-icon>{{ saving ? 'Guardando...' : 'Confirmar movimiento' }}</button>
+    <footer><button type="button" (click)="dialogRef.close()" [disabled]="saving">Cancelar</button>
+      <button type="submit" class="confirm" [disabled]="!canSave">
+        <app-loading-indicator *ngIf="saving; else movementSave" [compact]="true" message="Guardando..." />
+        <ng-template #movementSave><mat-icon>save</mat-icon>Confirmar movimiento</ng-template>
+      </button>
     </footer>
   </form>
 </div>

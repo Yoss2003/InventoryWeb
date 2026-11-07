@@ -1,21 +1,29 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { ArticleList } from './article-list';
+import { TestBed } from '@angular/core/testing';
+import { of } from 'rxjs';
+import { MatDialog } from '@angular/material/dialog';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { ArticleListComponent } from './article-list';
+import { ArticleService } from '../../../core/services/articles';
+import { CategoryService } from '../../categories/services/category';
+import { BrandService } from '../../../core/services/brands';
 
-describe('ArticleList', () => {
-  let component: ArticleList;
-  let fixture: ComponentFixture<ArticleList>;
-
-  beforeEach(async () => {
+describe('ArticleListComponent', () => {
+  it('creates and loads an empty catalog', async () => {
     await TestBed.configureTestingModule({
-      imports: [ArticleList],
+      imports: [ArticleListComponent],
+      providers: [
+        { provide: ArticleService, useValue: {getArticles: () => of([])} },
+        { provide: CategoryService, useValue: {getCategories: () => of([])} },
+        { provide: BrandService, useValue: {getBrands: () => of([])} },
+        { provide: MatDialog, useValue: {open: () => ({afterClosed: () => of(false)})} },
+        { provide: MatSnackBar, useValue: {open: () => null} }
+      ]
     }).compileComponents();
-
-    fixture = TestBed.createComponent(ArticleList);
-    component = fixture.componentInstance;
+    const fixture = TestBed.createComponent(ArticleListComponent);
+    fixture.detectChanges();
     await fixture.whenStable();
-  });
-
-  it('should create', () => {
-    expect(component).toBeTruthy();
+    expect(fixture.componentInstance).toBeTruthy();
+    expect(fixture.componentInstance.loading).toBe(false);
+    expect(fixture.componentInstance.dataSource).toEqual([]);
   });
 });

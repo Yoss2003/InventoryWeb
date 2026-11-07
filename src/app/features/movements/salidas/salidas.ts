@@ -14,8 +14,9 @@ import { Article } from '../../../core/models/article.model';
 import { TraspasoFormComponent } from '../traspaso-form/traspaso-form';
 import { QuickSaleFormComponent } from '../quick-sale-form/quick-sale-form';
 import { MovementDetailDialogComponent } from '../movement-detail-dialog/movement-detail-dialog';
+import { LoadingIndicatorComponent } from '../../../shared/loading/loading-indicator';
 
-@Component({selector:'app-salidas',standalone:true,imports:[CommonModule,MatIconModule,MatTabsModule],templateUrl:'./salidas.html',styleUrl:'./salidas.scss'})
+@Component({selector:'app-salidas',standalone:true,imports:[CommonModule,MatIconModule,MatTabsModule,LoadingIndicatorComponent],templateUrl:'./salidas.html',styleUrl:'./salidas.scss'})
 export class SalidasComponent implements OnInit {
   private readonly movementsApi=inject(MovementService);
   private readonly salesApi=inject(SalesService);
@@ -26,12 +27,12 @@ export class SalidasComponent implements OnInit {
   private readonly router=inject(Router);
   traspasos:Movement[]=[]; ventas:Movement[]=[];
   private articles=new Map<number,Article>();
-  cancelledIds=new Set<number>();
-  cancelledSaleIds=new Set<number>();
-  loading=true;
+  cancelledIds=new Set<number>();cancelledSaleIds=new Set<number>();
+  loading=false;hasLoaded=false;error='';
   ngOnInit():void{this.loadRealData();}
   loadRealData():void{
-    this.loading=true;
+    if(this.loading)return;
+    this.loading=true;this.error='';this.cdr.markForCheck();
     forkJoin({movements:this.movementsApi.getMovements(),articles:this.articlesApi.getArticles(),reversals:this.movementsApi.getCancellations(),sales:this.salesApi.getCancellations()}).subscribe({
       next:({movements,articles,reversals,sales})=>{
         this.articles=new Map(articles.map(a=>[a.id,a]));
@@ -40,8 +41,12 @@ export class SalidasComponent implements OnInit {
         const records=[...movements].sort((a,b)=>new Date(b.movementDate).getTime()-new Date(a.movementDate).getTime());
         this.ventas=records.filter(m=>m.actionId===2&&!!m.paymentMethod&&m.paymentMethod!=='N/A');
         this.traspasos=records.filter(m=>m.actionId===3||(m.actionId===2&&!m.paymentMethod));
-        this.loading=false;this.cdr.markForCheck();
-      },error:err=>{this.loading=false;this.snackbar.open(String(err?.error?.error??'No fue posible cargar las salidas.'),'Cerrar',{duration:6000});}
+        this.loading=false;this.hasLoaded=true;this.cdr.markForCheck();
+      },error:err=>{
+        this.loading=false;this.hasLoaded=true;
+        this.error=String(err?.error?.error??'No fue posible actualizar las salidas. Los datos anteriores pueden estar desactualizados.');
+        this.snackbar.open(this.error,'Cerrar',{duration:6000});this.cdr.markForCheck();
+      }
     });
   }
   articleName(id:number):string{return this.articles.get(id)?.name??`Artículo #${id}`;}

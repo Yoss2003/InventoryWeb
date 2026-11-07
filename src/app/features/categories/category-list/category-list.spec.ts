@@ -1,21 +1,27 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { CategoryList } from './category-list';
+import { TestBed } from '@angular/core/testing';
+import { provideNoopAnimations } from '@angular/platform-browser/animations';
+import { of } from 'rxjs';
+import { MatDialog } from '@angular/material/dialog';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { CategoryListComponent } from './category-list';
+import { CategoryService } from '../services/category';
 
-describe('CategoryList', () => {
-  let component: CategoryList;
-  let fixture: ComponentFixture<CategoryList>;
-
-  beforeEach(async () => {
+describe('CategoryListComponent', () => {
+  it('creates and loads categories', async () => {
     await TestBed.configureTestingModule({
-      imports: [CategoryList],
+      imports: [CategoryListComponent],
+      providers: [
+        provideNoopAnimations(),
+        { provide: CategoryService, useValue: {getCategories: () => of([])} },
+        { provide: MatDialog, useValue: {open: () => ({afterClosed: () => of(false)})} },
+        { provide: MatSnackBar, useValue: {open: () => null} }
+      ]
     }).compileComponents();
-
-    fixture = TestBed.createComponent(CategoryList);
-    component = fixture.componentInstance;
+    const fixture = TestBed.createComponent(CategoryListComponent);
+    fixture.detectChanges();
     await fixture.whenStable();
-  });
-
-  it('should create', () => {
-    expect(component).toBeTruthy();
+    expect(fixture.componentInstance).toBeTruthy();
+    expect(fixture.componentInstance.dataSource.data).toEqual([]);
+    expect(fixture.componentInstance.loading).toBe(false);
   });
 });

@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
@@ -10,11 +10,12 @@ import { AuthService } from '../../../core/services/auth.service';
 import { CompanyPublicService } from '../../../core/services/companies';
 import { CompanyPublic } from '../../../core/models/company-public.model';
 import { LoginRequest } from '../../../core/models/auth.model';
+import { LoadingIndicatorComponent } from '../../../shared/loading/loading-indicator';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, MatIconModule, CompanySelectorComponent],
+  imports: [CommonModule, ReactiveFormsModule, MatIconModule, CompanySelectorComponent, LoadingIndicatorComponent],
   templateUrl: './login.html',
   styleUrl: './login.scss'
 })
@@ -24,6 +25,7 @@ export class Login implements OnInit {
   private readonly companiesService = inject(CompanyPublicService);
   private readonly router = inject(Router);
   private readonly snackBar = inject(MatSnackBar);
+  private readonly cdr = inject(ChangeDetectorRef);
 
   readonly loginForm: FormGroup = this.fb.group({
     companyId: [null, Validators.required],
@@ -67,23 +69,28 @@ export class Login implements OnInit {
     this.loadingCompanies = true;
     this.companiesError = '';
     this.loginError = '';
+    this.cdr.markForCheck();
     this.companiesService.getActiveCompanies().subscribe({
       next: companies => {
         this.companies = companies;
+        // Si el usuario acaba de refrescar, priorizar su selección actual si sigue activa.
+        const selectedId = Number(this.loginForm.get('companyId')?.value);
+        const previous = companies.find(company => company.id === selectedId);
         const last = this.authService.getLastSelectedCompanyId();
         const remembered = companies.find(company => company.id === last);
-        // Si hay más de una empresa y no existe preferencia, obligar a elegir.
-        const initialId = remembered?.id ?? (companies.length === 1 ? companies[0].id : null);
+        const initialId = previous?.id ?? remembered?.id ?? (companies.length === 1 ? companies[0].id : null);
         this.loginForm.patchValue({ companyId: initialId });
         this.onCompanyChange();
         this.loadingCompanies = false;
         if (!companies.length) this.companiesError = 'No hay empresas activas disponibles para iniciar sesión.';
+        this.cdr.markForCheck();
       },
       error: () => {
         this.companies = [];
         this.loginForm.patchValue({ companyId: null });
         this.loadingCompanies = false;
         this.companiesError = 'No se pudieron cargar las empresas. Comprueba la conexión con la API y vuelve a intentar.';
+        this.cdr.markForCheck();
       }
     });
   }
@@ -120,19 +127,35 @@ export class Login implements OnInit {
     }
 
     this.submitting = true;
+    this.cdr.markForCheck();
     this.authService.login(payload).subscribe({
       next: result => {
-        this.submitting = false;
         if ('requirePasswordChange' in result && result.requirePasswordChange) {
+          this.submitting = false;
           // El endpoint actual de cambio inicial no autentica por token; no invocarlo desde aquí.
           this.loginError = 'Tu cuenta necesita cambiar su contraseña inicial. Solicita la actualización al administrador antes de ingresar desde la web.';
+          this.cdr.markForCheck();
           return;
         }
         if ('token' in result && result.token) {
-          void this.router.navigate(['/dashboard/articulos']);
+          // Mantener el botón bloqueado mientras Angular cambia de página.
+          void this.router.navigate(['/dashboard/articulos']).then(navigated => {
+            if (!navigated) {
+              this.submitting = false;
+              this.loginError = 'No fue posible abrir el panel. Vuelve a intentar.';
+              this.cdr.markForCheck();
+            }
+          }).catch(() => {
+            this.submitting = false;
+            this.loginError = 'No fue posible abrir el panel. Vuelve a intentar.';
+            this.cdr.markForCheck();
+          });
+          this.cdr.markForCheck();
           return;
         }
+        this.submitting = false;
         this.loginError = 'No se recibió una sesión válida del servidor.';
+        this.cdr.markForCheck();
       },
       error: (error: HttpErrorResponse | Error) => {
         this.submitting = false;
@@ -143,10 +166,12 @@ export class Login implements OnInit {
             control?.setValidators([Validators.required, Validators.pattern(/^\d{6}$/)]);
             control?.updateValueAndValidity();
             this.loginError = 'Introduce el código de 6 dígitos de tu autenticador.';
+            this.cdr.markForCheck();
             return;
           }
           if (error.error?.accountPending) {
             this.loginError = 'La cuenta está inactiva o pendiente de aprobación.';
+            this.cdr.markForCheck();
             return;
           }
           this.loginError = error.status === 0
@@ -155,6 +180,7 @@ export class Login implements OnInit {
         } else {
           this.loginError = error.message || 'No se pudo iniciar sesión.';
         }
+        this.cdr.markForCheck();
         this.snackBar.open(this.loginError, 'Cerrar', { duration: 4500 });
       }
     });

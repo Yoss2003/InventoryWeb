@@ -4,30 +4,50 @@
   </div></header>
   <div class="sharing-notice"><mat-icon>shield</mat-icon><p>Compartir el inventario completo es distinto de asignar artículos. Las asignaciones individuales se consultan desde «Artículos asignados» sin otorgar acceso general al almacén.</p></div>
   <div class="sharing-card">
-    <div class="sharing-card-heading"><h2>Inventario de origen</h2><button type="button" (click)="refresh()" [disabled]="loading"><mat-icon>refresh</mat-icon> Actualizar</button></div>
-    <label for="sharing-inventory">Seleccionar inventario propio</label>
-    <mat-form-field appearance="outline" class="sharing-select">
-      <mat-select id="sharing-inventory" [(ngModel)]="currentInventoryId" (selectionChange)="loadShares()" panelClass="sharing-inventory-options" aria-label="Inventario propio">
-        <mat-option *ngFor="let i of ownedInventories" [value]="i.id">{{ inventoryLabel(i) }}</mat-option>
-      </mat-select>
-    </mat-form-field>
-    <small class="sharing-hint" *ngIf="ownedInventories.length > 1">Los inventarios con nombres repetidos se distinguen por ID; no se eliminan registros.</small>
-    <div *ngIf="error" class="sharing-error" role="alert">{{error}}</div>
-    <div *ngIf="!ownedInventories.length && !loading" class="sharing-state">No tienes almacenes propios disponibles para compartir.</div>
+    <div class="sharing-card-heading"><h2>Inventario de origen</h2>
+      <button type="button" (click)="refresh()" [disabled]="loading" aria-label="Actualizar inventarios">
+        <ng-container *ngIf="loading; else sharingRefresh"><app-loading-indicator [compact]="true" message="Cargando..." /></ng-container>
+        <ng-template #sharingRefresh><mat-icon>refresh</mat-icon> Actualizar</ng-template>
+      </button>
+    </div>
+    <app-loading-indicator *ngIf="loading && !hasLoaded" message="Cargando inventarios..." />
+    <ng-container *ngIf="hasLoaded || !loading">
+      <label for="sharing-inventory">Seleccionar inventario propio</label>
+      <mat-form-field appearance="outline" class="sharing-select">
+        <mat-select id="sharing-inventory" [(ngModel)]="currentInventoryId" (selectionChange)="loadShares()" panelClass="sharing-inventory-options" aria-label="Inventario propio">
+          <mat-option *ngFor="let i of ownedInventories" [value]="i.id">{{ inventoryLabel(i) }}</mat-option>
+        </mat-select>
+      </mat-form-field>
+      <small class="sharing-hint" *ngIf="ownedInventories.length > 1">Los inventarios con nombres repetidos se distinguen por ID; no se eliminan registros.</small>
+      <div *ngIf="error" class="sharing-error" role="alert">{{error}}</div>
+      <div *ngIf="!ownedInventories.length && !loading" class="sharing-state">No tienes almacenes propios disponibles para compartir.</div>
+    </ng-container>
   </div>
   <div class="sharing-card" *ngIf="currentInventoryId">
     <h2>Otorgar acceso</h2>
     <form (ngSubmit)="share()" class="sharing-form">
       <div class="recipient-cell"><label for="share-recipient">Usuario, correo o DNI</label><input id="share-recipient" type="text" name="recipient" [(ngModel)]="identifier" maxlength="180" placeholder="Buscar colaborador de tu empresa" required /></div>
-      <div><label for="share-access">Permiso</label><select id="share-access" name="permission" [(ngModel)]="accessLevel"><option [ngValue]="1">Solo lectura</option><option [ngValue]="2">Editar inventario</option></select></div>
-      <button class="primary" type="submit" [disabled]="saving || !identifier.trim()">{{saving ? 'Guardando…' : 'Compartir'}}</button>
+      <div><label for="share-access">Permiso</label>
+        <mat-form-field appearance="outline" class="sharing-select sharing-permission-select" subscriptSizing="dynamic">
+          <mat-select id="share-access" name="permission" [(ngModel)]="accessLevel" panelClass="inventory-select-options" aria-label="Permiso de colaborador">
+            <mat-option [value]="1">Solo lectura</mat-option>
+            <mat-option [value]="2">Editar inventario</mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+      <button class="primary" type="submit" [disabled]="saving || !identifier.trim()">
+        <app-loading-indicator *ngIf="saving; else sharingButtonLabel" [compact]="true" message="Guardando..." />
+        <ng-template #sharingButtonLabel>Compartir</ng-template>
+      </button>
     </form>
   </div>
   <div class="sharing-card" *ngIf="currentInventoryId">
     <h2>Colaboradores autorizados ({{shares.length}})</h2>
-    <div class="sharing-table-wrap"><table><thead><tr><th>Usuario</th><th>Permiso</th><th>Desde</th><th>Acciones</th></tr></thead><tbody>
-    <tr *ngFor="let item of shares"><td>{{item.username || ('Usuario #' + item.userId)}}</td><td>{{item.accessLevel === 2 ? 'Editor' : 'Lector'}}</td><td>{{item.sharedDate | date:'dd/MM/yyyy'}}</td><td><button type="button" class="danger" (click)="revoke(item)">Revocar</button></td></tr>
-    <tr *ngIf="!shares.length"><td colspan="4" class="empty">No hay colaboradores autorizados para este inventario.</td></tr>
+    <app-loading-indicator *ngIf="loadingShares && !sharesLoaded" message="Cargando colaboradores..." />
+    <div class="sharing-table-wrap" *ngIf="!loadingShares || sharesLoaded"><table><thead><tr><th>Usuario</th><th>Permiso</th><th>Desde</th><th>Acciones</th></tr></thead><tbody>
+      <tr *ngFor="let item of shares"><td>{{item.username || ('Usuario #' + item.userId)}}</td><td>{{item.accessLevel === 2 ? 'Editor' : 'Lector'}}</td><td>{{item.sharedDate | date:'dd/MM/yyyy'}}</td><td><button type="button" class="danger" (click)="revoke(item)">Revocar</button></td></tr>
+      <tr *ngIf="!shares.length && !loadingShares && !error"><td colspan="4" class="empty">No hay colaboradores autorizados para este inventario.</td></tr>
     </tbody></table></div>
+    <div class="sharing-hint" *ngIf="loadingShares && sharesLoaded"><app-loading-indicator [compact]="true" message="Actualizando colaboradores..." /></div>
   </div>
 </section>

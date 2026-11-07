@@ -13,8 +13,9 @@ import { ArticleFormComponent } from '../../articles/article-form/article-form';
 import { ArticleDetailDialogComponent } from '../../articles/article-detail-dialog/article-detail-dialog';
 import { MovementForm } from '../movement-form/movement-form';
 import { MovementDetailDialogComponent } from '../movement-detail-dialog/movement-detail-dialog';
+import { LoadingIndicatorComponent } from '../../../shared/loading/loading-indicator';
 
-@Component({selector:'app-entradas',standalone:true,imports:[CommonModule,MatIconModule,MatTabsModule],templateUrl:'./entradas.html',styleUrl:'./entradas.scss'})
+@Component({selector:'app-entradas',standalone:true,imports:[CommonModule,MatIconModule,MatTabsModule,LoadingIndicatorComponent],templateUrl:'./entradas.html',styleUrl:'./entradas.scss'})
 export class EntradasComponent implements OnInit {
   private readonly dialog=inject(MatDialog);
   private readonly articles=inject(ArticleService);
@@ -24,10 +25,11 @@ export class EntradasComponent implements OnInit {
   standard:Article[]=[];bulk:Article[]=[];serialized:Article[]=[];
   movements:Movement[]=[];
   private articleMap=new Map<number,Article>();
-  loading=true;
+  loading=false;hasLoaded=false;error='';
   ngOnInit():void{this.loadRealData();}
   loadRealData():void{
-    this.loading=true;
+    if(this.loading)return;
+    this.loading=true;this.error='';this.cdr.markForCheck();
     forkJoin({articles:this.articles.getArticles(),movements:this.movementsApi.getMovements()}).subscribe({
       next:({articles,movements})=>{
         const active=articles.filter(a=>a.isActive);
@@ -40,8 +42,12 @@ export class EntradasComponent implements OnInit {
         this.bulk=active.filter(a=>type(a)===2);
         this.articleMap=new Map(articles.map(a=>[a.id,a]));
         this.movements=movements.filter(m=>m.actionId===1).sort((a,b)=>new Date(b.movementDate).getTime()-new Date(a.movementDate).getTime());
-        this.loading=false;this.cdr.markForCheck();
-      },error:err=>{this.loading=false;this.snackbar.open(String(err?.error?.error??'No se pudieron cargar las entradas.'),'Cerrar',{duration:5000});}
+        this.loading=false;this.hasLoaded=true;this.cdr.markForCheck();
+      },error:err=>{
+        this.loading=false;this.hasLoaded=true;
+        this.error=String(err?.error?.error??'No se pudieron cargar las entradas. Los datos anteriores pueden estar desactualizados.');
+        this.snackbar.open(this.error,'Cerrar',{duration:5000});this.cdr.markForCheck();
+      }
     });
   }
   articleName(id:number):string{return this.articleMap.get(id)?.name||`Artículo #${id}`;}

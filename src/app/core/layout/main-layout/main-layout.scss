@@ -1,7 +1,11 @@
 :host {display:block;height:100%;}
 .sidenav-container {height:100dvh;width:100%;background:#131b22;}
-.sidenav {width:66px;background:#172430;color:#dce8f4;border-right:1px solid #465868;overflow:hidden;}
+.sidenav {width:66px;transition:width .18s ease;background:#172430;color:#dce8f4;border-right:1px solid #465868;overflow:hidden;}
 .sidenav.expanded {width:234px;}
+/* Margen controlado por el mismo estado que la barra lateral: no requiere autosize. */
+.sidenav-container.sidebar-collapsed > mat-sidenav-content {margin-left:66px!important;}
+.sidenav-container.sidebar-expanded > mat-sidenav-content {margin-left:234px!important;}
+.sidenav-container > mat-sidenav-content {transition:margin-left .18s ease;min-width:0;}
 .logo-container{display:flex;align-items:center;gap:10px;white-space:nowrap;min-height:70px;padding:12px 14px;border-bottom:1px solid #394c5c;box-sizing:border-box;}
 .logo-mark{flex:none;width:36px;height:36px;display:grid;place-items:center;background:#30401d;border-radius:9px;color:#b9e86e;}
 .logo-label{font-size:15px;font-weight:750;color:#eaf3fa;white-space:nowrap;opacity:0;transition:opacity .15s;}
@@ -30,5 +34,15 @@
 .hamburger.open span:nth-child(2){opacity:0;transform:scaleX(.2)}
 .hamburger.open span:nth-child(3){top:8px;transform:rotate(-45deg)}
 .main-content{padding:18px;background:#151c23;height:calc(100dvh - 64px);box-sizing:border-box;overflow:auto;min-width:0;}
-@media(max-width:700px){.sidenav{width:56px}.sidenav.expanded{width:min(228px,75vw)}.top-toolbar{padding:0 10px}.current-title{font-size:15px}.main-content{padding:9px}}
-@media(prefers-reduced-motion:reduce){.sidenav,.hamburger span{transition:none!important}}
+@media(max-width:700px){
+  .sidenav{width:56px}
+  .sidenav.expanded{width:min(228px,75vw)}
+  .sidenav-container.sidebar-collapsed > mat-sidenav-content{margin-left:56px!important}
+  .sidenav-container.sidebar-expanded > mat-sidenav-content{margin-left:min(228px,75vw)!important}
+  .top-toolbar{padding:0 10px}
+  .current-title{font-size:15px}
+  .main-content{padding:9px}
+}
+@media(prefers-reduced-motion:reduce){
+  .sidenav,.sidenav-container > mat-sidenav-content,.hamburger span,.logo-label,.sidebar-label{transition:none!important}
+}
