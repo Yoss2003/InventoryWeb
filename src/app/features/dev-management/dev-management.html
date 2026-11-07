@@ -1,33 +1,187 @@
 <div class="dev-page" *ngIf="developer; else forbidden">
-  <header class="dev-head"><div><small>ACCESO EXCLUSIVO · ROL DESARROLLADOR</small><h1>Gestión Dev</h1><p>Empresas, licencias, usuarios y recuperaciones pendientes.</p></div><button type="button" (click)="reload()" [disabled]="loading"><app-loading-indicator *ngIf="loading; else devRefresh" [compact]="true" message="Cargando..." /><ng-template #devRefresh>Actualizar</ng-template></button></header>
-  <p *ngIf="error" class="error" role="alert">{{error}}</p><p *ngIf="notice" class="notice">{{notice}}</p>
-  <section class="dev-card"><h2>Empresas registradas</h2>
+  <header class="dev-head">
+    <div>
+      <small>ACCESO EXCLUSIVO · ROL DESARROLLADOR</small>
+      <h1>Gestión Dev</h1>
+      <p>Empresas, licencias y recuperaciones pendientes.</p>
+    </div>
+    <button type="button" (click)="reload()" [disabled]="loading">
+      <app-loading-indicator *ngIf="loading; else refreshCaption" [compact]="true" message="Cargando..." />
+      <ng-template #refreshCaption><mat-icon>refresh</mat-icon> Actualizar</ng-template>
+    </button>
+  </header>
+
+  <p *ngIf="error" class="error alert" role="alert">{{error}}</p>
+  <p *ngIf="notice" class="notice alert" role="status">{{notice}}</p>
+
+  <section class="dev-card" aria-label="Empresas registradas">
+    <div class="section-head"><div><h2>Empresas registradas</h2><small>El número de usuarios es calculado por la API; no se edita.</small></div></div>
     <p *ngIf="companiesError" class="error" role="alert">{{companiesError}}</p>
     <button *ngIf="companiesError" type="button" (click)="loadCompanies()" [disabled]="loadingCompanies">Reintentar empresas</button>
     <app-loading-indicator *ngIf="loadingCompanies && !companies.length" message="Cargando empresas..." />
-    <div class="overflow"><table><thead><tr><th>Empresa / RUC</th><th>Usuarios</th><th>Inventarios</th><th>Plan</th><th>Licencia</th><th>Estado</th><th>Acciones</th></tr></thead><tbody>
-      <tr *ngFor="let c of companies; trackBy: trackCompany"><td><strong>{{c.businessName}}</strong><small>{{c.ruc}} · ID {{c.id}}</small></td><td>{{c.userCount}} / {{c.license?.maxUsers ?? '—'}}</td><td>{{c.inventoryCount}}</td><td>{{c.license?.plan || 'Sin licencia'}}</td><td><span *ngIf="daysRemaining(c) !== null" [class.expired]="(daysRemaining(c) ?? 0)<0">{{daysRemaining(c)}} días</span><span *ngIf="daysRemaining(c) === null">Sin configurar</span></td><td>{{c.isActive ? (c.license?.isEnabled === false ? 'Suspendida' : 'Activa') : 'Inactiva'}}</td><td><button type="button" (click)="select(c)">Editar</button><button type="button" class="danger-button" (click)="deactivate(c)" [disabled]="!c.isActive">Desactivar</button></td></tr>
-      <tr *ngIf="!companies.length"><td colspan="7">{{loadingCompanies?'Consultando empresas…':companiesError?'Empresas no disponibles.':'No hay registros.'}}</td></tr>
-    </tbody></table></div>
+    <div class="overflow">
+      <table>
+        <thead><tr><th>Empresa / RUC</th><th>Usuarios</th><th>Inventarios</th><th>Plan</th><th>Vencimiento</th><th>Estado</th><th>Acciones</th></tr></thead>
+        <tbody>
+          <tr *ngFor="let c of companies; trackBy: trackCompany" [class.selected-row]="selectedId === c.id">
+            <td><strong>{{c.businessName}}</strong><small>{{c.ruc}} · ID {{c.id}}</small></td>
+            <td>{{c.userCount}} activos <small>{{c.totalUsers}} registrados · cupo {{c.license?.maxUsers ?? '—'}}</small></td>
+            <td>{{c.inventoryCount}}</td>
+            <td><span class="plan-tag">{{c.license?.plan || 'Sin licencia'}}</span></td>
+            <td>
+              <span *ngIf="c.license?.expiresAt">{{c.license?.expiresAt | date:'dd/MM/yyyy'}}</span>
+              <span *ngIf="daysRemaining(c) !== null" class="days-left" [class.expired]="(daysRemaining(c) ?? 0) < 0">{{daysRemaining(c)}} días</span>
+              <span *ngIf="daysRemaining(c) === null">Sin configurar</span>
+            </td>
+            <td>{{!c.isActive ? 'Inactiva' : c.license?.isEnabled === false ? 'Suspendida' : 'Activa'}}</td>
+            <td class="action-cell">
+              <button type="button" (click)="select(c)" [disabled]="saving || renewing">Editar</button>
+              <button type="button" class="danger-button" (click)="deactivate(c)"
+                [disabled]="!c.isActive || isProtectedCompany(c) || workingRequestId !== null"
+                [title]="isProtectedCompany(c) ? 'La empresa del desarrollador está protegida' : 'Desactivar empresa sin datos relacionados'">
+                {{workingRequestId === c.id ? 'Procesando...' : 'Desactivar'}}
+              </button>
+            </td>
+          </tr>
+          <tr *ngIf="!companies.length"><td colspan="7">{{loadingCompanies ? 'Consultando empresas…' : companiesError ? 'Empresas no disponibles.' : 'No hay registros.'}}</td></tr>
+        </tbody>
+      </table>
+    </div>
   </section>
-  <section class="dev-card"><div class="section-head"><h2>{{editing ? 'Editar empresa y licencia' : 'Registrar empresa y licencia'}}</h2><button type="button" class="muted" (click)="newCompany()">Nueva empresa</button></div>
-    <form (ngSubmit)="save()" class="dev-form">
-      <label>Razón social<input name="businessName" [(ngModel)]="form.businessName" maxlength="255" required /></label>
-      <label>RUC<input name="ruc" [(ngModel)]="form.ruc" maxlength="11" inputmode="numeric" required /></label>
-      <label>Plan<input name="plan" [(ngModel)]="form.plan" maxlength="40" required /></label>
-      <label>Usuarios permitidos<input name="maxUsers" type="number" min="1" [(ngModel)]="form.maxUsers" required /></label>
-      <label>Vencimiento<input name="expiresAt" type="date" [(ngModel)]="form.expiresAt" required /></label>
-      <label>Color principal<input name="color" type="text" [(ngModel)]="form.primaryColorHex" placeholder="#A2D149" /></label>
-      <label class="check"><input name="enabled" type="checkbox" [(ngModel)]="form.licenseEnabled" /> Licencia habilitada</label>
-      <button type="submit" class="save" [disabled]="saving"><app-loading-indicator *ngIf="saving; else devSaveLabel" [compact]="true" message="Guardando..." /><ng-template #devSaveLabel>{{editing?'Guardar cambios':'Crear empresa'}}</ng-template></button>
+
+  <section class="dev-card company-editor" aria-label="Formulario de empresa">
+    <div class="section-head">
+      <div>
+        <h2>{{editing ? 'Editar empresa' : 'Registrar empresa'}}</h2>
+        <small>{{editing ? 'Los cambios empresariales no renuevan la licencia.' : 'El vencimiento se calculará en la API al registrar.'}}</small>
+      </div>
+      <button type="button" class="muted" (click)="newCompany()" [disabled]="saving || renewing"><mat-icon>add</mat-icon> Nueva empresa</button>
+    </div>
+
+    <form (ngSubmit)="save()" class="dev-form" #companyForm="ngForm">
+      <div class="editor-group">
+        <div class="group-heading"><h3>Datos de la empresa</h3><p>Identificación y contacto</p></div>
+        <div class="fields-grid">
+          <label class="field">RUC <span class="required">*</span>
+            <input name="ruc" [(ngModel)]="form.ruc" (ngModelChange)="onRucChanged()" type="text" inputmode="numeric" maxlength="11" minlength="11" pattern="[0-9]{11}" required
+              [readonly]="isSelectedProtected" placeholder="11 dígitos" />
+          </label>
+          <div class="ruc-lookup">
+            <button type="button" (click)="lookupRuc()" [disabled]="lookingUpRuc || saving || form.ruc.length !== 11">
+              <mat-icon *ngIf="!lookingUpRuc">manage_search</mat-icon>
+              <app-loading-indicator *ngIf="lookingUpRuc" [compact]="true" message="Consultando..." />
+              <span *ngIf="!lookingUpRuc">Consultar RUC</span>
+            </button>
+            <small *ngIf="rucResult" role="status">{{rucResult.source}} · {{rucResult.estado || 'Estado no informado'}} · {{rucResult.condicion || 'Condición no informada'}}</small>
+            <small *ngIf="rucLookupError" class="error" role="alert">{{rucLookupError}}</small>
+          </div>
+          <label class="field field-wide">Razón social <span class="required">*</span>
+            <input name="businessName" [(ngModel)]="form.businessName" maxlength="255" required placeholder="Razón social de la empresa" />
+          </label>
+          <label class="field">Dueño fiscal <span class="required" *ngIf="!editing">*</span>
+            <input name="fiscalOwnerName" [(ngModel)]="form.fiscalOwnerName" maxlength="255" [required]="!editing" placeholder="Nombre completo" />
+          </label>
+          <label class="field field-wide">Correo empresarial <span class="required" *ngIf="!editing">*</span>
+            <input name="contactEmail" [(ngModel)]="form.contactEmail" type="email" maxlength="254" [required]="!editing" placeholder="contacto@empresa.com" />
+          </label>
+        </div>
+        <p class="field-help">La consulta de RUC recupera la razón social desde Decolecta/SUNAT. El dueño fiscal y correo se completan manualmente; si falla el servicio, puedes continuar con datos validados.</p>
+      </div>
+
+      <div class="editor-group">
+        <div class="group-heading"><h3>Identidad visual</h3><p>Color principal y logo</p></div>
+        <div class="visual-fields">
+          <div class="logo-preview" [style.borderColor]="form.primaryColorHex || '#526779'">
+            <img *ngIf="logoPreview as preview" [src]="preview" alt="Logo actual de la empresa" (error)="logoFailed = true" />
+            <mat-icon *ngIf="!logoPreview">business</mat-icon>
+          </div>
+          <div class="visual-controls">
+            <label class="field">Color principal (HEX)
+              <span class="color-control">
+                <input class="color-picker" type="color" name="picker" [(ngModel)]="form.primaryColorHex" aria-label="Elegir color principal" />
+                <input type="text" name="color" [(ngModel)]="form.primaryColorHex" maxlength="7" placeholder="#A2D149" />
+              </span>
+            </label>
+            <label class="field">Logo de la empresa (PNG, JPG o WebP, máximo 2 MB)
+              <input type="file" accept="image/png,image/jpeg,image/webp" (change)="onLogoSelected($event)" [disabled]="saving || renewing" />
+            </label>
+            <p class="field-help" *ngIf="logoFile">Imagen seleccionada: {{logoFile.name}}. Se guardará junto con la empresa.</p>
+            <p *ngIf="logoInputError" class="error" role="alert">{{logoInputError}}</p>
+            <p class="field-help">La foto se almacena en la base de datos. Si no seleccionas una nueva, se conserva el logo actual.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="editor-group">
+        <div class="group-heading"><h3>Licencia y usuarios</h3><p>El servidor controla la vigencia</p></div>
+        <div class="fields-grid">
+          <div class="field">
+            <label for="dev-license-plan">Tipo de licencia <span class="required" *ngIf="!editing">*</span></label>
+            <mat-form-field *ngIf="!editing; else currentPlan" appearance="outline" class="dev-select">
+              <mat-select id="dev-license-plan" name="plan" [(ngModel)]="form.plan" panelClass="inventory-select-options">
+                <mat-option *ngFor="let plan of plans" [value]="plan">{{plan}}</mat-option>
+              </mat-select>
+            </mat-form-field>
+            <ng-template #currentPlan><input class="read-only" [value]="form.plan" readonly aria-label="Plan actual" /></ng-template>
+          </div>
+          <label class="field">Usuarios activos (no editable)
+            <input class="read-only" [value]="currentUserCount" type="number" readonly />
+          </label>
+          <label class="field">Cupo de usuarios permitido <span class="required">*</span>
+            <input name="maxUsers" [(ngModel)]="form.maxUsers" type="number" min="1" step="1" required [readonly]="isSelectedProtected" />
+          </label>
+          <label class="field">Vencimiento (no editable)
+            <input class="read-only" [value]="selectedCompany?.license?.expiresAt ? (selectedCompany?.license?.expiresAt | date:'dd/MM/yyyy') : 'Se asigna al crear'" readonly />
+          </label>
+          <label class="check"><input type="checkbox" name="enabled" [(ngModel)]="form.licenseEnabled" [disabled]="isSelectedProtected" /> Licencia habilitada</label>
+        </div>
+        <p class="field-help" *ngIf="!editing">El plan {{form.plan}} tendrá una vigencia de {{durationLabel}} desde su registro en el servidor.</p>
+        <p class="field-help" *ngIf="editing">Editar los datos o el cupo no cambia la fecha de vencimiento. El plan se cambia mediante la renovación independiente.</p>
+        <p class="field-help warning" *ngIf="isSelectedProtected">Esta empresa está vinculada a tu sesión de desarrollador. La API protege su licencia.</p>
+      </div>
+
+      <div class="form-actions">
+        <button type="submit" class="save" [disabled]="saving || renewing || !companyForm.valid">
+          <app-loading-indicator *ngIf="saving; else saveText" [compact]="true" message="Guardando..." />
+          <ng-template #saveText><mat-icon>save</mat-icon> {{editing ? 'Guardar cambios' : 'Crear empresa'}}</ng-template>
+        </button>
+      </div>
     </form>
-    <small>El vencimiento y el límite de usuarios quedan registrados; la API debe aplicar estas condiciones también a las sesiones y altas de usuarios.</small>
+
+    <div *ngIf="editing" class="renew-box" aria-label="Renovar licencia">
+      <div><h3>Renovación independiente</h3><p>Renovar añade tiempo al vencimiento actual si aún está vigente. Si venció, la nueva vigencia inicia hoy.</p></div>
+      <div class="renew-controls">
+        <mat-form-field appearance="outline" class="dev-select">
+          <mat-select [(ngModel)]="renewPlan" [ngModelOptions]="{standalone:true}" panelClass="inventory-select-options" aria-label="Plan para renovar"
+            [disabled]="isSelectedProtected || !selectedCompany?.isActive || renewing || saving">
+            <mat-option *ngFor="let plan of plans" [value]="plan">{{plan}}</mat-option>
+          </mat-select>
+        </mat-form-field>
+        <button type="button" class="renew-btn" (click)="renewLicense()"
+          [disabled]="renewing || saving || isSelectedProtected || !selectedCompany?.isActive">
+          <app-loading-indicator *ngIf="renewing; else renewText" [compact]="true" message="Renovando..." />
+          <ng-template #renewText><mat-icon>event_repeat</mat-icon> Renovar {{renewDurationLabel}}</ng-template>
+        </button>
+      </div>
+      <small *ngIf="isSelectedProtected">La renovación de la empresa administradora está bloqueada por la API.</small>
+    </div>
   </section>
-  <section class="dev-card"><h2>Solicitudes de recuperación</h2>
+
+  <section class="dev-card" aria-label="Solicitudes de recuperación">
+    <div class="section-head"><h2>Solicitudes de recuperación</h2></div>
     <p *ngIf="pendingError" class="error" role="alert">{{pendingError}}</p>
-    <button *ngIf="pendingError" type="button" (click)="loadPending()" [disabled]="loadingPending">Reintentar recuperaciones</button><app-loading-indicator *ngIf="loadingPending && !pending.length" message="Cargando recuperaciones..." /><div class="overflow"><table><thead><tr><th>Usuario</th><th>Empresa</th><th>Fecha</th><th>Acciones</th></tr></thead><tbody>
-    <tr *ngFor="let r of pending; trackBy: trackPending"><td>{{r.username}}</td><td>{{r.company}}</td><td>{{r.requestedAt | date:'dd/MM/yyyy HH:mm'}}</td><td><button type="button" (click)="review(r,true)">Aprobar y enviar correo</button><button type="button" class="danger-button" (click)="review(r,false)">Rechazar</button></td></tr>
-    <tr *ngIf="!pending.length"><td colspan="4">{{loadingPending?'Consultando solicitudes…':pendingError?'Solicitudes no disponibles.':'No hay solicitudes pendientes.'}}</td></tr>
-  </tbody></table></div></section>
+    <button *ngIf="pendingError" type="button" (click)="loadPending()" [disabled]="loadingPending">Reintentar recuperaciones</button>
+    <app-loading-indicator *ngIf="loadingPending && !pending.length" message="Cargando recuperaciones..." />
+    <div class="overflow">
+      <table><thead><tr><th>Usuario</th><th>Empresa</th><th>Fecha</th><th>Acciones</th></tr></thead>
+      <tbody>
+        <tr *ngFor="let r of pending; trackBy: trackPending">
+          <td>{{r.username}}</td><td>{{r.company}}</td><td>{{r.requestedAt | date:'dd/MM/yyyy HH:mm'}}</td>
+          <td class="action-cell"><button type="button" (click)="review(r,true)">Aprobar y enviar correo</button><button type="button" class="danger-button" (click)="review(r,false)">Rechazar</button></td>
+        </tr>
+        <tr *ngIf="!pending.length"><td colspan="4">{{loadingPending ? 'Consultando solicitudes…' : pendingError ? 'Solicitudes no disponibles.' : 'No hay solicitudes pendientes.'}}</td></tr>
+      </tbody></table>
+    </div>
+  </section>
 </div>
 <ng-template #forbidden><p class="error">Esta área requiere una sesión del desarrollador.</p></ng-template>
