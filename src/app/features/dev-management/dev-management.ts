@@ -26,7 +26,7 @@ export class DevManagementComponent implements OnInit, OnDestroy {
   private readonly platform = inject(PLATFORM_ID);
   private readonly cdr = inject(ChangeDetectorRef);
 
-  readonly plans: LicensePlan[] = ['Pro', 'Plus', 'Max'];
+  readonly plans: LicensePlan[] = ['Básico', 'Pro', 'Plus', 'Max'];
   readonly developer = this.isDeveloper();
   readonly developerCompanyId = this.getDeveloperCompanyId();
   readonly trackCompany = (_index: number, row: DevCompany): number => row.id;
@@ -48,15 +48,40 @@ export class DevManagementComponent implements OnInit, OnDestroy {
   lookingUpRuc = false;
   rucResult: RucLookupResult | null = null;
   rucLookupError = '';
+  get rucNeedsConfiguration(): boolean { return this.rucLookupError.toLocaleLowerCase('es').includes('token decolecta'); }
   logoFile: File | null = null;
   logoInputError = '';
   private temporaryLogoUrl: string | null = null;
   private lookupGeneration = 0;
-  renewPlan: LicensePlan = 'Pro';
+  renewPlan: LicensePlan = 'Básico';
+  companySearch = '';
+  readonly presetColors = ['#A2D149','#FFFFFF','#1F2937','#0EA5E9','#2563EB','#14B8A6','#16A34A','#EAB308','#F97316','#EF4444','#EC4899','#8B5CF6'];
+  workingRecoveryId: number | null = null;
   form: CompanyEdit = this.empty();
   private remainingDaysById = new Map<number, number | null>();
 
   get loading(): boolean { return this.loadingCompanies || this.loadingPending; }
+  get filteredCompanies(): DevCompany[] {
+    const q = this.companySearch.trim().toLocaleLowerCase('es');
+    if (!q) return this.companies;
+    return this.companies.filter(x => [x.businessName, x.ruc, x.contactEmail ?? '', x.license?.plan ?? '']
+      .some(v => v.toLocaleLowerCase('es').includes(q)));
+  }
+  planLimit(plan: string | null | undefined): number {
+    return plan === 'Básico' || plan === 'Basico' ? 5 : plan === 'Pro' ? 10 : plan === 'Plus' ? 15 : plan === 'Max' ? 0 : -1;
+  }
+  displayLimit(plan: string | null | undefined, value: number | null | undefined): string {
+    if (plan === 'Max' && value === 0) return 'Ilimitados';
+    return value === null || value === undefined ? '—' : String(value);
+  }
+  get displayedLimit(): string { return this.displayLimit(this.form.plan, this.form.maxUsers); }
+  onPlanChanged(): void { this.form.maxUsers = this.planLimit(this.form.plan); this.cdr.markForCheck(); }
+  chooseColor(color: string): void { if (!this.saving && !this.renewing) {this.form.primaryColorHex = color;this.cdr.markForCheck();} }
+  openColorPalette(picker: HTMLInputElement): void {
+    if (this.saving || this.renewing) return;
+    try { picker.showPicker(); } catch { picker.focus(); }
+    this.cdr.markForCheck();
+  }
   get editing(): boolean { return this.selectedId !== null; }
   get selectedCompany(): DevCompany | null {
     return this.companies.find(c => c.id === this.selectedId) ?? null;
@@ -156,7 +181,7 @@ export class DevManagementComponent implements OnInit, OnDestroy {
   private empty(): CompanyEdit {
     return {
       businessName: '', ruc: '', fiscalOwnerName: '', contactEmail: '',
-      plan: 'Pro', maxUsers: 5, licenseEnabled: true,
+      plan: 'Básico', maxUsers: 5, licenseEnabled: true,
       primaryColorHex: '#A2D149', logoUrl: null
     };
   }
@@ -175,7 +200,7 @@ export class DevManagementComponent implements OnInit, OnDestroy {
   }
 
   isKnownPlan(value: string | null | undefined): value is LicensePlan {
-    return value === 'Pro' || value === 'Plus' || value === 'Max';
+    return value === 'Básico' || value === 'Pro' || value === 'Plus' || value === 'Max';
   }
   isProtectedCompany(row: DevCompany): boolean {
     // Refuerzo visual. La API es la que realmente bloquea operaciones sobre empresas con desarrolladores.
@@ -227,14 +252,14 @@ export class DevManagementComponent implements OnInit, OnDestroy {
       ruc: row.ruc,
       fiscalOwnerName: row.fiscalOwnerName ?? '',
       contactEmail: row.contactEmail ?? '',
-      plan: row.license?.plan ?? 'Pro',
-      maxUsers: row.license?.maxUsers ?? Math.max(row.userCount, 5),
+      plan: row.license?.plan ?? 'Básico',
+      maxUsers: row.license?.maxUsers ?? 5,
       licenseEnabled: row.license?.isEnabled ?? true,
       primaryColorHex: row.primaryColorHex || '#A2D149',
       logoUrl: row.logoUrl
     };
     const currentPlan = row.license?.plan;
-    this.renewPlan = this.isKnownPlan(currentPlan) ? currentPlan : 'Pro';
+    this.renewPlan = this.isKnownPlan(currentPlan) ? currentPlan : 'Básico';
     this.logoFailed = false;
     this.error = '';
     this.notice = '';
@@ -247,7 +272,7 @@ export class DevManagementComponent implements OnInit, OnDestroy {
     this.onRucChanged();
     this.selectedId = null;
     this.form = this.empty();
-    this.renewPlan = 'Pro';
+    this.renewPlan = 'Básico';
     this.logoFailed = false;
     this.error = '';
     this.notice = '';
@@ -271,10 +296,9 @@ export class DevManagementComponent implements OnInit, OnDestroy {
         return 'Ingresa un correo empresarial válido.';
     }
     if (color && !/^#[0-9a-f]{6}$/i.test(color)) return 'El color debe tener el formato #RRGGBB.';
-    if (!Number.isInteger(maxUsers) || maxUsers < 1) return 'El cupo permitido debe ser un entero mayor que cero.';
-    if (this.editing && !this.isSelectedProtected && maxUsers < this.currentUserCount)
-      return 'El cupo no puede ser menor que la cantidad actual de usuarios activos.';
-    if (!this.editing && !this.isKnownPlan(this.form.plan)) return 'Selecciona una licencia Pro, Plus o Max.';
+    if (!Number.isInteger(maxUsers) || maxUsers < 0) return 'El cupo de la licencia no es válido.';
+    if (!this.editing && maxUsers !== this.planLimit(this.form.plan)) return 'El cupo no corresponde al plan seleccionado.';
+    if (!this.editing && !this.isKnownPlan(this.form.plan)) return 'Selecciona una licencia Básico, Pro, Plus o Max.';
     // No modificar el plan existente desde Guardar; se cambia solo mediante Renovar.
     if (this.editing && this.selectedCompany?.license && this.form.plan !== this.selectedCompany.license.plan)
       return 'El plan existente solo puede cambiarse mediante la renovación.';
@@ -296,7 +320,7 @@ export class DevManagementComponent implements OnInit, OnDestroy {
       contactEmail: String(this.form.contactEmail ?? '').trim() || null,
       primaryColorHex: String(this.form.primaryColorHex ?? '').trim() || null,
       logoUrl: this.form.logoUrl?.trim() || null,
-      maxUsers: Number(this.form.maxUsers)
+      maxUsers: this.editing ? Number(this.form.maxUsers) : this.planLimit(this.form.plan)
     };
     // La API exige dueño fiscal/correo al crear; en ediciones históricas permite null.
     const wasEditing = this.editing;
@@ -362,9 +386,9 @@ export class DevManagementComponent implements OnInit, OnDestroy {
     this.error = '';
     this.notice = '';
     if (!this.isKnownPlan(this.renewPlan)) { this.error = 'Selecciona un plan válido.'; return; }
-    const maxUsers = Number(this.form.maxUsers);
-    if (!Number.isInteger(maxUsers) || maxUsers < Math.max(1, row.userCount)) {
-      this.error = 'El cupo permitido no puede ser menor que los usuarios activos.';
+    const maxUsers = this.planLimit(this.renewPlan);
+    if (maxUsers < 0 || (maxUsers > 0 && maxUsers < row.userCount)) {
+      this.error = 'El plan seleccionado admite menos usuarios que los que están activos.';
       return;
     }
     if (!confirm(`¿Renovar la licencia de ${row.businessName} al plan ${this.renewPlan}? Se agregarán ${this.renewDurationLabel} a la vigencia según las reglas del servidor.`)) return;
@@ -411,14 +435,17 @@ export class DevManagementComponent implements OnInit, OnDestroy {
   }
 
   review(req: ResetPending, approve: boolean): void {
+    if (this.workingRecoveryId !== null) return;
     if (!confirm(`${approve ? 'Aprobar' : 'Rechazar'} recuperación de ${req.username} en ${req.company}?`)) return;
     const call: Observable<unknown> = approve ? this.api.approve(req.id) : this.api.reject(req.id);
+    this.workingRecoveryId = req.id; this.cdr.markForCheck();
     call.subscribe({
       next: () => {
+        this.workingRecoveryId = null;
         this.notice = approve ? 'Solicitud aprobada y correo enviado.' : 'Solicitud rechazada.';
         this.loadPending(); this.cdr.markForCheck();
       },
-      error: e => { this.error = this.errorFromApi(e, 'No se pudo procesar la solicitud.'); this.cdr.markForCheck(); }
+      error: e => { this.workingRecoveryId = null; this.error = this.errorFromApi(e, 'No se pudo procesar la solicitud.'); this.cdr.markForCheck(); }
     });
   }
 

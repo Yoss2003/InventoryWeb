@@ -1,7 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 
-export type LicensePlan = 'Pro' | 'Plus' | 'Max';
+export type LicensePlan = 'Básico' | 'Pro' | 'Plus' | 'Max';
 
 export interface RucLookupResult {
   ruc: string;
@@ -51,7 +51,7 @@ export interface CompanyEdit {
 
 export interface RenewLicenseInput {
   plan: LicensePlan;
-  maxUsers: number;
+  maxUsers?: number; // Compatibilidad del endpoint; la API ignora este valor.
 }
 
 export interface ResetPending {

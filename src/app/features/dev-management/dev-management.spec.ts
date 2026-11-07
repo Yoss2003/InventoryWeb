@@ -54,7 +54,7 @@ describe('Gestión Dev: Fase 2.2', () => {
     const page = TestBed.createComponent(DevManagementComponent).componentInstance;
     page.form = {
       businessName: ' Empresa nueva ', ruc: '20612345678', fiscalOwnerName: ' Dueño fiscal ',
-      contactEmail: ' contacto@empresa.com ', plan: 'Max', maxUsers: 5,
+      contactEmail: ' contacto@empresa.com ', plan: 'Max', maxUsers: 0,
       licenseEnabled: true, primaryColorHex: '#A2D149', logoUrl: null
     };
     page.save();
@@ -92,7 +92,8 @@ describe('Gestión Dev: Fase 2.2', () => {
 
 describe('Gestión Dev: consulta de RUC y selección de logo', () => {
   it('rellena la razón social desde el servicio de consulta de RUC', () => {
-    TestBed.configureTestingModule({providers: [provideRouter([]), {
+    TestBed.configureTestingModule({providers: [provideRouter([]),
+      { provide: CompanyPublicService, useValue: {publicLogoUrl: () => null} }, {
       provide: DevManagementService,
       useValue: {
         lookupRuc: () => of({
@@ -110,7 +111,8 @@ describe('Gestión Dev: consulta de RUC y selección de logo', () => {
   });
 
   it('rechaza archivos que no sean imágenes permitidas', () => {
-    TestBed.configureTestingModule({providers: [provideRouter([]), {
+    TestBed.configureTestingModule({providers: [provideRouter([]),
+      { provide: CompanyPublicService, useValue: {publicLogoUrl: () => null} }, {
       provide: DevManagementService, useValue: {}
     }]});
     const page = TestBed.createComponent(DevManagementComponent).componentInstance;
@@ -118,5 +120,28 @@ describe('Gestión Dev: consulta de RUC y selección de logo', () => {
     page.onLogoSelected({target: input} as unknown as Event);
     expect(page.logoFile).toBeNull();
     expect(page.logoInputError).toContain('PNG');
+  });
+});
+
+
+describe('Gestión Dev: catálogo fijo de planes', () => {
+  it('inicia con Básico, cinco usuarios, y deja los cupos de los planes definidos en la UI', () => {
+    TestBed.configureTestingModule({providers: [provideRouter([]),
+      { provide: CompanyPublicService, useValue: { publicLogoUrl: () => null } },
+      { provide: DevManagementService, useValue: {} }
+    ]});
+    const page = TestBed.createComponent(DevManagementComponent).componentInstance;
+    expect(page.form.plan).toBe('Básico');
+    expect(page.form.maxUsers).toBe(5);
+    expect(page.planLimit('Pro')).toBe(10);
+    expect(page.planLimit('Plus')).toBe(15);
+    expect(page.planLimit('Max')).toBe(0);
+    page.form.plan = 'Max'; page.onPlanChanged();
+    expect(page.form.maxUsers).toBe(0);
+    expect(page.displayedLimit).toBe('Ilimitados');
+    page.newCompany();
+    expect(page.form.plan).toBe('Básico');
+    expect(page.form.maxUsers).toBe(5);
+    expect(page.form.ruc).toBe('');
   });
 });

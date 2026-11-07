@@ -15,38 +15,46 @@
   <p *ngIf="notice" class="notice alert" role="status">{{notice}}</p>
 
   <section class="dev-card" aria-label="Empresas registradas">
-    <div class="section-head"><div><h2>Empresas registradas</h2><small>El número de usuarios es calculado por la API; no se edita.</small></div></div>
-    <p *ngIf="companiesError" class="error" role="alert">{{companiesError}}</p>
+    <div class="section-head section-head--table">
+      <div>
+        <h2>Empresas registradas <span class="count-chip">{{companies.length}}</span></h2>
+        <small>Administración de organizaciones, accesos y vigencia de licencias.</small>
+      </div>
+      <label class="table-search">
+        <mat-icon>search</mat-icon>
+        <input name="companySearch" [(ngModel)]="companySearch" [ngModelOptions]="{standalone:true}"
+          type="search" autocomplete="off" placeholder="Buscar empresa, RUC o plan" aria-label="Filtrar empresas" />
+      </label>
+    </div>
+    <p *ngIf="companiesError" class="inline-alert inline-alert--error" role="alert"><mat-icon>error_outline</mat-icon>{{companiesError}}</p>
     <button *ngIf="companiesError" type="button" (click)="loadCompanies()" [disabled]="loadingCompanies">Reintentar empresas</button>
     <app-loading-indicator *ngIf="loadingCompanies && !companies.length" message="Cargando empresas..." />
-    <div class="overflow">
+    <div class="overflow companies-table" *ngIf="companies.length">
       <table>
-        <thead><tr><th>Empresa / RUC</th><th>Usuarios</th><th>Inventarios</th><th>Plan</th><th>Vencimiento</th><th>Estado</th><th>Acciones</th></tr></thead>
+        <thead><tr><th>Empresa</th><th>Usuarios</th><th>Almacenes</th><th>Licencia</th><th>Vencimiento</th><th>Estado</th><th>Acciones</th></tr></thead>
         <tbody>
-          <tr *ngFor="let c of companies; trackBy: trackCompany" [class.selected-row]="selectedId === c.id">
-            <td><strong>{{c.businessName}}</strong><small>{{c.ruc}} · ID {{c.id}}</small></td>
-            <td>{{c.userCount}} activos <small>{{c.totalUsers}} registrados · cupo {{c.license?.maxUsers ?? '—'}}</small></td>
-            <td>{{c.inventoryCount}}</td>
-            <td><span class="plan-tag">{{c.license?.plan || 'Sin licencia'}}</span></td>
+          <tr *ngFor="let c of filteredCompanies; trackBy: trackCompany" [class.selected-row]="selectedId === c.id">
+            <td class="company-cell"><div class="company-identity"><span class="company-mark" [style.borderColor]="c.primaryColorHex || '#54687b'"><mat-icon>domain</mat-icon></span><div><strong>{{c.businessName}}</strong><small>RUC {{c.ruc}}</small><small class="subtle">ID {{c.id}} · {{c.contactEmail || 'Sin correo'}}</small></div></div></td>
+            <td><strong>{{c.userCount}}</strong><small>{{c.totalUsers}} registrados</small><small>Cupo: {{displayLimit(c.license?.plan, c.license?.maxUsers)}}</small></td>
+            <td class="number-cell">{{c.inventoryCount}}</td>
+            <td><span class="plan-tag" [class.plan-max]="c.license?.plan === 'Max'">{{c.license?.plan || 'Sin licencia'}}</span></td>
             <td>
-              <span *ngIf="c.license?.expiresAt">{{c.license?.expiresAt | date:'dd/MM/yyyy'}}</span>
-              <span *ngIf="daysRemaining(c) !== null" class="days-left" [class.expired]="(daysRemaining(c) ?? 0) < 0">{{daysRemaining(c)}} días</span>
-              <span *ngIf="daysRemaining(c) === null">Sin configurar</span>
+              <ng-container *ngIf="c.license?.expiresAt; else noExpiry">{{c.license?.expiresAt | date:'dd/MM/yyyy'}}<small class="days-left" [class.expired]="(daysRemaining(c) ?? 0) < 0">{{daysRemaining(c)}} días restantes</small></ng-container>
+              <ng-template #noExpiry><span class="subtle">Sin configurar</span></ng-template>
             </td>
-            <td>{{!c.isActive ? 'Inactiva' : c.license?.isEnabled === false ? 'Suspendida' : 'Activa'}}</td>
-            <td class="action-cell">
-              <button type="button" (click)="select(c)" [disabled]="saving || renewing">Editar</button>
-              <button type="button" class="danger-button" (click)="deactivate(c)"
-                [disabled]="!c.isActive || isProtectedCompany(c) || workingRequestId !== null"
-                [title]="isProtectedCompany(c) ? 'La empresa del desarrollador está protegida' : 'Desactivar empresa sin datos relacionados'">
-                {{workingRequestId === c.id ? 'Procesando...' : 'Desactivar'}}
+            <td><span class="status-pill" [class.status-muted]="!c.isActive" [class.status-warning]="c.isActive && (!c.license || c.license.isEnabled === false)" [class.status-danger]="c.isActive && c.license?.isEnabled !== false && (daysRemaining(c) ?? 1) < 0">{{!c.isActive ? 'Inactiva' : !c.license ? 'Sin licencia' : c.license.isEnabled === false ? 'Suspendida' : (daysRemaining(c) ?? 1) < 0 ? 'Vencida' : 'Activa'}}</span></td>
+            <td class="action-cell"><div class="table-actions">
+              <button type="button" class="action-edit" (click)="select(c)" [disabled]="saving || renewing"><mat-icon>edit</mat-icon>Editar</button>
+              <button type="button" class="danger-button" (click)="deactivate(c)" [disabled]="!c.isActive || isProtectedCompany(c) || workingRequestId !== null" [title]="isProtectedCompany(c) ? 'Empresa administradora protegida' : 'Desactivar empresa si no tiene registros asociados'">
+                <mat-icon>{{workingRequestId === c.id ? 'hourglass_top' : 'block'}}</mat-icon>{{workingRequestId === c.id ? 'Procesando...' : 'Desactivar'}}
               </button>
-            </td>
+            </div></td>
           </tr>
-          <tr *ngIf="!companies.length"><td colspan="7">{{loadingCompanies ? 'Consultando empresas…' : companiesError ? 'Empresas no disponibles.' : 'No hay registros.'}}</td></tr>
         </tbody>
       </table>
     </div>
+    <div *ngIf="companies.length && filteredCompanies.length === 0" class="empty-table"><mat-icon>search_off</mat-icon><strong>Sin resultados</strong><span>Prueba con otro nombre, RUC o tipo de licencia.</span></div>
+    <div *ngIf="!companies.length && !loadingCompanies" class="empty-table"><mat-icon>apartment</mat-icon><strong>{{companiesError ? 'No se pudo consultar la lista' : 'Aún no hay empresas disponibles'}}</strong></div>
   </section>
 
   <section class="dev-card company-editor" aria-label="Formulario de empresa">
@@ -55,33 +63,32 @@
         <h2>{{editing ? 'Editar empresa' : 'Registrar empresa'}}</h2>
         <small>{{editing ? 'Los cambios empresariales no renuevan la licencia.' : 'El vencimiento se calculará en la API al registrar.'}}</small>
       </div>
-      <button type="button" class="muted" (click)="newCompany()" [disabled]="saving || renewing"><mat-icon>add</mat-icon> Nueva empresa</button>
+      <button type="button" class="muted" (click)="newCompany()" [disabled]="saving || renewing"><mat-icon>restart_alt</mat-icon> Limpiar campos</button>
     </div>
 
     <form (ngSubmit)="save()" class="dev-form" #companyForm="ngForm">
+      <fieldset class="form-lock" [disabled]="saving || renewing" [attr.aria-busy]="saving">
       <div class="editor-group">
         <div class="group-heading"><h3>Datos de la empresa</h3><p>Identificación y contacto</p></div>
         <div class="fields-grid">
-          <label class="field">RUC <span class="required">*</span>
+          <label class="field"><span class="field-label">RUC <span class="required">*</span></span>
             <input name="ruc" [(ngModel)]="form.ruc" (ngModelChange)="onRucChanged()" type="text" inputmode="numeric" maxlength="11" minlength="11" pattern="[0-9]{11}" required
               [readonly]="isSelectedProtected" placeholder="11 dígitos" />
           </label>
-          <div class="ruc-lookup">
-            <button type="button" (click)="lookupRuc()" [disabled]="lookingUpRuc || saving || form.ruc.length !== 11">
+          <div class="ruc-lookup"><button type="button" (click)="lookupRuc()" [disabled]="lookingUpRuc || form.ruc.length !== 11">
               <mat-icon *ngIf="!lookingUpRuc">manage_search</mat-icon>
               <app-loading-indicator *ngIf="lookingUpRuc" [compact]="true" message="Consultando..." />
               <span *ngIf="!lookingUpRuc">Consultar RUC</span>
-            </button>
-            <small *ngIf="rucResult" role="status">{{rucResult.source}} · {{rucResult.estado || 'Estado no informado'}} · {{rucResult.condicion || 'Condición no informada'}}</small>
-            <small *ngIf="rucLookupError" class="error" role="alert">{{rucLookupError}}</small>
-          </div>
-          <label class="field field-wide">Razón social <span class="required">*</span>
+            </button></div>
+          <div *ngIf="rucResult" class="ruc-feedback ruc-feedback--ok" role="status"><mat-icon>verified</mat-icon><span><strong>Consulta exitosa</strong> · {{rucResult.estado || 'Estado no informado'}} · {{rucResult.condicion || 'Condición no informada'}}</span></div>
+          <div *ngIf="rucLookupError" class="ruc-feedback ruc-feedback--error" role="alert"><mat-icon>{{rucNeedsConfiguration ? 'settings' : 'info_outline'}}</mat-icon><span>{{rucLookupError}}</span></div>
+          <label class="field field-wide"><span class="field-label">Razón social <span class="required">*</span></span>
             <input name="businessName" [(ngModel)]="form.businessName" maxlength="255" required placeholder="Razón social de la empresa" />
           </label>
-          <label class="field">Dueño fiscal <span class="required" *ngIf="!editing">*</span>
+          <label class="field"><span class="field-label">Dueño fiscal <span class="required" *ngIf="!editing">*</span></span>
             <input name="fiscalOwnerName" [(ngModel)]="form.fiscalOwnerName" maxlength="255" [required]="!editing" placeholder="Nombre completo" />
           </label>
-          <label class="field field-wide">Correo empresarial <span class="required" *ngIf="!editing">*</span>
+          <label class="field field-wide"><span class="field-label">Correo empresarial <span class="required" *ngIf="!editing">*</span></span>
             <input name="contactEmail" [(ngModel)]="form.contactEmail" type="email" maxlength="254" [required]="!editing" placeholder="contacto@empresa.com" />
           </label>
         </div>
@@ -96,12 +103,18 @@
             <mat-icon *ngIf="!logoPreview">business</mat-icon>
           </div>
           <div class="visual-controls">
-            <label class="field">Color principal (HEX)
-              <span class="color-control">
-                <input class="color-picker" type="color" name="picker" [(ngModel)]="form.primaryColorHex" aria-label="Elegir color principal" />
-                <input type="text" name="color" [(ngModel)]="form.primaryColorHex" maxlength="7" placeholder="#A2D149" />
-              </span>
-            </label>
+            <div class="field">
+              <span class="field-label">Color principal</span>
+              <div class="color-control">
+                <button type="button" class="palette-launch" (click)="openColorPalette(colorPicker)" aria-label="Abrir selector de color" title="Abrir paleta de colores">
+                  <span class="palette-swatch" [style.background]="form.primaryColorHex || '#A2D149'"></span><mat-icon>palette</mat-icon> Elegir color
+                </button>
+                <input #colorPicker class="color-picker-accessible" type="color" name="picker" [(ngModel)]="form.primaryColorHex" aria-label="Paleta de colores con puntero" />
+                <input class="color-hex" type="text" name="color" [(ngModel)]="form.primaryColorHex" maxlength="7" placeholder="#A2D149" aria-label="Código hexadecimal del color" />
+              </div>
+              <div class="color-presets" aria-label="Colores sugeridos"><button *ngFor="let color of presetColors" class="preset-swatch" type="button" [style.background]="color" (click)="chooseColor(color)" [title]="color" [attr.aria-label]="'Usar color ' + color" [class.preset-current]="form.primaryColorHex?.toUpperCase() === color"></button></div>
+              <p class="field-help">Haz clic en «Elegir color» para abrir la paleta y seleccionar un tono con el puntero.</p>
+            </div>
             <label class="field">Logo de la empresa (PNG, JPG o WebP, máximo 2 MB)
               <input type="file" accept="image/png,image/jpeg,image/webp" (change)="onLogoSelected($event)" [disabled]="saving || renewing" />
             </label>
@@ -116,27 +129,27 @@
         <div class="group-heading"><h3>Licencia y usuarios</h3><p>El servidor controla la vigencia</p></div>
         <div class="fields-grid">
           <div class="field">
-            <label for="dev-license-plan">Tipo de licencia <span class="required" *ngIf="!editing">*</span></label>
+            <label class="field-label" for="dev-license-plan">Tipo de licencia <span class="required" *ngIf="!editing">*</span></label>
             <mat-form-field *ngIf="!editing; else currentPlan" appearance="outline" class="dev-select">
-              <mat-select id="dev-license-plan" name="plan" [(ngModel)]="form.plan" panelClass="inventory-select-options">
+              <mat-select id="dev-license-plan" name="plan" [(ngModel)]="form.plan" (selectionChange)="onPlanChanged()" panelClass="inventory-select-options">
                 <mat-option *ngFor="let plan of plans" [value]="plan">{{plan}}</mat-option>
               </mat-select>
             </mat-form-field>
             <ng-template #currentPlan><input class="read-only" [value]="form.plan" readonly aria-label="Plan actual" /></ng-template>
           </div>
-          <label class="field">Usuarios activos (no editable)
+          <label class="field"><span class="field-label">Usuarios activos</span>
             <input class="read-only" [value]="currentUserCount" type="number" readonly />
           </label>
-          <label class="field">Cupo de usuarios permitido <span class="required">*</span>
-            <input name="maxUsers" [(ngModel)]="form.maxUsers" type="number" min="1" step="1" required [readonly]="isSelectedProtected" />
+          <label class="field"><span class="field-label">Usuarios permitidos</span>
+            <input class="read-only" [value]="displayedLimit" type="text" readonly />
           </label>
-          <label class="field">Vencimiento (no editable)
+          <label class="field"><span class="field-label">Vencimiento</span>
             <input class="read-only" [value]="selectedCompany?.license?.expiresAt ? (selectedCompany?.license?.expiresAt | date:'dd/MM/yyyy') : 'Se asigna al crear'" readonly />
           </label>
           <label class="check"><input type="checkbox" name="enabled" [(ngModel)]="form.licenseEnabled" [disabled]="isSelectedProtected" /> Licencia habilitada</label>
         </div>
         <p class="field-help" *ngIf="!editing">El plan {{form.plan}} tendrá una vigencia de {{durationLabel}} desde su registro en el servidor.</p>
-        <p class="field-help" *ngIf="editing">Editar los datos o el cupo no cambia la fecha de vencimiento. El plan se cambia mediante la renovación independiente.</p>
+        <p class="field-help" *ngIf="editing">Editar los datos no cambia el plan ni la fecha de vencimiento. Cambia el plan desde Renovación independiente.</p>
         <p class="field-help warning" *ngIf="isSelectedProtected">Esta empresa está vinculada a tu sesión de desarrollador. La API protege su licencia.</p>
       </div>
 
@@ -146,6 +159,7 @@
           <ng-template #saveText><mat-icon>save</mat-icon> {{editing ? 'Guardar cambios' : 'Crear empresa'}}</ng-template>
         </button>
       </div>
+      </fieldset>
     </form>
 
     <div *ngIf="editing" class="renew-box" aria-label="Renovar licencia">
@@ -168,20 +182,24 @@
   </section>
 
   <section class="dev-card" aria-label="Solicitudes de recuperación">
-    <div class="section-head"><h2>Solicitudes de recuperación</h2></div>
-    <p *ngIf="pendingError" class="error" role="alert">{{pendingError}}</p>
-    <button *ngIf="pendingError" type="button" (click)="loadPending()" [disabled]="loadingPending">Reintentar recuperaciones</button>
+    <div class="section-head section-head--table"><div><h2>Solicitudes de recuperación <span class="count-chip">{{pending.length}}</span></h2><small>Revisa las solicitudes antes de aprobar o rechazar el acceso.</small></div>
+      <button type="button" (click)="loadPending()" [disabled]="loadingPending"><app-loading-indicator *ngIf="loadingPending; else refreshPending" [compact]="true" message="Cargando..." /><ng-template #refreshPending><mat-icon>refresh</mat-icon> Actualizar</ng-template></button>
+    </div>
+    <p *ngIf="pendingError" class="inline-alert inline-alert--error" role="alert"><mat-icon>error_outline</mat-icon>{{pendingError}}</p>
     <app-loading-indicator *ngIf="loadingPending && !pending.length" message="Cargando recuperaciones..." />
-    <div class="overflow">
-      <table><thead><tr><th>Usuario</th><th>Empresa</th><th>Fecha</th><th>Acciones</th></tr></thead>
+    <div *ngIf="pending.length" class="overflow recovery-table"><table>
+      <thead><tr><th>Usuario</th><th>Empresa</th><th>Fecha de solicitud</th><th>Estado</th><th>Acciones</th></tr></thead>
       <tbody>
         <tr *ngFor="let r of pending; trackBy: trackPending">
-          <td>{{r.username}}</td><td>{{r.company}}</td><td>{{r.requestedAt | date:'dd/MM/yyyy HH:mm'}}</td>
-          <td class="action-cell"><button type="button" (click)="review(r,true)">Aprobar y enviar correo</button><button type="button" class="danger-button" (click)="review(r,false)">Rechazar</button></td>
+          <td class="company-cell"><strong>{{r.username}}</strong><small>ID {{r.userId}}</small></td>
+          <td>{{r.company}}</td>
+          <td>{{r.requestedAt | date:'dd/MM/yyyy HH:mm'}}</td>
+          <td><span class="status-pill status-warning">Pendiente</span></td>
+          <td class="action-cell"><div class="table-actions"><button type="button" class="action-edit" (click)="review(r,true)" [disabled]="workingRecoveryId !== null"><mat-icon>check_circle</mat-icon> Aprobar</button><button type="button" class="danger-button" (click)="review(r,false)" [disabled]="workingRecoveryId !== null"><mat-icon>close</mat-icon> Rechazar</button></div></td>
         </tr>
-        <tr *ngIf="!pending.length"><td colspan="4">{{loadingPending ? 'Consultando solicitudes…' : pendingError ? 'Solicitudes no disponibles.' : 'No hay solicitudes pendientes.'}}</td></tr>
-      </tbody></table>
-    </div>
+      </tbody>
+    </table></div>
+    <div *ngIf="!pending.length && !loadingPending" class="empty-table"><mat-icon>task_alt</mat-icon><strong>{{pendingError ? 'No se pudieron consultar las solicitudes' : 'Todo al día'}}</strong><span *ngIf="!pendingError">No hay solicitudes de recuperación pendientes.</span></div>
   </section>
 </div>
 <ng-template #forbidden><p class="error">Esta área requiere una sesión del desarrollador.</p></ng-template>
