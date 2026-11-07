@@ -12,7 +12,8 @@ export class CompanyPublicService {
   getActiveCompanies(): Observable<CompanyPublic[]> {
     return this.http.get<CompanyPublic[]>(`${this.apiBaseUrl}/api/Companies/Active`).pipe(
       map(companies => (Array.isArray(companies) ? companies : [])
-        .filter(company => Number(company.id) > 0 && !!company.businessName?.trim())
+        .filter(company => Number.isInteger(Number(company.id)) && Number(company.id) > 0 && !!company.businessName?.trim())
+        .map(company => ({ ...company, id: Number(company.id) }))
         .sort((a, b) => a.businessName.localeCompare(b.businessName, 'es')))
     );
   }

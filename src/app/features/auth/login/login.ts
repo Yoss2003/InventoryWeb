@@ -4,8 +4,7 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { HttpErrorResponse } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatSelectModule } from '@angular/material/select';
+import { CompanySelectorComponent } from '../../../shared/company-selector/company-selector';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { AuthService } from '../../../core/services/auth.service';
 import { CompanyPublicService } from '../../../core/services/companies';
@@ -15,7 +14,7 @@ import { LoginRequest } from '../../../core/models/auth.model';
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, MatIconModule, MatFormFieldModule, MatSelectModule],
+  imports: [CommonModule, ReactiveFormsModule, MatIconModule, CompanySelectorComponent],
   templateUrl: './login.html',
   styleUrl: './login.scss'
 })
@@ -58,17 +57,13 @@ export class Login implements OnInit {
     return /^#[0-9a-f]{6}$/i.test(value) ? value : '#a2d149';
   }
 
-  hasDuplicateCompanyName(company: CompanyPublic): boolean {
-    const name = company.businessName.trim().toLocaleLowerCase('es');
-    return this.companies.filter(item => item.businessName.trim().toLocaleLowerCase('es') === name).length > 1;
-  }
-
   get selectedCompanyInitials(): string {
     const words = (this.selectedCompany?.businessName || 'Empresa').trim().split(/\s+/);
     return words.slice(0, 2).map(word => word[0]?.toUpperCase() || '').join('');
   }
 
   loadCompanies(): void {
+    if (this.loadingCompanies || this.submitting) return;
     this.loadingCompanies = true;
     this.companiesError = '';
     this.loginError = '';
@@ -103,7 +98,7 @@ export class Login implements OnInit {
   }
 
   onSubmit(): void {
-    if (this.submitting) return;
+    if (this.submitting || this.loadingCompanies) return;
     this.loginError = '';
     const id = Number(this.loginForm.get('companyId')?.value);
     if (this.loginForm.invalid || !this.companies.some(c => c.id === id)) {

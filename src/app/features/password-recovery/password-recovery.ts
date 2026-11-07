@@ -4,21 +4,31 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { CompanyPublicService } from '../../core/services/companies';
+import { CompanySelectorComponent } from '../../shared/company-selector/company-selector';
 import { CompanyPublic } from '../../core/models/company-public.model';
 
-@Component({selector:'app-password-recovery',standalone:true,imports:[CommonModule,FormsModule,RouterModule],templateUrl:'./password-recovery.html',styleUrl:'./password-recovery.scss'})
+@Component({selector:'app-password-recovery',standalone:true,imports:[CommonModule,FormsModule,RouterModule,CompanySelectorComponent],templateUrl:'./password-recovery.html',styleUrl:'./password-recovery.scss'})
 export class PasswordRecoveryComponent implements OnInit {
   private readonly http=inject(HttpClient);
   private readonly route=inject(ActivatedRoute);
   private readonly companiesApi=inject(CompanyPublicService);
+  loadingCompanies=false; companiesError='';
   companies:CompanyPublic[]=[];companyId:number|null=null;username='';token='';password='';confirmPassword='';sending=false;message='';error='';
   ngOnInit():void{this.token=this.route.snapshot.queryParamMap.get('token')||'';
-    if(!this.token)this.companiesApi.getActiveCompanies().subscribe({next:data=>this.companies=data,error:()=>this.error='No fue posible consultar empresas.'});}
+    if(!this.token)this.loadCompanies();}
+  loadCompanies():void {
+    if(this.loadingCompanies || this.sending)return;
+    this.loadingCompanies=true;this.companiesError='';
+    this.companiesApi.getActiveCompanies().subscribe({
+      next:data=>{this.companies=data;this.companyId=data.some(c=>c.id===this.companyId)?this.companyId:(data.length===1?data[0].id:null);this.loadingCompanies=false;if(!data.length)this.companiesError='No hay empresas activas disponibles.';},
+      error:()=>{this.companies=[];this.companyId=null;this.loadingCompanies=false;this.companiesError='No fue posible consultar empresas. Vuelve a intentar.';}
+    });
+  }
   submit():void {
-    if(this.sending)return;this.error='';this.message='';
+    if(this.sending || this.loadingCompanies)return;this.error='';this.message='';
     if(this.token && (this.password.length<12 || this.password!==this.confirmPassword)){
       this.error='Utiliza al menos 12 caracteres y confirma la contraseña.';return;}
-    if(!this.token && (!this.companyId || !this.username.trim())){
+    if(!this.token && (!this.companies.some(c=>c.id===this.companyId) || !this.username.trim())){
       this.error='Selecciona tu empresa e indica tu usuario o correo.';return;}
     this.sending=true;
     const url='https://localhost:7295/api/password-recovery';

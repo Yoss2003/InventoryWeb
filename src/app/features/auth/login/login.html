@@ -29,16 +29,9 @@
             </button>
           </div>
 
-          <mat-form-field appearance="outline" class="company-select">
-            <mat-select id="login-company" formControlName="companyId"
-                        [disabled]="loadingCompanies || submitting"
-                        [placeholder]="loadingCompanies ? 'Consultando empresas…' : 'Seleccionar empresa'"
-                        panelClass="inventory-select-options" (selectionChange)="onCompanyChange()">
-              <mat-option *ngFor="let company of companies" [value]="company.id">
-                {{ company.businessName }}<span *ngIf="hasDuplicateCompanyName(company)"> (ID {{ company.id }})</span>
-              </mat-option>
-            </mat-select>
-          </mat-form-field>
+          <app-company-selector selectId="login-company" [companies]="companies"
+            [value]="loginForm.get('companyId')?.value" [loading]="loadingCompanies" [disabled]="submitting"
+            (valueChange)="loginForm.patchValue({companyId: $event}); onCompanyChange()" />
           <p *ngIf="companiesError" class="field-error" role="alert">{{ companiesError }}</p>
           <p *ngIf="!loadingCompanies && !companiesError && companies.length > 1 && !selectedCompany" class="field-hint">
             Elige la empresa a la que pertenece tu cuenta.

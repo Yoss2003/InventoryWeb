@@ -2,9 +2,11 @@
   <header class="dev-head"><div><small>ACCESO EXCLUSIVO · ROL DESARROLLADOR</small><h1>Gestión Dev</h1><p>Empresas, licencias, usuarios y recuperaciones pendientes.</p></div><button type="button" (click)="reload()" [disabled]="loading">Actualizar</button></header>
   <p *ngIf="error" class="error" role="alert">{{error}}</p><p *ngIf="notice" class="notice">{{notice}}</p>
   <section class="dev-card"><h2>Empresas registradas</h2>
+    <p *ngIf="companiesError" class="error" role="alert">{{companiesError}}</p>
+    <button *ngIf="companiesError" type="button" (click)="loadCompanies()" [disabled]="loadingCompanies">Reintentar empresas</button>
     <div class="overflow"><table><thead><tr><th>Empresa / RUC</th><th>Usuarios</th><th>Inventarios</th><th>Plan</th><th>Licencia</th><th>Estado</th><th>Acciones</th></tr></thead><tbody>
       <tr *ngFor="let c of companies"><td><strong>{{c.businessName}}</strong><small>{{c.ruc}} · ID {{c.id}}</small></td><td>{{c.userCount}} / {{c.license?.maxUsers ?? '—'}}</td><td>{{c.inventoryCount}}</td><td>{{c.license?.plan || 'Sin licencia'}}</td><td><span *ngIf="daysRemaining(c) !== null" [class.expired]="(daysRemaining(c) ?? 0)<0">{{daysRemaining(c)}} días</span><span *ngIf="daysRemaining(c) === null">Sin configurar</span></td><td>{{c.isActive ? (c.license?.isEnabled === false ? 'Suspendida' : 'Activa') : 'Inactiva'}}</td><td><button type="button" (click)="select(c)">Editar</button><button type="button" class="danger-button" (click)="deactivate(c)" [disabled]="!c.isActive">Desactivar</button></td></tr>
-      <tr *ngIf="!companies.length"><td colspan="7">{{loading?'Consultando empresas…':'No hay registros.'}}</td></tr>
+      <tr *ngIf="!companies.length"><td colspan="7">{{loadingCompanies?'Consultando empresas…':companiesError?'Empresas no disponibles.':'No hay registros.'}}</td></tr>
     </tbody></table></div>
   </section>
   <section class="dev-card"><div class="section-head"><h2>{{editing ? 'Editar empresa y licencia' : 'Registrar empresa y licencia'}}</h2><button type="button" class="muted" (click)="newCompany()">Nueva empresa</button></div>
@@ -20,9 +22,11 @@
     </form>
     <small>El vencimiento y el límite de usuarios quedan registrados; la API debe aplicar estas condiciones también a las sesiones y altas de usuarios.</small>
   </section>
-  <section class="dev-card"><h2>Solicitudes de recuperación</h2><div class="overflow"><table><thead><tr><th>Usuario</th><th>Empresa</th><th>Fecha</th><th>Acciones</th></tr></thead><tbody>
+  <section class="dev-card"><h2>Solicitudes de recuperación</h2>
+    <p *ngIf="pendingError" class="error" role="alert">{{pendingError}}</p>
+    <button *ngIf="pendingError" type="button" (click)="loadPending()" [disabled]="loadingPending">Reintentar recuperaciones</button><div class="overflow"><table><thead><tr><th>Usuario</th><th>Empresa</th><th>Fecha</th><th>Acciones</th></tr></thead><tbody>
     <tr *ngFor="let r of pending"><td>{{r.username}}</td><td>{{r.company}}</td><td>{{r.requestedAt | date:'dd/MM/yyyy HH:mm'}}</td><td><button type="button" (click)="review(r,true)">Aprobar y enviar correo</button><button type="button" class="danger-button" (click)="review(r,false)">Rechazar</button></td></tr>
-    <tr *ngIf="!pending.length"><td colspan="4">No hay solicitudes pendientes.</td></tr>
+    <tr *ngIf="!pending.length"><td colspan="4">{{loadingPending?'Consultando solicitudes…':pendingError?'Solicitudes no disponibles.':'No hay solicitudes pendientes.'}}</td></tr>
   </tbody></table></div></section>
 </div>
 <ng-template #forbidden><p class="error">Esta área requiere una sesión del desarrollador.</p></ng-template>
