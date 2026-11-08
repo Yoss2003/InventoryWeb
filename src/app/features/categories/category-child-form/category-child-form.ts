@@ -10,6 +10,10 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatDialogRef, MatDialogModule, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatDialog } from '@angular/material/dialog';
+import { HttpErrorResponse } from '@angular/common/http';
+import { ToastService } from '../../../shared/toast/toast.service';
+import { CatalogSimilarDialogComponent, CatalogSimilarChoice } from '../../../shared/catalog-similar-dialog/catalog-similar-dialog';
 import { CommonModule } from '@angular/common';
 import { CategoryService } from '../services/category';
 import { Category } from '../../../core/models/category.model';
@@ -32,6 +36,8 @@ export class CategoryChildFormComponent implements OnInit {
     private fb = inject(FormBuilder);
     private categoryService = inject(CategoryService);
     private snackBar = inject(MatSnackBar);
+    private readonly toast = inject(ToastService);
+    private readonly dialogs = inject(MatDialog);
     public dialogRef = inject(MatDialogRef<CategoryChildFormComponent>);
     public data: { categoriaEdit?: Category, padres: Category[] } = inject(MAT_DIALOG_DATA);
     showPreviewInputs = false;
@@ -472,12 +478,9 @@ export class CategoryChildFormComponent implements OnInit {
 
     onSubmit() {
         if (!this.isFormComplete || !this.hasEditChanges) return;
-
         const rules = this.rulesForm.getRawValue();
         const attrs = this.attributesForm.getRawValue();
-
         const finalNaming = rules.isNamingLibre ? this.normalizeFormula(String(attrs.namingCustom ?? '')) : rules.namingMethod;
-
         const payload: Category = {
             ...this.data.categoriaEdit,
             ...this.identityForm.value,
@@ -491,17 +494,30 @@ export class CategoryChildFormComponent implements OnInit {
             isActive: this.data.categoriaEdit?.isActive ?? true,
             companyId: this.data.categoriaEdit?.companyId ?? 0
         };
+        this.saveCategory(payload,false);
+    }
 
+    private saveCategory(payload:Category,allowSimilar:boolean):void {
         const request$: Observable<unknown> = this.isEdit
-            ? this.categoryService.updateCategory(payload)
-            : this.categoryService.createCategory(payload);
+          ? this.categoryService.updateCategory(payload)
+          : this.categoryService.createCategory(payload,allowSimilar);
         request$.subscribe({
-            next: () => {
-                this.snackBar.open(`Categoría ${this.isEdit ? 'actualizada' : 'creada'} con éxito`, 'Cerrar', { duration: 3000 });
+            next: result => {
+                const saved = result as Category | undefined;
+                if (!this.isEdit && saved?.reused) this.toast.info(`Se reutilizó la categoría «${saved.name}».`,'Categoría existente');
+                else this.toast.success(`Categoría ${this.isEdit ? 'actualizada' : 'creada'} con éxito`);
                 this.dialogRef.close(true);
             },
-            error: () => this.snackBar.open('Error al guardar categoría', 'Cerrar', { duration: 3000 })
+            error: (error:HttpErrorResponse) => {
+                if (!this.isEdit && error.status===409 && error.error?.code==='similar_name') {
+                    this.toast.warning('Encontramos subcategorías parecidas.','Posible duplicado');
+                    this.dialogs.open(CatalogSimilarDialogComponent, {data:{type:'subcategorías',enteredName:payload.name,matches:error.error?.matches||[]},width:'min(500px,calc(100vw - 24px))'})
+                      .afterClosed().subscribe((choice:CatalogSimilarChoice | undefined) => {
+                        if(choice?.action==='create')this.saveCategory(payload,true);
+                        else if(choice?.action==='reuse'){this.toast.info('Se utilizará la subcategoría existente.');this.dialogRef.close(true);}
+                      });
+                } else { this.toast.error(String(error?.error?.error || 'Error al guardar categoría')); }
+            }
         });
     }
 }
-

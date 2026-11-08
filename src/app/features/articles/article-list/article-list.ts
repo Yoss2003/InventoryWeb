@@ -3,8 +3,9 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDialog } from '@angular/material/dialog';
-import { forkJoin } from 'rxjs';
+import { forkJoin, filter, take } from 'rxjs';
 import { ArticleService } from '../../../core/services/articles';
+import { InventoryContextService } from '../../../core/services/inventory-context';
 import { CategoryService } from '../../categories/services/category';
 import { BrandService } from '../../../core/services/brands';
 import { Article } from '../../../core/models/article.model';
@@ -19,6 +20,7 @@ interface ArticleRow extends Article { categoryName: string; brandName: string; 
   templateUrl:'./article-list.html',styleUrl:'./article-list.scss'})
 export class ArticleListComponent implements OnInit {
   private readonly articles=inject(ArticleService);
+  private readonly inventoryContext=inject(InventoryContextService);
   private readonly categories=inject(CategoryService);
   private readonly brands=inject(BrandService);
   private readonly dialog=inject(MatDialog);
@@ -31,7 +33,7 @@ export class ArticleListComponent implements OnInit {
     return this.dataSource.filter(a=>(this.showInactive||a.isActive)&&
       (!q||[a.code,a.name,a.model,a.categoryName,a.brandName,a.barcode??''].some(s=>String(s).toLocaleLowerCase('es').includes(q))));
   }
-  ngOnInit():void{this.load();}
+  ngOnInit():void{this.inventoryContext.activeInventoryId$.pipe(filter(id=>id!==null),take(1)).subscribe(()=>this.load());}
   load():void{
     if(this.loading)return;
     this.loading=true;
@@ -41,7 +43,7 @@ export class ArticleListComponent implements OnInit {
       next:({articles,categories,brands})=>{
         const cm=new Map(categories.map(c=>[c.id,c.name]));
         const bm=new Map(brands.map(b=>[b.id,b.name]));
-        this.dataSource=articles.map(a=>({...a,categoryName:cm.get(a.categoryId)||`#${a.categoryId}`,brandName:bm.get(Number(a.brandId))||'—'}));
+        this.dataSource=articles.filter(a=>a.inventoryId===this.inventoryContext.activeInventoryId).map(a=>({...a,categoryName:cm.get(a.categoryId)||`#${a.categoryId}`,brandName:bm.get(Number(a.brandId))||'—'}));
         this.loading=false;this.hasLoaded=true;this.cdr.markForCheck();
       },error:err=>{this.loading=false;this.hasLoaded=true;this.error=String(err?.error?.error??'No se pudo cargar el catálogo. Los datos anteriores pueden estar desactualizados.');this.cdr.markForCheck();}
     });

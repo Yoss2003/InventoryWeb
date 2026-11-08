@@ -488,6 +488,44 @@ export class DevManagementComponent implements OnInit, OnDestroy {
     });
   }
 
+  /** Reactiva solo el estado de la empresa; la licencia existente no se renueva. */
+  reactivate(row: DevCompany): void {
+    if (this.isProtectedCompany(row) || this.workingRequestId !== null || row.isActive ||
+        this.saving || this.renewing) return;
+    this.askConfirmation({
+      title: 'Reactivar empresa',
+      message: `¿Deseas reactivar «${row.businessName}»? Se conservarán sus datos, usuarios, inventarios y la licencia actual. Si la licencia está suspendida o vencida, el acceso seguirá bloqueado hasta regularizarla.`,
+      confirmLabel: 'Sí, reactivar',
+      tone: 'primary',
+      icon: 'check_circle'
+    }, () => {
+      if (this.isProtectedCompany(row) || this.workingRequestId !== null ||
+          row.isActive || this.saving || this.renewing) return;
+      this.workingRequestId = row.id;
+      this.cdr.markForCheck();
+      this.api.reactivate(row.id).subscribe({
+        next: () => {
+          this.workingRequestId = null;
+          this.companies = this.companies.map(c => c.id === row.id ? { ...c, isActive: true } : c);
+          this.toasts.success(`Empresa «${row.businessName}» reactivada.`);
+          const license = row.license;
+          if (!license || !license.isEnabled ||
+              !Number.isFinite(Date.parse(license.expiresAt)) ||
+              Date.parse(license.expiresAt) <= Date.now()) {
+            this.toasts.warning('La licencia sigue ausente, suspendida o vencida. Reactivar la empresa no renueva el acceso.', 'Revisar licencia');
+          }
+          this.loadCompanies();
+          this.cdr.markForCheck();
+        },
+        error: e => {
+          this.workingRequestId = null;
+          this.toasts.error(this.errorFromApi(e, 'No se pudo reactivar la empresa.'), 'Error al reactivar');
+          this.cdr.markForCheck();
+        }
+      });
+    });
+  }
+
   review(req: ResetPending, approve: boolean): void {
     if (this.workingRecoveryId !== null) return;
     this.askConfirmation({

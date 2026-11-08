@@ -16,6 +16,7 @@ import { CategoryService } from '../../categories/services/category';
 import { BrandService } from '../../../core/services/brands';
 import { Brand } from '../../../core/models/brand.model';
 import { ArticleService } from '../../../core/services/articles';
+import { InventoryContextService } from '../../../core/services/inventory-context';
 import { Article, ArticleDetail } from '../../../core/models/article.model';
 import { BrandDialogComponent, BrandDialogData } from '../brand-dialog/brand-dialog';
 
@@ -38,6 +39,7 @@ export class ArticleFormComponent implements OnInit, OnDestroy {
   private categoryService = inject(CategoryService);
   private brandService = inject(BrandService);
   private articleService = inject(ArticleService);
+  private inventoryContext = inject(InventoryContextService);
   private dialog = inject(MatDialog);
   private snackBar = inject(MatSnackBar);
   public dialogRef = inject(MatDialogRef<ArticleFormComponent>);
@@ -488,9 +490,9 @@ export class ArticleFormComponent implements OnInit, OnDestroy {
       disableClose: true,
       data
     });
-    // El administrador cambia el catálogo, pero no selecciona automáticamente una marca.
-    dialogRef.afterClosed().subscribe((changed?: boolean) => {
-      if (changed) this.loadBrands(undefined, true);
+    // Si el servidor creó o reutilizó un ID, el artículo lo selecciona automáticamente.
+    dialogRef.afterClosed().subscribe((changed?: boolean | { brandId: number }) => {
+      if (changed) this.loadBrands(typeof changed === 'object' ? changed.brandId : undefined, true);
     });
   }
 
@@ -870,9 +872,14 @@ export class ArticleFormComponent implements OnInit, OnDestroy {
       attr1: attrs['attr1'], attr2: attrs['attr2'], attr3: attrs['attr3'],
       attr4: attrs['attr4'], attr5: attrs['attr5'], attr6: attrs['attr6'], isActive: true
     };
+    const targetInventoryId = this.existingArticle?.inventoryId ?? this.inventoryContext.activeInventoryId;
+    if (!targetInventoryId) {
+      this.snackBar.open('Selecciona un inventario de trabajo antes de registrar artículos.', 'Cerrar', { duration: 5000 });
+      return;
+    }
     const payload: Partial<Article> & { id: number } = {
       id: this.existingArticle?.id ?? 0,
-      inventoryId: Number(category.inventoryId), categoryId: Number(category.id),
+      inventoryId: Number(targetInventoryId), categoryId: Number(category.id),
       brandId: Number(identity.brandId), code, barcode: identity.barcode || null,
       name: String(identity.name).trim(), model: identity.model || 'Sin modelo',
       presentation: identity.presentation || null, serialNumber: identity.serialNumber || null,

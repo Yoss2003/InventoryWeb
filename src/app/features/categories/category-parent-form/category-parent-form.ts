@@ -4,10 +4,15 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatDialog } from '@angular/material/dialog';
+import type { Observable } from 'rxjs';
+import { HttpErrorResponse } from '@angular/common/http';
+import { ToastService } from '../../../shared/toast/toast.service';
+import { CatalogSimilarDialogComponent, CatalogSimilarChoice } from '../../../shared/catalog-similar-dialog/catalog-similar-dialog';
 import { CategoryService } from '../services/category';
 import { Category } from '../../../core/models/category.model';
 import { InventoryService, InventorySummary } from '../../../core/services/inventories';
+import { InventoryContextService } from '../../../core/services/inventory-context';
 import { MatSelectModule } from '@angular/material/select';
 import { LoadingIndicatorComponent } from '../../../shared/loading/loading-indicator';
 
@@ -20,7 +25,9 @@ export class CategoryParentFormComponent implements OnInit {
   private readonly fb = inject(FormBuilder);
   private readonly categoryService = inject(CategoryService);
   private readonly inventoryService = inject(InventoryService);
-  private readonly snackBar = inject(MatSnackBar);
+  private readonly toast = inject(ToastService);
+  private readonly dialogs = inject(MatDialog);
+  private readonly inventoryContext = inject(InventoryContextService);
   private readonly cdr = inject(ChangeDetectorRef);
   inventories: InventorySummary[] = [];
   readonly dialogRef = inject(MatDialogRef<CategoryParentFormComponent>);
@@ -42,8 +49,12 @@ export class CategoryParentFormComponent implements OnInit {
     if (this.isEdit) this.parentForm.controls.inventoryId.disable({emitEvent:false});
     this.inventoryService.getInventories().subscribe({
       next: data => {
-        this.inventories = data.filter(i => i.isActive || i.id === this.data?.inventoryId);
-        if (!this.isEdit && this.inventories.length === 1) this.parentForm.controls.inventoryId.setValue(this.inventories[0].id);
+        this.inventories = data.filter(i => (i.isActive && !i.isMaster) || i.id === this.data?.inventoryId);
+        const selected = this.inventoryContext.activeInventoryId;
+        if (!this.isEdit && this.inventories.length) {
+          const matched = this.inventories.find(i => i.id === selected) || this.inventories[0];
+          this.parentForm.controls.inventoryId.setValue(matched.id);
+        }
         this.loadingInventories = false;this.cdr.markForCheck();
       },
       error: () => {this.loadingInventories=false;this.saveError='No se pudieron consultar los inventarios. Comprueba la conexión con la API.';this.cdr.markForCheck();}
@@ -60,27 +71,45 @@ export class CategoryParentFormComponent implements OnInit {
   }
   onSubmit(): void {
     if (!this.canSave) return;
-    this.isSaving=true;this.saveError='';this.cdr.markForCheck();
-    const value=this.parentForm.getRawValue();
-    const name=String(value.name??'').trim();
-    const inventoryId=Number(value.inventoryId);
-    if (!inventoryId){this.isSaving=false;this.saveError='Selecciona un almacén válido.';this.cdr.markForCheck();return;}
-    const description=String(value.description??'').trim();
-    const payload:Category=this.isEdit && this.data
+    this.isSaving = true; this.saveError = ''; this.cdr.markForCheck();
+    const value = this.parentForm.getRawValue();
+    const name = String(value.name ?? '').trim();
+    const inventoryId = Number(value.inventoryId);
+    const description = String(value.description ?? '').trim();
+    if (!inventoryId) {this.isSaving=false;this.saveError='Selecciona tu inventario de trabajo.';return;}
+    const payload: Category = this.isEdit && this.data
       ? {...this.data,name,description,parentCategoryId:null}
       : {id:0,name,description,inventoryId,companyId:0,parentCategoryId:null,isActive:true};
-    const onSuccess=():void=>{
-      this.isSaving=false;
-      this.snackBar.open(`Categoría ${this.isEdit?'actualizada':'creada'} correctamente`,'Cerrar',{duration:3000});
-      this.dialogRef.close(true);
-    };
-    const onError=(error:{error?:{error?:string;message?:string}|string}):void=>{
-      this.isSaving=false;
-      const body=error.error;
-      this.saveError=typeof body==='string'?body:body?.error??body?.message??'No se pudo guardar la categoría.';
-      this.cdr.markForCheck();
-    };
-    if (this.isEdit) this.categoryService.updateCategory(payload).subscribe({next:onSuccess,error:onError});
-    else this.categoryService.createCategory({name,description,inventoryId,companyId:payload.companyId,parentCategoryId:null,isActive:true}).subscribe({next:onSuccess,error:onError});
+    this.savePayload(payload, false);
+  }
+
+  private savePayload(payload: Category, allowSimilar: boolean): void {
+    const request$: Observable<Category | void> = this.isEdit ? this.categoryService.updateCategory(payload) : this.categoryService.createCategory(payload,allowSimilar);
+    request$.subscribe({
+      next: result => {
+        this.isSaving = false;
+        const reused = !this.isEdit && Boolean(result && 'reused' in result && result.reused);
+        if (reused) this.toast.info(`Se reutilizó la categoría «${(result as Category).name}».`,'Categoría existente');
+        else this.toast.success(`Categoría ${this.isEdit?'actualizada':'creada'} correctamente.`);
+        this.dialogRef.close(true);
+      },
+      error: (error: HttpErrorResponse) => {
+        this.isSaving = false;
+        if (!this.isEdit && error.status === 409 && error.error?.code === 'similar_name') {
+          this.toast.warning('Encontramos categorías parecidas.','Posible duplicado');
+          this.dialogs.open(CatalogSimilarDialogComponent, {data:{type:'categorías',enteredName:payload.name,matches:error.error.matches||[]},width:'min(500px,calc(100vw - 24px))'})
+            .afterClosed().subscribe((choice:CatalogSimilarChoice | undefined) => {
+              if (choice?.action==='create') {this.isSaving=true;this.savePayload(payload,true);}
+              else if(choice?.action==='reuse') {this.toast.info('Se utilizará una categoría ya registrada.');this.dialogRef.close(true);}
+              this.cdr.markForCheck();
+            });
+        } else {
+          const body=error.error;
+          this.saveError=typeof body==='string'?body:body?.error??body?.message??'No se pudo guardar la categoría.';
+          this.toast.error(this.saveError);
+        }
+        this.cdr.markForCheck();
+      }
+    });
   }
 }

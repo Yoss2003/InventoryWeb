@@ -9,6 +9,9 @@ import { MatButtonModule } from '@angular/material/button';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { filter } from 'rxjs';
 import { AuthService } from '../../services/auth.service';
+import { InventoryService, InventorySummary } from '../../services/inventories';
+import { InventoryContextService } from '../../services/inventory-context';
+import { ToastService } from '../../../shared/toast/toast.service';
 
 @Component({
   selector:'app-main-layout', standalone:true,
@@ -17,8 +20,15 @@ import { AuthService } from '../../services/auth.service';
 })
 export class MainLayoutComponent {
   private readonly authService=inject(AuthService);
+  private readonly inventoryApi=inject(InventoryService);
+  private readonly inventoryContext=inject(InventoryContextService);
+  private readonly toast=inject(ToastService);
+  inventories: InventorySummary[]=[];
+  selectedInventoryId: number | null = null;
+  loadingInventories = true;
   private readonly platform=inject(PLATFORM_ID);
   get isDeveloper(): boolean { if(!isPlatformBrowser(this.platform))return false;try{return Number(JSON.parse(localStorage.getItem('userSession')||'{}').roleId)===1;}catch{return false;} }
+  get isAdmin(): boolean { if(!isPlatformBrowser(this.platform))return false;try{return [1,2].includes(Number(JSON.parse(localStorage.getItem('userSession')||'{}').roleId));}catch{return false;} }
   private readonly router=inject(Router);
   private readonly destroyRef=inject(DestroyRef);
   readonly isSidebarOpen=signal(false);
@@ -27,9 +37,30 @@ export class MainLayoutComponent {
     this.router.events.pipe(filter((event):event is NavigationEnd=>event instanceof NavigationEnd),takeUntilDestroyed(this.destroyRef))
       .subscribe(event=>this.currentTitle.set(this.resolveTitle(event.urlAfterRedirects)));
   }
+  ngOnInit():void {
+    const session = isPlatformBrowser(this.platform) ? JSON.parse(localStorage.getItem('userSession') || '{}') : {};
+    this.inventoryApi.getInventories().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: rows => {
+        this.inventoryContext.initialize(rows, Number(session.id) || 0);
+        this.inventories = this.inventoryContext.options;
+        this.selectedInventoryId = this.inventoryContext.activeInventoryId;
+        this.loadingInventories = false;
+      },
+      error: () => {
+        this.loadingInventories = false;
+        this.toast.error('No se pudieron cargar los inventarios.');
+      }
+    });
+  }
+  selectInventory(event:Event):void {
+    const id = Number((event.target as HTMLSelectElement).value);
+    if (id === this.selectedInventoryId || !this.inventoryContext.select(id)) return;
+    // Evita presentar datos en caché del inventario anterior al cambiar de contexto.
+    if (isPlatformBrowser(this.platform)) window.location.reload();
+  }
   private resolveTitle(url:string):string {
     const segment=url.split('?')[0].split('/').filter(Boolean).pop() ?? '';
-    const titles:Record<string,string>={articulos:'Maestro de artículos',categorias:'Categorías',entradas:'Entradas de stock',salidas:'Salidas y ventas',asignaciones:'Artículos asignados','compartir-inventario':'Compartir inventario','gestion-dev':'Gestión Dev','consultas':'Consultas SUNAT y cambio'};
+    const titles:Record<string,string>={articulos:'Maestro de artículos',categorias:'Categorías',entradas:'Entradas de stock',salidas:'Salidas y ventas',asignaciones:'Artículos asignados','compartir-inventario':'Compartir inventario','gestion-dev':'Gestión Dev','consultas':'Consultas SUNAT y cambio','historial-general':'Historial general','catalogo-general':'Catálogo general'};
     return titles[segment] ?? 'Panel de gestión';
   }
   toggleSidebar():void {this.isSidebarOpen.update(open=>!open);}

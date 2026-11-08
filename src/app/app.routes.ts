@@ -19,7 +19,9 @@ export const routes: Routes = [
       { path: 'entradas', loadComponent: () => import('./features/movements/entradas/entradas').then(m => m.EntradasComponent) },
       { path: 'salidas', loadComponent: () => import('./features/movements/salidas/salidas').then(m => m.SalidasComponent) },
       { path: 'asignaciones', loadComponent: () => import('./features/assignment-history/assignment-history').then(m => m.AssignmentHistoryComponent) },
-      { path: 'compartir-inventario', loadComponent: () => import('./features/inventory-sharing/inventory-sharing').then(m => m.InventorySharingComponent) }
+      { path: 'compartir-inventario', loadComponent: () => import('./features/inventory-sharing/inventory-sharing').then(m => m.InventorySharingComponent) },
+      { path: 'historial-general', loadComponent: () => import('./features/master-history/master-history').then(m => m.MasterHistoryComponent) },
+      { path: 'catalogo-general', loadComponent: () => import('./features/master-catalogs/master-catalogs').then(m => m.MasterCatalogsComponent) }
     ]
   }
 ];

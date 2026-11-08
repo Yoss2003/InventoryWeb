@@ -1,5 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
+import { MatDialog } from '@angular/material/dialog';
+import { ToastService } from '../../shared/toast/toast.service';
 import { of, Subject } from 'rxjs';
 import { DevManagementComponent } from './dev-management';
 import { DevManagementService, DevCompany, CompanyEdit, ResetPending } from '../../core/services/dev-management';
@@ -143,5 +145,55 @@ describe('Gestión Dev: catálogo fijo de planes', () => {
     expect(page.form.plan).toBe('Básico');
     expect(page.form.maxUsers).toBe(5);
     expect(page.form.ruc).toBe('');
+  });
+});
+
+
+describe('Gestión Dev: reactivación segura', () => {
+  it('pide confirmación, reactiva una empresa inactiva y no renueva su licencia', () => {
+    const inactive: DevCompany = { ...row, isActive: false };
+    let reactivatedId: number | null = null;
+    let renewCalls = 0;
+    let confirmationTitle = '';
+    TestBed.configureTestingModule({ providers: [
+      provideRouter([]),
+      { provide: CompanyPublicService, useValue: { publicLogoUrl: () => null } },
+      { provide: MatDialog, useValue: { open: (_component: unknown, options: { data: { title: string } }) => {
+        confirmationTitle = options.data.title;
+        return { afterClosed: () => of(true) };
+      } } },
+      { provide: ToastService, useValue: { success: () => {}, warning: () => {}, error: () => {} } },
+      { provide: DevManagementService, useValue: {
+        reactivate: (id: number) => { reactivatedId = id; return of(void 0); },
+        renewLicense: () => { renewCalls++; return of({}); },
+        list: () => of([{ ...inactive, isActive: true }])
+      } }
+    ] });
+    const page = TestBed.createComponent(DevManagementComponent).componentInstance;
+    page.companies = [inactive];
+    page.reactivate(inactive);
+    expect(confirmationTitle).toBe('Reactivar empresa');
+    expect(reactivatedId).toBe(inactive.id);
+    expect(renewCalls).toBe(0);
+    expect(page.companies[0].isActive).toBe(true);
+    expect(page.companies[0].license?.expiresAt).toBe(inactive.license?.expiresAt);
+    expect(page.workingRequestId).toBeNull();
+  });
+
+  it('no solicita reactivación si se cancela la confirmación', () => {
+    const inactive: DevCompany = { ...row, isActive: false };
+    let calls = 0;
+    TestBed.configureTestingModule({ providers: [
+      provideRouter([]),
+      { provide: CompanyPublicService, useValue: { publicLogoUrl: () => null } },
+      { provide: MatDialog, useValue: { open: () => ({ afterClosed: () => of(false) }) } },
+      { provide: ToastService, useValue: { success: () => {}, warning: () => {}, error: () => {} } },
+      { provide: DevManagementService, useValue: { reactivate: () => { calls++; return of(void 0); } } }
+    ] });
+    const page = TestBed.createComponent(DevManagementComponent).componentInstance;
+    page.companies = [inactive];
+    page.reactivate(inactive);
+    expect(calls).toBe(0);
+    expect(inactive.isActive).toBe(false);
   });
 });

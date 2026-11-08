@@ -26,8 +26,8 @@ export class BrandService {
     this.brandsCache$ = undefined;
   }
 
-  createBrand(data: CreateBrandRequest): Observable<Brand> {
-    return this.http.post<Brand>(this.apiUrl, {
+  createBrand(data: CreateBrandRequest, allowSimilar = false): Observable<Brand> {
+    return this.http.post<Brand>(allowSimilar ? `${this.apiUrl}?allowSimilar=true` : this.apiUrl, {
       inventoryId: data.inventoryId,
       categoryId: data.categoryId,
       name: data.name.trim(),

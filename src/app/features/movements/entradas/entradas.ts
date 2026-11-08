@@ -4,8 +4,9 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { forkJoin } from 'rxjs';
+import { forkJoin, filter, take } from 'rxjs';
 import { ArticleService } from '../../../core/services/articles';
+import { InventoryContextService } from '../../../core/services/inventory-context';
 import { MovementService } from '../../../core/services/movement';
 import { Article } from '../../../core/models/article.model';
 import { Movement } from '../../../core/models/movement.model';
@@ -19,6 +20,7 @@ import { LoadingIndicatorComponent } from '../../../shared/loading/loading-indic
 export class EntradasComponent implements OnInit {
   private readonly dialog=inject(MatDialog);
   private readonly articles=inject(ArticleService);
+  private readonly inventoryContext=inject(InventoryContextService);
   private readonly movementsApi=inject(MovementService);
   private readonly snackbar=inject(MatSnackBar);
   private readonly cdr=inject(ChangeDetectorRef);
@@ -26,13 +28,15 @@ export class EntradasComponent implements OnInit {
   movements:Movement[]=[];
   private articleMap=new Map<number,Article>();
   loading=false;hasLoaded=false;error='';
-  ngOnInit():void{this.loadRealData();}
+  ngOnInit():void{this.inventoryContext.activeInventoryId$.pipe(filter(id=>id!==null),take(1)).subscribe(()=>this.loadRealData());}
   loadRealData():void{
     if(this.loading)return;
     this.loading=true;this.error='';this.cdr.markForCheck();
     forkJoin({articles:this.articles.getArticles(),movements:this.movementsApi.getMovements()}).subscribe({
       next:({articles,movements})=>{
-        const active=articles.filter(a=>a.isActive);
+        const inventoryArticles=articles.filter(a=>a.inventoryId===this.inventoryContext.activeInventoryId);
+        const active=inventoryArticles.filter(a=>a.isActive);
+        const ids=new Set(inventoryArticles.map(a=>a.id));
         const type=(a:Article):number=>{
           const v=String(a.tracking ?? a.trackingMode ?? 0).toLocaleLowerCase('es');
           return v==='serialized'||v==='serializado'||v==='1'?1:v==='bulk'||v==='a granel'||v==='2'?2:0;
@@ -40,8 +44,8 @@ export class EntradasComponent implements OnInit {
         this.standard=active.filter(a=>type(a)===0);
         this.serialized=active.filter(a=>type(a)===1);
         this.bulk=active.filter(a=>type(a)===2);
-        this.articleMap=new Map(articles.map(a=>[a.id,a]));
-        this.movements=movements.filter(m=>m.actionId===1).sort((a,b)=>new Date(b.movementDate).getTime()-new Date(a.movementDate).getTime());
+        this.articleMap=new Map(inventoryArticles.map(a=>[a.id,a]));
+        this.movements=movements.filter(m=>m.actionId===1&&ids.has(m.articleId)).sort((a,b)=>new Date(b.movementDate).getTime()-new Date(a.movementDate).getTime());
         this.loading=false;this.hasLoaded=true;this.cdr.markForCheck();
       },error:err=>{
         this.loading=false;this.hasLoaded=true;

@@ -6,6 +6,8 @@ export interface Brand {
   name: string;
   companyId: number;
   isActive: boolean;
+  nameKey?: string;
+  reused?: boolean;
 }
 
 export type CreateBrandRequest = Pick<Brand, 'inventoryId' | 'categoryId' | 'name'> &

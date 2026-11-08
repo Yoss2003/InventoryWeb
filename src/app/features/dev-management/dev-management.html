@@ -47,8 +47,11 @@
             <td><span class="status-pill" [class.status-muted]="!c.isActive" [class.status-warning]="c.isActive && (!c.license || c.license.isEnabled === false)" [class.status-danger]="c.isActive && c.license?.isEnabled !== false && (daysRemaining(c) ?? 1) < 0">{{!c.isActive ? 'Inactiva' : !c.license ? 'Sin licencia' : c.license.isEnabled === false ? 'Suspendida' : (daysRemaining(c) ?? 1) < 0 ? 'Vencida' : 'Activa'}}</span></td>
             <td class="action-cell"><div class="table-actions">
               <button type="button" class="action-edit" (click)="select(c)" [disabled]="saving || renewing"><mat-icon>edit</mat-icon>Editar</button>
-              <button type="button" class="danger-button" (click)="deactivate(c)" [disabled]="!c.isActive || isProtectedCompany(c) || workingRequestId !== null" [title]="isProtectedCompany(c) ? 'Empresa administradora protegida' : 'Desactivar empresa si no tiene registros asociados'">
+              <button *ngIf="c.isActive" type="button" class="danger-button" (click)="deactivate(c)" [disabled]="isProtectedCompany(c) || workingRequestId !== null || saving || renewing" [title]="isProtectedCompany(c) ? 'Empresa administradora protegida' : 'Desactivar empresa si no tiene registros asociados'">
                 <mat-icon>{{workingRequestId === c.id ? 'hourglass_top' : 'block'}}</mat-icon>{{workingRequestId === c.id ? 'Procesando...' : 'Desactivar'}}
+              </button>
+              <button *ngIf="!c.isActive" type="button" class="action-reactivate" (click)="reactivate(c)" [disabled]="isProtectedCompany(c) || workingRequestId !== null || saving || renewing" [title]="isProtectedCompany(c) ? 'Empresa administradora protegida' : 'Reactivar sin modificar la licencia'">
+                <mat-icon>{{workingRequestId === c.id ? 'hourglass_top' : 'check_circle_outline'}}</mat-icon>{{workingRequestId === c.id ? 'Procesando...' : 'Reactivar'}}
               </button>
             </div></td>
           </tr>

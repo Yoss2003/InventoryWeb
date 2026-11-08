@@ -46,3 +46,10 @@
 @media(prefers-reduced-motion:reduce){
   .sidenav,.sidenav-container > mat-sidenav-content,.hamburger span,.logo-label,.sidebar-label{transition:none!important}
 }
+
+/* Fase 3.5: selector operativo de inventario; el maestro no figura aquí */
+.active-inventory-label{font-size:12px;color:#c5d6e3;white-space:nowrap}
+.active-inventory-select{max-width:min(245px,36vw);min-width:115px;background:#1d2e3b;color:#f1f8fd;border:1px solid #657887;border-radius:8px;padding:9px;font-size:12px;outline:none}
+.active-inventory-select:focus{border-color:#99bd42}
+.active-inventory-select:disabled{opacity:.6}
+@media(max-width:700px){.active-inventory-label{display:none}.active-inventory-select{max-width:42vw;min-width:90px}}

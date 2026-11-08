@@ -83,6 +83,7 @@ export class DevManagementService {
     return this.http.post<CompanyLicenseInfo>(`${this.base}/dev/companies/${id}/renew-license`, body);
   }
   deactivate(id: number) { return this.http.delete<void>(`${this.base}/dev/companies/${id}`); }
+  reactivate(id: number) { return this.http.post<void>(`${this.base}/dev/companies/${id}/reactivate`, {}); }
   pending() { return this.http.get<ResetPending[]>(`${this.base}/password-recovery/pending`); }
   approve(id: number) { return this.http.post<{ message: string }>(`${this.base}/password-recovery/${id}/approve`, {}); }
   reject(id: number) { return this.http.post<void>(`${this.base}/password-recovery/${id}/reject`, {}); }

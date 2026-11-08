@@ -1,0 +1,34 @@
+<section class="master-history">
+  <header>
+    <div><h1>Historial general</h1><p>Entradas y salidas de los inventarios personales de esta empresa.</p></div>
+    <button type="button" (click)="load()" [disabled]="loading"><mat-icon>refresh</mat-icon> Actualizar</button>
+  </header>
+  <form class="filters" (ngSubmit)="applyFilters()">
+    <label>Inventario (ID)<input name="inventoryId" [(ngModel)]="inventoryId" type="number" min="1" placeholder="Todos" /></label>
+    <label>Propietario (ID)<input name="userId" [(ngModel)]="userId" type="number" min="1" placeholder="Todos" /></label>
+    <label>Usuario responsable (ID)<input name="actorUserId" [(ngModel)]="actorUserId" type="number" min="1" placeholder="Todos" /></label>
+    <label>Movimiento<select name="actionId" [(ngModel)]="actionId"><option value="">Todos</option><option value="1">Entradas</option><option value="2">Salidas</option></select></label>
+    <label>Desde<input name="from" [(ngModel)]="from" type="date" /></label>
+    <label>Hasta<input name="to" [(ngModel)]="to" type="date" /></label>
+    <button type="submit" [disabled]="loading">Filtrar</button>
+  </form>
+  <div role="status" *ngIf="loading" class="status">Consultando movimientos...</div>
+  <div role="alert" *ngIf="error" class="error">{{error}}</div>
+  <div class="table-wrapper" *ngIf="!loading && !error">
+    <table>
+      <thead><tr><th>Fecha</th><th>Tipo</th><th>Inventario</th><th>Propietario</th><th>Responsable (ID)</th><th>Artículo</th><th>Cantidad</th><th>Observación</th></tr></thead>
+      <tbody><tr *ngFor="let row of items">
+        <td>{{row.movementDate | date:'dd/MM/yyyy HH:mm'}}</td>
+        <td><span class="type" [class.out]="row.actionId===2">{{row.actionId===1?'Entrada':'Salida'}}</span></td>
+        <td>{{row.inventoryName}} <small>#{{row.inventoryId}}</small></td>
+        <td>{{row.username}}</td>
+        <td>{{row.actorUserId ?? '—'}}</td>
+        <td>{{row.articleName}} <small>{{row.articleCode}}</small></td>
+        <td>{{row.amount ?? '—'}}</td>
+        <td>{{row.observation || '—'}}</td>
+      </tr></tbody>
+    </table>
+    <p *ngIf="!items.length" class="status">No existen movimientos para estos filtros.</p>
+  </div>
+  <footer><span>{{total}} movimientos encontrados</span><div><button type="button" (click)="previous()" [disabled]="page<=1||loading">Anterior</button><strong>Página {{page}}</strong><button type="button" (click)="next()" [disabled]="page*pageSize>=total||loading">Siguiente</button></div></footer>
+</section>

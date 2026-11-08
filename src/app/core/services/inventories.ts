@@ -9,6 +9,7 @@ export interface InventorySummary {
   isActive: boolean;
   companyId: number;
   userId: number;
+  isMaster: boolean;
 }
 export interface InventoryShare {
   id: number;

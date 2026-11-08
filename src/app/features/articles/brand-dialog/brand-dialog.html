@@ -102,14 +102,14 @@
               <td class="actions-cell">
                 <div class="brand-actions">
                   <button type="button" class="edit-button"
-                          [disabled]="isSaving || !brand.isActive"
+                          [disabled]="!canManage || isSaving || !brand.isActive"
                           (click)="editingBrand?.id === brand.id ? cancelEdit() : startEdit(brand)"
                           [attr.aria-label]="editingBrand?.id === brand.id ? 'Cancelar edición' : 'Editar marca'"
                           [title]="brand.isActive ? (editingBrand?.id === brand.id ? 'Cancelar edición' : 'Editar') : 'Marca inactiva'">
                     <mat-icon>{{ editingBrand?.id === brand.id ? 'close' : 'edit' }}</mat-icon>
                   </button>
                   <button type="button" class="delete-button"
-                          [disabled]="isSaving || !brand.isActive || editingBrand?.id === brand.id"
+                          [disabled]="!canManage || isSaving || !brand.isActive || editingBrand?.id === brand.id"
                           (click)="deleteBrand(brand)"
                           [attr.aria-label]="'Eliminar marca ' + brand.name"
                           [title]="brand.isActive ? 'Desactivar marca' : 'Marca inactiva'">

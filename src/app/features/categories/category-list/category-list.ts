@@ -1,4 +1,5 @@
-import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectorRef, PLATFORM_ID } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 import { animate, state, style, transition, trigger } from '@angular/animations';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { MatCardModule } from '@angular/material/card';
@@ -28,6 +29,11 @@ import { LoadingIndicatorComponent } from '../../../shared/loading/loading-indic
 })
 export class CategoryListComponent implements OnInit {
   private readonly categoryService=inject(CategoryService);
+  private readonly platformId=inject(PLATFORM_ID);
+  get canManage():boolean {
+    if(!isPlatformBrowser(this.platformId))return false;
+    try{return [1,2].includes(Number(JSON.parse(localStorage.getItem('userSession')||'{}').roleId));}catch{return false;}
+  }
   private readonly dialog=inject(MatDialog);
   private readonly cdr=inject(ChangeDetectorRef);
   private readonly snackbar=inject(MatSnackBar);

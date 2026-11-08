@@ -166,3 +166,18 @@ td strong { font-size: 12.5px; }
   object-fit: contain;
   border-radius: 8px;
 }
+
+/* Reactivación: acción positiva, coherente con el tema oscuro de Gestión Dev. */
+.table-actions .action-reactivate {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #cbf1c3;
+  background: #1e392f;
+  border-color: #4e8d6d;
+}
+.table-actions .action-reactivate:hover:not(:disabled) {
+  color: #f0fff0;
+  background: #29533e;
+}
+.table-actions .action-reactivate:disabled { opacity: .5; cursor: not-allowed; }

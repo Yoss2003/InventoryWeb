@@ -34,7 +34,7 @@ export class InventorySharingComponent implements OnInit {
   private loadedSharesInventoryId: number | null = null;
 
   get ownedInventories(): InventorySummary[] {
-    return this.inventories.filter(x => x.userId === this.myUserId && x.isActive);
+    return this.inventories.filter(x => x.userId === this.myUserId && x.isActive && !x.isMaster);
   }
   get labelCount(): Map<string, number> {
     const counts = new Map<string, number>();

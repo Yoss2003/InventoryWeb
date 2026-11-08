@@ -5,10 +5,11 @@ import { MatTabsModule } from '@angular/material/tabs';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
-import { forkJoin } from 'rxjs';
+import { forkJoin, filter, take } from 'rxjs';
 import { MovementService } from '../../../core/services/movement';
 import { SalesService } from '../../../core/services/sales';
 import { ArticleService } from '../../../core/services/articles';
+import { InventoryContextService } from '../../../core/services/inventory-context';
 import { Movement } from '../../../core/models/movement.model';
 import { Article } from '../../../core/models/article.model';
 import { TraspasoFormComponent } from '../traspaso-form/traspaso-form';
@@ -21,6 +22,7 @@ export class SalidasComponent implements OnInit {
   private readonly movementsApi=inject(MovementService);
   private readonly salesApi=inject(SalesService);
   private readonly articlesApi=inject(ArticleService);
+  private readonly inventoryContext=inject(InventoryContextService);
   private readonly dialog=inject(MatDialog);
   private readonly cdr=inject(ChangeDetectorRef);
   private readonly snackbar=inject(MatSnackBar);
@@ -29,16 +31,18 @@ export class SalidasComponent implements OnInit {
   private articles=new Map<number,Article>();
   cancelledIds=new Set<number>();cancelledSaleIds=new Set<number>();
   loading=false;hasLoaded=false;error='';
-  ngOnInit():void{this.loadRealData();}
+  ngOnInit():void{this.inventoryContext.activeInventoryId$.pipe(filter(id=>id!==null),take(1)).subscribe(()=>this.loadRealData());}
   loadRealData():void{
     if(this.loading)return;
     this.loading=true;this.error='';this.cdr.markForCheck();
     forkJoin({movements:this.movementsApi.getMovements(),articles:this.articlesApi.getArticles(),reversals:this.movementsApi.getCancellations(),sales:this.salesApi.getCancellations()}).subscribe({
       next:({movements,articles,reversals,sales})=>{
-        this.articles=new Map(articles.map(a=>[a.id,a]));
+        const inventoryArticles=articles.filter(a=>a.inventoryId===this.inventoryContext.activeInventoryId);
+        const ids=new Set(inventoryArticles.map(a=>a.id));
+        this.articles=new Map(inventoryArticles.map(a=>[a.id,a]));
         this.cancelledIds=new Set(reversals.map(x=>x.originalMovementId));
         this.cancelledSaleIds=new Set(sales.map(x=>x.saleId));
-        const records=[...movements].sort((a,b)=>new Date(b.movementDate).getTime()-new Date(a.movementDate).getTime());
+        const records=movements.filter(m=>ids.has(m.articleId)).sort((a,b)=>new Date(b.movementDate).getTime()-new Date(a.movementDate).getTime());
         this.ventas=records.filter(m=>m.actionId===2&&!!m.paymentMethod&&m.paymentMethod!=='N/A');
         this.traspasos=records.filter(m=>m.actionId===3||(m.actionId===2&&!m.paymentMethod));
         this.loading=false;this.hasLoaded=true;this.cdr.markForCheck();

@@ -17,7 +17,7 @@ export class CategoryService {
   }
   refreshCategories():Observable<Category[]>{return this.getCategories(true);}
   invalidateCache():void{this.cache$=undefined;}
-  createCategory(category:Partial<Category>):Observable<Category>{return this.http.post<Category>(this.apiUrl,category).pipe(tap(()=>this.invalidateCache()));}
+  createCategory(category:Partial<Category>,allowSimilar=false):Observable<Category>{return this.http.post<Category>(allowSimilar?`${this.apiUrl}?allowSimilar=true`:this.apiUrl,category).pipe(tap(()=>this.invalidateCache()));}
   updateCategory(category:Category):Observable<void>{return this.http.put<void>(`${this.apiUrl}/${category.id}`,category).pipe(tap(()=>this.invalidateCache()));}
   deleteCategory(id:number):Observable<void>{return this.http.delete<void>(`${this.apiUrl}/${id}`).pipe(tap(()=>this.invalidateCache()));}
 }

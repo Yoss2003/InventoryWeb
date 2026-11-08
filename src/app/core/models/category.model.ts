@@ -4,6 +4,8 @@ export interface Category {
   name: string;
   description?: string;
   isActive: boolean;
+  nameKey?: string;
+  reused?: boolean;
   companyId: number;
 
   parentCategoryId?: number | null;

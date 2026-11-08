@@ -31,8 +31,8 @@
       <ng-container matColumnDef="description"><th mat-header-cell *matHeaderCellDef>Descripción</th><td mat-cell *matCellDef="let element"><span class="cell-muted">{{element.description || 'Sin descripción'}}</span></td></ng-container>
       <ng-container matColumnDef="isActive"><th mat-header-cell *matHeaderCellDef>Estado</th><td mat-cell *matCellDef="let element"><span class="state-pill" [class.inactive]="!element.isActive">{{element.isActive ? 'Activo' : 'Inactivo'}}</span></td></ng-container>
       <ng-container matColumnDef="actions"><th mat-header-cell *matHeaderCellDef class="actions-col">Acciones</th><td mat-cell *matCellDef="let element" class="actions-col">
-        <button type="button" class="row-icon" title="Editar grupo" [disabled]="!element.isActive" (click)="nuevaCategoriaPadre(element); $event.stopPropagation()"><mat-icon>edit</mat-icon></button>
-        <button type="button" class="row-icon danger" title="Desactivar grupo" [disabled]="!element.isActive" (click)="eliminarCategoria(element.id,$event)"><mat-icon>delete_outline</mat-icon></button>
+        <button type="button" class="row-icon" title="Editar grupo" [disabled]="!element.isActive || !canManage" (click)="nuevaCategoriaPadre(element); $event.stopPropagation()"><mat-icon>edit</mat-icon></button>
+        <button type="button" class="row-icon danger" title="Desactivar grupo" [disabled]="!element.isActive || !canManage" (click)="eliminarCategoria(element.id,$event)"><mat-icon>delete_outline</mat-icon></button>
       </td></ng-container>
       <ng-container matColumnDef="expandedDetail"><td mat-cell *matCellDef="let element" [attr.colspan]="columnsToDisplay.length" class="expanded-cell">
         <div class="expanded-detail" [@detailExpand]="element === expandedElement ? 'expanded' : 'collapsed'">
@@ -43,8 +43,8 @@
               <td><strong>{{sub.name}}</strong></td><td class="cell-muted">{{sub.description || '—'}}</td>
               <td><span class="chip tracking">{{sub.trackingMode || '—'}}</span></td><td><span class="chip naming">{{sub.namingMethod || '—'}}</span></td>
               <td><span class="state-pill" [class.inactive]="!sub.isActive">{{sub.isActive ? 'Activa' : 'Inactiva'}}</span></td>
-              <td class="actions-col"><button type="button" class="row-icon" title="Editar subcategoría" [disabled]="!sub.isActive" (click)="nuevaCategoriaHija(sub);$event.stopPropagation()"><mat-icon>edit</mat-icon></button>
-              <button type="button" class="row-icon danger" title="Desactivar subcategoría" [disabled]="!sub.isActive" (click)="eliminarCategoria(sub.id,$event)"><mat-icon>delete_outline</mat-icon></button></td>
+              <td class="actions-col"><button type="button" class="row-icon" title="Editar subcategoría" [disabled]="!sub.isActive || !canManage" (click)="nuevaCategoriaHija(sub);$event.stopPropagation()"><mat-icon>edit</mat-icon></button>
+              <button type="button" class="row-icon danger" title="Desactivar subcategoría" [disabled]="!sub.isActive || !canManage" (click)="eliminarCategoria(sub.id,$event)"><mat-icon>delete_outline</mat-icon></button></td>
             </tr></tbody></table></div>
         </div>
       </td></ng-container>
