@@ -1,0 +1,32 @@
+/* FASE 4.1.2 — Modal de consulta de proveedores */
+:host { display: block; color: #eef5fa; }
+.supplier-detail-modal { background: #172633; color: #edf5fc; border: 1px solid #466173; border-radius: 15px; overflow: hidden; }
+.detail-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 18px 22px; background: #203444; border-bottom: 1px solid #40596b; }
+.detail-heading { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.detail-symbol { display: flex; align-items: center; justify-content: center; width: 42px; height: 42px; flex: none; border-radius: 11px; background: #293c2d; color: #b5db6b; }
+.detail-head h2 { font-size: 19px; margin: 0; font-weight: 700; }
+.detail-head p { margin: 4px 0 0; color: #bdd0dd; font-size: 12px; }
+.close-icon { border: 1px solid #5d788b; background: #182d3a; border-radius: 9px; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; color: #edf5fc; cursor: pointer; }
+.detail-content { padding: 18px 20px; max-height: min(70vh, 690px); overflow-y: auto; scrollbar-width: thin; scrollbar-color: #5b798d #172633; }
+.detail-section { padding: 15px; background: #1c2e3c; border: 1px solid #405b6a; border-radius: 11px; margin: 0 0 13px; }
+.detail-section h3 { font-size: 13px; font-weight: 700; color: #dbeaf3; margin: 0 0 13px; display: flex; align-items: center; gap: 8px; }
+.detail-section h3 mat-icon { color: #a9d15b; font-size: 19px; width: 19px; height: 19px; }
+.business-name { font-size: 16px; font-weight: 700; margin: 0 0 15px; line-height: 1.45; overflow-wrap: anywhere; }
+.detail-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 11px; }
+.detail-entry { min-width: 0; display: flex; flex-direction: column; gap: 6px; padding: 10px 12px; background: #162630; border-radius: 9px; border: 1px solid #354e60; }
+.detail-entry.wide { grid-column: 1 / -1; }
+.detail-entry span { color: #9fb8c9; font-size: 11px; }
+.detail-entry strong { color: #ebf5fc; font-size: 12px; font-weight: 600; overflow-wrap: anywhere; }
+.detail-entry .long-value { white-space: pre-wrap; font-weight: 500; line-height: 1.5; }
+.internal-status { align-self: flex-start; border-radius: 99px; padding: 5px 10px; }
+.internal-status.active, .sunat-good { color: #a8ec95 !important; }
+.internal-status.active { background: #25462e; border: 1px solid #48895a; }
+.internal-status.inactive { background: #4a3034; border: 1px solid #9c585e; color: #ffaaaa; }
+.sunat-warning { color: #ffd39b !important; }
+.hint, .empty-note { font-size: 11px; line-height: 1.5; color: #adc3d1; margin: 4px 0 12px; }
+.empty-note { border: 1px dashed #597081; border-radius: 10px; padding: 12px; }
+.detail-footer { border-top: 1px solid #40596b; padding: 12px 20px; display: flex; justify-content: flex-end; background: #203444; }
+.detail-footer button { padding: 9px 17px; color: #f4f9fd; background: #253d4f; border-radius: 8px; border: 1px solid #5a7c8e; cursor: pointer; }
+.close-icon:hover, .detail-footer button:hover { background: #31516a; }
+.close-icon:focus-visible, .detail-footer button:focus-visible { outline: 2px solid #bbdf77; outline-offset: 2px; }
+@media (max-width: 550px) { .detail-grid { grid-template-columns: 1fr; } .detail-entry.wide { grid-column: auto; } .detail-content { padding: 12px; } .detail-head { padding: 14px; } }

@@ -1,0 +1,11 @@
+﻿using InventoryAPI.Models;
+using InventoryAPI.Repositories;
+using InventoryAPI.Repositories.IRepositories;
+using InventoryAPI.Services.IServices;
+
+namespace InventoryAPI.Services
+{
+    public class NotificationService(IWorkFlow workFlow) : WorkContainer<Notification>(workFlow), INotificationService
+    {
+    }
+}

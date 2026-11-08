@@ -1,0 +1,80 @@
+<!-- FASE 4.1.2 — Modal de solo lectura de proveedores -->
+<div class="supplier-detail-modal" role="document">
+  <header class="detail-head">
+    <div class="detail-heading">
+      <div class="detail-symbol"><mat-icon aria-hidden="true">storefront</mat-icon></div>
+      <div><h2>Detalle del proveedor</h2><p>Datos registrados y consulta fiscal disponible</p></div>
+    </div>
+    <button type="button" class="close-icon" (click)="close()" aria-label="Cerrar detalle de proveedor" title="Cerrar">
+      <mat-icon aria-hidden="true">close</mat-icon>
+    </button>
+  </header>
+
+  <div class="detail-content">
+    <section class="detail-section">
+      <h3><mat-icon aria-hidden="true">badge</mat-icon> Identificación</h3>
+      <p class="business-name">{{item.businessName}}</p>
+      <div class="detail-grid">
+        <div class="detail-entry"><span>RUC</span><strong>{{item.ruc}}</strong></div>
+        <div class="detail-entry"><span>Estado en InventarioWeb</span>
+          <strong class="internal-status" [class.active]="item.isActive" [class.inactive]="!item.isActive">
+            {{item.isActive ? 'Activo' : 'Inactivo'}}
+          </strong>
+        </div>
+      </div>
+    </section>
+
+    <section class="detail-section">
+      <h3><mat-icon aria-hidden="true">account_balance</mat-icon> Situación ante SUNAT</h3>
+      <div class="detail-grid">
+        <div class="detail-entry"><span>Estado SUNAT</span>
+          <strong [class.sunat-good]="item.estado?.toUpperCase() === 'ACTIVO'"
+                  [class.sunat-warning]="item.estado?.toUpperCase() !== 'ACTIVO'">{{item.estado || 'No disponible'}}</strong>
+        </div>
+        <div class="detail-entry"><span>Condición SUNAT</span>
+          <strong [class.sunat-good]="item.condicion?.toUpperCase() === 'HABIDO'"
+                  [class.sunat-warning]="!!item.condicion && item.condicion?.toUpperCase() !== 'HABIDO'">
+            {{item.condicion || 'No disponible'}}
+          </strong>
+        </div>
+      </div>
+      <p class="hint">El estado en InventarioWeb es independiente del estado registrado ante SUNAT.</p>
+    </section>
+
+    <section class="detail-section">
+      <h3><mat-icon aria-hidden="true">location_on</mat-icon> Ubicación</h3>
+      <div class="detail-grid">
+        <div class="detail-entry wide"><span>Dirección</span><strong>{{item.address || 'No registrada'}}</strong></div>
+        <div class="detail-entry"><span>Distrito</span><strong>{{item.distrito || 'No disponible'}}</strong></div>
+        <div class="detail-entry"><span>Provincia</span><strong>{{item.provincia || 'No disponible'}}</strong></div>
+        <div class="detail-entry"><span>Departamento</span><strong>{{item.departamento || 'No disponible'}}</strong></div>
+      </div>
+    </section>
+
+    <section class="detail-section">
+      <h3><mat-icon aria-hidden="true">handshake</mat-icon> Relación comercial y contacto</h3>
+      <div class="detail-grid">
+        <div class="detail-entry wide"><span>Relación con el proveedor</span>
+          <strong class="long-value">{{item.relationshipDescription || 'No se ha registrado una descripción comercial.'}}</strong>
+        </div>
+        <div class="detail-entry"><span>Contacto</span><strong>{{item.contactName || 'No registrado'}}</strong></div>
+        <div class="detail-entry"><span>Teléfono</span><strong>{{item.phone || 'No registrado'}}</strong></div>
+        <div class="detail-entry wide"><span>Correo</span><strong>{{item.email || 'No registrado'}}</strong></div>
+      </div>
+    </section>
+
+    <section class="detail-section" *ngIf="fiscalRows.length">
+      <h3><mat-icon aria-hidden="true">fact_check</mat-icon> Información fiscal avanzada</h3>
+      <p class="hint">Instantánea guardada en la última consulta avanzada del proveedor. Los datos pueden cambiar en SUNAT.</p>
+      <div class="detail-grid">
+        <div class="detail-entry" *ngFor="let field of fiscalRows">
+          <span>{{field.label}}</span><strong>{{field.value}}</strong>
+        </div>
+      </div>
+    </section>
+    <p *ngIf="!fiscalRows.length" class="empty-note">
+      Este proveedor todavía no tiene una instantánea fiscal avanzada guardada. Puedes consultar su RUC desde el formulario de edición y guardar los cambios.
+    </p>
+  </div>
+  <footer class="detail-footer"><button type="button" (click)="close()">Cerrar</button></footer>
+</div>

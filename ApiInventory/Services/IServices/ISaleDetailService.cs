@@ -1,0 +1,6 @@
+﻿using InventoryAPI.Models;
+using InventoryAPI.Repositories.IRepositories;
+namespace InventoryAPI.Services.IServices
+{
+    public interface ISaleDetailService : IWorkContainer<SaleDetail> { }
+}
