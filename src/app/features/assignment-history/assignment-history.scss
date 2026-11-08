@@ -58,3 +58,7 @@ button {font:inherit;cursor:pointer}
 .assignment-table-wrap { overflow-x: auto; }
 .assignment-table { min-width: 900px; }
 .assignment-table tr { cursor: pointer; }
+
+/* CUSTODIA_HISTORIALES_V2_SCROLL_ASIGNACIONES */
+.assignment-table-wrap { max-height: 615px; overflow-x: auto; overflow-y: auto; scrollbar-width: thin; scrollbar-color: #536b7b #172532; }
+.assignment-table th { position: sticky; top: 0; z-index: 1; background: #253443; }

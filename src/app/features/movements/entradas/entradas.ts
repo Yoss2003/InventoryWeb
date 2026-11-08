@@ -1,3 +1,4 @@
+import { cleanArticleDisplayName } from '../../../shared/clean-article-name.pipe';
 import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
@@ -56,7 +57,7 @@ export class EntradasComponent implements OnInit {
       }
     });
   }
-  articleName(id:number):string{return this.articleMap.get(id)?.name||`Artículo #${id}`;}
+  articleName(id:number):string{return cleanArticleDisplayName(this.articleMap.get(id)?.name ?? `Artículo #${id}`);}
   articleCode(id:number):string{return this.articleMap.get(id)?.code||'—';}
   newArticle():void{this.editArticle(null);}
   editArticle(id:number|null):void{

@@ -7,7 +7,7 @@
     <label>Inventario (ID)<input name="inventoryId" [(ngModel)]="inventoryId" type="number" min="1" placeholder="Todos" /></label>
     <label>Propietario (ID)<input name="userId" [(ngModel)]="userId" type="number" min="1" placeholder="Todos" /></label>
     <label>Usuario responsable (ID)<input name="actorUserId" [(ngModel)]="actorUserId" type="number" min="1" placeholder="Todos" /></label>
-    <label>Movimiento<select name="actionId" [(ngModel)]="actionId"><option value="">Todos</option><option value="1">Entradas</option><option value="2">Salidas</option></select></label>
+    <label>Movimiento<select name="actionId" [(ngModel)]="actionId"><option value="">Todos</option><option value="1">Entradas</option><option value="2">Salidas</option><option value="3">Custodias</option></select></label>
     <label>Desde<input name="from" [(ngModel)]="from" type="date" /></label>
     <label>Hasta<input name="to" [(ngModel)]="to" type="date" /></label>
     <button type="submit" [disabled]="loading">Filtrar</button>
@@ -19,11 +19,11 @@
       <thead><tr><th>Fecha</th><th>Tipo</th><th>Inventario</th><th>Propietario</th><th>Responsable (ID)</th><th>Artículo</th><th>Cantidad</th><th>Observación</th></tr></thead>
       <tbody><tr *ngFor="let row of items">
         <td>{{row.movementDate | date:'dd/MM/yyyy HH:mm'}}</td>
-        <td><span class="type" [class.out]="row.actionId===2">{{row.actionId===1?'Entrada':'Salida'}}</span></td>
+        <td><span class="type" [class.out]="row.actionId===2" [class.custody]="row.actionId===3">{{row.actionId===1?'Entrada':row.actionId===2?'Salida':'Custodia'}}</span></td>
         <td>{{row.inventoryName}} <small>#{{row.inventoryId}}</small></td>
         <td>{{row.username}}</td>
         <td>{{row.actorUserId ?? '—'}}</td>
-        <td>{{row.articleName}} <small>{{row.articleCode}}</small></td>
+        <td>{{row.articleName | cleanArticleName}} <small>{{row.articleCode}}</small></td>
         <td>{{row.amount ?? '—'}}</td>
         <td>{{row.observation || '—'}}</td>
       </tr></tbody>

@@ -935,3 +935,15 @@ $muted: #a8b5c2;
     white-space: normal;
   }
 }
+
+/* UX_FINAL_REGLAS_CATEGORIA */
+@media (min-width: 761px) {
+  .category-stepper .rules-grid {grid-template-columns:repeat(2,minmax(0,1fr)) !important; gap:14px 16px;align-items:stretch;}
+  .category-stepper .rules-grid>.category-field,.category-stepper .rules-grid>.toggle-tile{min-width:0;align-self:stretch;}
+  .category-stepper .rules-grid .toggle-tile{min-height:66px;padding:12px 14px;}
+  .category-stepper .naming-config{grid-column:1/-1;display:grid;grid-template-columns:repeat(2,minmax(0,1fr)) !important;gap:14px 16px;align-items:stretch;}
+  .category-stepper .naming-config:has(>.naming-toggle:only-child){grid-template-columns:minmax(0,1fr) !important;}
+  .category-stepper .naming-config>.naming-toggle{height:auto;min-height:66px;}
+  .category-stepper .rules-grid .toggle-tile small{white-space:normal;}
+}
+@media (max-width:760px){.category-stepper .rules-grid,.category-stepper .naming-config{grid-template-columns:minmax(0,1fr) !important;}}

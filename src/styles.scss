@@ -38,3 +38,11 @@ html, body { height: 100%; margin: 0; padding: 0; background-color: #1e1e1e; }
   color: #dcffa5 !important;
 }
 .mat-mdc-select-panel.inventory-select-options .mdc-list-item__primary-text { color: inherit !important; }
+
+/* UX_FINAL_SELECTS_NATIVOS */
+select:not([multiple]){color-scheme:dark;accent-color:#a8d73d}
+select:not([multiple]) option{background:#21313f;color:#eaf3fa}
+select:not([multiple]):focus-visible{outline:2px solid #a8d73d;outline-offset:2px}
+#active-inventory-select,.master-history .filters select{background-color:#1b2c39;border-color:#687e90;color:#edf5fa;border-radius:9px;cursor:pointer;transition:border-color .15s,box-shadow .15s}
+#active-inventory-select:hover,.master-history .filters select:hover{border-color:#94bd57}
+#active-inventory-select:focus,.master-history .filters select:focus{box-shadow:0 0 0 2px rgba(168,215,61,.18);outline:none}

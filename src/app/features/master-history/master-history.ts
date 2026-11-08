@@ -1,3 +1,4 @@
+import { CleanArticleNamePipe } from '../../shared/clean-article-name.pipe';
 import { CommonModule } from '@angular/common';
 import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -25,7 +26,7 @@ interface MasterHistoryResponse { items: MasterMovementRow[]; total: number; pag
 
 @Component({
   selector: 'app-master-history', standalone: true,
-  imports: [CommonModule, FormsModule, MatIconModule],
+  imports: [CleanArticleNamePipe, CommonModule, FormsModule, MatIconModule],
   templateUrl: './master-history.html', styleUrl: './master-history.scss'
 })
 export class MasterHistoryComponent implements OnInit {

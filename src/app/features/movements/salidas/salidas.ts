@@ -1,9 +1,10 @@
+import { cleanArticleDisplayName } from '../../../shared/clean-article-name.pipe';
+import { ToastService } from '../../../shared/toast/toast.service';
 import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatDialog } from '@angular/material/dialog';
-import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
 import { forkJoin, filter, take } from 'rxjs';
 import { MovementService } from '../../../core/services/movement';
@@ -25,7 +26,7 @@ export class SalidasComponent implements OnInit {
   private readonly inventoryContext=inject(InventoryContextService);
   private readonly dialog=inject(MatDialog);
   private readonly cdr=inject(ChangeDetectorRef);
-  private readonly snackbar=inject(MatSnackBar);
+  private readonly toast = inject(ToastService);
   private readonly router=inject(Router);
   traspasos:Movement[]=[]; ventas:Movement[]=[];
   private articles=new Map<number,Article>();
@@ -49,11 +50,11 @@ export class SalidasComponent implements OnInit {
       },error:err=>{
         this.loading=false;this.hasLoaded=true;
         this.error=String(err?.error?.error??'No fue posible actualizar las salidas. Los datos anteriores pueden estar desactualizados.');
-        this.snackbar.open(this.error,'Cerrar',{duration:6000});this.cdr.markForCheck();
+        this.toast.error(this.error);this.cdr.markForCheck();
       }
     });
   }
-  articleName(id:number):string{return this.articles.get(id)?.name??`Artículo #${id}`;}
+  articleName(id:number):string{return cleanArticleDisplayName(this.articles.get(id)?.name ?? `Artículo #${id}`);}
   articleCode(id:number):string{return this.articles.get(id)?.code??'—';}
   total(m:Movement):number{return Number(m.amount??0)*Number(m.salePrice??0);}
   saleId(m:Movement):number|null{
@@ -80,19 +81,19 @@ export class SalidasComponent implements OnInit {
     const reason=prompt('Motivo para anular el retiro y revertir el stock:');
     if(!reason?.trim())return;
     this.movementsApi.cancelMovement(m.id,reason.trim()).subscribe({
-      next:()=>{this.snackbar.open('Movimiento revertido y stock actualizado.','Cerrar',{duration:3500});this.loadRealData();},
-      error:err=>this.snackbar.open(String(err?.error?.error??'No se pudo anular el movimiento.'),'Cerrar',{duration:6000})
+      next:()=>{this.toast.success('Movimiento revertido y stock actualizado.');this.loadRealData();},
+      error:err=>this.toast.error(String(err?.error?.error??'No se pudo anular el movimiento.'))
     });
   }
   cancelSale(m:Movement,event:Event):void{
     event.stopPropagation();const id=this.saleId(m);
-    if(!id){this.snackbar.open('La venta antigua no tiene identificador para anularla desde esta pantalla.','Cerrar',{duration:4500});return;}
+    if(!id){this.toast.warning('La venta antigua no tiene identificador para anularla desde esta pantalla.');return;}
     if(this.cancelledSaleIds.has(id))return;
     const reason=prompt(`Motivo para anular la venta #${id}:`);
     if(!reason?.trim())return;
     this.salesApi.cancelSale(id,reason.trim()).subscribe({
-      next:()=>{this.snackbar.open('Venta anulada; stock devuelto.','Cerrar',{duration:3500});this.loadRealData();},
-      error:err=>this.snackbar.open(String(err?.error?.error??'No se pudo anular la venta.'),'Cerrar',{duration:6000})
+      next:()=>{this.toast.success('Venta anulada; stock devuelto.');this.loadRealData();},
+      error:err=>this.toast.error(String(err?.error?.error??'No se pudo anular la venta.'))
     });
   }
 }

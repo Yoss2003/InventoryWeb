@@ -1,3 +1,4 @@
+import { CleanArticleNamePipe } from '../../../shared/clean-article-name.pipe';
 import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
@@ -7,7 +8,7 @@ import { Movement } from '../../../core/models/movement.model';
 
 interface EmployeeName {firstName?:string|null;lastName?:string|null;}
 @Component({selector:'app-movement-detail-dialog',standalone:true,
-  imports:[CommonModule,MatDialogModule,MatIconModule],
+  imports:[CleanArticleNamePipe, CommonModule,MatDialogModule,MatIconModule],
   templateUrl:'./movement-detail-dialog.html',styleUrl:'./movement-detail-dialog.scss'})
 export class MovementDetailDialogComponent implements OnInit {
   readonly dialogRef=inject(MatDialogRef<MovementDetailDialogComponent>);

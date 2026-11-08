@@ -4,11 +4,13 @@ import { finalize, timeout } from 'rxjs';
 import { FormsModule } from '@angular/forms';
 import { ExternalConsultasService, SunatRuc, ExchangeRate } from '../../core/services/external-consultas';
 import { LoadingIndicatorComponent } from '../../shared/loading/loading-indicator';
+import { ToastService } from '../../shared/toast/toast.service';
 
 @Component({selector:'app-external-consultas',standalone:true,imports:[CommonModule,FormsModule,LoadingIndicatorComponent],templateUrl:'./external-consultas.html',styleUrl:'./external-consultas.scss'})
 export class ExternalConsultasComponent {
   private readonly api=inject(ExternalConsultasService);
   private readonly cdr=inject(ChangeDetectorRef);
+  private readonly toast=inject(ToastService); // UX_FINAL_TOAST_CONSULTAS
   ruc=''; sunat:SunatRuc|null=null; usd:ExchangeRate|null=null; eur:ExchangeRate|null=null;
   usdStatus='';eurStatus='';
   error=''; usdError=''; eurError=''; loadingRuc=false; loadingRates=false;
@@ -16,13 +18,13 @@ export class ExternalConsultasComponent {
 
   searchRuc():void {
     this.error='';this.sunat=null;
-    if(!/^\d{11}$/.test(this.ruc)){this.error='RUC inválido (11 dígitos).';return;}
+    if(!/^\d{11}$/.test(this.ruc)){this.error='RUC inválido (11 dígitos).';this.toast.warning(this.error);return;}
     if(this.loadingRuc)return;
     this.loadingRuc=true;this.cdr.markForCheck();
     this.api.ruc(this.ruc).subscribe({
       next:r=>{this.sunat=r;this.loadingRuc=false;this.cdr.markForCheck();},
       error:()=>{
-        this.error='No se pudo consultar el RUC. Revisa el token SUNAT en la API.';
+        this.error='No se pudo consultar el RUC. Verifica el servicio de consulta en la API.';this.toast.error(this.error);
         this.loadingRuc=false;this.cdr.markForCheck();
       }
     });
@@ -63,6 +65,7 @@ export class ExternalConsultasComponent {
       error:()=>{
         if(currency==='USD')this.usdError='No se pudo consultar USD. Vuelve a intentar.';
         else this.eurError='No se pudo consultar EUR. Vuelve a intentar.';
+        this.toast.error(currency==='USD'?this.usdError:this.eurError);
         this.cdr.markForCheck();
       }
     });

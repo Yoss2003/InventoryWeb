@@ -1,4 +1,6 @@
-import { Component, OnDestroy, OnInit, ViewEncapsulation, inject } from '@angular/core';
+import { CleanArticleNamePipe } from '../../shared/clean-article-name.pipe';
+import { InventoryContextService } from '../../core/services/inventory-context';
+import { ChangeDetectorRef, Component, OnDestroy, OnInit, ViewEncapsulation, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatDialogModule, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
@@ -8,7 +10,7 @@ import { SerialUnitsService, SerialUnit } from '../../core/services/serial-units
 
 @Component({
   selector: 'app-assignment-history-dialog', standalone: true,
-  imports: [CommonModule, FormsModule, MatDialogModule, MatIconModule],
+  imports: [CleanArticleNamePipe, CommonModule, FormsModule, MatDialogModule, MatIconModule],
   templateUrl: './assignment-history-dialog.html', styleUrl: './assignment-history-dialog.scss',
   encapsulation: ViewEncapsulation.None
 })
@@ -17,6 +19,12 @@ export class AssignmentHistoryDialogComponent implements OnInit, OnDestroy {
   readonly dialogRef = inject(MatDialogRef<AssignmentHistoryDialogComponent>);
   private readonly api = inject(AssignmentService);
   private readonly serialsApi = inject(SerialUnitsService);
+  get inventoryLabel(): string {
+    const inventory = this.inventoryContext.options.find(i => i.id === this.data.inventoryId);
+    return inventory?.alias?.trim() || inventory?.inventoryName || `Inventario #${this.data.inventoryId}`;
+  }
+  private readonly inventoryContext = inject(InventoryContextService);
+  private readonly cdr = inject(ChangeDetectorRef);
   events: AssignmentEvent[] = [];
   loading = false;
   isSaving = false;
@@ -30,16 +38,30 @@ export class AssignmentHistoryDialogComponent implements OnInit, OnDestroy {
   }
   errorMessage = '';
   evidenceUrl: string | null = null;
+  evidenceStatus = '';
 
   get canReturn(): boolean { return Number(this.amount) > 0 && Number(this.amount) <= Number(this.data.remainingQuantity) && !this.isSaving && !this.serialLoading &&
     (!this.isSerialized || this.selectedSerialIds.length === Number(this.amount)); }
   ngOnInit(): void {
     this.loading = true;
-    this.api.events(this.data.id).subscribe({ next: rows => { this.events = rows; this.loading = false; }, error: () => { this.loading = false; this.errorMessage = 'No se pudo cargar el historial.'; } });
-    this.serialsApi.assigned(this.data.id).subscribe({next:rows=>{this.assignedSerials=rows;this.serialLoading=false;},
-      error:()=>{this.serialLoading=false;this.errorMessage='No se pudieron consultar las series asignadas.';}});
-    if (this.data.hasEvidence) this.api.getEvidence(this.data.id).subscribe({
-      next: file => this.evidenceUrl = URL.createObjectURL(file), error: () => {} });
+    this.api.events(this.data.id).subscribe({ next: rows => { this.events = rows; this.loading = false; this.cdr.markForCheck(); }, error: () => { this.loading = false; this.errorMessage = 'No se pudo cargar el historial.'; this.cdr.markForCheck(); } });
+    this.serialsApi.assigned(this.data.id).subscribe({next:rows=>{this.assignedSerials=rows;this.serialLoading=false; this.cdr.markForCheck();},
+      error:()=>{this.serialLoading=false;this.errorMessage='No se pudieron consultar las series asignadas.'; this.cdr.markForCheck();}});
+    // UX_FINAL_EVIDENCIA_CUSTODIA: consultar incluso custodias históricas.
+    this.api.getEvidence(this.data.id).subscribe({
+      next: file => {
+        if (this.evidenceUrl) URL.revokeObjectURL(this.evidenceUrl);
+        this.evidenceUrl = URL.createObjectURL(file);
+        this.evidenceStatus = '';
+        this.cdr.markForCheck();
+      },
+      error: err => {
+        this.evidenceStatus = err?.status === 404
+          ? 'No se encontró una fotografía guardada para esta custodia.'
+          : 'No se pudo cargar la fotografía de esta custodia.';
+        this.cdr.markForCheck();
+      }
+    });
   }
   ngOnDestroy(): void { if (this.evidenceUrl) URL.revokeObjectURL(this.evidenceUrl); }
   returnArticle(): void {

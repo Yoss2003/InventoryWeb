@@ -1,3 +1,4 @@
+import { CleanArticleNamePipe } from '../../shared/clean-article-name.pipe';
 import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -9,7 +10,7 @@ import { AssignmentHistoryDialogComponent } from '../assignment-history-dialog/a
 import { LoadingIndicatorComponent } from '../../shared/loading/loading-indicator';
 
 @Component({selector:'app-assignment-history',standalone:true,
-  imports:[CommonModule,FormsModule,MatIconModule,LoadingIndicatorComponent],
+  imports:[CleanArticleNamePipe, CommonModule,FormsModule,MatIconModule,LoadingIndicatorComponent],
   templateUrl:'./assignment-history.html',styleUrl:'./assignment-history.scss'})
 export class AssignmentHistoryComponent implements OnInit {
   private readonly api=inject(AssignmentService);

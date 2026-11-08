@@ -1,7 +1,7 @@
 <div class="movement-dialog">
   <header><h2>Detalle de movimiento #{{data.movement.id}}</h2><button type="button" (click)="dialogRef.close()"><mat-icon>close</mat-icon></button></header>
   <main><div class="record-grid">
-    <div><label>Artículo</label><strong>{{data.articleName}}</strong></div><div><label>Código</label><strong>{{data.articleCode}}</strong></div>
+    <div><label>Artículo</label><strong>{{data.articleName | cleanArticleName}}</strong></div><div><label>Código</label><strong>{{data.articleCode}}</strong></div>
     <div><label>Acción</label><strong>{{data.movement.actionId===1?'Entrada':data.movement.actionId===2?'Salida':'Custodia / traspaso'}}</strong></div>
     <div><label>Fecha</label><strong>{{data.movement.movementDate | date:'dd/MM/yyyy HH:mm'}}</strong></div>
     <div><label>Cantidad</label><strong>{{data.movement.amount | number:'1.0-2'}}</strong></div>

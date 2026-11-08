@@ -23,14 +23,14 @@
           <mat-form-field appearance="outline" class="compact-select"><mat-select formControlName="retireType" panelClass="inventory-select-options"><mat-option value="Parcial">Cantidad parcial</mat-option><mat-option value="Total">Todo el stock disponible</mat-option></mat-select></mat-form-field>
         </div>
         <div class="field wide"><label>Artículo <span class="required">*</span></label>
-          <mat-form-field appearance="outline" class="compact-select"><mat-select formControlName="articleId" placeholder="Seleccionar artículo" panelClass="inventory-select-options"><mat-option *ngFor="let a of articles" [value]="a.id">{{a.name}} — {{a.stock}} {{a.measurementUnit}}</mat-option></mat-select></mat-form-field>
+          <mat-form-field appearance="outline" class="compact-select"><mat-select formControlName="articleId" placeholder="Seleccionar artículo" panelClass="inventory-select-options"><mat-option *ngFor="let a of articles" [value]="a.id">{{a.name | cleanArticleName}} — {{a.stock}} {{a.measurementUnit}}</mat-option></mat-select></mat-form-field>
         </div>
         <div class="field"><label>Cantidad a retirar <span class="required">*</span></label>
           <input type="number" min="0.01" step="0.01" class="compact-input" formControlName="amount" />
           <small *ngIf="selectedArticle">Disponible: {{selectedArticleStock|number:'1.0-2'}} {{selectedArticle.measurementUnit}}</small>
           <span class="transfer-error" *ngIf="selectedArticle && quantityExceedsStock">Cantidad superior al stock disponible.</span>
         </div>
-        <div class="field info-block" *ngIf="selectedArticle"><label>Referencia de almacén</label><strong>{{selectedArticle.code}}</strong><small>Registro #{{selectedArticle.id}}</small></div>
+        <div class="field info-block" *ngIf="selectedArticle"><label>Almacén de origen</label><strong>{{selectedInventoryLabel}}</strong></div>
       </div>
       <div class="serial-selection" *ngIf="isSerialized">
         <strong>Series disponibles · selecciona las unidades exactas</strong>
@@ -59,7 +59,7 @@
       <div class="card-heading"><mat-icon>fact_check</mat-icon><div><strong>Resumen y confirmación</strong><small>Revisa la operación antes de actualizar el stock.</small></div></div>
       <dl class="operation-summary">
         <div><dt>Operación</dt><dd>{{operationType==='Asignar'?'Asignación de custodia':'Baja definitiva'}}</dd></div>
-        <div><dt>Artículo</dt><dd>{{selectedArticle?.name || '—'}}</dd></div>
+        <div><dt>Artículo</dt><dd>{{(selectedArticle?.name || '—') | cleanArticleName}}</dd></div>
         <div><dt>Cantidad</dt><dd>{{form.controls.amount.value}} {{selectedArticle?.measurementUnit || ''}}</dd></div>
         <div><dt>Destinatario</dt><dd>{{form.controls.recipientName.value || 'Baja interna'}}</dd></div>
         <div class="wide"><dt>Motivo</dt><dd>{{form.controls.observation.value}}</dd></div>

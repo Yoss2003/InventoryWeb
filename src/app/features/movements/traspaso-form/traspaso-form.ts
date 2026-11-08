@@ -1,3 +1,6 @@
+import { CleanArticleNamePipe } from '../../../shared/clean-article-name.pipe';
+import { ToastService } from '../../../shared/toast/toast.service';
+import { InventoryContextService } from '../../../core/services/inventory-context';
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -6,7 +9,6 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatIconModule } from '@angular/material/icon';
 import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatSnackBar } from '@angular/material/snack-bar';
 import { ArticleService } from '../../../core/services/articles';
 import { MovementService } from '../../../core/services/movement';
 import { AssignmentService, AssignmentRecipient } from '../../../core/services/assignments';
@@ -16,21 +18,27 @@ import { SerialUnitsService, SerialUnit } from '../../../core/services/serial-un
 @Component({
   selector: 'app-traspaso-form',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, MatDialogModule, MatInputModule, MatSelectModule, MatIconModule, MatFormFieldModule],
+  imports: [CleanArticleNamePipe, CommonModule, ReactiveFormsModule, MatDialogModule, MatInputModule, MatSelectModule, MatIconModule, MatFormFieldModule],
   templateUrl: './traspaso-form.html',
   styleUrl: './traspaso-form.scss'
 })
 export class TraspasoFormComponent implements OnInit {
   private readonly fb = inject(FormBuilder);
   private readonly articlesApi = inject(ArticleService);
+  private readonly inventoryContext = inject(InventoryContextService);
   private readonly serialsApi = inject(SerialUnitsService);
   private readonly movementsApi = inject(MovementService);
   private readonly assignmentsApi = inject(AssignmentService);
-  private readonly snackbar = inject(MatSnackBar);
+  private readonly toast = inject(ToastService);
   readonly dialogRef = inject(MatDialogRef<TraspasoFormComponent>);
   articles: Article[] = [];
   step = 1;
   get selectedArticle():Article|undefined {return this.articles.find(a=>a.id===Number(this.form.controls.articleId.value));}
+  get selectedInventoryLabel(): string {
+    const id = Number(this.selectedArticle?.inventoryId);
+    const inventory = this.inventoryContext.options.find(i => i.id === id);
+    return inventory?.alias?.trim() || inventory?.inventoryName || (id > 0 ? `Inventario #${id}` : 'Selecciona un artículo');
+  }
   availableSerials:SerialUnit[]=[];
   selectedSerialIds:number[]=[];
   serialError='';
@@ -129,7 +137,7 @@ export class TraspasoFormComponent implements OnInit {
     const file = input.files?.[0];
     if (!file) return;
     if (!file.type.startsWith('image/') || file.size > 8_000_000) {
-      this.snackbar.open('Usa una imagen JPG/PNG/WEBP de menos de 8 MB.', 'Cerrar', {duration: 4500});
+      this.toast.warning('Usa una imagen JPG/PNG/WEBP de menos de 8 MB.');
       return;
     }
     this.removePhoto();
@@ -161,7 +169,7 @@ export class TraspasoFormComponent implements OnInit {
             next: () => this.saved(),
             error: () => {
               this.isSaving = false;
-              this.snackbar.open('La asignación se registró, pero falló el archivo. Puedes consultar la entrega en Artículos asignados.', 'Cerrar', {duration: 7500});
+              this.toast.warning('La asignación se registró, pero falló el archivo. Puedes consultar la entrega en Artículos asignados.');
               this.closeWithRefresh();
             }
           });
@@ -171,7 +179,7 @@ export class TraspasoFormComponent implements OnInit {
     } else {
       if (this.evidence) {
         this.isSaving = false;
-        this.snackbar.open('La baja sin custodia aún no admite evidencia. Quita la foto antes de registrar.', 'Cerrar', {duration: 4500});
+        this.toast.warning('La baja sin custodia aún no admite evidencia. Quita la foto antes de registrar.');
         return;
       }
       this.movementsApi.createMovement({
@@ -183,12 +191,12 @@ export class TraspasoFormComponent implements OnInit {
   }
   private saved(): void {
     this.isSaving = false;
-    this.snackbar.open('Operación registrada y stock actualizado.', 'Cerrar', {duration: 3500});
+    this.toast.success('Operación registrada y stock actualizado.');
     this.closeWithRefresh();
   }
   private closeWithRefresh(): void { this.removePhoto(); this.dialogRef.close(true); }
   private failed(err: any): void {
     this.isSaving = false;
-    this.snackbar.open(String(err?.error?.error ?? `No se pudo registrar (HTTP ${err?.status ?? '?'}).`), 'Cerrar', {duration: 7000});
+    this.toast.error(String(err?.error?.error ?? `No se pudo registrar (HTTP ${err?.status ?? '?'}).`));
   }
 }

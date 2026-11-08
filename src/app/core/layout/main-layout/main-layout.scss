@@ -53,3 +53,13 @@
 .active-inventory-select:focus{border-color:#99bd42}
 .active-inventory-select:disabled{opacity:.6}
 @media(max-width:700px){.active-inventory-label{display:none}.active-inventory-select{max-width:42vw;min-width:90px}}
+
+/* UX_FINAL_SIDEBAR */
+:host ::ng-deep .sidenav.collapsed .mat-mdc-list-item{width:48px!important;min-width:48px;height:48px!important;margin:5px auto!important;padding:0!important;display:flex!important;align-items:center!important;justify-content:center!important}
+:host ::ng-deep .sidenav.collapsed .mat-mdc-list-item .mdc-list-item__start{margin:0!important;display:grid!important;place-items:center!important;flex:0 0 24px!important}
+:host ::ng-deep .sidenav.collapsed .mat-mdc-list-item mat-icon[matlistitemicon]{width:24px;height:24px;margin:0!important;text-align:center;flex:none}
+:host ::ng-deep .sidenav.collapsed .mat-mdc-list-item .mdc-list-item__content{display:none!important}
+.top-toolbar{padding-left:22px!important;gap:17px}
+.top-toolbar .menu-trigger{margin-right:4px;border:1px solid #657d8f;background:#20323e;box-shadow:0 0 0 3px #14212b}
+.top-toolbar .menu-trigger:hover{border-color:#a8d73d;background:#293d49}
+@media(max-width:700px){:host ::ng-deep .sidenav.collapsed .mat-mdc-list-item{width:44px!important;min-width:44px}.top-toolbar{padding-left:14px!important;gap:10px}}

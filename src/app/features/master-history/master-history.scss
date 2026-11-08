@@ -19,3 +19,10 @@ td small{display:block;color:#a9bbc9;margin-top:3px}
 .status{padding:20px;text-align:center;color:#c8d4df}
 .error{padding:12px;color:#ffb6b6}
 footer{font-size:12px;color:#b7c8d6}footer div{display:flex;align-items:center;gap:10px}
+
+/* CUSTODIA_HISTORIALES_V2_SCROLL_GENERAL */
+.table-wrapper { max-height: 565px; overflow-x: auto; overflow-y: auto; scrollbar-width: thin; scrollbar-color: #536b7b #172532; }
+.table-wrapper th { position: sticky; top: 0; z-index: 1; }
+
+/* UX_FINAL_CUSTODIAS_HISTORIAL */
+.master-history .type.custody{background:#244b50;border:1px solid #437c7b;color:#c6f0ed}
