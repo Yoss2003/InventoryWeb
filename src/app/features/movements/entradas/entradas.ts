@@ -24,6 +24,8 @@ export class EntradasComponent implements OnInit {
   private readonly movementsApi=inject(MovementService);
   private readonly snackbar=inject(MatSnackBar);
   private readonly cdr=inject(ChangeDetectorRef);
+  /* FASE 4.1 */
+  selectedEntryTab=0;
   standard:Article[]=[];bulk:Article[]=[];serialized:Article[]=[];
   movements:Movement[]=[];
   private articleMap=new Map<number,Article>();
@@ -59,7 +61,12 @@ export class EntradasComponent implements OnInit {
   newArticle():void{this.editArticle(null);}
   editArticle(id:number|null):void{
     const ref=this.dialog.open(ArticleFormComponent,{width:'1080px',maxWidth:'calc(100vw - 24px)',maxHeight:'calc(100dvh - 24px)',disableClose:true,data:{id}});
-    ref.afterClosed().subscribe(ok=>{if(ok)this.loadRealData();});
+    ref.afterClosed().subscribe((result: boolean | { created: boolean; tracking: number } | undefined)=>{
+      if (!result) return;
+      if (typeof result === 'object' && result.created)
+        this.selectedEntryTab = result.tracking === 1 ? 2 : result.tracking === 2 ? 1 : 0;
+      this.loadRealData();
+    });
   }
   newEntry():void{
     const ref=this.dialog.open(MovementForm,{width:'min(600px,calc(100vw - 24px))',data:{actionId:1}});

@@ -1,5 +1,5 @@
 import { CommonModule, isPlatformBrowser } from '@angular/common';
-import { Component, OnInit, PLATFORM_ID, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, PLATFORM_ID, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import type { Observable } from 'rxjs';
@@ -26,6 +26,8 @@ export class MasterCatalogsComponent implements OnInit {
   private readonly http = inject(HttpClient);
   private readonly inventories = inject(InventoryContextService);
   private readonly toast = inject(ToastService);
+  private readonly cdr = inject(ChangeDetectorRef);
+  /* FASE 4.1 */
   private readonly platformId = inject(PLATFORM_ID);
   private readonly apiRoot = 'https://localhost:7295/api';
   tab: 'suppliers' | 'parameters' = 'suppliers';
@@ -33,6 +35,7 @@ export class MasterCatalogsComponent implements OnInit {
   parameters: ParameterRecord[] = [];
   loading = false;
   saving = false;
+  lookupRucLoading = false;
   editingSupplierId: number | null = null;
   editingParameterId: number | null = null;
   supplier: SupplierRecord = this.emptySupplier();
@@ -54,12 +57,40 @@ export class MasterCatalogsComponent implements OnInit {
     if (this.loading) return;
     this.loading = true;
     this.http.get<SupplierRecord[]>(`${this.apiRoot}/Suppliers`).subscribe({
-      next: list => {this.suppliers = list || [];this.loading = false;},
-      error: () => {this.loading = false;this.toast.error('No se pudieron consultar los proveedores.');}
+      next: list => {this.suppliers = list || [];this.loading = false;this.cdr.markForCheck();},
+      error: () => {this.loading = false;this.toast.error('No se pudieron consultar los proveedores.');this.cdr.markForCheck();}
     });
     this.http.get<ParameterRecord[]>(`${this.apiRoot}/Parameters`).subscribe({
-      next: list => this.parameters = list || [],
+      next: list => {this.parameters = list || [];this.cdr.markForCheck();},
       error: () => this.toast.error('No se pudieron consultar los parámetros generales.')
+    });
+  }
+  lookupRuc(): void {
+    const ruc = String(this.supplier.ruc ?? '').trim();
+    if (!/^\d{11}$/.test(ruc)) { this.toast.warning('El RUC debe tener 11 dígitos.'); return; }
+    if (this.lookupRucLoading || this.saving || this.editingSupplierId) return;
+    this.lookupRucLoading = true;
+    this.cdr.markForCheck();
+    this.http.get<Partial<SupplierRecord>>(`${this.apiRoot}/Suppliers/ruc/${encodeURIComponent(ruc)}`).subscribe({
+      next: result => {
+        this.lookupRucLoading = false;
+        this.cdr.markForCheck();
+        if (String(this.supplier.ruc).trim() !== ruc) return; // No sobrescribir otro RUC.
+        this.supplier = {
+          ...this.supplier,
+          businessName: result.businessName || this.supplier.businessName,
+          address: result.address ?? this.supplier.address,
+          statusId: result.statusId || this.supplier.statusId,
+          contactName: result.contactName || this.supplier.contactName
+        };
+        this.toast.success('Consulta RUC realizada. Verifica los datos antes de registrar.', 'Datos SUNAT');
+        this.cdr.markForCheck();
+      },
+      error: err => {
+        this.lookupRucLoading = false;
+        this.toast.error(String(err?.error?.error ?? 'No se pudo consultar SUNAT. Revisa el token central en la API.'));
+        this.cdr.markForCheck();
+      }
     });
   }
   newSupplier(): void {this.supplier=this.emptySupplier();this.editingSupplierId=null;}

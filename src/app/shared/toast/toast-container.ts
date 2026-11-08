@@ -1,5 +1,5 @@
-import { CommonModule } from '@angular/common';
-import { Component, inject } from '@angular/core';
+import { CommonModule, DOCUMENT, isPlatformBrowser } from '@angular/common';
+import { AfterViewInit, Component, ElementRef, OnDestroy, PLATFORM_ID, ViewChild, inject } from '@angular/core';
 import { ToastService, ToastType } from './toast.service';
 
 @Component({
@@ -9,7 +9,25 @@ import { ToastService, ToastType } from './toast.service';
   templateUrl: './toast-container.html',
   styleUrl: './toast-container.scss'
 })
-export class ToastContainerComponent {
+export class ToastContainerComponent implements AfterViewInit, OnDestroy {
+  /* FASE 4.1 */
+  @ViewChild('toastStack', { static: true }) private stack?: ElementRef<HTMLElement>;
+  private readonly document = inject(DOCUMENT);
+  private readonly platform = inject(PLATFORM_ID);
+  ngAfterViewInit(): void {
+    if (!isPlatformBrowser(this.platform)) return;
+    const element = this.stack?.nativeElement;
+    if (!element) return;
+    this.document.body.appendChild(element); // Escapa del stacking context de app-root.
+    if (typeof element.showPopover === 'function') element.showPopover();
+  }
+  ngOnDestroy(): void {
+    const element = this.stack?.nativeElement;
+    if (element && isPlatformBrowser(this.platform)) {
+      if (typeof element.hidePopover === 'function' && element.matches(':popover-open')) element.hidePopover();
+      element.remove();
+    }
+  }
   readonly alerts = inject(ToastService);
 
   icon(type: ToastType): string {

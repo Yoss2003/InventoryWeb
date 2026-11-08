@@ -408,6 +408,7 @@ export class CategoryChildFormComponent implements OnInit {
     }
 
     // Preview del nombre
+    /* FASE 4.1 */
     get formulaPreview(): string {
         let formula = this.attributesForm.get('namingCustom')?.value || '';
         if (!formula) return 'Define una fórmula para ver el ejemplo...';
@@ -426,7 +427,8 @@ export class CategoryChildFormComponent implements OnInit {
             formula = formula.replace(new RegExp(escapedTag, 'g'), displayVal);
         }
 
-        return formula;
+        // '+' es concatenación de etiquetas, no un separador visible en el nombre.
+        return formula.replace(/\s*\+\s*/g, ' ').replace(/\s{2,}/g, ' ').trim();
     }
 
     // Respaldo al enfocar

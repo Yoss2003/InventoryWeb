@@ -110,6 +110,22 @@ export class ArticleFormComponent implements OnInit, OnDestroy {
   isEditMode = false;
   isSaving = false;
   private existingArticle: Article | null = null;
+  /* FASE 4.1 */
+  extraSerialNumbers: string[] = [];
+
+  get additionalSerialIndexes(): number[] {
+    if (this.currentTrackingMode !== 'Serializado' || this.isEditMode) return [];
+    const count = Number(this.logisticsForm?.get('stock')?.value);
+    if (!Number.isInteger(count) || count < 1 || count > 1000) return [];
+    return Array.from({length: count - 1}, (_, i) => i);
+  }
+  trackBySerialIndex(index: number): number { return index; }
+  setExtraSerial(index: number, event: Event): void {
+    this.extraSerialNumbers[index] = (event.target as HTMLInputElement).value;
+  }
+  get hasSeveralExistingSerials(): boolean {
+    return (this.existingArticle?.details ?? this.existingArticle?.articleDetails ?? []).length > 1;
+  }
   private editHydrated = false;
   private removedPhoto = false;
   private removedVoucher = false;
@@ -456,12 +472,21 @@ export class ArticleFormComponent implements OnInit, OnDestroy {
 
       if (this.currentTrackingMode === 'Serializado') {
         serial?.setValidators(Validators.required);
-        this.logisticsForm.get('stock')?.setValue(1);
-        this.logisticsForm.get('stock')?.disable({ emitEvent: false });
+        const stock = this.logisticsForm.get('stock');
+        stock?.setValidators([Validators.required, Validators.min(1), Validators.max(1000), Validators.pattern(/^[1-9]\d*$/)]);
+        if (!this.isEditMode) {
+          stock?.setValue(1, { emitEvent: false });
+          stock?.enable({ emitEvent: false });
+          this.extraSerialNumbers = [];
+        } else stock?.disable({ emitEvent: false });
+        stock?.updateValueAndValidity({ emitEvent: false });
       } else {
         if (this.currentTrackingMode === 'A Granel') sku?.setValidators(Validators.required);
         else barcode?.setValidators(Validators.required);
-        this.logisticsForm.get('stock')?.enable({ emitEvent: false });
+        const stock = this.logisticsForm.get('stock');
+        stock?.setValidators([Validators.required, Validators.min(0)]);
+        stock?.enable({ emitEvent: false });
+        stock?.updateValueAndValidity({ emitEvent: false });
       }
     }
 
@@ -529,6 +554,9 @@ export class ArticleFormComponent implements OnInit, OnDestroy {
     result = result
       .replace(/\[[^\]]+\]/g, '')
       .replace(/\s*([+|/,\-])\s*(?=[+|/,\-]|$)/g, '')
+      // '+' concatena etiquetas de la fórmula, pero jamás se muestra al usuario.
+      .replace(/\s*\+\s*/g, ' ')
+      .replace(/^\s*[|/,.;:\-]+\s*|\s*[|/,.;:\-]+\s*$/g, '')
       .replace(/\s{2,}/g, ' ')
       .trim();
     nameControl.setValue(result, { emitEvent: false });
@@ -872,6 +900,21 @@ export class ArticleFormComponent implements OnInit, OnDestroy {
       attr1: attrs['attr1'], attr2: attrs['attr2'], attr3: attrs['attr3'],
       attr4: attrs['attr4'], attr5: attrs['attr5'], attr6: attrs['attr6'], isActive: true
     };
+    // Alta serializada: una serie única, no vacía, por cada unidad de stock.
+    const requestedStock = Number(logistics.stock);
+    const initialSerials = mode === 1 && !this.isEditMode
+      ? [String(identity.serialNumber ?? ''), ...this.extraSerialNumbers.slice(0, Math.max(0, requestedStock - 1))]
+          .map(value => String(value ?? '').trim()) : [];
+    if (mode === 1 && !this.isEditMode) {
+      const unique = new Set(initialSerials.map(value => value.toLocaleUpperCase('es-PE')));
+      if (!Number.isInteger(requestedStock) || requestedStock < 1 || requestedStock > 1000 ||
+          initialSerials.length !== requestedStock || initialSerials.some(value => !value || value.length > 150) ||
+          unique.size !== requestedStock) {
+        this.currentStep = 2;
+        this.snackBar.open('El stock serializado requiere exactamente una serie válida y distinta por unidad.', 'Cerrar', { duration: 6500 });
+        return;
+      }
+    }
     const targetInventoryId = this.existingArticle?.inventoryId ?? this.inventoryContext.activeInventoryId;
     if (!targetInventoryId) {
       this.snackBar.open('Selecciona un inventario de trabajo antes de registrar artículos.', 'Cerrar', { duration: 5000 });
@@ -883,8 +926,7 @@ export class ArticleFormComponent implements OnInit, OnDestroy {
       brandId: Number(identity.brandId), code, barcode: identity.barcode || null,
       name: String(identity.name).trim(), model: identity.model || 'Sin modelo',
       presentation: identity.presentation || null, serialNumber: identity.serialNumber || null,
-      tracking: mode, stock: !this.isEditMode && mode === 1 && detail.serialNumber
-        ? 1 : Number(logistics.stock),
+      tracking: mode, stock: requestedStock,
       measurementUnit: logistics.saleUnit,
       acquisitionUnit: logistics.acqUnit, saleUnit: logistics.saleUnit,
       conversionFactor: Number(logistics.conversionFactor),
@@ -894,8 +936,10 @@ export class ArticleFormComponent implements OnInit, OnDestroy {
       saleCurrency: finance.saleCurrency,
       characteristics: mode === 1 ? null : JSON.stringify(attrs),
       details: mode === 1
-        ? [{...detail, ...(this.isEditMode && this.existingArticle?.details?.[0]?.id ?
-          {id: this.existingArticle.details[0].id, articleId: this.existingArticle.id} : {})}]
+        ? (this.isEditMode
+            ? (this.hasSeveralExistingSerials ? [] : [{ ...detail, ...(this.existingArticle?.details?.[0]?.id
+                ? {id: this.existingArticle.details[0].id, articleId: this.existingArticle.id} : {}) }])
+            : initialSerials.map(serialNumber => ({...detail, serialNumber})))
         : undefined,
       actionId: this.existingArticle?.actionId ?? 1,
       isActive: this.existingArticle?.isActive ?? true,
@@ -925,12 +969,12 @@ export class ArticleFormComponent implements OnInit, OnDestroy {
           next: () => {
             this.isSaving = false;
             this.snackBar.open('Artículo y archivos guardados correctamente.', 'Cerrar', { duration: 3300 });
-            this.dialogRef.close(true);
+            this.dialogRef.close({ created: !this.isEditMode, tracking: mode, articleId });
           },
           error: (error: HttpErrorResponse) => {
             this.isSaving = false;
             this.snackBar.open(`Artículo guardado, pero falló el archivo: ${this.readApiError(error)}`, 'Cerrar', { duration: 8500 });
-            this.dialogRef.close(true);
+            this.dialogRef.close({ created: !this.isEditMode, tracking: mode, articleId });
           }
         });
       },

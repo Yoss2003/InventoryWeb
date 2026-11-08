@@ -754,3 +754,10 @@ button:focus-visible { outline: 2px solid $lime; outline-offset: 2px; }
   .preview-expand { padding: 6px; font-size: 0; gap: 0; }
   .preview-expand mat-icon { font-size: 18px; width: 18px; height: 18px; }
 }
+
+/* FASE 4.1 */
+/* Captura de series en lote: 2 columnas en escritorio, 1 en móvil. */
+.serial-series-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; margin-top:16px; padding:16px; border:1px solid #526b7d; border-radius:12px; background:#12212d; }
+.serial-series-field { display:grid; gap:7px; min-width:0; color:#dfe8f0; font-size:12px; }
+.serial-series-field .custom-input { width:100%; box-sizing:border-box; }
+@media(max-width:700px) {.serial-series-grid {grid-template-columns:1fr;}}

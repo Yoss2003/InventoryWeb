@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { MatIconModule } from '@angular/material/icon';
@@ -31,6 +31,8 @@ interface MasterHistoryResponse { items: MasterMovementRow[]; total: number; pag
 export class MasterHistoryComponent implements OnInit {
   private readonly http = inject(HttpClient);
   private readonly toast = inject(ToastService);
+  private readonly cdr = inject(ChangeDetectorRef);
+  /* FASE 4.1 */
   readonly api = 'https://localhost:7295/api/Movements/master/history';
   items: MasterMovementRow[] = [];
   total = 0;
@@ -63,12 +65,14 @@ export class MasterHistoryComponent implements OnInit {
     if (this.to) params = params.set('to', new Date(`${this.to}T23:59:59`).toISOString());
     this.loading = true;
     this.error = '';
+    this.cdr.markForCheck();
     this.http.get<MasterHistoryResponse>(this.api, { params }).subscribe({
-      next: result => { this.items = result.items ?? []; this.total = result.total ?? 0; this.loading = false; },
+      next: result => { this.items = result.items ?? []; this.total = result.total ?? 0; this.loading = false; this.cdr.markForCheck(); },
       error: err => {
         this.loading = false;
         this.error = String(err?.error?.error || 'No se pudo consultar el historial de la empresa.');
         this.toast.error(this.error, 'Historial administrativo');
+        this.cdr.markForCheck();
       }
     });
   }

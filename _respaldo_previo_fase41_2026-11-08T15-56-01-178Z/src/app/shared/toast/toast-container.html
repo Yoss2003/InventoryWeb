@@ -1,0 +1,24 @@
+<div class="toast-stack" aria-label="Notificaciones de InventarioWeb">
+  <section *ngFor="let toast of alerts.toasts()"
+           class="toast"
+           [class.toast--success]="toast.type === 'success'"
+           [class.toast--error]="toast.type === 'error'"
+           [class.toast--warning]="toast.type === 'warning'"
+           [class.toast--info]="toast.type === 'info'"
+           [class.toast--closing]="toast.closing"
+           [attr.role]="toast.type === 'error' ? 'alert' : 'status'">
+    <div class="toast-content">
+      <span class="toast-symbol" aria-hidden="true">{{ icon(toast.type) }}</span>
+      <div class="toast-text">
+        <strong>{{ toast.title }}</strong>
+        <p>{{ toast.message }}</p>
+      </div>
+      <button type="button" class="toast-close"
+              (click)="alerts.dismiss(toast.id)" aria-label="Cerrar notificación"
+              title="Cerrar">&times;</button>
+    </div>
+    <div class="toast-timeline" aria-hidden="true">
+      <div class="toast-progress" [style.animation-duration]="toast.durationMs + 'ms'"></div>
+    </div>
+  </section>
+</div>

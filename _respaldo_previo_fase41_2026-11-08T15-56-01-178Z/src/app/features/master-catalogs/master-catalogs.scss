@@ -1,0 +1,17 @@
+:host{display:block;color:#e8f2fb}
+.catalog-page{display:flex;flex-direction:column;gap:14px}
+header{display:flex;align-items:center;justify-content:space-between;gap:12px}
+h1{margin:0;font-size:23px}h2{margin:0 0 12px;font-size:16px}p{margin:4px 0;color:#aebdca;font-size:12px}
+.tabs{display:flex;gap:8px;flex-wrap:wrap}
+button{border:1px solid #526c7c;border-radius:7px;background:#233747;color:#edf6fc;padding:8px 12px;cursor:pointer}
+button:disabled{opacity:.5;cursor:not-allowed}.tabs button.active,.primary{background:#93bb43;border-color:#93bb43;color:#172509;font-weight:700}
+.panel{display:grid;grid-template-columns:minmax(270px,.9fr) minmax(320px,1.6fr);gap:14px}
+.panel form,.list{background:#1a2a36;border:1px solid #3b5465;border-radius:12px;padding:16px;min-width:0}
+.fields{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px}
+.fields label{display:flex;flex-direction:column;gap:5px;font-size:12px}
+.fields input,.fields textarea{background:#111d27;border:1px solid #536b7c;color:#f3f8fb;padding:10px;border-radius:7px;font:inherit;min-width:0}
+.actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
+.list{overflow:auto}.list table{width:100%;border-collapse:collapse;font-size:12px}.list th,.list td{padding:10px;border-bottom:1px solid #364e5d;text-align:left}
+.list th{color:#c5d8e3;background:#243a48}.list td button{font-size:11px;margin:2px}
+.hint{margin-top:12px;line-height:1.5}
+@media(max-width:900px){.panel{grid-template-columns:1fr}}

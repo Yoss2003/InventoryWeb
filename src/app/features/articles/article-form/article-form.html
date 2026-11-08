@@ -165,7 +165,7 @@
                 <label for="article-serial">Número de serie / IMEI <span class="required">*</span></label>
                 <div class="input-with-actions">
                   <input id="article-serial" type="text" formControlName="serialNumber" class="custom-input"
-                         [class.invalid]="isInvalid('identity', 'serialNumber')" placeholder="Ingresa o escanea la serie" />
+                         [class.invalid]="isInvalid('identity', 'serialNumber')" [readonly]="hasSeveralExistingSerials" placeholder="Ingresa o escanea la primera serie" />
                   <input type="file" #camScanSerie accept="image/*" capture="environment"
                          (change)="scanBarcodeFromImage($event, 'serialNumber')" hidden>
                   <button type="button" class="btn-icon btn-blue" (click)="camScanSerie.click()"
@@ -346,13 +346,22 @@
             </div>
             <div class="field-tile">
               <div class="tile-label"><mat-icon>warehouse</mat-icon><label for="article-stock">Stock total <span class="required">*</span></label></div>
-              <input id="article-stock" type="number" min="0" step="any" formControlName="stock" class="custom-input"
+              <input id="article-stock" type="number" [attr.min]="currentTrackingMode === 'Serializado' ? 1 : 0" [attr.max]="currentTrackingMode === 'Serializado' ? 1000 : null" [attr.step]="currentTrackingMode === 'Serializado' ? 1 : 'any'" formControlName="stock" class="custom-input"
                      [class.invalid]="isInvalid('logistics', 'stock')" />
               <span class="hint-text">Expresado en unidades de venta</span>
               <span class="error-text" *ngIf="isInvalid('logistics', 'stock')">Ingresa un stock válido.</span>
             </div>
           </div>
-          <p *ngIf="currentTrackingMode === 'Serializado'" class="helper-note"><mat-icon>info_outline</mat-icon> Para artículos serializados el stock inicial se fija en 1.</p>
+          <p *ngIf="currentTrackingMode === 'Serializado' && !isEditMode" class="helper-note"><mat-icon>info_outline</mat-icon> Cada unidad de stock necesita una serie distinta. Ingresa la primera en Identidad y las restantes aquí (máximo 1000 por alta).</p>
+          <div *ngIf="currentTrackingMode === 'Serializado' && !isEditMode && additionalSerialIndexes.length > 0" class="serial-series-grid">
+            <label *ngFor="let idx of additionalSerialIndexes; trackBy: trackBySerialIndex" class="serial-series-field">
+              <span>Serie / IMEI {{idx + 2}} <span class="required">*</span></span>
+              <input type="text" class="custom-input" maxlength="150" autocomplete="off"
+                [value]="extraSerialNumbers[idx] || ''" (input)="setExtraSerial(idx, $event)"
+                [attr.aria-label]="'Serie / IMEI ' + (idx + 2)" placeholder="Número de serie único" />
+            </label>
+          </div>
+          <p *ngIf="currentTrackingMode === 'Serializado' && isEditMode" class="helper-note"><mat-icon>info_outline</mat-icon> Para agregar nuevas unidades a un artículo existente usa Gestión de series, que también registra su movimiento. El stock no se cambia aquí.</p>
         </form>
       </div>
     </section>
@@ -490,3 +499,5 @@
     </p>
   </div>
 </dialog>
+
+<!-- /* FASE 4.1 */ -->

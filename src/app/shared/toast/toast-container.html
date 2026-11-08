@@ -1,4 +1,4 @@
-<div class="toast-stack" aria-label="Notificaciones de InventarioWeb">
+<div #toastStack popover="manual" class="toast-stack" aria-label="Notificaciones de InventarioWeb">
   <section *ngFor="let toast of alerts.toasts()"
            class="toast"
            [class.toast--success]="toast.type === 'success'"
@@ -22,3 +22,5 @@
     </div>
   </section>
 </div>
+
+<!-- /* FASE 4.1 */ -->

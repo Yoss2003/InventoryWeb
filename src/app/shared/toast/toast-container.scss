@@ -46,3 +46,12 @@
   .toast, .toast--closing { animation-duration: .01ms; }
   .toast-progress { animation-name: none; }
 }
+
+/* FASE 4.1 */
+/* Popover manual: top-layer (delante de mat-dialog y sus overlays). */
+.toast-stack, .toast-stack:popover-open {
+  inset: auto 22px 22px auto;
+  margin: 0; border: 0; padding: 0; background: transparent;
+  overflow: visible; z-index: 2147483647;
+}
+@media (max-width: 600px) { .toast-stack, .toast-stack:popover-open { inset: auto 12px 12px 12px; } }

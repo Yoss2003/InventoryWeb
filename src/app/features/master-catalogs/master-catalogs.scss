@@ -15,3 +15,7 @@ button:disabled{opacity:.5;cursor:not-allowed}.tabs button.active,.primary{backg
 .list th{color:#c5d8e3;background:#243a48}.list td button{font-size:11px;margin:2px}
 .hint{margin-top:12px;line-height:1.5}
 @media(max-width:900px){.panel{grid-template-columns:1fr}}
+
+/* FASE 4.1 */
+.ruc-lookup {align-self:end;min-height:42px;padding:8px 14px;border-radius:8px;border:1px solid #91b552;background:#31492a;color:#f0ffd7;cursor:pointer;font-weight:600}
+.ruc-lookup:disabled {opacity:.55;cursor:not-allowed}
