@@ -19,6 +19,7 @@ export class AssignmentHistoryDialogComponent implements OnInit, OnDestroy {
   readonly dialogRef = inject(MatDialogRef<AssignmentHistoryDialogComponent>);
   private readonly api = inject(AssignmentService);
   private readonly serialsApi = inject(SerialUnitsService);
+
   get inventoryLabel(): string {
     const inventory = this.inventoryContext.options.find(i => i.id === this.data.inventoryId);
     return inventory?.alias?.trim() || inventory?.inventoryName || `Inventario #${this.data.inventoryId}`;
@@ -42,6 +43,85 @@ export class AssignmentHistoryDialogComponent implements OnInit, OnDestroy {
 
   get canReturn(): boolean { return Number(this.amount) > 0 && Number(this.amount) <= Number(this.data.remainingQuantity) && !this.isSaving && !this.serialLoading &&
     (!this.isSerialized || this.selectedSerialIds.length === Number(this.amount)); }
+
+  
+  evidenceUploading = false;
+
+  get canManageEvidence(): boolean {
+    if (typeof window === 'undefined') return false;
+
+    try {
+      const session = JSON.parse(
+        window.localStorage.getItem('userSession') || '{}'
+      );
+
+      return Number(session.id) > 0 &&
+        Number(session.id) === this.data.assignedByUserId;
+    } catch {
+      return false;
+    }
+  }
+
+  onEvidenceSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    input.value = '';
+
+    if (!file || this.evidenceUploading ||
+        !this.canManageEvidence) return;
+
+    const formats: Record<string, string> = {
+      jpg: 'image/jpeg',
+      jpeg: 'image/jpeg',
+      png: 'image/png',
+      webp: 'image/webp'
+    };
+
+    const extension = file.name.split('.').pop()?.toLowerCase();
+
+    if (!extension || formats[extension] !== file.type ||
+        file.size <= 0 || file.size > 8_000_000) {
+      this.evidenceStatus =
+        'Selecciona una imagen JPG, PNG o WEBP de máximo 8 MB.';
+      return;
+    }
+
+    this.evidenceUploading = true;
+    this.evidenceStatus = '';
+
+    this.api.uploadEvidence(this.data.id, file).subscribe({
+      next: () => {
+        this.data.hasEvidence = true;
+
+        this.api.getEvidence(this.data.id).subscribe({
+          next: blob => {
+            if (this.evidenceUrl) {
+              URL.revokeObjectURL(this.evidenceUrl);
+            }
+
+            this.evidenceUrl = URL.createObjectURL(blob);
+            this.evidenceStatus = '';
+            this.evidenceUploading = false;
+            this.cdr.markForCheck();
+          },
+          error: () => {
+            this.evidenceUploading = false;
+            this.evidenceStatus =
+              'La fotografía se guardó, pero no pudo recargarse. Vuelve a abrir la custodia.';
+            this.cdr.markForCheck();
+          }
+        });
+      },
+      error: err => {
+        this.evidenceUploading = false;
+        this.evidenceStatus = err?.status === 403
+          ? 'Solo quien registró la custodia puede modificar su fotografía.'
+          : 'No se pudo guardar la fotografía de custodia.';
+        this.cdr.markForCheck();
+      }
+    });
+  }
+
   ngOnInit(): void {
     this.loading = true;
     this.api.events(this.data.id).subscribe({ next: rows => { this.events = rows; this.loading = false; this.cdr.markForCheck(); }, error: () => { this.loading = false; this.errorMessage = 'No se pudo cargar el historial.'; this.cdr.markForCheck(); } });
@@ -49,18 +129,21 @@ export class AssignmentHistoryDialogComponent implements OnInit, OnDestroy {
       error:()=>{this.serialLoading=false;this.errorMessage='No se pudieron consultar las series asignadas.'; this.cdr.markForCheck();}});
     // UX_FINAL_EVIDENCIA_CUSTODIA: consultar incluso custodias históricas.
     this.api.getEvidence(this.data.id).subscribe({
-      next: file => {
-        if (this.evidenceUrl) URL.revokeObjectURL(this.evidenceUrl);
-        this.evidenceUrl = URL.createObjectURL(file);
-        this.evidenceStatus = '';
-        this.cdr.markForCheck();
-      },
-      error: err => {
-        this.evidenceStatus = err?.status === 404
-          ? 'No se encontró una fotografía guardada para esta custodia.'
-          : 'No se pudo cargar la fotografía de esta custodia.';
-        this.cdr.markForCheck();
-      }
+        next: file => {
+            if (this.evidenceUrl)
+                URL.revokeObjectURL(this.evidenceUrl);
+
+            this.evidenceUrl = URL.createObjectURL(file);
+            this.evidenceStatus = '';
+            this.cdr.markForCheck();
+        },
+        error: err => {
+            this.evidenceStatus = err?.status === 404
+                ? 'No se encontró la fotografía de esta custodia.'
+                : 'No se pudo cargar la fotografía.';
+
+            this.cdr.markForCheck();
+        }
     });
   }
   ngOnDestroy(): void { if (this.evidenceUrl) URL.revokeObjectURL(this.evidenceUrl); }

@@ -23,6 +23,29 @@
       <p class="assignment-dialog__notes">{{data.observation || 'Sin observaciones'}}</p>
       <img *ngIf="evidenceUrl" [src]="evidenceUrl" alt="Evidencia de entrega" style="max-width:100%;max-height:240px;object-fit:contain;border-radius:9px;margin-top:10px" />
       <p *ngIf="evidenceStatus" class="evidence-status" role="status">{{evidenceStatus}}</p>
+
+      <div *ngIf="canManageEvidence" class="evidence-update">
+        <input
+          #evidenceInput
+          type="file"
+          accept=".jpg,.jpeg,.png,.webp"
+          hidden
+          (change)="onEvidenceSelected($event)"
+        />
+
+        <button
+          type="button"
+          class="evidence-update-button"
+          [disabled]="evidenceUploading"
+          (click)="evidenceInput.click()">
+          {{ evidenceUploading
+              ? 'Guardando fotografía...'
+              : (data.hasEvidence
+                  ? 'Cambiar fotografía'
+                  : 'Agregar fotografía') }}
+        </button>
+      </div>
+
     </section>
     <section class="assignment-dialog__block"><h3><mat-icon>history</mat-icon> Historial de eventos</h3>
       <p *ngIf="loading">Cargando movimientos…</p>
