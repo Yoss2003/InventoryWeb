@@ -15,8 +15,10 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { LoadingIndicatorComponent } from '../../../shared/loading/loading-indicator';
 
 interface ArticleRow extends Article { categoryName: string; brandName: string; }
+import { UiSearchComponent } from '../../../shared/ui/ui-search.component';
+
 @Component({selector:'app-article-list',standalone:true,
-  imports:[CommonModule,FormsModule,MatIconModule,LoadingIndicatorComponent],
+  imports:[CommonModule,FormsModule,MatIconModule,LoadingIndicatorComponent,UiSearchComponent],
   templateUrl:'./article-list.html',styleUrl:'./article-list.scss'})
 export class ArticleListComponent implements OnInit {
   private readonly articles=inject(ArticleService);

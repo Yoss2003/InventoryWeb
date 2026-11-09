@@ -9,8 +9,10 @@ import { AssignmentService, AssignedArticle } from '../../core/services/assignme
 import { AssignmentHistoryDialogComponent } from '../assignment-history-dialog/assignment-history-dialog';
 import { LoadingIndicatorComponent } from '../../shared/loading/loading-indicator';
 
+import { UiSearchComponent } from '../../shared/ui/ui-search.component';
+
 @Component({selector:'app-assignment-history',standalone:true,
-  imports:[CleanArticleNamePipe, CommonModule,FormsModule,MatIconModule,LoadingIndicatorComponent],
+  imports:[CleanArticleNamePipe, CommonModule,FormsModule,MatIconModule,LoadingIndicatorComponent,UiSearchComponent],
   templateUrl:'./assignment-history.html',styleUrl:'./assignment-history.scss'})
 export class AssignmentHistoryComponent implements OnInit {
   private readonly api=inject(AssignmentService);

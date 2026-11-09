@@ -1,0 +1,126 @@
+/* WebInventory UI System V1
+   Arquitectura inspirada en las variables y utilidades de ControlRestaurant,
+   conservando colores y densidad visual de WebInventory.
+   Uso OPT-IN: no cambia los modales aprobados ni sus reglas existentes.
+*/
+:root {
+  --inv-bg: #151c23;
+  --inv-panel: #17232f;
+  --inv-panel-head: #1e3040;
+  --inv-input-bg: #101a24;
+  --inv-input-border: #60788a;
+  --inv-text: #edf4fc;
+  --inv-muted: #a9bac8;
+  --inv-border: #455a6d;
+  --inv-accent: #a8d73d;
+  --inv-danger: #ffacb1;
+  --inv-control-height: 43px;
+  --inv-button-height: 40px;
+  --inv-action-size: 34px;
+  --inv-radius-control: 9px;
+  --inv-radius-panel: 14px;
+  --inv-space-1: 4px;
+  --inv-space-2: 8px;
+  --inv-space-3: 12px;
+  --inv-space-4: 16px;
+  --inv-space-5: 20px;
+}
+
+/* Barras de búsqueda y filtros compuestas: mismo alineamiento. */
+.ui-table-toolbar {
+  display:flex;
+  flex-wrap:wrap;
+  align-items:center;
+  gap:12px;
+  min-width:0;
+  margin:14px 0;
+}
+.ui-table-toolbar app-ui-search { min-width:0; }
+
+/* El ancho mínimo depende de las columnas: cada pantalla lo conserva.
+   Esta clase solo normaliza densidad y jerarquía visual. */
+.ui-table-shell table:not(.mat-mdc-table) {
+  width:100%;
+  border-collapse:collapse;
+  text-align:left;
+  background:var(--inv-panel);
+}
+.ui-table-shell table:not(.mat-mdc-table) thead th {
+  padding:12px 13px;
+  background:var(--inv-panel-head);
+  color:#b8c8d7;
+  font-size:11px;
+  font-weight:700;
+  line-height:1.4;
+  vertical-align:middle;
+}
+.ui-table-shell table:not(.mat-mdc-table) tbody td {
+  padding:12px 13px;
+  border-bottom:1px solid #3e5264;
+  color:#dce8f3;
+  font-size:12px;
+  vertical-align:middle;
+}
+/* No aplicar a los modales de marca ni a las tablas de proveedores en móvil. */
+.ui-table-shell table:not(.mat-mdc-table) tbody tr:last-child td {
+  border-bottom:0;
+}
+.ui-table-shell { max-width:100%; min-width:0; overflow-x:auto; }
+.ui-table-shell:focus-within { scroll-padding-inline:12px; }
+
+/* Acciones reutilizables: aplicación explícita para evitar cambios globales
+   sobre botones especializados (cámara, zoom, series, etc.). */
+.ui-button {
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:7px;
+  min-height:var(--inv-button-height);
+  border-radius:var(--inv-radius-control);
+  padding:9px 13px;
+  font:inherit;
+  font-size:12px;
+  font-weight:700;
+  cursor:pointer;
+  white-space:normal;
+}
+.ui-button--primary {
+  background:#7e9e28;
+  border:1px solid #92ae43;
+  color:#f4ffe9;
+}
+.ui-button--secondary {
+  background:#263947;
+  border:1px solid #62798a;
+  color:#e4eff8;
+}
+.ui-button--danger {
+  background:#41262e;
+  border:1px solid #855562;
+  color:#ffb7bc;
+}
+.ui-button:disabled { opacity:.48; cursor:not-allowed; }
+.ui-button:focus-visible,
+.ui-table-shell button:focus-visible {
+  outline:2px solid var(--inv-accent);
+  outline-offset:2px;
+}
+
+.ui-empty-state {
+  display:grid;
+  place-items:center;
+  min-height:110px;
+  padding:22px;
+  color:var(--inv-muted);
+  text-align:center;
+  font-size:12px;
+}
+
+@media(max-width:720px) {
+  .ui-table-toolbar { align-items:stretch; flex-direction:column; }
+  .ui-table-toolbar > * { max-width:100%; }
+  .ui-button { min-height:42px; }
+}
+@media(prefers-reduced-motion:reduce) {
+  .ui-button { transition:none; }
+}

@@ -17,9 +17,11 @@ import { CategoryParentFormComponent } from '../category-parent-form/category-pa
 import { CategoryChildFormComponent } from '../category-child-form/category-child-form';
 import { LoadingIndicatorComponent } from '../../../shared/loading/loading-indicator';
 
+import { UiSearchComponent } from '../../../shared/ui/ui-search.component';
+
 @Component({
   selector:'app-category-list',standalone:true,
-  imports:[MatTableModule,MatCardModule,MatButtonModule,MatIconModule,MatInputModule,MatCheckboxModule,FormsModule,CommonModule,LoadingIndicatorComponent],
+  imports:[MatTableModule,MatCardModule,MatButtonModule,MatIconModule,MatInputModule,MatCheckboxModule,FormsModule,CommonModule,LoadingIndicatorComponent,UiSearchComponent],
   templateUrl:'./category-list.html',styleUrl:'./category-list.scss',
   animations:[trigger('detailExpand',[
     state('collapsed,void',style({height:'0px',minHeight:'0'})),
@@ -69,7 +71,7 @@ export class CategoryListComponent implements OnInit {
     this.cdr.markForCheck();
   }
   toggleInactivos():void{this.processData();}
-  applyFilter(event:Event):void{this.dataSource.filter=(event.target as HTMLInputElement).value.trim().toLowerCase();}
+  applyFilterText(text:string):void{this.dataSource.filter=text.trim().toLocaleLowerCase('es');}
   nuevaCategoriaPadre(categoriaEdit?:Category):void{
     const ref=this.dialog.open(CategoryParentFormComponent,{width:'min(540px,calc(100vw - 24px))',maxWidth:'calc(100vw - 24px)',data:categoriaEdit||null});
     ref.afterClosed().subscribe(ok=>{if(ok)this.loadData();});

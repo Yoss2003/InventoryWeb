@@ -1,4 +1,5 @@
 @use '@angular/material' as mat;
+@use './app/shared/ui/ui-system';
 @use './app/features/articles/brand-dialog/brand-dialog-overlay';
 
 html { height: 100%; color-scheme: dark; @include mat.theme((color: (theme-type: dark, primary: mat.$azure-palette, tertiary: mat.$blue-palette), typography: Roboto, density: 0)); }

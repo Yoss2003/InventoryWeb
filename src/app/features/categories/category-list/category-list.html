@@ -4,21 +4,21 @@
       <h1>Maestro de categorías</h1><p>Grupos, subcategorías, reglas de seguimiento y nombramiento.</p>
     </div></div>
     <div class="heading-actions">
-      <button type="button" class="secondary-action" (click)="loadData()" [disabled]="loading">
+      <button type="button" class="secondary-action ui-button ui-button--secondary" (click)="loadData()" [disabled]="loading">
         <app-loading-indicator *ngIf="loading; else categoryRefresh" [compact]="true" message="Cargando..." />
         <ng-template #categoryRefresh><mat-icon>refresh</mat-icon>Actualizar</ng-template>
       </button>
-      <button type="button" class="primary-action" (click)="nuevaCategoriaHija()"><mat-icon>add</mat-icon>Categoría hija</button>
-      <button type="button" class="secondary-action" (click)="nuevaCategoriaPadre()"><mat-icon>create_new_folder</mat-icon>Categoría padre</button>
+      <button type="button" class="primary-action ui-button ui-button--primary" (click)="nuevaCategoriaHija()"><mat-icon>add</mat-icon>Categoría hija</button>
+      <button type="button" class="secondary-action ui-button ui-button--secondary" (click)="nuevaCategoriaPadre()"><mat-icon>create_new_folder</mat-icon>Categoría padre</button>
     </div>
   </header>
-  <div class="category-overview__filters">
-    <label class="category-search"><mat-icon>search</mat-icon><input type="search" (input)="applyFilter($event)" placeholder="Buscar grupo por nombre…" aria-label="Buscar categoría padre" /></label>
+  <div class="category-overview__filters ui-table-toolbar">
+    <app-ui-search [value]="dataSource.filter" (valueChange)="applyFilterText($event)" placeholder="Buscar grupo por nombre…" label="Buscar categoría padre" />
     <label class="show-inactive"><input type="checkbox" [(ngModel)]="mostrarInactivos" (change)="toggleInactivos()" /> Mostrar inactivos</label>
   </div>
   <div *ngIf="loading && !hasLoaded"><app-loading-indicator message="Cargando categorías..." /></div>
   <p *ngIf="error" role="alert" class="empty-categories">{{error}}</p>
-  <div class="category-overview__table-wrap" *ngIf="hasLoaded && (!error || rawDataCount)">
+  <div class="category-overview__table-wrap ui-table-shell" *ngIf="hasLoaded && (!error || rawDataCount)">
     <table mat-table [dataSource]="dataSource" multiTemplateDataRows class="category-table">
       <ng-container matColumnDef="expand"><th mat-header-cell *matHeaderCellDef class="expand-col"></th>
         <td mat-cell *matCellDef="let element" class="expand-col">

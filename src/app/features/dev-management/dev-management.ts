@@ -15,10 +15,12 @@ import { CompanyPublicService } from '../../core/services/companies';
 import { LoadingIndicatorComponent } from '../../shared/loading/loading-indicator';
 import { ToastService } from '../../shared/toast/toast.service';
 
+import { UiSearchComponent } from '../../shared/ui/ui-search.component';
+
 @Component({
   selector: 'app-dev-management',
   standalone: true,
-  imports: [CommonModule, FormsModule, MatFormFieldModule, MatSelectModule, MatIconModule, LoadingIndicatorComponent],
+  imports: [CommonModule, FormsModule, MatFormFieldModule, MatSelectModule, MatIconModule, LoadingIndicatorComponent,UiSearchComponent],
   templateUrl: './dev-management.html',
   styleUrl: './dev-management.scss'
 })

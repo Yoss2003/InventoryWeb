@@ -17,7 +17,9 @@ import { MovementForm } from '../movement-form/movement-form';
 import { MovementDetailDialogComponent } from '../movement-detail-dialog/movement-detail-dialog';
 import { LoadingIndicatorComponent } from '../../../shared/loading/loading-indicator';
 
-@Component({selector:'app-entradas',standalone:true,imports:[CommonModule,MatIconModule,MatTabsModule,LoadingIndicatorComponent],templateUrl:'./entradas.html',styleUrl:'./entradas.scss'})
+import { UiSearchComponent } from '../../../shared/ui/ui-search.component';
+
+@Component({selector:'app-entradas',standalone:true,imports:[CommonModule,MatIconModule,MatTabsModule,LoadingIndicatorComponent,UiSearchComponent],templateUrl:'./entradas.html',styleUrl:'./entradas.scss'})
 export class EntradasComponent implements OnInit {
   private readonly dialog=inject(MatDialog);
   private readonly articles=inject(ArticleService);
@@ -31,6 +33,22 @@ export class EntradasComponent implements OnInit {
   movements:Movement[]=[];
   private articleMap=new Map<number,Article>();
   loading=false;hasLoaded=false;error='';
+  search='';
+  private matchesQuery(values: unknown[]): boolean {
+    const q = this.search.trim().toLocaleLowerCase('es');
+    return !q || values.some(v => String(v ?? '').toLocaleLowerCase('es').includes(q));
+  }
+  private matchesArticle(a: Article): boolean {
+    return this.matchesQuery([a.name, a.code, a.model, a.barcode]);
+  }
+  get filteredStandard(): Article[] { return this.standard.filter(a => this.matchesArticle(a)); }
+  get filteredBulk(): Article[] { return this.bulk.filter(a => this.matchesArticle(a)); }
+  get filteredSerialized(): Article[] { return this.serialized.filter(a => this.matchesArticle(a)); }
+  get filteredMovements(): Movement[] {
+    return this.movements.filter(m => this.matchesQuery([
+      this.articleName(m.articleId), this.articleCode(m.articleId), m.observation
+    ]));
+  }
   ngOnInit():void{this.inventoryContext.activeInventoryId$.pipe(filter(id=>id!==null),take(1)).subscribe(()=>this.loadRealData());}
   loadRealData():void{
     if(this.loading)return;

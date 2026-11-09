@@ -1,0 +1,29 @@
+<section class="assignment-page">
+  <header class="assignment-page__header">
+    <div class="assignment-page__heading"><div class="assignment-page__icon"><mat-icon>assignment_ind</mat-icon></div><div><h1>Artículos fuera de stock</h1><p>Custodias y devoluciones vinculadas a usuarios y entidades.</p></div></div>
+    <button type="button" class="action-secondary" [disabled]="loading" (click)="loadHistory()">
+      <app-loading-indicator *ngIf="loading; else assignedRefresh" [compact]="true" message="Cargando..." />
+      <ng-template #assignedRefresh><mat-icon>refresh</mat-icon>Actualizar</ng-template>
+    </button>
+  </header>
+  <div class="assignment-stats">
+    <div class="assignment-stat"><span>Asignaciones vigentes</span><strong>{{!hasLoaded?'…':activeAssignments}}</strong><small>Entregas con cantidad pendiente</small></div>
+    <div class="assignment-stat"><span>Artículos asignados</span><strong>{{!hasLoaded?'…':distinctArticles}}</strong><small>Referencias diferentes</small></div>
+    <div class="assignment-stat"><span>Cantidad fuera de stock</span><strong>{{!hasLoaded?'…':(pendingQuantity|number:'1.0-2')}}</strong><small>Saldo pendiente de devolución</small></div>
+  </div>
+  <div class="assignment-section">
+    <nav class="assignment-tabs" aria-label="Vistas de asignaciones">
+      <button type="button" [class.active]="currentTab==='history'" (click)="currentTab='history';search=''" [attr.aria-pressed]="currentTab==='history'"><mat-icon>outbox</mat-icon>Entregados</button>
+      <button type="button" [class.active]="currentTab==='received'" (click)="currentTab='received';search=''" [attr.aria-pressed]="currentTab==='received'"><mat-icon>inventory_2</mat-icon>Asignados a mí</button>
+    </nav>
+    <div class="assignment-toolbar"><div><h2>{{currentTab==='history'?'Mis entregas y custodias':'Artículos que recibí'}}</h2><p>Haz clic sobre un artículo para consultar movimientos y registrar devoluciones.</p></div><label class="assignment-search"><mat-icon>search</mat-icon><input type="search" [(ngModel)]="search" placeholder="Buscar artículo o destinatario" aria-label="Buscar asignaciones" /></label></div>
+    <div *ngIf="errorMessage" class="assignment-state assignment-state--error" role="alert"><mat-icon>error_outline</mat-icon>{{errorMessage}}</div>
+    <div *ngIf="loading && !hasLoaded" class="assignment-state" role="status"><app-loading-indicator message="Cargando asignaciones..." /></div>
+    <div class="assignment-table-wrap" *ngIf="hasLoaded && filteredRows.length">
+      <table class="assignment-table"><thead><tr><th>Artículo</th><th>Responsable / entidad</th><th>Fecha</th><th>Entregado</th><th>Pendiente</th><th>Estado</th><th class="assignment-table__end">Detalle</th></tr></thead>
+        <tbody><tr *ngFor="let row of filteredRows" (click)="openDetail(row)" (keydown.enter)="openDetail(row)" tabindex="0" role="button" [attr.aria-label]="'Ver asignación de '+row.articleName"><td><strong>{{row.articleName | cleanArticleName}}</strong><small>{{row.articleCode}}</small></td><td>{{row.recipientName}}</td><td>{{row.assignedAt|date:'dd/MM/yyyy HH:mm'}}</td><td>{{row.quantity|number:'1.0-2'}}</td><td>{{row.remainingQuantity|number:'1.0-2'}}</td><td><span class="assignment-tag">{{row.status}}</span></td><td class="assignment-table__end"><mat-icon>chevron_right</mat-icon></td></tr></tbody>
+      </table>
+    </div>
+    <div class="assignment-state" *ngIf="hasLoaded && !filteredRows.length && !errorMessage"><mat-icon>inventory_2</mat-icon><strong>{{search?'No hay resultados':'No hay asignaciones registradas'}}</strong><span>{{search?'Prueba otra búsqueda.':'Las asignaciones registradas con el nuevo flujo aparecerán aquí.'}}</span></div>
+  </div>
+</section>

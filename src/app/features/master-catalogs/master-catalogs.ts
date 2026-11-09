@@ -30,9 +30,11 @@ interface ParameterRecord {
   name: string; description?: string | null; reused?: boolean;
 }
 
+import { UiSearchComponent } from '../../shared/ui/ui-search.component';
+
 @Component({
   selector: 'app-master-catalogs', standalone: true,
-  imports: [CommonModule, FormsModule, MatIconModule],
+  imports: [CommonModule, FormsModule, MatIconModule, UiSearchComponent],
   templateUrl: './master-catalogs.html', styleUrl: './master-catalogs.scss'
 })
 export class MasterCatalogsComponent implements OnInit {
@@ -47,6 +49,20 @@ export class MasterCatalogsComponent implements OnInit {
   tab: 'suppliers' | 'parameters' = 'suppliers';
   suppliers: SupplierRecord[] = [];
   parameters: ParameterRecord[] = [];
+  supplierSearch = '';
+  parameterSearch = '';
+  get filteredSuppliers(): SupplierRecord[] {
+    const q = this.supplierSearch.trim().toLocaleLowerCase('es');
+    return !q ? this.suppliers : this.suppliers.filter(x =>
+      [x.ruc, x.businessName, x.contactName, x.email, x.estado]
+        .some(value => String(value ?? '').toLocaleLowerCase('es').includes(q)));
+  }
+  get filteredParameters(): ParameterRecord[] {
+    const q = this.parameterSearch.trim().toLocaleLowerCase('es');
+    return !q ? this.parameters : this.parameters.filter(x =>
+      [x.parameterType, x.name, x.description]
+        .some(value => String(value ?? '').toLocaleLowerCase('es').includes(q)));
+  }
   loading = false;
   saving = false;
   lookupRucLoading = false;

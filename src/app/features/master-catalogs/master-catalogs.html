@@ -62,6 +62,7 @@
           </div>
         </div>
       </header>
+      <div class="ui-table-toolbar"><app-ui-search [(value)]="supplierSearch" placeholder="Buscar proveedor, RUC o contacto" label="Buscar proveedores" /></div>
       <table class="supplier-table" [class.supplier-table-readonly]="!canManage">
         <thead><tr>
           <th scope="col">RUC</th>
@@ -70,7 +71,7 @@
           <th scope="col" *ngIf="canManage" class="supplier-actions-col">Acciones</th>
         </tr></thead>
         <tbody>
-          <tr *ngFor="let item of suppliers" class="supplier-row-detail" role="button" tabindex="0"
+          <tr *ngFor="let item of filteredSuppliers" class="supplier-row-detail" role="button" tabindex="0"
               [attr.aria-label]="'Ver detalle del proveedor ' + item.businessName"
               (click)="showSupplierDetail(item)"
               (keydown.enter)="showSupplierDetail(item)"
@@ -104,16 +105,16 @@
           </tr>
         </tbody>
       </table>
-      <div *ngIf="!suppliers.length" class="supplier-empty">
+      <div *ngIf="!filteredSuppliers.length" class="supplier-empty">
         <mat-icon aria-hidden="true">inventory_2</mat-icon>
-        <strong>Aún no hay proveedores registrados</strong>
-        <span>Consulta un RUC y registra tu primer proveedor desde el formulario.</span>
+        <strong>{{supplierSearch ? 'Sin coincidencias' : 'Aún no hay proveedores registrados'}}</strong>
+        <span>{{supplierSearch ? 'Prueba otra búsqueda de proveedor o RUC.' : 'Consulta un RUC y registra tu primer proveedor desde el formulario.'}}</span>
       </div>
     </div>
   </div>
   <div class="panel" *ngIf="tab==='parameters'">
     <form (ngSubmit)="saveParameter()"><h2>{{editingParameterId?'Editar parámetro':'Nuevo parámetro general'}}</h2><div class="fields"><label>Tipo <input [(ngModel)]="parameter.parameterType" name="parameterType" maxlength="100" required placeholder="Ej. UnidadBase" /></label><label>Nombre <input [(ngModel)]="parameter.name" name="parameterName" maxlength="255" required /></label><label>Descripción / valor <textarea [(ngModel)]="parameter.description" name="description" rows="2"></textarea></label></div><p class="hint">Para parámetros comunes. Las contraseñas, tokens y claves de API tienen una gestión separada.</p><div class="actions"><button type="submit" class="primary" [disabled]="saving">{{saving?'Guardando...':editingParameterId?'Guardar cambios':'Registrar parámetro'}}</button><button *ngIf="editingParameterId" type="button" (click)="newParameter()">Cancelar edición</button></div></form>
-    <div class="list"><h2>Parámetros visibles ({{parameters.length}})</h2><table><thead><tr><th>Tipo</th><th>Nombre</th><th>Valor / descripción</th><th *ngIf="canManage">Acciones</th></tr></thead><tbody><tr *ngFor="let item of parameters"><td>{{item.parameterType}}</td><td>{{item.name}}</td><td>{{item.description||'—'}}</td><td *ngIf="canManage"><button type="button" (click)="editParameter(item)">Editar</button><button type="button" (click)="deleteParameter(item)">Eliminar</button></td></tr></tbody></table><p *ngIf="!parameters.length">Sin parámetros generales visibles.</p></div>
+    <div class="list"><h2>Parámetros visibles ({{parameters.length}})</h2><div class="ui-table-toolbar"><app-ui-search [(value)]="parameterSearch" placeholder="Buscar parámetro" label="Buscar parámetros" /></div><table><thead><tr><th>Tipo</th><th>Nombre</th><th>Valor / descripción</th><th *ngIf="canManage">Acciones</th></tr></thead><tbody><tr *ngFor="let item of filteredParameters"><td>{{item.parameterType}}</td><td>{{item.name}}</td><td>{{item.description||'—'}}</td><td *ngIf="canManage"><button type="button" (click)="editParameter(item)">Editar</button><button type="button" (click)="deleteParameter(item)">Eliminar</button></td></tr></tbody></table><p *ngIf="!filteredParameters.length">{{parameterSearch ? 'Sin resultados para la búsqueda.' : 'Sin parámetros generales visibles.'}}</p></div>
   </div>
 </section>
 

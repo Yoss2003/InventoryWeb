@@ -16,12 +16,7 @@
       <div>
         <h2>Empresas registradas <span class="count-chip">{{companies.length}}</span></h2>
         <small>Administración de organizaciones, accesos y vigencia de licencias.</small>
-      </div>
-      <label class="table-search">
-        <mat-icon>search</mat-icon>
-        <input name="companySearch" [(ngModel)]="companySearch" [ngModelOptions]="{standalone:true}"
-          type="search" autocomplete="off" placeholder="Buscar empresa, RUC o plan" aria-label="Filtrar empresas" />
-      </label>
+      </div>      <app-ui-search [(value)]="companySearch" placeholder="Buscar empresa, RUC o plan" label="Filtrar empresas" />
     </div>
     <p *ngIf="companiesError" class="inline-alert inline-alert--error" role="alert"><mat-icon>error_outline</mat-icon>{{companiesError}}</p>
     <button *ngIf="companiesError" type="button" (click)="loadCompanies()" [disabled]="loadingCompanies">Reintentar empresas</button>

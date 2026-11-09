@@ -18,7 +18,9 @@ import { QuickSaleFormComponent } from '../quick-sale-form/quick-sale-form';
 import { MovementDetailDialogComponent } from '../movement-detail-dialog/movement-detail-dialog';
 import { LoadingIndicatorComponent } from '../../../shared/loading/loading-indicator';
 
-@Component({selector:'app-salidas',standalone:true,imports:[CommonModule,MatIconModule,MatTabsModule,LoadingIndicatorComponent],templateUrl:'./salidas.html',styleUrl:'./salidas.scss'})
+import { UiSearchComponent } from '../../../shared/ui/ui-search.component';
+
+@Component({selector:'app-salidas',standalone:true,imports:[CommonModule,MatIconModule,MatTabsModule,LoadingIndicatorComponent,UiSearchComponent],templateUrl:'./salidas.html',styleUrl:'./salidas.scss'})
 export class SalidasComponent implements OnInit {
   private readonly movementsApi=inject(MovementService);
   private readonly salesApi=inject(SalesService);
@@ -32,6 +34,16 @@ export class SalidasComponent implements OnInit {
   private articles=new Map<number,Article>();
   cancelledIds=new Set<number>();cancelledSaleIds=new Set<number>();
   loading=false;hasLoaded=false;error='';
+  search='';
+  private matchesQuery(m: Movement): boolean {
+    const q = this.search.trim().toLocaleLowerCase('es');
+    return !q || [
+      this.articleName(m.articleId), this.articleCode(m.articleId),
+      m.recipient, m.documentNumber, m.observation, m.paymentMethod
+    ].some(value => String(value ?? '').toLocaleLowerCase('es').includes(q));
+  }
+  get filteredTransfers(): Movement[] { return this.traspasos.filter(m => this.matchesQuery(m)); }
+  get filteredSales(): Movement[] { return this.ventas.filter(m => this.matchesQuery(m)); }
   ngOnInit():void{this.inventoryContext.activeInventoryId$.pipe(filter(id=>id!==null),take(1)).subscribe(()=>this.loadRealData());}
   loadRealData():void{
     if(this.loading)return;

@@ -1,0 +1,26 @@
+<section class="entries-page">
+  <header><div><h1>Entradas y existencias</h1><p>Artículos disponibles y movimientos de ingreso confirmados.</p></div>
+    <div class="actions">
+      <button type="button" (click)="loadRealData()" [disabled]="loading">
+        <app-loading-indicator *ngIf="loading; else entryRefresh" [compact]="true" message="Cargando..." />
+        <ng-template #entryRefresh><mat-icon>refresh</mat-icon>Actualizar</ng-template>
+      </button>
+      <button type="button" (click)="newEntry()"><mat-icon>add_circle</mat-icon>Registrar entrada</button>
+      <button type="button" (click)="newArticle()"><mat-icon>add</mat-icon>Nuevo artículo</button>
+    </div>
+  </header>
+  <app-loading-indicator *ngIf="loading && !hasLoaded" message="Consultando inventario y movimientos..." />
+  <p *ngIf="error" class="entries-loading" role="alert">{{error}}</p>
+  <mat-tab-group *ngIf="hasLoaded && (!error || standard.length || bulk.length || serialized.length || movements.length)" animationDuration="0ms" class="entries-tabs" [selectedIndex]="selectedEntryTab" (selectedIndexChange)="selectedEntryTab = $event">
+    <mat-tab label="Estándar"><ng-container *ngTemplateOutlet="articleRows;context:{$implicit:standard}"></ng-container></mat-tab>
+    <mat-tab label="A granel"><ng-container *ngTemplateOutlet="articleRows;context:{$implicit:bulk}"></ng-container></mat-tab>
+    <mat-tab label="Serializados"><ng-container *ngTemplateOutlet="articleRows;context:{$implicit:serialized}"></ng-container></mat-tab>
+    <mat-tab label="Historial de ingresos"><div class="entries-table"><table><thead><tr><th>Fecha</th><th>Artículo</th><th>Código</th><th>Cantidad</th><th>Observación</th></tr></thead>
+      <tbody><tr *ngFor="let m of movements" (click)="showMovement(m)" (keydown.enter)="showMovement(m)" tabindex="0"><td>{{m.movementDate|date:'dd/MM/yyyy HH:mm'}}</td><td>{{articleName(m.articleId)}}</td><td>{{articleCode(m.articleId)}}</td><td>{{m.amount|number:'1.0-2'}}</td><td>{{m.observation||'—'}}</td></tr></tbody></table></div></mat-tab>
+  </mat-tab-group>
+</section>
+<ng-template #articleRows let-items><div class="entries-table"><table><thead><tr><th>Código</th><th>Artículo</th><th>Modelo</th><th>Stock</th><th>Unidad</th><th>Costo</th><th>Precio</th><th>Acciones</th></tr></thead>
+  <tbody><tr *ngFor="let a of items" tabindex="0" (click)="showArticle(a.id)" (keydown.enter)="showArticle(a.id)"><td>{{a.code}}</td><td><strong>{{a.name}}</strong></td><td>{{a.model}}</td><td>{{a.stock|number:'1.0-2'}}</td><td>{{a.measurementUnit}}</td><td>{{a.acquisitionPrice??0|number:'1.2-2'}}</td><td>{{a.salePrice??0|number:'1.2-2'}}</td>
+    <td class="entry-actions"><button type="button" (click)="$event.stopPropagation();editArticle(a.id)" aria-label="Editar artículo"><mat-icon>edit</mat-icon></button><button type="button" class="danger" (click)="deleteArticle(a,$event)" aria-label="Dar de baja artículo"><mat-icon>delete_outline</mat-icon></button></td></tr></tbody></table><p *ngIf="!items.length&&!loading" class="entries-loading">Sin artículos registrados.</p></div></ng-template>
+
+<!-- /* FASE 4.1 */ -->
