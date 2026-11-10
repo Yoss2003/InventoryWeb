@@ -71,15 +71,15 @@
 
           <ng-template #nameField>
               <div class="form-group grid-full name-group">
-                <label for="article-name">Nombre final del artículo <span class="required">*</span></label>
+                <div class="field-heading"><label for="article-name">Nombre final del artículo <span class="required">*</span></label>
+                  <span class="field-feedback" [class.is-error]="showNameError" aria-live="polite">{{ showNameError ? 'Completa los datos necesarios para obtener un nombre.' : (identityForm.get('name')?.disabled ? 'Se genera con los datos ingresados.' : 'Puedes escribir el nombre manualmente.') }}</span></div>
                 <div class="name-field">
                   <input id="article-name" type="text" formControlName="name" class="custom-input"
-                         [class.invalid]="showNameError" [class.input-locked]="identityForm.get('name')?.disabled"
+                         [class.invalid]="showNameError" [class.input-locked]="identityForm.get('name')?.disabled" (focus)="resetFieldMessage('identity','name')"
                          [placeholder]="identityForm.get('name')?.disabled ? 'Se generará según la categoría' : 'Escribe el nombre del artículo'" />
                   <mat-icon *ngIf="identityForm.get('name')?.disabled" title="Nombre generado automáticamente">lock</mat-icon>
                 </div>
-                <span class="hint-text">{{ identityForm.get('name')?.disabled ? 'El nombre se genera a partir de los datos ingresados.' : 'Esta categoría permite escribir el nombre manualmente.' }}</span>
-                <span class="error-text" *ngIf="showNameError">Completa los datos necesarios para obtener un nombre.</span>
+
               </div>
           </ng-template>
 
@@ -91,29 +91,32 @@
 
             <div class="form-grid">
               <div class="form-group">
-                <label for="article-category">Categoría <span class="required">*</span></label>
+<div class="field-heading"><label for="article-category">Categoría <span class="required">*</span></label>
+                  <span class="field-feedback" [class.is-error]="(!!categoriesError || isInvalid('identity','categoryId'))" aria-live="polite">
+                    <ng-container *ngIf="categoriesError; else categoryStandard">{{categoriesError}} <button type="button" class="catalog-retry" (click)="loadCategories(true)">Reintentar</button></ng-container>
+                    <ng-template #categoryStandard>{{ isInvalid('identity','categoryId') ? 'Selecciona una categoría.' : isLoadingCategories ? 'Cargando categorías...' : currentTrackingMode ? 'Rastreo: ' + currentTrackingMode : 'Elige una categoría hija.' }}</ng-template>
+                  </span></div>
                 <mat-form-field appearance="outline" class="inventory-select" [class.invalid]="isInvalid('identity', 'categoryId')">
                   <mat-select id="article-category" formControlName="categoryId" placeholder="Seleccionar categoría"
-                              panelClass="inventory-select-options">
+                              panelClass="inventory-select-options" (openedChange)="$event && resetFieldMessage('identity','categoryId')">
                     <mat-option [value]="null">Seleccionar categoría</mat-option>
                     <mat-option *ngFor="let cat of categoriasHijas" [value]="cat.id">{{ cat.name }}</mat-option>
                   </mat-select>
                 </mat-form-field>
-                <span class="hint-text" *ngIf="isLoadingCategories">Cargando categorías hijas...</span>
-                <span class="error-text" *ngIf="categoriesError" role="alert">{{ categoriesError }}
-                  <button type="button" class="catalog-retry" (click)="loadCategories(true)">Reintentar</button>
-                </span>
-                <span class="hint-text" *ngIf="currentTrackingMode">Modo de rastreo: {{ currentTrackingMode }}</span>
-                <span class="error-text" *ngIf="isInvalid('identity', 'categoryId')">Selecciona una categoría.</span>
+
               </div>
 
               <div class="form-group">
-                <label for="article-brand">Marca <span class="required">*</span></label>
+<div class="field-heading"><label for="article-brand">Marca <span class="required">*</span></label>
+                  <span class="field-feedback" [class.is-error]="(!!brandsError || isInvalid('identity','brandId'))" aria-live="polite">
+                    <ng-container *ngIf="brandsError; else brandStandard">{{brandsError}} <button type="button" class="catalog-retry" (click)="loadBrands(undefined,true)">Reintentar</button></ng-container>
+                    <ng-template #brandStandard>{{ isInvalid('identity','brandId') ? 'Selecciona una marca.' : !selectedCategory ? 'Selecciona primero una categoría hija.' : isLoadingBrands ? 'Cargando marcas...' : !marcasFiltradas.length ? 'No hay marcas; pulsa + para crear una.' : 'Elige una marca de la lista.' }}</ng-template>
+                  </span></div>
                 <div class="field-with-button">
                   <mat-form-field appearance="outline" class="inventory-select" [class.invalid]="isInvalid('identity', 'brandId')">
                     <mat-select id="article-brand" formControlName="brandId" placeholder="Seleccionar marca"
                                 [disabled]="!selectedCategory || isLoadingBrands"
-                                panelClass="inventory-select-options">
+                                panelClass="inventory-select-options" (openedChange)="$event && resetFieldMessage('identity','brandId')">
                       <mat-option [value]="null">Seleccionar marca</mat-option>
                       <mat-option *ngFor="let marca of marcasFiltradas" [value]="marca.id">{{ marca.name }}</mat-option>
                     </mat-select>
@@ -124,19 +127,13 @@
                     <mat-icon>add</mat-icon>
                   </button>
                 </div>
-                <span class="hint-text" *ngIf="!selectedCategory">Selecciona primero una categoría hija.</span>
-                <span class="hint-text" *ngIf="isLoadingBrands">Cargando marcas...</span>
-                <span class="hint-text" *ngIf="selectedCategory && !isLoadingBrands && !brandsError && !marcasFiltradas.length">No hay marcas registradas en esta categoría. Pulsa + para agregar una.</span>
-                <span class="error-text" *ngIf="brandsError" role="alert">{{ brandsError }}
-                  <button type="button" class="catalog-retry" (click)="loadBrands(undefined, true)">Reintentar</button>
-                </span>
-                <span class="error-text" *ngIf="isInvalid('identity', 'brandId')">Selecciona una marca.</span>
+
               </div>
 
               <div class="form-group" *ngIf="currentTrackingMode === 'Estándar'">
-                <label for="article-barcode">Código de barras <span class="required">*</span></label>
+                <div class="field-heading"><label for="article-barcode">Código de barras <span class="required">*</span></label><span class="field-feedback" [class.is-error]="isInvalid('identity','barcode')">{{ isInvalid('identity','barcode') ? 'El código de barras es obligatorio.' : '' }}</span></div>
                 <div class="input-with-actions">
-                  <input id="article-barcode" type="text" formControlName="barcode" class="custom-input"
+                  <input id="article-barcode" type="text" formControlName="barcode" (focus)="resetFieldMessage('identity','barcode')" class="custom-input"
                          [class.invalid]="isInvalid('identity', 'barcode')" placeholder="Ingresa o escanea un código" />
                   <input type="file" #camScanInput accept="image/*" capture="environment"
                          (change)="scanBarcodeFromImage($event, 'barcode')" hidden>
@@ -147,14 +144,14 @@
                   <button type="button" class="btn-icon btn-dark" (click)="galScanInput.click()"
                           [disabled]="isScanning" title="Escanear desde imagen" aria-label="Escanear desde galería"><mat-icon>image</mat-icon></button>
                 </div>
-                <span class="error-text" *ngIf="isInvalid('identity', 'barcode')">El código de barras es obligatorio.</span>
+                
               </div>
 
               <div class="form-group" *ngIf="currentTrackingMode === 'A Granel' || currentTrackingMode === 'Serializado'">
-                <label for="article-sku">Código SKU interno <span *ngIf="currentTrackingMode === 'A Granel'" class="required">*</span></label>
-                <input id="article-sku" type="text" formControlName="sku" class="custom-input"
+                <div class="field-heading"><label for="article-sku">Código SKU interno <span *ngIf="currentTrackingMode === 'A Granel'" class="required">*</span></label><span class="field-feedback" [class.is-error]="isInvalid('identity','sku')">{{ isInvalid('identity','sku') ? 'El SKU es obligatorio en artículos a granel.' : '' }}</span></div>
+                <input id="article-sku" type="text" formControlName="sku" (focus)="resetFieldMessage('identity','sku')" class="custom-input"
                        [class.invalid]="isInvalid('identity', 'sku')" placeholder="Ingresa el código interno" />
-                <span class="error-text" *ngIf="isInvalid('identity', 'sku')">El SKU es obligatorio en artículos a granel.</span>
+                
               </div>
 
               <ng-container *ngIf="attributeFields.length === 0">
@@ -162,16 +159,16 @@
               </ng-container>
 
               <div class="form-group" *ngIf="currentTrackingMode === 'Serializado'">
-                <label for="article-serial">Número de serie / IMEI <span class="required">*</span></label>
+                <div class="field-heading"><label for="article-serial">Número de serie / IMEI <span class="required">*</span></label><span class="field-feedback" [class.is-error]="isInvalid('identity','serialNumber')">{{ isInvalid('identity','serialNumber') ? 'La serie es obligatoria.' : '' }}</span></div>
                 <div class="input-with-actions">
-                  <input id="article-serial" type="text" formControlName="serialNumber" class="custom-input"
+                  <input id="article-serial" type="text" formControlName="serialNumber" (focus)="resetFieldMessage('identity','serialNumber')" class="custom-input"
                          [class.invalid]="isInvalid('identity', 'serialNumber')" [readonly]="hasSeveralExistingSerials" placeholder="Ingresa o escanea la primera serie" />
                   <input type="file" #camScanSerie accept="image/*" capture="environment"
                          (change)="scanBarcodeFromImage($event, 'serialNumber')" hidden>
                   <button type="button" class="btn-icon btn-blue" (click)="camScanSerie.click()"
                           [disabled]="isScanning" title="Escanear número de serie" aria-label="Escanear serie"><mat-icon>qr_code_scanner</mat-icon></button>
                 </div>
-                <span class="error-text" *ngIf="isInvalid('identity', 'serialNumber')">La serie es obligatoria.</span>
+                
               </div>
 
               <ng-container *ngIf="attributeFields.length === 0">
@@ -204,7 +201,7 @@
               <div class="form-group" *ngFor="let field of attributeFields; trackBy: trackByAttribute">
                 <label [for]="field.control">{{ field.label }}</label>
                 <input type="text" class="custom-input" [id]="field.control" [formControlName]="field.control"
-                       [placeholder]="'Ingresa ' + field.label.toLowerCase()" />
+                       [placeholder]="'Ingresa ' + field.label.toLowerCase()" (focus)="resetFieldMessage('identity','name')" />
               </div>
               <ng-container *ngTemplateOutlet="nameField"></ng-container>
             </div>
@@ -320,36 +317,36 @@
           <div class="section-heading"><h3>Configuración logística</h3><p>Define cómo se compra, vende y contabiliza el producto.</p></div>
         </div>
         <form [formGroup]="logisticsForm" (ngSubmit)="goNextFromLogistics()">
-          <div class="tile-grid">
+          <div class="tile-grid" [class.has-conversion]="requiresUnitConversion">
             <div class="field-tile">
-              <div class="tile-label"><mat-icon>local_shipping</mat-icon><label for="acq-unit">Se compra por <span class="required">*</span></label></div>
+              <div class="tile-label"><mat-icon>local_shipping</mat-icon><label for="acq-unit">Se compra por <span class="required">*</span></label><span class="field-feedback" [class.is-error]="isInvalid('logistics','acqUnit')">{{isInvalid('logistics','acqUnit')?'Elige una unidad.':''}}</span></div>
               <mat-form-field appearance="outline" class="inventory-select">
-                <mat-select id="acq-unit" formControlName="acqUnit" panelClass="inventory-select-options">
+                <mat-select id="acq-unit" formControlName="acqUnit" panelClass="inventory-select-options" (openedChange)="$event && resetFieldMessage('logistics','acqUnit')">
                   <mat-option *ngFor="let u of unidades" [value]="u">{{ u }}</mat-option>
                 </mat-select>
               </mat-form-field>
             </div>
             <div class="field-tile">
-              <div class="tile-label"><mat-icon>shopping_cart</mat-icon><label for="sale-unit">Se vende por <span class="required">*</span></label></div>
+              <div class="tile-label"><mat-icon>shopping_cart</mat-icon><label for="sale-unit">Se vende por <span class="required">*</span></label><span class="field-feedback" [class.is-error]="isInvalid('logistics','saleUnit')">{{isInvalid('logistics','saleUnit')?'Elige una unidad.':''}}</span></div>
               <mat-form-field appearance="outline" class="inventory-select">
-                <mat-select id="sale-unit" formControlName="saleUnit" panelClass="inventory-select-options">
+                <mat-select id="sale-unit" formControlName="saleUnit" panelClass="inventory-select-options" (openedChange)="$event && resetFieldMessage('logistics','saleUnit')">
                   <mat-option *ngFor="let u of unidades" [value]="u">{{ u }}</mat-option>
                 </mat-select>
               </mat-form-field>
             </div>
-            <div class="field-tile">
-              <div class="tile-label"><mat-icon>layers</mat-icon><label for="conversion">Unidades de venta por paquete <span class="required">*</span></label></div>
+            <div class="field-tile" *ngIf="requiresUnitConversion">
+              <div class="tile-label"><mat-icon>inventory_2</mat-icon><label for="initial-quantity">{{initialQuantityLabel}} <span class="required">*</span></label><span class="field-feedback" [class.is-error]="isInvalid('logistics','initialQuantity')">{{isInvalid('logistics','initialQuantity')?'Ingresa una cantidad válida.':currentTrackingMode === 'Serializado' && isEditMode?'Equivalencia informativa; no cambia el stock':'Cantidad recibida en unidades de compra'}}</span></div>
+              <input id="initial-quantity" type="number" [attr.min]="currentTrackingMode === 'Serializado' && !isEditMode ? 1 : 0" [attr.step]="currentTrackingMode === 'Serializado' && !isEditMode ? 1 : 'any'" formControlName="initialQuantity" class="custom-input" [readonly]="currentTrackingMode === 'Serializado' && isEditMode" [class.invalid]="isInvalid('logistics','initialQuantity')" (focus)="resetFieldMessage('logistics','initialQuantity')" />
+            </div>
+            <div class="field-tile" *ngIf="requiresUnitConversion">
+              <div class="tile-label"><mat-icon>layers</mat-icon><label for="conversion">Factor de conversión <span class="required">*</span></label><span class="field-feedback" [class.is-error]="isInvalid('logistics','conversionFactor')">{{isInvalid('logistics','conversionFactor')?'Ingresa un factor mayor que cero.':'Unidades de venta por compra'}}</span></div>
               <input id="conversion" type="number" min="0.01" step="any" formControlName="conversionFactor"
-                     class="custom-input" [class.invalid]="isInvalid('logistics', 'conversionFactor')" />
-              <span class="hint-text">Factor de conversión</span>
-              <span class="error-text" *ngIf="isInvalid('logistics', 'conversionFactor')">Ingresa un factor mayor que cero.</span>
+                     class="custom-input" [class.invalid]="isInvalid('logistics', 'conversionFactor')" (focus)="resetFieldMessage('logistics','conversionFactor')" />
             </div>
-            <div class="field-tile">
-              <div class="tile-label"><mat-icon>warehouse</mat-icon><label for="article-stock">Stock total <span class="required">*</span></label></div>
+            <div class="field-tile" [class.stock-calculated]="requiresUnitConversion">
+              <div class="tile-label"><mat-icon>warehouse</mat-icon><label for="article-stock">Stock total <span class="required">*</span></label><span class="field-feedback" [class.is-error]="isInvalid('logistics','stock')">{{isInvalid('logistics','stock')?'Ingresa un stock válido.':currentTrackingMode === 'Serializado' && isEditMode?'Solo Gestión de series modifica el stock':requiresUnitConversion?'Calculado automáticamente':'En unidades de venta'}}</span></div>
               <input id="article-stock" type="number" [attr.min]="currentTrackingMode === 'Serializado' ? 1 : 0" [attr.max]="currentTrackingMode === 'Serializado' ? 1000 : null" [attr.step]="currentTrackingMode === 'Serializado' ? 1 : 'any'" formControlName="stock" class="custom-input"
-                     [class.invalid]="isInvalid('logistics', 'stock')" />
-              <span class="hint-text">Expresado en unidades de venta</span>
-              <span class="error-text" *ngIf="isInvalid('logistics', 'stock')">Ingresa un stock válido.</span>
+                     [class.invalid]="isInvalid('logistics', 'stock')" [readonly]="requiresUnitConversion || (currentTrackingMode === 'Serializado' && isEditMode)" (focus)="resetFieldMessage('logistics','stock')" />
             </div>
           </div>
           <p *ngIf="currentTrackingMode === 'Serializado' && !isEditMode" class="helper-note"><mat-icon>info_outline</mat-icon> Cada unidad de stock necesita una serie distinta. Ingresa la primera en Identidad y las restantes aquí (máximo 1000 por alta).</p>
@@ -374,7 +371,7 @@
           <div class="section-heading"><h3>Información financiera</h3><p>Registra costos y precios; revisa la rentabilidad estimada.</p></div>
         </div>
         <form [formGroup]="financeForm" (ngSubmit)="onSubmit()">
-          <div class="finance-fields">
+          <div class="finance-layout"><div class="finance-fields">
             <div class="finance-row">
               <div class="finance-label"><mat-icon>payments</mat-icon><label for="acq-price">Costo de adquisición</label></div>
               <div class="money-input">
@@ -402,15 +399,24 @@
           </div>
 
           <div class="profitability-dashboard" [class.is-loss]="isLoss">
-            <div class="dash-header"><mat-icon>calculate</mat-icon><div><strong>Vista de rentabilidad (estimada)</strong><p>Cálculos por unidad de venta, expresados en soles</p></div></div>
+            <div class="dash-header"><mat-icon>calculate</mat-icon><div><strong>Vista de rentabilidad (estimada)</strong><p>Cálculos por unidad de venta, expresados en soles</p></div><button type="button" class="finance-info-button" aria-label="Información y limitaciones del cálculo de rentabilidad" title="Estimación para operaciones gravadas. No determina el impuesto a declarar ni verifica el crédito fiscal. No incluye descuentos ni otros gastos. El USD utiliza un tipo de cambio fijo configurado."><mat-icon>info_outline</mat-icon></button></div>
+            <label class="igv-option"><input type="checkbox" [checked]="pricesIncludeIgv" (change)="setPricesIncludeIgv($event)" /><span>Precios ingresados incluyen IGV (18 %)</span></label>
             <div class="dash-metrics" *ngIf="hasFinancialEstimate; else awaitingValues">
               <div class="metric"><mat-icon>paid</mat-icon><span class="label">Utilidad por unidad</span><span class="value">S/ {{ utilityPerUnit | number:'1.2-2' }}</span></div>
               <div class="metric"><mat-icon>percent</mat-icon><span class="label">Ganancia sobre costo</span><span class="value">{{ marginPercent | number:'1.2-2' }} %</span></div>
               <div class="metric"><mat-icon>trending_up</mat-icon><span class="label">Relación venta/costo</span><span class="value">{{ profitabilityRatio | number:'1.2-2' }} x</span></div>
             </div>
+            <div class="igv-details" *ngIf="hasFinancialEstimate">
+              <div><span>Venta sin IGV</span><strong>S/ {{netSalePerUnit | number:'1.2-2'}}</strong></div>
+              <div><span>Costo sin IGV</span><strong>S/ {{netCostPerUnit | number:'1.2-2'}}</strong></div>
+              <div><span>IGV estimado de venta</span><strong>S/ {{igvSalePerUnit | number:'1.2-2'}}</strong></div>
+              <div><span>IGV estimado de compra</span><strong>S/ {{igvCostPerUnit | number:'1.2-2'}}</strong></div>
+              <div class="igv-total"><span>Diferencia referencial</span><strong>S/ {{igvDifferencePerUnit | number:'1.2-2'}}</strong></div>
+            </div>
             <ng-template #awaitingValues><div class="awaiting-values"><mat-icon>info_outline</mat-icon> Ingresa costos y precio de venta para ver la estimación.</div></ng-template>
           </div>
-          <p class="helper-note">Cálculo orientativo: no incluye impuestos, descuentos ni costos adicionales. USD usa el tipo de cambio fijo configurado.</p>
+          <!-- MODAL_SERIES_FINANZAS_2026: detalles de la estimación accesibles desde el icono de información. -->
+          </div>
         </form>
       </div>
     </section>

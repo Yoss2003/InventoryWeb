@@ -1,5 +1,5 @@
 import { CommonModule, DOCUMENT, isPlatformBrowser } from '@angular/common';
-import { AfterViewInit, Component, ElementRef, OnDestroy, PLATFORM_ID, ViewChild, inject } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, OnDestroy, PLATFORM_ID, ViewChild, effect, inject } from '@angular/core';
 import { ToastService, ToastType } from './toast.service';
 
 @Component({
@@ -29,6 +29,20 @@ export class ToastContainerComponent implements AfterViewInit, OnDestroy {
     }
   }
   readonly alerts = inject(ToastService);
+  private latestRaisedToast = 0;
+  private readonly keepVisibleAboveDialogs = effect(() => {
+    const last = this.alerts.toasts().at(-1)?.id ?? 0;
+    if (!last || last <= this.latestRaisedToast) return;
+    this.latestRaisedToast = last;
+    if (!isPlatformBrowser(this.platform)) return;
+    queueMicrotask(() => {
+      const element = this.stack?.nativeElement;
+      if (!element || typeof element.showPopover !== 'function') return;
+      // Nuevo mensaje: mover el popover al final del top-layer, sobre MatDialog.
+      if (element.matches(':popover-open')) element.hidePopover();
+      element.showPopover();
+    });
+  });
 
   icon(type: ToastType): string {
     return type === 'success' ? '✓' : type === 'error' ? '!' : type === 'warning' ? '!' : 'i';

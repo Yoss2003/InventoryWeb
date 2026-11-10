@@ -135,6 +135,34 @@ export class ArticleFormComponent implements OnInit, OnDestroy {
   attemptedNext = false;
   attemptedLogistics = false;
   attemptedSave = false;
+  // El mensaje vuelve a informativo al reingresar al campo; reaparece solo tras validar.
+  private readonly clearedMessages = new Set<string>();
+  initialQuantityLabel = 'Cantidad inicial de compra';
+  pricesIncludeIgv = true;
+  readonly igvRate = 0.18; // Estimación IGV + IPM vigente en Perú (2026).
+  igvSalePerUnit = 0;
+  igvCostPerUnit = 0;
+  igvDifferencePerUnit = 0;
+  netSalePerUnit = 0;
+  netCostPerUnit = 0;
+  // MODAL_SERIES_FINANZAS_2026: paquetes serializados en alta, no modificación de existencias en edición.
+  get requiresUnitConversion(): boolean {
+    if (!this.selectedCategory) return false;
+    const purchase = String(this.logisticsForm?.get('acqUnit')?.value ?? '').trim();
+    const sale = String(this.logisticsForm?.get('saleUnit')?.value ?? '').trim();
+    return !!purchase && !!sale && purchase.toLocaleLowerCase('es') !== sale.toLocaleLowerCase('es');
+  }
+  resetFieldMessage(section: 'identity' | 'logistics' | 'finance', name: string): void {
+    this.clearedMessages.add(section + '.' + name);
+    if (section === 'identity' && name !== 'name') this.clearedMessages.add('identity.name');
+  }
+  private validateAgain(section: 'identity' | 'logistics' | 'finance'): void {
+    for (const key of Array.from(this.clearedMessages)) if (key.startsWith(section + '.')) this.clearedMessages.delete(key);
+  }
+  setPricesIncludeIgv(event: Event): void {
+    this.pricesIncludeIgv = (event.target as HTMLInputElement).checked;
+    this.calculateProfit();
+  }
 
   ngOnInit(): void {
     this.isEditMode = !!this.data?.id;
@@ -182,6 +210,7 @@ export class ArticleFormComponent implements OnInit, OnDestroy {
       acqUnit: ['Unidad', Validators.required],
       saleUnit: ['Unidad', Validators.required],
       conversionFactor: [1, [Validators.required, Validators.min(0.01)]],
+      initialQuantity: [null],
       stock: [{ value: 0, disabled: true }, [Validators.required, Validators.min(0)]]
     });
 
@@ -223,7 +252,7 @@ export class ArticleFormComponent implements OnInit, OnDestroy {
   }
 
   get showNameError(): boolean {
-    return (this.attemptedNext || !!this.identityForm.get('name')?.touched) &&
+    return this.attemptedNext && !this.clearedMessages.has('identity.name') &&
       !String(this.identityForm.get('name')?.value ?? '').trim();
   }
 
@@ -234,7 +263,8 @@ export class ArticleFormComponent implements OnInit, OnDestroy {
     if (!control) return false;
     const wasSubmitted = section === 'identity' ? this.attemptedNext :
       section === 'logistics' ? this.attemptedLogistics : this.attemptedSave;
-    return !!control.invalid && (control.touched || wasSubmitted);
+    return !!control.invalid && (control.touched || wasSubmitted) &&
+      !this.clearedMessages.has(section + '.' + name);
   }
 
   loadCatalogs(): void {
@@ -332,8 +362,10 @@ export class ArticleFormComponent implements OnInit, OnDestroy {
     }, { emitEvent: false });
     this.logisticsForm.patchValue({
       acqUnit: a.acquisitionUnit ?? 'Unidad', saleUnit: a.saleUnit ?? a.measurementUnit ?? 'Unidad',
-      conversionFactor: a.conversionFactor ?? 1, stock: a.stock
+      conversionFactor: a.conversionFactor ?? 1, stock: a.stock,
+      initialQuantity: a.stock / Math.max(Number(a.conversionFactor) || 1, 0.01)
     }, { emitEvent: false });
+    this.syncUnitConversion(false);
     this.financeForm.patchValue({
       acqPrice: a.acquisitionPrice ?? null,
       acqCurrency: a.acquisitionCurrency ?? 'S/.',
@@ -394,7 +426,63 @@ export class ArticleFormComponent implements OnInit, OnDestroy {
     ['acqPrice', 'salePrice', 'acqCurrency', 'saleCurrency'].forEach(name => {
       this.financeForm.get(name)?.valueChanges.subscribe(() => this.calculateProfit());
     });
-    this.logisticsForm.get('conversionFactor')?.valueChanges.subscribe(() => this.calculateProfit());
+    ['acqUnit', 'saleUnit', 'conversionFactor', 'initialQuantity'].forEach(name => {
+      this.logisticsForm.get(name)?.valueChanges.subscribe(() => {
+        this.resetFieldMessage('logistics', name);
+        this.syncUnitConversion(name === 'acqUnit' || name === 'saleUnit');
+      });
+    });
+  }
+
+  private syncUnitConversion(unitsChanged = false): void {
+    const initial = this.logisticsForm.get('initialQuantity');
+    const factor = this.logisticsForm.get('conversionFactor');
+    const stock = this.logisticsForm.get('stock');
+    const isSerialized = this.currentTrackingMode === 'Serializado';
+    const editingSerialized = isSerialized && this.isEditMode;
+    const currentStock = Number(stock?.value) || 0;
+    const ratio = Number(factor?.value);
+
+    if (this.requiresUnitConversion) {
+      // Una caja de productos con series contiene unidades ENTERAS y positivas.
+      factor?.setValidators(isSerialized
+        ? [Validators.required, Validators.min(1), Validators.pattern(/^[1-9]\d*$/)]
+        : [Validators.required, Validators.min(0.01)]);
+
+      if (editingSerialized) {
+        // La cantidad de cajas es solo informativa. La edición NO altera stock ni series.
+        initial?.setValue(ratio > 0 ? Number((currentStock / ratio).toFixed(6)) : null,
+          { emitEvent: false });
+        initial?.clearValidators();
+        this.initialQuantityLabel = 'Equivalente en ' + String(this.logisticsForm.get('acqUnit')?.value || 'compra');
+      } else {
+        const missingQuantity = initial?.value == null || initial.value === '';
+        if (unitsChanged && missingQuantity && currentStock > 0) {
+          initial?.setValue(currentStock / (ratio > 0 ? ratio : 1), { emitEvent: false });
+        }
+        initial?.setValidators(isSerialized
+          ? [Validators.required, Validators.min(1), Validators.pattern(/^[1-9]\d*$/)]
+          : [Validators.required, Validators.min(0)]);
+        const quantity = Number(initial?.value);
+        const validQuantity = initial?.value != null && initial.value !== '' &&
+          Number.isFinite(quantity) && Number.isFinite(ratio) && ratio > 0;
+        // Alta: cada unidad generada debe tener una serie distinta.
+        // El validador de stock existente limita a 1–1000 unidades enteras.
+        stock?.setValue(validQuantity ? Number((quantity * ratio).toFixed(6)) : null,
+          { emitEvent: false });
+        this.initialQuantityLabel = 'Cantidad de ' + String(this.logisticsForm.get('acqUnit')?.value || 'compra');
+      }
+    } else {
+      initial?.clearValidators();
+      factor?.setValidators([Validators.required, Validators.min(0.01)]);
+      // Misma unidad de compra y venta: el costo no debe dividirse por un factor oculto.
+      factor?.setValue(1, { emitEvent: false });
+    }
+
+    factor?.updateValueAndValidity({ emitEvent: false });
+    initial?.updateValueAndValidity({ emitEvent: false });
+    stock?.updateValueAndValidity({ emitEvent: false });
+    this.calculateProfit();
   }
 
   setStep(step: number): void {
@@ -419,6 +507,7 @@ export class ArticleFormComponent implements OnInit, OnDestroy {
   }
 
   goNextFromIdentity(): void {
+    this.validateAgain('identity');
     this.attemptedNext = true;
     this.identityForm.markAllAsTouched();
     if (!this.isIdentityComplete) {
@@ -436,6 +525,7 @@ export class ArticleFormComponent implements OnInit, OnDestroy {
   }
 
   goNextFromLogistics(): void {
+    this.validateAgain('logistics');
     this.attemptedLogistics = true;
     this.logisticsForm.markAllAsTouched();
     if (this.logisticsForm.invalid) {
@@ -491,6 +581,7 @@ export class ArticleFormComponent implements OnInit, OnDestroy {
     }
 
     [barcode, sku, serial].forEach(control => control?.updateValueAndValidity({ emitEvent: false }));
+    this.syncUnitConversion(false);
     this.generateAutoName();
   }
 
@@ -830,30 +921,36 @@ export class ArticleFormComponent implements OnInit, OnDestroy {
   calculateProfit(): void {
     const acquisition = Number(this.financeForm.get('acqPrice')?.value);
     const sale = Number(this.financeForm.get('salePrice')?.value);
-    const factor = Number(this.logisticsForm.get('conversionFactor')?.value);
-
+    const factor = this.requiresUnitConversion ? Number(this.logisticsForm.get('conversionFactor')?.value) : 1;
     if (!(acquisition > 0) || !(sale > 0) || !(factor > 0) || this.financeForm.invalid) {
       this.hasFinancialEstimate = false;
-      this.utilityPerUnit = 0;
-      this.marginPercent = 0;
-      this.profitabilityRatio = 0;
+      this.utilityPerUnit = this.marginPercent = this.profitabilityRatio = 0;
+      this.igvSalePerUnit = this.igvCostPerUnit = this.igvDifferencePerUnit = 0;
+      this.netSalePerUnit = this.netCostPerUnit = 0;
       this.isLoss = false;
       return;
     }
-
     const acqRate = this.monedas.find(m => m.code === this.financeForm.get('acqCurrency')?.value)?.rate ?? 1;
     const saleRate = this.monedas.find(m => m.code === this.financeForm.get('saleCurrency')?.value)?.rate ?? 1;
-    const costSolesPerUnit = acquisition * acqRate / factor;
-    const saleSolesPerUnit = sale * saleRate;
-
-    this.utilityPerUnit = saleSolesPerUnit - costSolesPerUnit;
-    this.marginPercent = (this.utilityPerUnit / costSolesPerUnit) * 100;
-    this.profitabilityRatio = saleSolesPerUnit / costSolesPerUnit;
+    const costGross = acquisition * acqRate / factor;
+    const saleGross = sale * saleRate;
+    // Proyección para operaciones gravadas: si el precio incluye impuesto, separa la base.
+    // No registra impuestos en el API ni reemplaza un cálculo tributario real.
+    const divisor = this.pricesIncludeIgv ? 1 + this.igvRate : 1;
+    this.netCostPerUnit = costGross / divisor;
+    this.netSalePerUnit = saleGross / divisor;
+    this.igvCostPerUnit = this.netCostPerUnit * this.igvRate;
+    this.igvSalePerUnit = this.netSalePerUnit * this.igvRate;
+    this.igvDifferencePerUnit = this.igvSalePerUnit - this.igvCostPerUnit;
+    this.utilityPerUnit = this.netSalePerUnit - this.netCostPerUnit;
+    this.marginPercent = this.netCostPerUnit > 0 ? this.utilityPerUnit / this.netCostPerUnit * 100 : 0;
+    this.profitabilityRatio = this.netCostPerUnit > 0 ? this.netSalePerUnit / this.netCostPerUnit : 0;
     this.isLoss = this.utilityPerUnit < 0;
     this.hasFinancialEstimate = true;
   }
 
   onSubmit(): void {
+    this.clearedMessages.clear();
     this.attemptedNext = true;
     this.attemptedLogistics = true;
     this.attemptedSave = true;

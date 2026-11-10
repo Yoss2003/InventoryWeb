@@ -128,3 +128,24 @@ select:not([multiple]):focus-visible{outline:2px solid var(--inv-company-accent,
     white
   );
 }
+/* MODAL_ARTICULOS_MEJORA_2026: halo corporativo para el modal de artículo (sin modificar otros diálogos). */
+.cdk-overlay-pane:has(app-article-form) { overflow: visible; filter: drop-shadow(0 0 9px color-mix(in srgb, var(--inv-company-accent, #A2D149) 20%, transparent)); }
+.cdk-overlay-pane:has(app-article-form) .mat-mdc-dialog-surface {
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--inv-company-accent, #A2D149) 75%, white);
+  border-radius: 18px;
+  background: #11161d;
+  box-shadow: 0 18px 70px rgba(0,0,0,.76),
+    0 0 0 1px color-mix(in srgb, var(--inv-company-accent, #A2D149) 50%, transparent),
+    0 0 24px color-mix(in srgb, var(--inv-company-accent, #A2D149) 34%, transparent);
+  animation: article-modal-glow-open 220ms ease-out both;
+}
+@keyframes article-modal-glow-open {
+  from { box-shadow: 0 18px 70px rgba(0,0,0,.76), 0 0 0 1px transparent, 0 0 0 transparent; }
+  to { box-shadow: 0 18px 70px rgba(0,0,0,.76),
+    0 0 0 1px color-mix(in srgb, var(--inv-company-accent, #A2D149) 50%, transparent),
+    0 0 24px color-mix(in srgb, var(--inv-company-accent, #A2D149) 34%, transparent); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .cdk-overlay-pane:has(app-article-form) .mat-mdc-dialog-surface { animation: none; }
+}
