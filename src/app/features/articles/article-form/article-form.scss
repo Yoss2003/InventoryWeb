@@ -174,7 +174,7 @@ $red: #fb8585;
   h3 { font-size: 16px; font-weight: 760; margin: 0 0 4px; line-height: 1.25; }
   p { font-size: 12px; line-height: 1.4; margin: 0; color: $muted; }
 }
-.form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px 16px; }
+.form-grid { align-items: center; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px 16px; }
 .grid-full { grid-column: 1 / -1; }
 .form-group { display: flex; flex-direction: column; gap: 7px; min-width: 0; }
 .form-group label, .field-tile label, .finance-label label, .media-label {
@@ -771,6 +771,13 @@ button:focus-visible { outline: 2px solid $lime; outline-offset: 2px; }
 .card-section { padding: 14px; }
 .section-header { margin-bottom: 10px; padding-bottom: 10px; }
 .form-grid { row-gap: 13px; }
+.form-grid .form-group > label,
+.form-grid .form-group > .field-heading {
+  display: flex;
+  align-items: center;
+  min-height: 29px;
+  height: 29px;
+}
 .field-heading {
   display: flex; justify-content: space-between; align-items: center; gap: 10px;
   min-width: 0; min-height: 29px; height: 29px;

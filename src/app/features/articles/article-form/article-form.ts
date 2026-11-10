@@ -146,12 +146,23 @@ export class ArticleFormComponent implements OnInit, OnDestroy {
   netSalePerUnit = 0;
   netCostPerUnit = 0;
   // MODAL_SERIES_FINANZAS_2026: paquetes serializados en alta, no modificación de existencias en edición.
+  
   get requiresUnitConversion(): boolean {
     if (!this.selectedCategory) return false;
-    const purchase = String(this.logisticsForm?.get('acqUnit')?.value ?? '').trim();
-    const sale = String(this.logisticsForm?.get('saleUnit')?.value ?? '').trim();
-    return !!purchase && !!sale && purchase.toLocaleLowerCase('es') !== sale.toLocaleLowerCase('es');
+
+    const compra = String(
+      this.logisticsForm?.get('acqUnit')?.value ?? ''
+    ).trim().toLowerCase();
+
+    const venta = String(
+      this.logisticsForm?.get('saleUnit')?.value ?? ''
+    ).trim().toLowerCase();
+
+    return ['caja', 'cajas'].includes(compra)
+      && !!venta
+      && !['caja', 'cajas'].includes(venta);
   }
+
   resetFieldMessage(section: 'identity' | 'logistics' | 'finance', name: string): void {
     this.clearedMessages.add(section + '.' + name);
     if (section === 'identity' && name !== 'name') this.clearedMessages.add('identity.name');
