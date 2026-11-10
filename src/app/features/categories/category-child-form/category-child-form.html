@@ -82,11 +82,22 @@
               <div class="category-field">
                 <label for="child-category-tracking">Modo de tracking <span class="required">*</span></label>
                 <mat-form-field appearance="outline" class="inventory-select">
-                  <mat-select id="child-category-tracking" formControlName="trackingMode"
-                    panelClass="inventory-select-options">
-                    <mat-option *ngFor="let opt of trackingOptions" [value]="opt.value">{{ opt.label }}</mat-option>
-                  </mat-select>
-                </mat-form-field>
+    <mat-select
+      id="child-units"
+      formControlName="selectedUnitIds"
+      multiple
+                  placeholder="Seleccionar unidades"
+                  panelClass="inventory-select-options">
+
+                  <mat-option
+                    *ngFor="let unidad of unidadesDisponibles"
+                    [value]="unidad.id">
+                    {{ unidad.unitName }}
+                    ({{ unidad.abbreviation }})
+                  </mat-option>
+
+                </mat-select>
+              </mat-form-field>
               </div>
               <div class="toggle-tile" *ngIf="isTrackingConfigurable">
                 <div><strong>Artículo retornable</strong><small>Puede devolverse después de una salida</small></div>

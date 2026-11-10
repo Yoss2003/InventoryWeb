@@ -19,6 +19,7 @@ import { ArticleService } from '../../../core/services/articles';
 import { InventoryContextService } from '../../../core/services/inventory-context';
 import { Article, ArticleDetail } from '../../../core/models/article.model';
 import { BrandDialogComponent, BrandDialogData } from '../brand-dialog/brand-dialog';
+import {MeasurementUnitsService, MeasurementUnit} from '../../../core/services/measurement-units';
 
 interface AttributeField {
   control: string;
@@ -42,6 +43,8 @@ export class ArticleFormComponent implements OnInit, OnDestroy {
   private inventoryContext = inject(InventoryContextService);
   private dialog = inject(MatDialog);
   private snackBar = inject(MatSnackBar);
+  private readonly measurementUnitsService = inject(MeasurementUnitsService);
+  private todasLasUnidades: MeasurementUnit[] = [];
   public dialogRef = inject(MatDialogRef<ArticleFormComponent>);
   public data = inject(MAT_DIALOG_DATA, { optional: true });
 
@@ -56,7 +59,7 @@ export class ArticleFormComponent implements OnInit, OnDestroy {
   isLoadingBrands = false;
   categoriesError = '';
   brandsError = '';
-  unidades = ['Unidad', 'Caja', 'Metros', 'Kilos', 'Gramos', 'Litros'];
+  unidades: string[] = [];
 
   // IMPORTANTE: cotización fija original, no es el tipo de cambio de hoy.
   monedas = [{ code: 'S/.', rate: 1 }, { code: 'USD', rate: 3.85 }];
@@ -175,10 +178,85 @@ export class ArticleFormComponent implements OnInit, OnDestroy {
     this.calculateProfit();
   }
 
+  private cargarUnidades(): void {
+    this.measurementUnitsService.getAll().subscribe({
+      next: (unidades) => {
+        this.todasLasUnidades = unidades;
+        this.actualizarUnidadesPermitidas();
+        this.cdr.markForCheck();
+      },
+      error: () => {
+        this.snackBar.open(
+          'No se pudieron cargar las unidades de medida.',
+          'Cerrar',
+          { duration: 4000 }
+        );
+      }
+    });
+  }
+
+  private actualizarUnidadesPermitidas(): void {
+    const categoria = this.selectedCategory;
+
+    if (!categoria) {
+      this.unidades = [];
+      return;
+    }
+
+    if (!this.todasLasUnidades.length) return;
+
+    const ids = new Set<number>(
+      (categoria.selectedUnitIds ?? []).map(Number)
+    );
+
+    // Categorías antiguas sin configuración: compatibilidad temporal.
+    const permitidas = ids.size
+      ? this.todasLasUnidades.filter(u => ids.has(u.id))
+      : this.todasLasUnidades;
+
+    this.unidades = [
+      ...new Set(permitidas.map(u => u.unitName.trim()))
+    ];
+
+    // En edición, conservar los valores históricos del artículo.
+    if (
+      this.isEditMode &&
+      this.existingArticle &&
+      Number(this.existingArticle.categoryId) === Number(categoria.id)
+    ) {
+      const articulo = this.existingArticle;
+
+      const anteriores = [
+        articulo.acquisitionUnit,
+        articulo.saleUnit ?? articulo.measurementUnit
+      ];
+
+      for (const unidad of anteriores) {
+        if (unidad && !this.unidades.includes(unidad)) {
+          this.unidades.push(unidad);
+        }
+      }
+    }
+
+    const primeraUnidad = this.unidades[0];
+    if (!primeraUnidad) return;
+
+    for (const campo of ['acqUnit', 'saleUnit']) {
+      const control = this.logisticsForm.get(campo);
+
+      if (control && !this.unidades.includes(String(control.value))) {
+        control.setValue(primeraUnidad, { emitEvent: false });
+      }
+    }
+
+    this.syncUnitConversion(false);
+  }
+
   ngOnInit(): void {
     this.isEditMode = !!this.data?.id;
     this.initForms();
     this.setupSubscriptions();
+    this.cargarUnidades();
     this.loadCatalogs();
     if (this.isEditMode) {
       this.articleService.getArticle(Number(this.data.id)).subscribe({
@@ -376,6 +454,7 @@ export class ArticleFormComponent implements OnInit, OnDestroy {
       conversionFactor: a.conversionFactor ?? 1, stock: a.stock,
       initialQuantity: a.stock / Math.max(Number(a.conversionFactor) || 1, 0.01)
     }, { emitEvent: false });
+    this.actualizarUnidadesPermitidas();
     this.syncUnitConversion(false);
     this.financeForm.patchValue({
       acqPrice: a.acquisitionPrice ?? null,
@@ -592,6 +671,7 @@ export class ArticleFormComponent implements OnInit, OnDestroy {
     }
 
     [barcode, sku, serial].forEach(control => control?.updateValueAndValidity({ emitEvent: false }));
+    this.actualizarUnidadesPermitidas();
     this.syncUnitConversion(false);
     this.generateAutoName();
   }

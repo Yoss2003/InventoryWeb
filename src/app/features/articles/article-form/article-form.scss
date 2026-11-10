@@ -798,8 +798,32 @@ button:focus-visible { outline: 2px solid $lime; outline-offset: 2px; }
 .tile-grid.has-conversion { grid-template-columns: repeat(6, minmax(0,1fr)); }
 .tile-grid.has-conversion > .field-tile { grid-column: span 2; }
 .tile-grid.has-conversion > .field-tile:nth-child(-n+2) { grid-column: span 3; }
-.tile-label { gap: 8px; flex-wrap: wrap; }
-.tile-label .field-feedback { margin-left: auto; max-width: 54%; }
+
+.tile-label {
+  gap: 8px;
+  flex-wrap: nowrap;
+  min-height: 31px;
+  height: 31px;
+  min-width: 0;
+}
+
+.tile-label > label {
+  flex: 1 1 auto;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tile-label .field-feedback {
+  flex: 0 1 auto;
+  margin-left: auto;
+  max-width: 44%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 .field-tile { padding: 13px; gap: 7px; }
 .field-tile .custom-input[readonly] { background: #202d3a; color: #d4e9f7; cursor: default; }
 .finance-layout { display:grid; grid-template-columns: minmax(0, .93fr) minmax(0, 1.07fr); gap: 12px; align-items: start; }

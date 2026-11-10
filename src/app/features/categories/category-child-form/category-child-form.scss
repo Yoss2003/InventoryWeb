@@ -947,3 +947,7 @@ $muted: #a8b5c2;
   .category-stepper .rules-grid .toggle-tile small{white-space:normal;}
 }
 @media (max-width:760px){.category-stepper .rules-grid,.category-stepper .naming-config{grid-template-columns:minmax(0,1fr) !important;}}
+
+.rules-grid .units-selection {
+  grid-column: 1 / -1;
+}

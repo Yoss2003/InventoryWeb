@@ -19,6 +19,7 @@ import { CategoryService } from '../services/category';
 import { Category } from '../../../core/models/category.model';
 import { FormControl } from '@angular/forms';
 import type { Observable } from 'rxjs';
+import {MeasurementUnitsService, MeasurementUnit} from '../../../core/services/measurement-units';
 
 @Component({
     selector: 'app-category-child-form',
@@ -40,6 +41,9 @@ export class CategoryChildFormComponent implements OnInit {
     private readonly dialogs = inject(MatDialog);
     public dialogRef = inject(MatDialogRef<CategoryChildFormComponent>);
     public data: { categoriaEdit?: Category, padres: Category[] } = inject(MAT_DIALOG_DATA);
+    private readonly measurementUnitsService = inject(MeasurementUnitsService);
+    unidadesDisponibles: MeasurementUnit[] = [];
+    cargandoUnidades = false;
     showPreviewInputs = false;
     previewControls: { [key: string]: FormControl } = {};
 
@@ -74,7 +78,7 @@ export class CategoryChildFormComponent implements OnInit {
             isReturnable: [false],
             namingMethod: ['Nombre'],
             isNamingLibre: [false],
-            selectedUnitIds: [[]]
+            selectedUnitIds: [[], Validators.required]
         });
 
         this.attributesForm = this.fb.group({
@@ -98,6 +102,22 @@ export class CategoryChildFormComponent implements OnInit {
         );
     }
 
+    cargarUnidades(): void {
+    this.cargandoUnidades = true;
+
+    this.measurementUnitsService.getAll().subscribe({
+        next: (unidades) => {
+        this.unidadesDisponibles = unidades;
+        this.cargandoUnidades = false;
+        },
+        error: () => {
+        this.cargandoUnidades = false;
+        this.toast.error('No se pudieron cargar las unidades de medida.');
+        }
+    });
+    }
+
+
     isFormulaTagEnabled(i: number): boolean {
         return Boolean(
             this.formulaTagEnabled[i - 1] &&
@@ -117,6 +137,7 @@ export class CategoryChildFormComponent implements OnInit {
 
     ngOnInit() {
         this.setDialogWidth(0);
+        this.cargarUnidades();
         this.padres = this.data.padres || [];
 
         if (this.data.categoriaEdit) {
