@@ -9,14 +9,42 @@
       <div class="field"><label>Artículo <span>*</span></label>
         <mat-form-field appearance="outline" class="inventory-select">
           <mat-select formControlName="articleId" placeholder="Seleccionar artículo" panelClass="inventory-select-options">
-            <mat-option *ngFor="let a of articles" [value]="a.id">{{ a.name }} · {{ a.stock }} {{ a.measurementUnit }}</mat-option>
+            <mat-option *ngFor="let a of articles" [value]="a.id" [disabled]="isEntry && a.tracking === 1">{{ a.name }} · {{ a.stock }} {{ a.measurementUnit }}{{isEntry && a.tracking === 1 ? ' (gestionar por series)' : ''}}</mat-option>
           </mat-select>
         </mat-form-field>
       </div>
+      <!-- WEBINVENTORY_UNIDADES_INGRESOS_2026_V1: la cantidad es de compra, el movimiento se registra en stock -->
       <div class="movement-grid">
-        <div class="field"><label>Cantidad <span>*</span></label><input type="number" min="0.01" step="0.01" formControlName="amount" /></div>
-        <div class="stock-panel"><small>Stock disponible</small><strong>{{ selected?.stock ?? '—' }}</strong><small>{{ selected?.measurementUnit || 'Selecciona un artículo' }}</small></div>
+        <div class="field">
+          <label>{{isEntry ? 'Cantidad recibida (' + (purchaseUnit || 'unidad') + ')' : 'Cantidad'}} <span>*</span></label>
+          <input type="number" [attr.min]="amountStep === 1 ? 1 : 0" [attr.step]="amountStep"
+            formControlName="amount" />
+          <small class="unit-step-hint" *ngIf="isEntry && selected">
+            {{amountStep === 1 ? 'Solo cantidades enteras (↑↓ de 1 en 1)' : 'Permite decimales (↑↓ de 0.1)'}}
+          </small>
+          <small class="unit-value-error" *ngIf="isEntry && selected && !enteredQuantityValid">
+            {{amountStep === 1 ? 'Ingresa un número entero positivo.' : 'Ingresa una cantidad positiva con máximo dos decimales.'}}
+          </small>
+        </div>
+        <div class="stock-panel">
+          <small>Stock disponible</small><strong>{{ selected?.stock ?? '—' }}</strong>
+          <small>{{ selected?.measurementUnit || 'Selecciona un artículo' }}</small>
+          <ng-container *ngIf="isEntry && selected && !ruleError">
+            <small>Este ingreso suma</small>
+            <strong class="stock-added">{{stockIncrement | number:'1.0-2'}} {{saleUnit}}</strong>
+          </ng-container>
+        </div>
       </div>
+      <div class="field" *ngIf="needsConversion && fixedFactor === null">
+        <label>Unidades por {{purchaseUnit}} <span>*</span></label>
+        <input type="number" min="1" step="1" formControlName="conversionFactor" />
+        <small class="unit-step-hint">El factor corresponde a este ingreso. Debe ser entero.</small>
+        <small class="unit-value-error" *ngIf="!enteredFactorValid">Ingresa un factor entero mayor que cero.</small>
+      </div>
+      <p class="unit-step-hint" *ngIf="needsConversion && fixedFactor !== null">
+        Equivalencia fija: 1 {{purchaseUnit}} = {{fixedFactor}} unidades.
+      </p>
+      <p class="message" *ngIf="ruleError" role="alert">{{ruleError}}</p>
       <div class="field"><label>Observación (opcional)</label><textarea rows="3" formControlName="observation" placeholder="Motivo del movimiento..."></textarea></div>
       <p class="message" *ngIf="error" role="alert">{{ error }}</p>
       <p class="hint" *ngIf="selected?.tracking === 1">Los artículos serializados requieren cantidades enteras.</p>

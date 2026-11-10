@@ -277,79 +277,63 @@
           <div class="section-heading"><h3>Configuración logística</h3><p>Define cómo se compra, vende y contabiliza el producto.</p></div>
         </div>
         <form [formGroup]="logisticsForm" (ngSubmit)="goNextFromLogistics()">
-          <div class="tile-grid" [class.has-conversion]="requiresUnitConversion">
+          <!-- WEBINVENTORY_UNIDADES_INGRESOS_2026_V1: compra, venta y stock según regla de unidad -->
+          <div class="tile-grid" [class.has-conversion]="requiresUnitConversion"
+               [class.fixed-conversion]="requiresUnitConversion && fixedFactor !== null">
             <div class="field-tile">
-              <div class="tile-label"><mat-icon>local_shipping</mat-icon><label for="acq-unit">Se compra por <span class="required">*</span></label><span class="field-feedback" [class.is-error]="isInvalid('logistics','acqUnit')">{{isInvalid('logistics','acqUnit')?'Elige una unidad.':''}}</span></div>
+              <div class="tile-label"><mat-icon>local_shipping</mat-icon><label for="acq-unit">Se compra por <span class="required">*</span></label></div>
               <mat-form-field appearance="outline" class="inventory-select">
-                <mat-select id="acq-unit" formControlName="acqUnit" panelClass="inventory-select-options" (openedChange)="$event && resetFieldMessage('logistics','acqUnit')">
-                  <mat-option *ngFor="let u of unidades" [value]="u">{{ u }}</mat-option>
+                <mat-select id="acq-unit" formControlName="acqUnit" panelClass="inventory-select-options">
+                  <mat-option *ngFor="let u of unidades" [value]="u">{{u}}</mat-option>
                 </mat-select>
               </mat-form-field>
             </div>
             <div class="field-tile">
-              <div class="tile-label"><mat-icon>shopping_cart</mat-icon><label for="sale-unit">Se vende por <span class="required">*</span></label><span class="field-feedback" [class.is-error]="isInvalid('logistics','saleUnit')">{{isInvalid('logistics','saleUnit')?'Elige una unidad.':''}}</span></div>
+              <div class="tile-label"><mat-icon>shopping_cart</mat-icon>
+                <label for="sale-unit">Se vende por <span class="required">*</span></label>
+                <mat-icon class="unit-lock" *ngIf="isPhysicalPurchase" title="Igual que compra; sin conversión">lock</mat-icon>
+              </div>
               <mat-form-field appearance="outline" class="inventory-select">
-                <mat-select id="sale-unit" formControlName="saleUnit" panelClass="inventory-select-options" (openedChange)="$event && resetFieldMessage('logistics','saleUnit')">
-                  <mat-option *ngFor="let u of unidades" [value]="u">{{ u }}</mat-option>
+                <mat-select id="sale-unit" formControlName="saleUnit" panelClass="inventory-select-options">
+                  <mat-option *ngFor="let u of saleUnits" [value]="u">{{u}}</mat-option>
                 </mat-select>
               </mat-form-field>
             </div>
             <div class="field-tile" *ngIf="requiresUnitConversion">
-              
-              <div class="tile-label">
-                <mat-icon>inventory_2</mat-icon>
-
-                <label for="initial-quantity">
-                  Cantidad de cajas <span class="required">*</span>
+              <div class="tile-label"><mat-icon>inventory_2</mat-icon>
+                <label for="initial-quantity">{{initialQuantityLabel}} <span class="required">*</span>
+                  <span class="fixed-factor" *ngIf="fixedFactor !== null">({{fixedFactor}} unid. c/u)</span>
                 </label>
-
-                <span
-                  *ngIf="isInvalid('logistics', 'initialQuantity')"
-                  class="field-feedback is-error">
-                  Cantidad inválida.
-                </span>
               </div>
-
-              <input id="initial-quantity" type="number" [attr.min]="currentTrackingMode === 'Serializado' && !isEditMode ? 1 : 0" [attr.step]="currentTrackingMode === 'Serializado' && !isEditMode ? 1 : 'any'" formControlName="initialQuantity" class="custom-input" [readonly]="currentTrackingMode === 'Serializado' && isEditMode" [class.invalid]="isInvalid('logistics','initialQuantity')" (focus)="resetFieldMessage('logistics','initialQuantity')" />
+              <input id="initial-quantity" type="number" min="0" step="1" formControlName="initialQuantity"
+                class="custom-input" [readonly]="currentTrackingMode === 'Serializado' && isEditMode"
+                [class.invalid]="isInvalid('logistics','initialQuantity')"
+                (focus)="resetFieldMessage('logistics','initialQuantity')" />
+              <span class="error-text" *ngIf="isInvalid('logistics','initialQuantity')">Ingresa un número entero de agrupaciones.</span>
             </div>
-            <div class="field-tile" *ngIf="requiresUnitConversion">
-              
-              <div class="tile-label">
-                <mat-icon>layers</mat-icon>
-
-                <label for="conversion">
-                  Unidades por caja <span class="required">*</span>
-                </label>
-
-                <span
-                  *ngIf="isInvalid('logistics', 'conversionFactor')"
-                  class="field-feedback is-error">
-                  Factor inválido.
-                </span>
+            <div class="field-tile" *ngIf="requiresUnitConversion && fixedFactor === null">
+              <div class="tile-label"><mat-icon>layers</mat-icon>
+                <label for="conversion">Unidades por {{logisticsForm.get('acqUnit')?.value}} <span class="required">*</span></label>
               </div>
-
-              <input id="conversion" type="number" min="0.01" step="any" formControlName="conversionFactor" class="custom-input" [class.invalid]="isInvalid('logistics', 'conversionFactor')" (focus)="resetFieldMessage('logistics','conversionFactor')" />
+              <input id="conversion" type="number" min="1" step="1" formControlName="conversionFactor"
+                class="custom-input" [class.invalid]="isInvalid('logistics','conversionFactor')"
+                (focus)="resetFieldMessage('logistics','conversionFactor')" />
+              <span class="error-text" *ngIf="isInvalid('logistics','conversionFactor')">Solo valores enteros mayores que cero.</span>
             </div>
             <div class="field-tile" [class.stock-calculated]="requiresUnitConversion">
-              
-              <div class="tile-label">
-                <mat-icon>warehouse</mat-icon>
-
-                <label for="article-stock">
-                  Stock ({{ logisticsForm.get('saleUnit')?.value }})
-                  <span class="required">*</span>
-                </label>
-
-                <span
-                  *ngIf="isInvalid('logistics', 'stock')"
-                  class="field-feedback is-error">
-                  Stock inválido.
-                </span>
+              <div class="tile-label"><mat-icon>warehouse</mat-icon>
+                <label for="article-stock">Stock total ({{logisticsForm.get('saleUnit')?.value}}) <span class="required">*</span></label>
               </div>
-
-              <input id="article-stock" type="number" [attr.min]="currentTrackingMode === 'Serializado' ? 1 : 0" [attr.max]="currentTrackingMode === 'Serializado' ? 1000 : null" [attr.step]="currentTrackingMode === 'Serializado' ? 1 : 'any'" formControlName="stock" class="custom-input" [class.invalid]="isInvalid('logistics', 'stock')" [readonly]="requiresUnitConversion || (currentTrackingMode === 'Serializado' && isEditMode)" (focus)="resetFieldMessage('logistics','stock')" />
+              <input id="article-stock" type="number" min="0" [attr.step]="stockStep" formControlName="stock"
+                class="custom-input" [class.invalid]="isInvalid('logistics','stock')"
+                [readonly]="requiresUnitConversion || (currentTrackingMode === 'Serializado' && isEditMode)"
+                (focus)="resetFieldMessage('logistics','stock')" />
+              <span class="error-text" *ngIf="isInvalid('logistics','stock')">
+                {{stockStep === 1 ? 'Solo números enteros válidos.' : 'Máximo dos decimales.'}}
+              </span>
             </div>
           </div>
+          <p class="units-load-error" *ngIf="unitLoadError" role="alert">{{unitLoadError}}</p>
           <p *ngIf="currentTrackingMode === 'Serializado' && !isEditMode" class="helper-note"><mat-icon>info_outline</mat-icon> Cada unidad de stock necesita una serie distinta. Ingresa la primera en Identidad y las restantes aquí (máximo 1000 por alta).</p>
           <div *ngIf="currentTrackingMode === 'Serializado' && !isEditMode && additionalSerialIndexes.length > 0" class="serial-series-grid">
             <label *ngFor="let idx of additionalSerialIndexes; trackBy: trackBySerialIndex" class="serial-series-field">

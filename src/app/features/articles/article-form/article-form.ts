@@ -19,6 +19,7 @@ import { ArticleService } from '../../../core/services/articles';
 import { InventoryContextService } from '../../../core/services/inventory-context';
 import { Article, ArticleDetail } from '../../../core/models/article.model';
 import { BrandDialogComponent, BrandDialogData } from '../brand-dialog/brand-dialog';
+import { isMeasuredUnit, isPackUnit, isUnitName, isUnitConversion, fixedUnitFactor, validPieces, validQuantity, quantityStep, quantityLabel } from '../../../shared/inventory/inventory-units';
 import {MeasurementUnitsService, MeasurementUnit} from '../../../core/services/measurement-units';
 
 interface AttributeField {
@@ -60,6 +61,8 @@ export class ArticleFormComponent implements OnInit, OnDestroy {
   categoriesError = '';
   brandsError = '';
   unidades: string[] = [];
+  private previousPurchaseUnit = '';
+  unitLoadError = '';
 
   // IMPORTANTE: cotización fija original, no es el tipo de cambio de hoy.
   monedas = [{ code: 'S/.', rate: 1 }, { code: 'USD', rate: 3.85 }];
@@ -151,19 +154,36 @@ export class ArticleFormComponent implements OnInit, OnDestroy {
   // MODAL_SERIES_FINANZAS_2026: paquetes serializados en alta, no modificación de existencias en edición.
   
   get requiresUnitConversion(): boolean {
-    if (!this.selectedCategory) return false;
-
-    const compra = String(
-      this.logisticsForm?.get('acqUnit')?.value ?? ''
-    ).trim().toLowerCase();
-
-    const venta = String(
-      this.logisticsForm?.get('saleUnit')?.value ?? ''
-    ).trim().toLowerCase();
-
-    return ['caja', 'cajas'].includes(compra)
-      && !!venta
-      && !['caja', 'cajas'].includes(venta);
+    return isUnitConversion(
+      String(this.logisticsForm?.get('acqUnit')?.value ?? ''),
+      String(this.logisticsForm?.get('saleUnit')?.value ?? '')
+    );
+  }
+  get isPhysicalPurchase(): boolean {
+    return isMeasuredUnit(String(this.logisticsForm?.get('acqUnit')?.value ?? ''));
+  }
+  get fixedFactor(): number | null {
+    if (!this.requiresUnitConversion) return null;
+    return fixedUnitFactor(String(this.logisticsForm?.get('acqUnit')?.value ?? ''));
+  }
+  get purchaseStep(): number {
+    return quantityStep(String(this.logisticsForm?.get('acqUnit')?.value ?? ''));
+  }
+  get stockStep(): number {
+    return quantityStep(String(this.logisticsForm?.get('saleUnit')?.value ?? ''));
+  }
+  get saleUnits(): string[] {
+    const purchase = String(this.logisticsForm?.get('acqUnit')?.value ?? '');
+    if (!purchase) return this.unidades;
+    if (this.isEditMode && this.existingArticle &&
+        Number(this.existingArticle.categoryId) === Number(this.selectedCategory?.id)) {
+      const original = this.existingArticle.saleUnit ?? this.existingArticle.measurementUnit;
+      if (original && original !== purchase && !isMeasuredUnit(purchase)) {
+        return [...new Set([purchase, ...this.unidades.filter(isUnitName), original])];
+      }
+    }
+    if (isPackUnit(purchase)) return [...new Set([purchase, ...this.unidades.filter(isUnitName)])];
+    return [purchase];
   }
 
   resetFieldMessage(section: 'identity' | 'logistics' | 'finance', name: string): void {
@@ -452,7 +472,7 @@ export class ArticleFormComponent implements OnInit, OnDestroy {
     this.logisticsForm.patchValue({
       acqUnit: a.acquisitionUnit ?? 'Unidad', saleUnit: a.saleUnit ?? a.measurementUnit ?? 'Unidad',
       conversionFactor: a.conversionFactor ?? 1, stock: a.stock,
-      initialQuantity: a.stock / Math.max(Number(a.conversionFactor) || 1, 0.01)
+      initialQuantity: a.stock / Math.max((fixedUnitFactor(String(a.acquisitionUnit ?? '')) ?? Number(a.conversionFactor)) || 1, 0.01)
     }, { emitEvent: false });
     this.actualizarUnidadesPermitidas();
     this.syncUnitConversion(false);
@@ -528,50 +548,64 @@ export class ArticleFormComponent implements OnInit, OnDestroy {
     const initial = this.logisticsForm.get('initialQuantity');
     const factor = this.logisticsForm.get('conversionFactor');
     const stock = this.logisticsForm.get('stock');
-    const isSerialized = this.currentTrackingMode === 'Serializado';
-    const editingSerialized = isSerialized && this.isEditMode;
-    const currentStock = Number(stock?.value) || 0;
-    const ratio = Number(factor?.value);
-
-    if (this.requiresUnitConversion) {
-      // Una caja de productos con series contiene unidades ENTERAS y positivas.
-      factor?.setValidators(isSerialized
-        ? [Validators.required, Validators.min(1), Validators.pattern(/^[1-9]\d*$/)]
-        : [Validators.required, Validators.min(0.01)]);
-
+    const purchase = this.logisticsForm.get('acqUnit');
+    const sale = this.logisticsForm.get('saleUnit');
+    const purchaseName = String(purchase?.value ?? '');
+    const purchaseChanged = !!this.previousPurchaseUnit && this.previousPurchaseUnit !== purchaseName;
+    this.previousPurchaseUnit = purchaseName;
+    if (purchaseChanged && !this.isEditMode) {
+      initial?.setValue(null, {emitEvent:false});
+      if (fixedUnitFactor(purchaseName) === null) factor?.setValue(null, {emitEvent:false});
+    }
+    const serialized = this.currentTrackingMode === 'Serializado';
+    const editingSerialized = serialized && this.isEditMode;
+    if (isMeasuredUnit(purchaseName)) {
+      if (sale?.value !== purchaseName) sale?.setValue(purchaseName, {emitEvent:false});
+      if (sale?.enabled) sale.disable({emitEvent:false});
+    } else {
+      if (sale?.disabled) sale.enable({emitEvent:false});
+      if (purchaseName && !this.saleUnits.includes(String(sale?.value ?? ''))) {
+        const unitOption = this.saleUnits.find(isUnitName);
+        sale?.setValue(unitOption ?? this.saleUnits[0] ?? purchaseName, {emitEvent:false});
+      }
+    }
+    const saleName = String(sale?.value ?? '');
+    const conversion = isUnitConversion(purchaseName, saleName);
+    const fixed = conversion ? fixedUnitFactor(purchaseName) : null;
+    this.initialQuantityLabel = quantityLabel(purchaseName);
+    const existingStock = Number(stock?.value);
+    if (conversion) {
+      if (fixed !== null) factor?.setValue(fixed, {emitEvent:false});
+      factor?.setValidators([Validators.required, Validators.min(1), Validators.pattern(/^[1-9]\d*$/)]);
+      initial?.setValidators([Validators.required, Validators.min(serialized ? 1 : 0),
+        Validators.pattern(serialized ? /^[1-9]\d*$/ : /^\d+$/)]);
       if (editingSerialized) {
-        // La cantidad de cajas es solo informativa. La edición NO altera stock ni series.
-        initial?.setValue(ratio > 0 ? Number((currentStock / ratio).toFixed(6)) : null,
-          { emitEvent: false });
+        const ratio = Number(factor?.value);
+        initial?.setValue(ratio > 0 ? existingStock / ratio : null, {emitEvent:false});
         initial?.clearValidators();
-        this.initialQuantityLabel = 'Equivalente en ' + String(this.logisticsForm.get('acqUnit')?.value || 'compra');
       } else {
-        const missingQuantity = initial?.value == null || initial.value === '';
-        if (unitsChanged && missingQuantity && currentStock > 0) {
-          initial?.setValue(currentStock / (ratio > 0 ? ratio : 1), { emitEvent: false });
-        }
-        initial?.setValidators(isSerialized
-          ? [Validators.required, Validators.min(1), Validators.pattern(/^[1-9]\d*$/)]
-          : [Validators.required, Validators.min(0)]);
         const quantity = Number(initial?.value);
-        const validQuantity = initial?.value != null && initial.value !== '' &&
-          Number.isFinite(quantity) && Number.isFinite(ratio) && ratio > 0;
-        // Alta: cada unidad generada debe tener una serie distinta.
-        // El validador de stock existente limita a 1–1000 unidades enteras.
-        stock?.setValue(validQuantity ? Number((quantity * ratio).toFixed(6)) : null,
-          { emitEvent: false });
-        this.initialQuantityLabel = 'Cantidad de ' + String(this.logisticsForm.get('acqUnit')?.value || 'compra');
+        const ratio = Number(factor?.value);
+        const valid = validPieces(initial?.value, serialized) && validPieces(factor?.value, true);
+        stock?.setValue(valid ? quantity * ratio : null, {emitEvent:false});
       }
     } else {
       initial?.clearValidators();
-      factor?.setValidators([Validators.required, Validators.min(0.01)]);
-      // Misma unidad de compra y venta: el costo no debe dividirse por un factor oculto.
-      factor?.setValue(1, { emitEvent: false });
+      initial?.setValue(null, {emitEvent:false});
+      factor?.setValidators([Validators.required, Validators.min(1)]);
+      factor?.setValue(1, {emitEvent:false});
     }
-
-    factor?.updateValueAndValidity({ emitEvent: false });
-    initial?.updateValueAndValidity({ emitEvent: false });
-    stock?.updateValueAndValidity({ emitEvent: false });
+    const stockValidators = serialized
+      ? [Validators.required, Validators.min(1), Validators.max(1000), Validators.pattern(/^[1-9]\d*$/)]
+      : isMeasuredUnit(saleName)
+        ? [Validators.required, Validators.min(0), Validators.pattern(/^\d+(?:\.\d{1,2})?$/)]
+        : [Validators.required, Validators.min(0), Validators.pattern(/^\d+$/)];
+    stock?.setValidators(stockValidators);
+    if (!this.selectedCategory || editingSerialized) stock?.disable({emitEvent:false});
+    else stock?.enable({emitEvent:false});
+    factor?.updateValueAndValidity({emitEvent:false});
+    initial?.updateValueAndValidity({emitEvent:false});
+    stock?.updateValueAndValidity({emitEvent:false});
     this.calculateProfit();
   }
 
@@ -1089,6 +1123,27 @@ export class ArticleFormComponent implements OnInit, OnDestroy {
       attr4: attrs['attr4'], attr5: attrs['attr5'], attr6: attrs['attr6'], isActive: true
     };
     // Alta serializada: una serie única, no vacía, por cada unidad de stock.
+    // WEBINVENTORY_UNIDADES_INGRESOS_2026_V1: validaciones finales al guardar.
+    const purchaseName = String(logistics.acqUnit ?? '');
+    const saleName = String(logistics.saleUnit ?? '');
+    const converted = isUnitConversion(purchaseName, saleName);
+    const physical = isMeasuredUnit(purchaseName);
+    if (this.isEditMode && this.existingArticle && Number(this.existingArticle.stock) > 0 &&
+        saleName !== String(this.existingArticle.saleUnit ?? this.existingArticle.measurementUnit)) {
+      this.currentStep = 2;
+      this.snackBar.open('No cambies la unidad de stock de un artículo con existencias.', 'Cerrar', {duration:6000});
+      return;
+    }
+    const configurationValid = this.unidades.includes(purchaseName) &&
+      (physical ? purchaseName === saleName : (purchaseName === saleName || converted)) &&
+      (converted ? validPieces(logistics.initialQuantity, mode === 1) &&
+        validPieces(logistics.conversionFactor, true) : true);
+    const quantityValid = validQuantity(logistics.stock, saleName, mode === 1);
+    if (!configurationValid || !quantityValid) {
+      this.currentStep = 2;
+      this.snackBar.open('Revisa unidades, cantidades y equivalencias en Logística.', 'Cerrar', {duration:5000});
+      return;
+    }
     const requestedStock = Number(logistics.stock);
     const initialSerials = mode === 1 && !this.isEditMode
       ? [String(identity.serialNumber ?? ''), ...this.extraSerialNumbers.slice(0, Math.max(0, requestedStock - 1))]
@@ -1179,3 +1234,5 @@ export class ArticleFormComponent implements OnInit, OnDestroy {
     return String(body?.error ?? body?.title ?? body?.message ?? `HTTP ${error.status}`);
   }
 }
+
+/* WEBINVENTORY_UNIDADES_INGRESOS_2026_V1: articleTs */

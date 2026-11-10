@@ -544,3 +544,5 @@ export class CategoryChildFormComponent implements OnInit {
         });
     }
 }
+
+/* WEBINVENTORY_UNIDADES_INGRESOS_2026_V1: categoryTs */

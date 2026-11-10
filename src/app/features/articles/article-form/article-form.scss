@@ -869,3 +869,19 @@ button:focus-visible { outline: 2px solid $lime; outline-offset: 2px; }
 @media (prefers-reduced-motion: reduce) { .custom-modal { animation:none; } }
 
 /* MODAL_SERIES_FINANZAS_2026: compactación integrada en reglas previas, sin reglas globales adicionales. */
+
+/* WEBINVENTORY_UNIDADES_INGRESOS_2026_V1: articleScss */
+
+/* Logística: sin saltos de altura por textos informativos; dos columnas para Docena/Pares. */
+.tile-label { flex-wrap: nowrap; height: 31px; min-height: 31px; }
+.tile-label label { min-width: 0; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tile-label .unit-lock { margin-left: auto; color: #c8d8e6; font-size: 17px; width: 17px; height: 17px; }
+.fixed-factor { font-size: 10px; color: #b3c9d8; margin-left: 5px; white-space: nowrap; }
+.tile-grid.has-conversion.fixed-conversion { grid-template-columns: repeat(2,minmax(0,1fr)); }
+.tile-grid.has-conversion.fixed-conversion > .field-tile,
+.tile-grid.has-conversion.fixed-conversion > .field-tile:nth-child(-n+2) { grid-column: auto; }
+.field-tile .error-text { font-size: 10px; line-height: 1.25; }
+.units-load-error { color: #ffaaaa; font-size: 11px; }
+@media(max-width:530px) {
+  .tile-grid.has-conversion.fixed-conversion { grid-template-columns: 1fr; }
+}
