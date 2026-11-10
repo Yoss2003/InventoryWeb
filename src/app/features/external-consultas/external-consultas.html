@@ -25,7 +25,7 @@
       <div class="fx-heading"><div><h2 id="fx-heading">Tipo de cambio referencial</h2><p>Última cotización verificada y consulta histórica</p></div><button type="button" class="fx-advanced-trigger" (click)="openAdvancedFilters()"><mat-icon>tune</mat-icon>Filtro avanzado</button></div>
       <div class="fx-grid" *ngIf="usd || eur; else fxEmpty">
         <article class="fx-card" *ngIf="usd">
-          <header class="fx-card-heading"><div class="fx-symbol">US$</div><div class="fx-title"><strong>Dólar estadounidense</strong><small>USD / PEN</small></div></header>
+          <header class="fx-card-heading"><div class="fx-symbol">$</div><div class="fx-title"><strong>Dólar estadounidense</strong><small>USD / PEN</small></div></header>
           <span class="fx-status" [class.fx-historical]="usdStatus !== 'Actual según fecha de API'">{{usdStatus}}</span>
           <div class="fx-prices"><div><span>Compra</span><strong>S/ {{usd.buyPrice | number:'1.3-3'}}</strong></div><div><span>Venta</span><strong>S/ {{usd.sellPrice | number:'1.3-3'}}</strong></div></div>
           <footer class="fx-date">Fecha informada: {{usd.date.slice(0,10) | date:'dd/MM/yyyy':'UTC'}}</footer>
