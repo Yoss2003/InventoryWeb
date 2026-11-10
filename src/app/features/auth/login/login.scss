@@ -2,7 +2,7 @@
 :host, :host * { box-sizing: border-box; }
 
 .login-page {
-  --company-accent: #a2d149;
+  --company-accent: var(--inv-company-accent, #A2D149);
   position: relative;
   min-height: 100dvh;
   display: flex;

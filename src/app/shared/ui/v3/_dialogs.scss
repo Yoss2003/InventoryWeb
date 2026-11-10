@@ -1,0 +1,21 @@
+/* Ancho general máximo 650 px. Nunca se fuerza en los modales especiales ya aprobados. */
+.cdk-overlay-pane:has(.ui-v2-dialog--simple) {
+  max-width:min(var(--inv-v3-modal-general-width),calc(100vw - 24px))!important;
+}
+.ui-v2-dialog--simple >header,
+.ui-v2-dialog--simple >footer {padding:12px 16px;}
+.ui-v2-dialog--simple >footer {display:flex;justify-content:flex-end;align-items:center;gap:8px;}
+.ui-v2-dialog--simple >footer button {border-radius:var(--inv-v3-button-radius);}
+/* Los diálogos especiales conservan pasos, tamaño y scroll internos que requieren. */
+.ui-v2-dialog--special :is(button,input,select,textarea):focus-visible {
+  outline-color:var(--inv-v3-brand);
+}
+/* Botones primarios de modales (sin interferir con acciones peligrosas). */
+.ui-v2-dialog :is(.save-button,.action-next,.button-primary,.confirm):not(:disabled) {
+  background:var(--inv-v3-brand);color:var(--inv-company-on-accent);
+  border-color:var(--inv-v3-brand);
+}
+.ui-v2-dialog :is(.step-num,.heading-icon,.section-icon,.header-icon,.modal-icon).active {
+  color:var(--inv-v3-brand);
+}
+/* El scroll vertical no se oculta: si el contenido supera el alto disponible, debe poder verse. */

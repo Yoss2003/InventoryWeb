@@ -1,4 +1,4 @@
-<div class="sale-dialog">
+<div class="sale-dialog ui-v2-dialog ui-v2-dialog--special">
   <header><div class="sale-header-icon"><mat-icon>point_of_sale</mat-icon></div><div><h2>Nueva venta (POS)</h2><p>Registro de compra, cliente y pago en tres etapas.</p></div><button type="button" (click)="dialogRef.close()" aria-label="Cerrar"><mat-icon>close</mat-icon></button></header>
   <nav class="sale-steps" aria-label="Etapas de la venta">
     <button type="button" [class.active]="step===1" (click)="goStep(1)"><span>1</span>Artículos</button><span class="step-line"></span>

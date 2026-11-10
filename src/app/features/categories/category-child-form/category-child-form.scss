@@ -12,7 +12,7 @@
 $bg: #111820;
 $panel: #19232e;
 $line: #344556;
-$lime: #a8d73d;
+$lime: var(--inv-company-accent, #A2D149);
 $muted: #a8b5c2;
 
 .category-modal {
@@ -305,10 +305,10 @@ $muted: #a8b5c2;
   min-width: 0;
   --mdc-outlined-text-field-outline-color: #6c8094;
   --mdc-outlined-text-field-hover-outline-color: #b4c5d6;
-  --mdc-outlined-text-field-focus-outline-color: #a8d73d;
+  --mdc-outlined-text-field-focus-outline-color: var(--inv-company-accent, #A2D149);
   --mdc-outlined-text-field-container-shape: 7px;
   --mat-select-enabled-arrow-color: #e7eef7;
-  --mat-select-focused-arrow-color: #a8d73d;
+  --mat-select-focused-arrow-color: var(--inv-company-accent, #A2D149);
 }
 
 :host ::ng-deep .inventory-select .mat-mdc-text-field-wrapper {
@@ -640,7 +640,7 @@ $muted: #a8b5c2;
 }
 
 .action-button.action-next {
-  background: #7d9f20;
+  background: var(--inv-company-accent, #A2D149);
   color: #fcfff6;
 }
 
@@ -836,7 +836,7 @@ $muted: #a8b5c2;
 }
 
 .formula-info-button:hover {
-  border-color: #a8d73d;
+  border-color: var(--inv-company-accent, #A2D149);
   background: #304322;
 }
 

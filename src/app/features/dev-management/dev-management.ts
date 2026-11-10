@@ -1,3 +1,6 @@
+import { UiControlDirective } from '../../shared/ui/v2/ui-control.directive';
+import { UiButtonDirective } from '../../shared/ui/v2/ui-button.directive';
+import { UiPageHeadingComponent } from '../../shared/ui/v2/ui-page-heading.component';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { ChangeDetectorRef, Component, OnDestroy, OnInit, PLATFORM_ID, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -20,7 +23,7 @@ import { UiSearchComponent } from '../../shared/ui/ui-search.component';
 @Component({
   selector: 'app-dev-management',
   standalone: true,
-  imports: [CommonModule, FormsModule, MatFormFieldModule, MatSelectModule, MatIconModule, LoadingIndicatorComponent,UiSearchComponent],
+  imports: [UiControlDirective, UiButtonDirective, UiPageHeadingComponent, CommonModule, FormsModule, MatFormFieldModule, MatSelectModule, MatIconModule, LoadingIndicatorComponent,UiSearchComponent],
   templateUrl: './dev-management.html',
   styleUrl: './dev-management.scss'
 })

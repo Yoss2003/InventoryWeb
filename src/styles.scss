@@ -1,6 +1,8 @@
 @use '@angular/material' as mat;
 @use './app/shared/ui/ui-system';
 @use './app/features/articles/brand-dialog/brand-dialog-overlay';
+@use './app/shared/ui/v2/ui-standards';
+@use './app/shared/ui/v3/ui-official';
 
 html { height: 100%; color-scheme: dark; @include mat.theme((color: (theme-type: dark, primary: mat.$azure-palette, tertiary: mat.$blue-palette), typography: Roboto, density: 0)); }
 body { background-color: var(--mat-sys-surface); color: var(--mat-sys-on-surface); font: var(--mat-sys-body-medium); margin: 0; height: 100%; }
@@ -21,7 +23,7 @@ html, body { height: 100%; margin: 0; padding: 0; background-color: #1e1e1e; }
   padding: 6px !important;
   max-height: 310px !important;
   --mat-option-label-text-color: #eff5fa;
-  --mat-option-selected-state-label-text-color: #d7f79a;
+  --mat-option-selected-state-label-text-color: var(--inv-company-accent, #A2D149);
   --mat-option-hover-state-layer-color: rgba(168,215,61,.14);
   --mat-option-focus-state-layer-color: rgba(168,215,61,.14);
   --mat-option-selected-state-layer-color: rgba(168,215,61,.2);
@@ -35,15 +37,15 @@ html, body { height: 100%; margin: 0; padding: 0; background-color: #1e1e1e; }
 }
 .mat-mdc-select-panel.inventory-select-options .mat-mdc-option:hover,
 .mat-mdc-select-panel.inventory-select-options .mat-mdc-option.mdc-list-item--selected {
-  background: #374b36 !important;
+  background: var(--inv-v3-brand-soft) !important;
   color: #dcffa5 !important;
 }
 .mat-mdc-select-panel.inventory-select-options .mdc-list-item__primary-text { color: inherit !important; }
 
 /* UX_FINAL_SELECTS_NATIVOS */
-select:not([multiple]){color-scheme:dark;accent-color:#a8d73d}
+select:not([multiple]){color-scheme:dark;accent-color:var(--inv-company-accent, #A2D149)}
 select:not([multiple]) option{background:#21313f;color:#eaf3fa}
-select:not([multiple]):focus-visible{outline:2px solid #a8d73d;outline-offset:2px}
+select:not([multiple]):focus-visible{outline:2px solid var(--inv-company-accent, #A2D149);outline-offset:2px}
 #active-inventory-select,.master-history .filters select{background-color:#1b2c39;border-color:#687e90;color:#edf5fa;border-radius:9px;cursor:pointer;transition:border-color .15s,box-shadow .15s}
 #active-inventory-select:hover,.master-history .filters select:hover{border-color:#94bd57}
 #active-inventory-select:focus,.master-history .filters select:focus{box-shadow:0 0 0 2px rgba(168,215,61,.18);outline:none}

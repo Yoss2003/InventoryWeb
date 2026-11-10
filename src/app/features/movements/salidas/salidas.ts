@@ -1,3 +1,8 @@
+import { UiEmptyStateComponent } from '../../../shared/ui/v2/ui-empty-state.component';
+import { UiStatusComponent } from '../../../shared/ui/v2/ui-status.component';
+import { UiTableActionDirective } from '../../../shared/ui/v2/ui-table-action.directive';
+import { UiButtonDirective } from '../../../shared/ui/v2/ui-button.directive';
+import { UiPageHeadingComponent } from '../../../shared/ui/v2/ui-page-heading.component';
 import { cleanArticleDisplayName } from '../../../shared/clean-article-name.pipe';
 import { ToastService } from '../../../shared/toast/toast.service';
 import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
@@ -20,7 +25,7 @@ import { LoadingIndicatorComponent } from '../../../shared/loading/loading-indic
 
 import { UiSearchComponent } from '../../../shared/ui/ui-search.component';
 
-@Component({selector:'app-salidas',standalone:true,imports:[CommonModule,MatIconModule,MatTabsModule,LoadingIndicatorComponent,UiSearchComponent],templateUrl:'./salidas.html',styleUrl:'./salidas.scss'})
+@Component({selector:'app-salidas',standalone:true,imports:[UiEmptyStateComponent, UiStatusComponent, UiTableActionDirective, UiButtonDirective, UiPageHeadingComponent, CommonModule,MatIconModule,MatTabsModule,LoadingIndicatorComponent,UiSearchComponent],templateUrl:'./salidas.html',styleUrl:'./salidas.scss'})
 export class SalidasComponent implements OnInit {
   private readonly movementsApi=inject(MovementService);
   private readonly salesApi=inject(SalesService);

@@ -1,0 +1,41 @@
+/* Respeta el ancho necesario para cada conjunto de columnas: uniforma densidad y acciones. */
+.ui-v2-screen :is(.ui-table-shell,.table-wrapper,.companies-table,.recovery-table,
+  .sharing-table-wrap,.supplier-list,.assignment-table-wrap) { min-width:0;max-width:100%; }
+.ui-v2-screen :is(.ui-table-shell,.table-wrapper,.companies-table,.recovery-table,
+  .sharing-table-wrap,.assignment-table-wrap) table:not(.mat-mdc-table) {
+  width:100%;border-collapse:collapse;
+}
+.ui-v2-screen :is(.ui-table-shell,.table-wrapper,.companies-table,.recovery-table,
+  .sharing-table-wrap,.assignment-table-wrap) table:not(.mat-mdc-table) > thead > tr > th {
+  box-sizing:border-box;padding:13px 13px;min-height:48px;
+  background:var(--inv-v2-header);color:#bbcbdb;
+  font-size:11px;font-weight:730;line-height:1.4;text-align:left;
+}
+.ui-v2-screen :is(.ui-table-shell,.table-wrapper,.companies-table,.recovery-table,
+  .sharing-table-wrap,.assignment-table-wrap) table:not(.mat-mdc-table) > tbody > tr > td {
+  box-sizing:border-box;padding:12px 13px;
+  font-size:12px;line-height:1.4;vertical-align:middle;
+  border-bottom:1px solid #3a5163;
+}
+/* MatTable requiere otras reglas, particularmente las filas expandibles de Categorías. */
+.ui-v2-screen .category-table .mat-mdc-header-cell {
+  background:var(--inv-v2-header)!important;
+  padding-block:13px!important; color:#bbcbdb!important;
+  font-size:11px!important;
+}
+.ui-v2-screen .category-table .parent-row .mat-mdc-cell {padding-block:12px!important;}
+.ui-v2-screen .category-table .detail-row .mat-mdc-cell {padding:0!important;}
+.ui-v2-screen :is(.status,.state-pill,.status-pill,.assignment-tag,.plan-tag,.supplier-status-pill):not(app-ui-status) {
+  box-sizing:border-box; min-height:27px;display:inline-flex;
+  align-items:center;justify-content:center;line-height:1.3;
+  padding:4px 10px; border-radius:999px;font-size:11px;font-weight:700;
+}
+.ui-v2-screen :is(.ui-empty-state,.catalog-state,.entries-loading,.outputs-empty):not(.err) {
+  font-size:12px;color:#aebfce;
+}
+/* Proveedores ya tiene una tabla responsive tipo tarjeta: sus filas móviles se mantienen. */
+.ui-v2-screen .supplier-list .supplier-table > thead > tr > th {padding:12px 13px;}
+.ui-v2-screen .supplier-list .supplier-table > tbody > tr > td {padding:12px 13px;}
+@media(max-width:660px) {
+ .ui-v2-screen .supplier-list .supplier-table > tbody > tr > td {padding:7px 0;}
+}

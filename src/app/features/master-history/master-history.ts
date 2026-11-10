@@ -1,3 +1,6 @@
+import { UiControlDirective } from '../../shared/ui/v2/ui-control.directive';
+import { UiButtonDirective } from '../../shared/ui/v2/ui-button.directive';
+import { UiPageHeadingComponent } from '../../shared/ui/v2/ui-page-heading.component';
 import { CleanArticleNamePipe } from '../../shared/clean-article-name.pipe';
 import { CommonModule } from '@angular/common';
 import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
@@ -26,7 +29,7 @@ interface MasterHistoryResponse { items: MasterMovementRow[]; total: number; pag
 
 @Component({
   selector: 'app-master-history', standalone: true,
-  imports: [CleanArticleNamePipe, CommonModule, FormsModule, MatIconModule],
+  imports: [UiControlDirective, UiButtonDirective, UiPageHeadingComponent, CleanArticleNamePipe, CommonModule, FormsModule, MatIconModule],
   templateUrl: './master-history.html', styleUrl: './master-history.scss'
 })
 export class MasterHistoryComponent implements OnInit {

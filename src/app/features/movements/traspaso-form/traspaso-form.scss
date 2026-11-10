@@ -20,13 +20,13 @@
 .field small { font-size: 11px; color: #9baabb; }
 .required { color: #aed94b; }
 .compact-input { width: 100%; height: 43px; font: inherit; font-size: 13px; padding: 9px 12px; background: #0f1720; color: #f2f6fa; border: 1px solid #697b8a; border-radius: 7px; outline: none; }
-.compact-input:focus { border-color: #a8d73d; }
+.compact-input:focus { border-color: var(--inv-company-accent, #A2D149); }
 .compact-area { resize: vertical; height: 74px; }
 :host ::ng-deep .compact-select .mat-mdc-text-field-wrapper { height: 43px; background: #0f1720; border-radius: 7px; }
 :host ::ng-deep .compact-select .mat-mdc-form-field-infix { padding-top: 11px; padding-bottom: 9px; min-height: 43px; }
 :host ::ng-deep .compact-select .mat-mdc-form-field-subscript-wrapper { display: none; }
 :host ::ng-deep .compact-select .mat-mdc-select-value { color: #edf3f9; font-size: 13px; }
-:host ::ng-deep .compact-select { --mdc-outlined-text-field-outline-color: #697b8a; --mdc-outlined-text-field-focus-outline-color: #a8d73d; --mat-select-enabled-arrow-color: #dce6f0; width: 100%; }
+:host ::ng-deep .compact-select { --mdc-outlined-text-field-outline-color: #697b8a; --mdc-outlined-text-field-focus-outline-color: var(--inv-company-accent, #A2D149); --mat-select-enabled-arrow-color: #dce6f0; width: 100%; }
 .evidence-row { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
 .evidence-row img { display: block; width: 106px; height: 76px; object-fit: contain; border-radius: 6px; border: 1px solid #64798b; }
 .outline-btn { min-height: 37px; background: #243340; border: 1px solid #5f7486; color: #e5edf6; border-radius: 8px; font-size: 12px; display: inline-flex; gap: 6px; align-items: center; justify-content: center; padding: 7px 12px; cursor: pointer; }
@@ -50,7 +50,7 @@
 .operation-summary{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px;margin:14px 0 0}.operation-summary>div{background:#13212d;border:1px solid #394d5e;padding:10px;border-radius:9px;min-width:0}.operation-summary .wide{grid-column:1/-1}.operation-summary dt{font-size:11px;color:#9db0c2}.operation-summary dd{font-weight:700;font-size:13px;color:#eaf3f9;margin:5px 0 0;overflow-wrap:anywhere}.evidence-card{border-top:1px solid #394e61;margin-top:12px;padding-top:13px}
 @media(max-width:600px){.wizard-nav{gap:1px;padding:9px 4px}.wizard-nav button{font-size:10px;padding:5px}.wizard-nav button span{width:19px;height:19px}.step-line{max-width:9px}.wizard-page{min-height:0}.operation-summary{grid-template-columns:1fr}.transfer-body{max-height:calc(100dvh - 215px)}}
 
-.serial-selection{margin:13px 0;display:grid;gap:8px}.serial-selection>label{display:flex;gap:10px;align-items:center;background:#172a36;border:1px solid #536778;border-radius:8px;padding:10px}.serial-selection input{width:18px;height:18px;accent-color:#a2d149}
+.serial-selection{margin:13px 0;display:grid;gap:8px}.serial-selection>label{display:flex;gap:10px;align-items:center;background:#172a36;border:1px solid #536778;border-radius:8px;padding:10px}.serial-selection input{width:18px;height:18px;accent-color:var(--inv-company-accent, #A2D149)}
 
 /* CUSTODIA_HISTORIALES_V2_ESTILOS_REFERENCIA */
 .info-block { min-height: 76px; padding: 9px 12px; gap: 5px; justify-content: center; }

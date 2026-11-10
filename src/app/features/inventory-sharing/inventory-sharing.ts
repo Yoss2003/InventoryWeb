@@ -1,3 +1,5 @@
+import { UiControlDirective } from '../../shared/ui/v2/ui-control.directive';
+import { UiPageHeadingComponent } from '../../shared/ui/v2/ui-page-heading.component';
 import { ChangeDetectorRef, Component, OnInit, PLATFORM_ID, inject } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -10,7 +12,7 @@ import { LoadingIndicatorComponent } from '../../shared/loading/loading-indicato
 
 @Component({
   selector: 'app-inventory-sharing', standalone: true,
-  imports: [CommonModule, FormsModule, MatIconModule, MatFormFieldModule, MatSelectModule, LoadingIndicatorComponent],
+  imports: [UiControlDirective, UiPageHeadingComponent, CommonModule, FormsModule, MatIconModule, MatFormFieldModule, MatSelectModule, LoadingIndicatorComponent],
   templateUrl: './inventory-sharing.html', styleUrl: './inventory-sharing.scss'
 })
 export class InventorySharingComponent implements OnInit {

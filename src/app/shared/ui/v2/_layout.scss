@@ -1,0 +1,48 @@
+/* Las cabeceras usan el mismo componente para título/ícono, sin mover las acciones. */
+.ui-v2-screen { min-width:0; color:var(--inv-v2-text); }
+.ui-v2-screen > header.ui-v2-page-header {
+  display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between;
+  column-gap:20px; row-gap:14px;
+  padding:0 0 17px; margin:0 0 16px;
+  border-bottom:1px solid #3d5364;
+  min-width:0; box-sizing:border-box;
+}
+.ui-v2-screen > header.ui-v2-page-header > app-ui-page-heading,
+.ui-v2-screen > header.ui-v2-page-header > .ui-v2-heading-fallback { flex:1 1 360px; min-width:0; }
+.ui-v2-screen .ui-v2-header-actions {
+  display:flex; align-items:center; justify-content:flex-end;
+  gap:10px; flex:0 1 auto; flex-wrap:wrap; min-width:0;
+}
+.ui-v2-screen .ui-v2-header-actions .reload { order:-1; }
+.ui-v2-screen .ui-v2-header-actions .ui-v2-button { flex:none; }
+.ui-v2-screen :is(.ui-table-toolbar, .ui-v2-table-toolbar) {
+  display:flex; align-items:center; justify-content:space-between;
+  flex-wrap:wrap; gap:12px; min-width:0;
+  margin:14px 0 16px;
+}
+.ui-v2-screen :is(.ui-table-toolbar, .ui-v2-table-toolbar) > app-ui-search {
+  width:min(100%,var(--inv-v2-search-width));
+  flex:0 1 var(--inv-v2-search-width); min-width:0;
+  --inv-control-height:var(--inv-v2-control-height);
+  --inv-search-width:var(--inv-v2-search-width);
+}
+.ui-v2-screen :is(.ui-table-toolbar, .ui-v2-table-toolbar) label:has(input[type=checkbox]) {
+  display:inline-flex; align-items:center; gap:8px;
+  margin-left:auto; min-height:var(--inv-v2-control-height);
+  color:#cedbe7; font-size:12px;
+}
+.ui-v2-screen :is(.ui-table-toolbar, .ui-v2-table-toolbar) input[type=checkbox] {
+  width:17px; height:17px; accent-color:var(--inv-v2-accent); cursor:pointer;
+}
+/* Las cuatro pantallas principales tienen el mismo contenedor de cabecera/filtros. */
+.ui-v2-screen:is(.catalog-page,.category-overview,.entries-page,.outputs-page) {
+  box-sizing:border-box; padding:20px; border:1px solid #4a6272;
+  border-radius:var(--inv-v2-radius-card); background:#14212b;
+  min-width:0; max-width:100%;
+}
+/* Los títulos secundarios mantienen tipografía uniforme sin alterar jerarquía. */
+.ui-v2-screen :is(.section-head,.assignment-toolbar,.sharing-card-heading) h2 { font-size:17px; }
+.ui-v2-screen .ui-v2-filter-panel { display:grid; gap:12px; align-items:end; }
+.ui-v2-screen .ui-v2-filter-panel label { min-width:0; }
+.ui-v2-screen .ui-v2-filter-panel input,
+.ui-v2-screen .ui-v2-filter-panel select { box-sizing:border-box; }

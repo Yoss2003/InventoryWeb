@@ -1,0 +1,78 @@
+/* Botones: el (click), [disabled] y ngSubmit quedan en sus vistas originales. */
+.ui-v2-screen .ui-v2-button,
+.ui-v2-dialog .ui-v2-button {
+  display:inline-flex; justify-content:center; align-items:center; gap:8px;
+  box-sizing:border-box; min-height:var(--inv-v2-button-height); height:auto;
+  padding:9px 15px; border-radius:var(--inv-v2-radius-control);
+  border:1px solid #667f90; background:#263b4a; color:#edf5fb;
+  font:inherit; font-size:12px; font-weight:700; line-height:1.25;
+  text-align:center; cursor:pointer; white-space:normal;
+}
+.ui-v2-screen .ui-v2-button--primary,
+.ui-v2-dialog .ui-v2-button--primary {background:var(--inv-v2-accent-bg); border-color:#90b343; color:#f8ffeb;}
+.ui-v2-screen .ui-v2-button--secondary,
+.ui-v2-dialog .ui-v2-button--secondary {background:#273b49; border-color:#698092; color:#edf5fd;}
+.ui-v2-screen .ui-v2-button--danger,
+.ui-v2-dialog .ui-v2-button--danger {background:var(--inv-v2-danger-bg); border-color:#84535e; color:var(--inv-v2-danger);}
+.ui-v2-screen .ui-v2-button > mat-icon,
+.ui-v2-dialog .ui-v2-button > mat-icon {
+  width:19px; height:19px; font-size:19px; line-height:1;
+}
+.ui-v2-screen .ui-v2-button:hover:not(:disabled),
+.ui-v2-dialog .ui-v2-button:hover:not(:disabled) {filter:brightness(1.11);}
+.ui-v2-screen .ui-v2-button:disabled,
+.ui-v2-dialog .ui-v2-button:disabled {opacity:.45;cursor:not-allowed;filter:none;}
+.ui-v2-screen button.ui-v2-table-action {
+  display:inline-grid;place-items:center; vertical-align:middle;
+  box-sizing:border-box; flex:none; width:var(--inv-v2-action-size);
+  height:var(--inv-v2-action-size); min-width:var(--inv-v2-action-size);
+  min-height:var(--inv-v2-action-size); padding:0;
+  border:1px solid #5c7689; border-radius:8px;
+  background:#263b4a; color:#bfe6ff; cursor:pointer;
+  margin:0 4px 0 0;
+}
+.ui-v2-screen button.ui-v2-table-action--danger {
+  border-color:#79545c;background:#332b38;color:#ffabb4;
+}
+.ui-v2-screen button.ui-v2-table-action mat-icon {
+  display:block; width:18px; height:18px; font-size:18px; line-height:18px;
+}
+.ui-v2-screen button.ui-v2-table-action:hover:not(:disabled) {filter:brightness(1.17);}
+.ui-v2-screen button.ui-v2-table-action:disabled {opacity:.35;cursor:not-allowed;}
+.ui-v2-screen :is(button.ui-v2-table-action,button.ui-v2-button,input.ui-v2-control,
+  select.ui-v2-control,textarea.ui-v2-control):focus-visible,
+.ui-v2-dialog :is(button,input,textarea,select):focus-visible {
+  outline:2px solid var(--inv-v2-accent);outline-offset:2px;
+}
+.ui-v2-screen :is(input.ui-v2-control,select.ui-v2-control,textarea.ui-v2-control),
+.ui-v2-auth :is(input.ui-v2-control,textarea.ui-v2-control,select.ui-v2-control) {
+  box-sizing:border-box; width:100%; min-width:0;
+  border:1px solid #61798b; border-radius:var(--inv-v2-radius-control);
+  background:var(--inv-v2-input);color:var(--inv-v2-text);
+  font:inherit; font-size:13px; padding:9px 12px;
+}
+.ui-v2-screen :is(input.ui-v2-control,select.ui-v2-control):not([type=checkbox]),
+.ui-v2-auth :is(input.ui-v2-control,select.ui-v2-control):not([type=checkbox]) {
+  height:var(--inv-v2-control-height);
+}
+.ui-v2-screen textarea.ui-v2-control {min-height:78px;resize:vertical;}
+.ui-v2-screen .mat-mdc-form-field:has(mat-select) .mat-mdc-text-field-wrapper {
+  box-sizing:border-box; height:var(--inv-v2-control-height);
+  background:var(--inv-v2-input);border-radius:var(--inv-v2-radius-control);
+}
+.ui-v2-screen .mat-mdc-form-field:has(mat-select) .mat-mdc-form-field-flex,
+.ui-v2-screen .mat-mdc-form-field:has(mat-select) .mat-mdc-form-field-infix {
+  min-height:var(--inv-v2-control-height);height:var(--inv-v2-control-height);
+  box-sizing:border-box;
+}
+.ui-v2-screen .mat-mdc-form-field:has(mat-select) .mat-mdc-form-field-infix {
+  padding-top:9px;padding-bottom:9px;
+}
+.ui-v2-screen .mat-mdc-form-field:has(mat-select) .mat-mdc-form-field-subscript-wrapper {
+  display:none;
+}
+/* Mantener Login como una pantalla independiente, pero armonizar con Recuperación. */
+.ui-v2-auth .input-wrap {height:44px;}
+.ui-v2-auth .login-submit {min-height:44px;}
+.ui-v2-auth .company-select .mat-mdc-text-field-wrapper,
+.ui-v2-auth .company-select .mat-mdc-form-field-infix {height:44px;min-height:44px;}

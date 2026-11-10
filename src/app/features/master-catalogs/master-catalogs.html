@@ -1,5 +1,5 @@
-<section class="catalog-page">
-  <header><div><h1>Catálogo general</h1><p>Todos los inventarios de la empresa utilizan estos registros. Las claves del sistema no se muestran aquí.</p></div><button type="button" (click)="refresh()" [disabled]="loading">Actualizar</button></header>
+<section class="catalog-page ui-v2-screen">
+  <header class="ui-v2-page-header"><app-ui-page-heading icon="storefront" title="Catálogo general" subtitle="Todos los inventarios de la empresa utilizan estos registros. Las claves del sistema no se muestran aquí."></app-ui-page-heading><button type="button" (click)="refresh()" [disabled]="loading" appUiButton="secondary"><mat-icon aria-hidden="true">refresh</mat-icon>Actualizar</button></header>
   <div class="tabs"><button type="button" [class.active]="tab==='suppliers'" (click)="tab='suppliers'">Proveedores</button><button type="button" [class.active]="tab==='parameters'" (click)="tab='parameters'">Parámetros generales</button></div>
   <p *ngIf="loading" role="status">Consultando catálogos...</p>
   <!-- FASE 4.1.1: PROVEEDORES UI -->
@@ -10,7 +10,7 @@
       <div class="fields">
         <!-- FASE 4.1.2: botón compacto al lado del RUC -->
         <div class="supplier-ruc-control">
-          <label>RUC <input [(ngModel)]="supplier.ruc" name="ruc" maxlength="11" inputmode="numeric" required /></label>
+          <label>RUC <input [(ngModel)]="supplier.ruc" name="ruc" maxlength="11" inputmode="numeric" required  appUiControl /></label>
           <button type="button" class="ruc-lookup supplier-lookup-compact" (click)="lookupRuc()"
                   [disabled]="lookupRucLoading || saving || supplier.ruc.length !== 11"
                   title="Consultar datos ante SUNAT" aria-label="Consultar RUC ante SUNAT">
@@ -19,22 +19,22 @@
           </button>
         </div>
         <label>Razón social
-          <input [(ngModel)]="supplier.businessName" name="businessName" maxlength="250" required />
+          <input [(ngModel)]="supplier.businessName" name="businessName" maxlength="250" required  appUiControl />
         </label>
-        <label>Contacto <input [(ngModel)]="supplier.contactName" name="contactName" /></label>
-        <label>Teléfono <input [(ngModel)]="supplier.phone" name="phone" /></label>
-        <label>Correo <input [(ngModel)]="supplier.email" name="email" type="email" /></label>
-        <label>Dirección <input [(ngModel)]="supplier.address" name="address" /></label>
-        <label>Estado SUNAT <input [(ngModel)]="supplier.estado" name="estado" readonly /></label>
-        <label>Condición SUNAT <input [(ngModel)]="supplier.condicion" name="condicion" readonly /></label>
-        <label>Distrito <input [(ngModel)]="supplier.distrito" name="distrito" /></label>
-        <label>Provincia <input [(ngModel)]="supplier.provincia" name="provincia" /></label>
-        <label>Departamento <input [(ngModel)]="supplier.departamento" name="departamento" /></label>
+        <label>Contacto <input [(ngModel)]="supplier.contactName" name="contactName"  appUiControl /></label>
+        <label>Teléfono <input [(ngModel)]="supplier.phone" name="phone"  appUiControl /></label>
+        <label>Correo <input [(ngModel)]="supplier.email" name="email" type="email"  appUiControl /></label>
+        <label>Dirección <input [(ngModel)]="supplier.address" name="address"  appUiControl /></label>
+        <label>Estado SUNAT <input [(ngModel)]="supplier.estado" name="estado" readonly  appUiControl /></label>
+        <label>Condición SUNAT <input [(ngModel)]="supplier.condicion" name="condicion" readonly  appUiControl /></label>
+        <label>Distrito <input [(ngModel)]="supplier.distrito" name="distrito"  appUiControl /></label>
+        <label>Provincia <input [(ngModel)]="supplier.provincia" name="provincia"  appUiControl /></label>
+        <label>Departamento <input [(ngModel)]="supplier.departamento" name="departamento"  appUiControl /></label>
         <!-- FASE 4.1.2: nota comercial opcional, guardada con el proveedor -->
         <label class="supplier-relationship-field">Relación con el proveedor
           <textarea [(ngModel)]="supplier.relationshipDescription" name="relationshipDescription"
                     maxlength="700" rows="3"
-                    placeholder="Ej.: distribuidor habitual de equipos y accesorios"></textarea>
+                    placeholder="Ej.: distribuidor habitual de equipos y accesorios" appUiControl></textarea>
         </label>
       </div>
       <div class="fiscal-summary" *ngIf="advancedInfo as info">
@@ -91,13 +91,13 @@
                 <button type="button" class="supplier-icon-button supplier-edit"
                         (click)="$event.stopPropagation();editSupplier(item)" [disabled]="!item.isActive"
                         [attr.title]="'Editar ' + item.businessName"
-                        [attr.aria-label]="'Editar proveedor ' + item.businessName">
+                        [attr.aria-label]="'Editar proveedor ' + item.businessName" appUiTableAction="normal">
                   <mat-icon aria-hidden="true">edit</mat-icon>
                 </button>
                 <button type="button" class="supplier-icon-button supplier-disable"
                         (click)="$event.stopPropagation();disableSupplier(item)" [disabled]="!item.isActive"
                         [attr.title]="'Desactivar ' + item.businessName"
-                        [attr.aria-label]="'Desactivar proveedor ' + item.businessName">
+                        [attr.aria-label]="'Desactivar proveedor ' + item.businessName" appUiTableAction="danger">
                   <mat-icon aria-hidden="true">block</mat-icon>
                 </button>
               </div>
@@ -113,8 +113,8 @@
     </div>
   </div>
   <div class="panel" *ngIf="tab==='parameters'">
-    <form (ngSubmit)="saveParameter()"><h2>{{editingParameterId?'Editar parámetro':'Nuevo parámetro general'}}</h2><div class="fields"><label>Tipo <input [(ngModel)]="parameter.parameterType" name="parameterType" maxlength="100" required placeholder="Ej. UnidadBase" /></label><label>Nombre <input [(ngModel)]="parameter.name" name="parameterName" maxlength="255" required /></label><label>Descripción / valor <textarea [(ngModel)]="parameter.description" name="description" rows="2"></textarea></label></div><p class="hint">Para parámetros comunes. Las contraseñas, tokens y claves de API tienen una gestión separada.</p><div class="actions"><button type="submit" class="primary" [disabled]="saving">{{saving?'Guardando...':editingParameterId?'Guardar cambios':'Registrar parámetro'}}</button><button *ngIf="editingParameterId" type="button" (click)="newParameter()">Cancelar edición</button></div></form>
-    <div class="list"><h2>Parámetros visibles ({{parameters.length}})</h2><div class="ui-table-toolbar"><app-ui-search [(value)]="parameterSearch" placeholder="Buscar parámetro" label="Buscar parámetros" /></div><table><thead><tr><th>Tipo</th><th>Nombre</th><th>Valor / descripción</th><th *ngIf="canManage">Acciones</th></tr></thead><tbody><tr *ngFor="let item of filteredParameters"><td>{{item.parameterType}}</td><td>{{item.name}}</td><td>{{item.description||'—'}}</td><td *ngIf="canManage"><button type="button" (click)="editParameter(item)">Editar</button><button type="button" (click)="deleteParameter(item)">Eliminar</button></td></tr></tbody></table><p *ngIf="!filteredParameters.length">{{parameterSearch ? 'Sin resultados para la búsqueda.' : 'Sin parámetros generales visibles.'}}</p></div>
+    <form (ngSubmit)="saveParameter()"><h2>{{editingParameterId?'Editar parámetro':'Nuevo parámetro general'}}</h2><div class="fields"><label>Tipo <input [(ngModel)]="parameter.parameterType" name="parameterType" maxlength="100" required placeholder="Ej. UnidadBase"  appUiControl /></label><label>Nombre <input [(ngModel)]="parameter.name" name="parameterName" maxlength="255" required  appUiControl /></label><label>Descripción / valor <textarea [(ngModel)]="parameter.description" name="description" rows="2" appUiControl></textarea></label></div><p class="hint">Para parámetros comunes. Las contraseñas, tokens y claves de API tienen una gestión separada.</p><div class="actions"><button type="submit" class="primary" [disabled]="saving">{{saving?'Guardando...':editingParameterId?'Guardar cambios':'Registrar parámetro'}}</button><button *ngIf="editingParameterId" type="button" (click)="newParameter()">Cancelar edición</button></div></form>
+    <div class="list"><h2>Parámetros visibles ({{parameters.length}})</h2><div class="ui-table-toolbar"><app-ui-search [(value)]="parameterSearch" placeholder="Buscar parámetro" label="Buscar parámetros" /></div><table><thead><tr><th>Tipo</th><th>Nombre</th><th>Valor / descripción</th><th *ngIf="canManage">Acciones</th></tr></thead><tbody><tr *ngFor="let item of filteredParameters"><td>{{item.parameterType}}</td><td>{{item.name}}</td><td>{{item.description||'—'}}</td><td *ngIf="canManage"><button type="button" class="ui-v3-1-parameter-action" (click)="editParameter(item)" title="Editar parámetro" aria-label="Editar parámetro"><mat-icon aria-hidden="true">edit</mat-icon></button><button type="button" class="ui-v3-1-parameter-action ui-v3-1-parameter-action--danger" (click)="deleteParameter(item)" title="Eliminar parámetro" aria-label="Eliminar parámetro"><mat-icon aria-hidden="true">delete_outline</mat-icon></button></td></tr></tbody></table><p *ngIf="!filteredParameters.length">{{parameterSearch ? 'Sin resultados para la búsqueda.' : 'Sin parámetros generales visibles.'}}</p></div>
   </div>
 </section>
 

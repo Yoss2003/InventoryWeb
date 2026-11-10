@@ -1,6 +1,6 @@
-<div class="lookup-page"><header><h1>Consultas SUNAT y tipo de cambio</h1><p>Datos obtenidos a través de la API de InventarioWeb (integración original de MAUI).</p></header>
+<div class="lookup-page ui-v2-screen"><header class="ui-v2-page-header"><app-ui-page-heading icon="account_balance" title="Consultas SUNAT y tipo de cambio" subtitle="Datos obtenidos a través de la API de InventarioWeb (integración original de MAUI)."></app-ui-page-heading></header>
 
-<section><h2>Consultar RUC</h2><div class="lookup-inline"><input [(ngModel)]="ruc" maxlength="11" inputmode="numeric" placeholder="Número RUC (11 dígitos)"/><button (click)="searchRuc()" [disabled]="loadingRuc"><app-loading-indicator *ngIf="loadingRuc; else rucButtonLabel" [compact]="true" message="Cargando..." /><ng-template #rucButtonLabel>Consultar</ng-template></button></div>
+<section><h2>Consultar RUC</h2><div class="lookup-inline"><input [(ngModel)]="ruc" maxlength="11" inputmode="numeric" placeholder="Número RUC (11 dígitos)" appUiControl /><button (click)="searchRuc()" [disabled]="loadingRuc"><app-loading-indicator *ngIf="loadingRuc; else rucButtonLabel" [compact]="true" message="Cargando..." /><ng-template #rucButtonLabel>Consultar</ng-template></button></div>
 <div *ngIf="sunat" class="data"><p><strong>{{sunat.businessName}}</strong> · {{sunat.ruc}}</p><p>{{sunat.address||'Sin dirección'}}</p><p>Estado: {{sunat.estado||'Sin información'}} · Condición: {{sunat.condicion||'Sin información'}}</p></div></section>
 <section class="fx-dashboard" aria-labelledby="fx-heading">
   <div class="fx-heading"><div><h2 id="fx-heading">Tipo de cambio referencial</h2><p>Comparación de compra y venta frente al sol peruano</p></div>

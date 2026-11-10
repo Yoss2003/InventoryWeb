@@ -1,11 +1,10 @@
-<div class="dev-page" *ngIf="developer; else forbidden">
-  <header class="dev-head">
+<div class="dev-page ui-v2-screen" *ngIf="developer; else forbidden">
+  <header class="dev-head ui-v2-page-header">
     <div>
       <small>ACCESO EXCLUSIVO · ROL DESARROLLADOR</small>
-      <h1>Gestión Dev</h1>
-      <p>Empresas, licencias y recuperaciones pendientes.</p>
+      <app-ui-page-heading icon="admin_panel_settings" title="Gestión Dev" subtitle="Empresas, licencias y recuperaciones pendientes."></app-ui-page-heading>
     </div>
-    <button type="button" (click)="reload()" [disabled]="loading">
+    <button type="button" (click)="reload()" [disabled]="loading" appUiButton="secondary">
       <app-loading-indicator *ngIf="loading; else refreshCaption" [compact]="true" message="Cargando..." />
       <ng-template #refreshCaption><mat-icon>refresh</mat-icon> Actualizar</ng-template>
     </button>
@@ -21,7 +20,7 @@
     <p *ngIf="companiesError" class="inline-alert inline-alert--error" role="alert"><mat-icon>error_outline</mat-icon>{{companiesError}}</p>
     <button *ngIf="companiesError" type="button" (click)="loadCompanies()" [disabled]="loadingCompanies">Reintentar empresas</button>
     <app-loading-indicator *ngIf="loadingCompanies && !companies.length" message="Cargando empresas..." />
-    <div class="overflow companies-table" *ngIf="companies.length">
+    <div class="overflow companies-table ui-table-shell" *ngIf="companies.length">
       <table>
         <thead><tr><th>Empresa</th><th>Usuarios</th><th>Almacenes</th><th>Licencia</th><th>Vencimiento</th><th>Estado</th><th>Acciones</th></tr></thead>
         <tbody>
@@ -73,7 +72,7 @@
         <div class="fields-grid">
           <label class="field"><span class="field-label">RUC <span class="required">*</span></span>
             <input name="ruc" [(ngModel)]="form.ruc" (ngModelChange)="onRucChanged()" type="text" inputmode="numeric" maxlength="11" minlength="11" pattern="[0-9]{11}" required
-              [readonly]="isSelectedProtected" placeholder="11 dígitos" />
+              [readonly]="isSelectedProtected" placeholder="11 dígitos"  appUiControl />
           </label>
           <div class="ruc-lookup"><button type="button" (click)="lookupRuc()" [disabled]="lookingUpRuc || form.ruc.length !== 11">
               <mat-icon *ngIf="!lookingUpRuc">manage_search</mat-icon>
@@ -83,13 +82,13 @@
           <div *ngIf="rucResult" class="ruc-feedback ruc-feedback--ok" role="status"><mat-icon>verified</mat-icon><span><strong>Consulta exitosa</strong> · {{rucResult.estado || 'Estado no informado'}} · {{rucResult.condicion || 'Condición no informada'}}</span></div>
           <div *ngIf="rucLookupError" class="ruc-feedback ruc-feedback--error" role="alert"><mat-icon>{{rucNeedsConfiguration ? 'settings' : 'info_outline'}}</mat-icon><span>{{rucLookupError}}</span></div>
           <label class="field field-wide"><span class="field-label">Razón social <span class="required">*</span></span>
-            <input name="businessName" [(ngModel)]="form.businessName" maxlength="255" required placeholder="Razón social de la empresa" />
+            <input name="businessName" [(ngModel)]="form.businessName" maxlength="255" required placeholder="Razón social de la empresa"  appUiControl />
           </label>
           <label class="field"><span class="field-label">Dueño fiscal <span class="required" *ngIf="!editing">*</span></span>
-            <input name="fiscalOwnerName" [(ngModel)]="form.fiscalOwnerName" maxlength="255" [required]="!editing" placeholder="Nombre completo" />
+            <input name="fiscalOwnerName" [(ngModel)]="form.fiscalOwnerName" maxlength="255" [required]="!editing" placeholder="Nombre completo"  appUiControl />
           </label>
           <label class="field field-wide"><span class="field-label">Correo empresarial <span class="required" *ngIf="!editing">*</span></span>
-            <input name="contactEmail" [(ngModel)]="form.contactEmail" type="email" maxlength="254" [required]="!editing" placeholder="contacto@empresa.com" />
+            <input name="contactEmail" [(ngModel)]="form.contactEmail" type="email" maxlength="254" [required]="!editing" placeholder="contacto@empresa.com"  appUiControl />
           </label>
         </div>
         <p class="field-help">La consulta de RUC recupera la razón social desde Decolecta/SUNAT. El dueño fiscal y correo se completan manualmente; si falla el servicio, puedes continuar con datos validados.</p>
@@ -110,7 +109,7 @@
                   <span class="palette-swatch" [style.background]="form.primaryColorHex || '#A2D149'"></span><mat-icon>palette</mat-icon> Elegir color
                 </button>
                 <input #colorPicker class="color-picker-accessible" type="color" name="picker" [(ngModel)]="form.primaryColorHex" aria-label="Paleta de colores con puntero" />
-                <input class="color-hex" type="text" name="color" [(ngModel)]="form.primaryColorHex" maxlength="7" placeholder="#A2D149" aria-label="Código hexadecimal del color" />
+                <input class="color-hex" type="text" name="color" [(ngModel)]="form.primaryColorHex" maxlength="7" placeholder="#A2D149" aria-label="Código hexadecimal del color"  appUiControl />
               </div>
               <div class="color-presets" aria-label="Colores sugeridos"><button *ngFor="let color of presetColors" class="preset-swatch" type="button" [style.background]="color" (click)="chooseColor(color)" [title]="color" [attr.aria-label]="'Usar color ' + color" [class.preset-current]="form.primaryColorHex?.toUpperCase() === color"></button></div>
               <p class="field-help">Haz clic en «Elegir color» para abrir la paleta y seleccionar un tono con el puntero.</p>
@@ -135,16 +134,16 @@
                 <mat-option *ngFor="let plan of plans" [value]="plan">{{plan}}</mat-option>
               </mat-select>
             </mat-form-field>
-            <ng-template #currentPlan><input class="read-only" [value]="form.plan" readonly aria-label="Plan actual" /></ng-template>
+            <ng-template #currentPlan><input class="read-only" [value]="form.plan" readonly aria-label="Plan actual"  appUiControl /></ng-template>
           </div>
           <label class="field"><span class="field-label">Usuarios activos</span>
-            <input class="read-only" [value]="currentUserCount" type="number" readonly />
+            <input class="read-only" [value]="currentUserCount" type="number" readonly  appUiControl />
           </label>
           <label class="field"><span class="field-label">Usuarios permitidos</span>
-            <input class="read-only" [value]="displayedLimit" type="text" readonly />
+            <input class="read-only" [value]="displayedLimit" type="text" readonly  appUiControl />
           </label>
           <label class="field"><span class="field-label">Vencimiento</span>
-            <input class="read-only" [value]="selectedCompany?.license?.expiresAt ? (selectedCompany?.license?.expiresAt | date:'dd/MM/yyyy') : 'Se asigna al crear'" readonly />
+            <input class="read-only" [value]="selectedCompany?.license?.expiresAt ? (selectedCompany?.license?.expiresAt | date:'dd/MM/yyyy') : 'Se asigna al crear'" readonly  appUiControl />
           </label>
           <label class="check"><input type="checkbox" name="enabled" [(ngModel)]="form.licenseEnabled" [disabled]="isSelectedProtected" /> Licencia habilitada</label>
         </div>

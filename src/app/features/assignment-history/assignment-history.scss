@@ -3,7 +3,7 @@
 .assignment-page { max-width: 1460px; margin: 0 auto; padding: 6px 0 32px; font-family: Roboto, 'Segoe UI', sans-serif; }
 .assignment-page__header { display:flex;align-items:center;justify-content:space-between;gap:18px;margin-bottom:20px; }
 .assignment-page__heading {display:flex;gap:14px;align-items:center;min-width:0}
-.assignment-page__icon {height:49px;width:49px;display:grid;place-items:center;background:#263720;color:#b6ed65;border:1px solid #516c30;border-radius:13px;flex:none}
+.assignment-page__icon {height:49px;width:49px;display:grid;place-items:center;background:var(--inv-v3-brand-soft);color:var(--inv-company-accent, #A2D149);border:1px solid var(--inv-v3-brand-border);border-radius:13px;flex:none}
 h1 {font-size:23px;margin:0 0 5px;line-height:1.25}h2 {font-size:17px;margin:0 0 5px}
 p {margin:0;color:#a4b1c1;font-size:13px;line-height:1.5}
 button {font:inherit;cursor:pointer}
@@ -16,17 +16,17 @@ button {font:inherit;cursor:pointer}
 .assignment-stats {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:13px;margin-bottom:20px}
 .assignment-stat {background:#18242f;border:1px solid #3d5263;border-radius:13px;padding:16px 18px;display:flex;flex-direction:column;gap:7px}
 .assignment-stat >span {color:#b4c6d6;font-size:12px;font-weight:650}
-.assignment-stat strong {color:#c8f480;font-size:30px;line-height:1.1}
+.assignment-stat strong {color:var(--inv-company-accent, #A2D149);font-size:30px;line-height:1.1}
 .assignment-stat small {color:#889daf;font-size:11px}
 .assignment-stat--pending strong {color:#8293a3}
 .assignment-section {background:#121d27;border:1px solid #455b70;border-radius:16px;overflow:hidden}
 .assignment-tabs {background:#1a2835;border-bottom:1px solid #384d61;padding:12px 17px;display:flex;gap:8px}
 .assignment-tabs button {display:flex;align-items:center;gap:7px;border:1px solid transparent;border-radius:9px;background:transparent;color:#aebed0;padding:10px 13px;font-weight:700;font-size:12px}
-.assignment-tabs button.active {background:#30421e;color:#d7ffaa;border-color:#7eac2d}
+.assignment-tabs button.active {background:var(--inv-v3-brand-soft);color:var(--inv-company-accent, #A2D149);border-color:var(--inv-v3-brand-border)}
 .assignment-tabs mat-icon {font-size:19px;width:19px;height:19px}
 .assignment-toolbar {display:flex;align-items:center;justify-content:space-between;gap:16px;padding:20px 19px 16px}
 .assignment-search {min-width:265px;max-width:375px;flex:1;display:flex;align-items:center;gap:9px;border:1px solid #617589;background:#0e151d;color:#a5b7c7;border-radius:8px;padding:0 12px;height:43px}
-.assignment-search:focus-within {border-color:#a8d73d}
+.assignment-search:focus-within {border-color:var(--inv-company-accent, #A2D149)}
 .assignment-search mat-icon {font-size:19px;width:19px;height:19px;flex:none}
 .assignment-search input {min-width:0;flex:1;border:0;outline:0;background:transparent;color:#eef4fb;font-size:12px}
 .assignment-search input::placeholder {color:#8d9eaf}
@@ -40,13 +40,13 @@ button {font:inherit;cursor:pointer}
 .assignment-table td strong {display:block;font-weight:700;line-height:1.4}
 .assignment-table td small {color:#9bafc1;display:block;margin-top:3px}
 .assignment-table__end {text-align:right}
-.assignment-table__end mat-icon {color:#a8d73d}
+.assignment-table__end mat-icon {color:var(--inv-company-accent, #A2D149)}
 .assignment-tag {display:inline-block;border:1px solid #637281;color:#c6d2db;border-radius:20px;padding:5px 9px;font-size:10px;white-space:nowrap}
 .assignment-state {margin:0 19px 19px;min-height:165px;border:1px dashed #4b6174;border-radius:11px;display:flex;flex-direction:column;gap:8px;align-items:center;justify-content:center;color:#a4b5c6;font-size:12px;text-align:center;padding:22px}
-.assignment-state mat-icon {font-size:30px;width:30px;height:30px;color:#a8d73d}
+.assignment-state mat-icon {font-size:30px;width:30px;height:30px;color:var(--inv-company-accent, #A2D149)}
 .assignment-state strong {color:#edf3f9;font-size:14px}
 .assignment-state--error {color:#ffafaf;border-color:#7a4e56;min-height:75px;flex-direction:row}
-.assignment-spinner {width:25px;height:25px;border:3px solid #43566a;border-top-color:#a8d73d;border-radius:50%;animation:assignment-spin .8s linear infinite}
+.assignment-spinner {width:25px;height:25px;border:3px solid #43566a;border-top-color:var(--inv-company-accent, #A2D149);border-radius:50%;animation:assignment-spin .8s linear infinite}
 @keyframes assignment-spin {to {transform:rotate(360deg)}}
 .assignment-empty-received {max-width:535px;margin:0 auto;text-align:center;padding:55px 24px 60px}
 .assignment-empty-received__icon {margin:0 auto 18px;width:60px;height:60px;display:grid;place-items:center;background:#273647;border:1px solid #56697d;border-radius:16px;color:#cbd9e6}

@@ -23,12 +23,12 @@
   border-bottom: 1px solid #405265;
 }
 .header-heading { display: flex; gap: 12px; align-items: center; min-width: 0; }
-.header-symbol { flex: none; display: grid; place-items: center; width: 44px; height: 44px; background: #2b3a24; color: #a8d73d; border-radius: 11px; }
+.header-symbol { flex: none; display: grid; place-items: center; width: 44px; height: 44px; background: #2b3a24; color: var(--inv-company-accent, #A2D149); border-radius: 11px; }
 .header-symbol mat-icon { width: 24px; height: 24px; font-size: 24px; }
 .parent-header h2 { margin: 0 0 5px; font-size: 19px; font-weight: 750; }
 .parent-header p { color: #a8b5c2; font-size: 12px; margin: 0; }
 .close-button { flex: none; width: 35px; height: 35px; border: 1px solid #5b6b7b; border-radius: 9px; background: #18232e; color: #e1ebf3; display: grid; place-items: center; cursor: pointer; }
-.close-button:hover { border-color: #a8d73d; }
+.close-button:hover { border-color: var(--inv-company-accent, #A2D149); }
 
 .parent-form { margin: 0; padding: 0; }
 .parent-card {
@@ -62,7 +62,7 @@
   transition: border-color .16s, box-shadow .16s;
 }
 .parent-input::placeholder { color: #8592a4; }
-.parent-input:focus-visible { border-color: #a8d73d; box-shadow: 0 0 0 2px rgba(168,215,61,.16); }
+.parent-input:focus-visible { border-color: var(--inv-company-accent, #A2D149); box-shadow: 0 0 0 2px rgba(168,215,61,.16); }
 .parent-input.invalid { border-color: #ff9c9c; }
 .parent-textarea { resize: vertical; min-height: 78px; height: auto; }
 .field-error, .save-error { color: #ff9c9c; font-size: 11px; }
@@ -70,7 +70,7 @@
 .parent-footer { min-height: 65px; display: flex; justify-content: flex-end; gap: 12px; align-items: center; padding: 11px 22px; background: #1d2935; border-top: 1px solid #3b4c5d; }
 .parent-footer button { font: inherit; font-weight: 650; font-size: 12px; border-radius: 9px; padding: 10px 15px; cursor: pointer; }
 .button-secondary { background: #25323f; border: 1px solid #556b7a; color: #e3ebf2; }
-.button-primary { display: inline-flex; align-items: center; gap: 7px; background: #7d9f20; border: 1px solid transparent; color: white; }
+.button-primary { display: inline-flex; align-items: center; gap: 7px; background: var(--inv-company-accent, #A2D149); border: 1px solid transparent; color: white; }
 .button-primary mat-icon { font-size: 19px; width: 19px; height: 19px; }
 .parent-footer button:disabled { opacity: .4; cursor: not-allowed; }
 @media(max-width: 520px) {
@@ -81,7 +81,7 @@
 }
 
 /* Selección de inventario con el mismo estilo que el alta de artículos. */
-:host ::ng-deep .parent-inventory-select { width:100%; --mdc-outlined-text-field-outline-color:#65788a; --mdc-outlined-text-field-focus-outline-color:#a8d73d; }
+:host ::ng-deep .parent-inventory-select { width:100%; --mdc-outlined-text-field-outline-color:#65788a; --mdc-outlined-text-field-focus-outline-color:var(--inv-company-accent, #A2D149); }
 :host ::ng-deep .parent-inventory-select .mat-mdc-text-field-wrapper { height:43px; background:#111a23; border-radius:7px; }
 :host ::ng-deep .parent-inventory-select .mat-mdc-form-field-infix { padding-top:10px; padding-bottom:9px; min-height:43px; }
 :host ::ng-deep .parent-inventory-select .mat-mdc-form-field-subscript-wrapper {display:none;}

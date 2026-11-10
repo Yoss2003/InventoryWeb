@@ -11,7 +11,7 @@
 .assignment-dialog__notice mat-icon {font-size:18px;height:18px;width:18px;flex:none}
 .assignment-dialog__block {background:#17232f;border:1px solid #425668;border-radius:12px;padding:14px 16px;margin-bottom:12px}
 .assignment-dialog__block h3 {display:flex;gap:8px;align-items:center;margin:0 0 13px;padding-bottom:11px;border-bottom:1px solid #394f64;font-size:13px}
-.assignment-dialog__block h3 mat-icon {font-size:19px;height:19px;width:19px;color:#a8d73d}
+.assignment-dialog__block h3 mat-icon {font-size:19px;height:19px;width:19px;color:var(--inv-company-accent, #A2D149)}
 .assignment-dialog__grid {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px 18px}
 .assignment-dialog__grid>div {display:flex;flex-direction:column;gap:4px;min-width:0}
 .assignment-dialog__grid span {font-size:11px;color:#9db0c2}
@@ -31,7 +31,7 @@
 .assignment-dialog .assignment-return-submit:disabled { opacity: .45; cursor: not-allowed; }
 @media (max-width: 550px) { .assignment-dialog .assignment-return { grid-template-columns: 1fr; } }
 
-.assigned-serials{display:grid;gap:7px;margin:10px 0}.assigned-serials label{display:flex;gap:10px;align-items:center;padding:8px;background:#1c303e;border:1px solid #577184;border-radius:8px}.assigned-serials input{width:18px;height:18px;accent-color:#a2d149}
+.assigned-serials{display:grid;gap:7px;margin:10px 0}.assigned-serials label{display:flex;gap:10px;align-items:center;padding:8px;background:#1c303e;border:1px solid #577184;border-radius:8px}.assigned-serials input{width:18px;height:18px;accent-color:var(--inv-company-accent, #A2D149)}
 
 /* UX_FINAL_CUSTODIA_EVIDENCIA */
 .assignment-dialog .evidence-status {font-size:12px;color:#aebfd0;background:#172734;border:1px dashed #42576a;padding:10px 12px;border-radius:8px;margin-top:10px}

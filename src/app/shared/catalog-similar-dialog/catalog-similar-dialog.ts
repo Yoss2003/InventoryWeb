@@ -17,7 +17,7 @@ export type CatalogSimilarChoice = { action: 'reuse'; id: number } | { action: '
   standalone: true,
   imports: [CommonModule, MatDialogModule, MatIconModule],
   template: `
-    <div class="catalog-similar-dialog">
+    <div class="catalog-similar-dialog ui-v2-dialog ui-v2-dialog--simple">
       <h2 mat-dialog-title><mat-icon>warning_amber</mat-icon> Posible duplicado</h2>
       <mat-dialog-content>
         <p>Quieres registrar <strong>{{data.enteredName}}</strong>, pero encontramos {{data.type}} similares.</p>

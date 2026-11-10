@@ -1,3 +1,8 @@
+import { UiEmptyStateComponent } from '../../../shared/ui/v2/ui-empty-state.component';
+import { UiStatusComponent } from '../../../shared/ui/v2/ui-status.component';
+import { UiTableActionDirective } from '../../../shared/ui/v2/ui-table-action.directive';
+import { UiButtonDirective } from '../../../shared/ui/v2/ui-button.directive';
+import { UiPageHeadingComponent } from '../../../shared/ui/v2/ui-page-heading.component';
 import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -18,7 +23,7 @@ interface ArticleRow extends Article { categoryName: string; brandName: string; 
 import { UiSearchComponent } from '../../../shared/ui/ui-search.component';
 
 @Component({selector:'app-article-list',standalone:true,
-  imports:[CommonModule,FormsModule,MatIconModule,LoadingIndicatorComponent,UiSearchComponent],
+  imports:[UiEmptyStateComponent, UiStatusComponent, UiTableActionDirective, UiButtonDirective, UiPageHeadingComponent, CommonModule,FormsModule,MatIconModule,LoadingIndicatorComponent,UiSearchComponent],
   templateUrl:'./article-list.html',styleUrl:'./article-list.scss'})
 export class ArticleListComponent implements OnInit {
   private readonly articles=inject(ArticleService);

@@ -1,0 +1,327 @@
+/* WebInventory V3.1 — correcciones de proporción y consistencia.
+   Carga después de ui-official.scss V3. Afecta principalmente vistas UI V2.
+   No sustituye tablas, campos, diálogos ni lógica Angular. */
+
+/* 1. Un único ritmo visual para cabeceras. */
+.ui-v2-screen > header.ui-v2-page-header {
+  box-sizing: border-box;
+  min-width: 0;
+  min-height: 63px;
+  gap: 12px 18px;
+  padding: 0 0 var(--inv-v3-header-separator-gap);
+  margin: 0 0 16px;
+  align-items: center;
+}
+.ui-v2-screen > header.ui-v2-page-header :is(app-ui-page-heading,.ui-v2-heading-fallback) {
+  min-width: 0;
+}
+.ui-v2-screen > header.ui-v2-page-header app-ui-page-heading .ui-page-heading__icon {
+  box-sizing: border-box;
+  width: 44px;
+  height: 44px;
+  flex: 0 0 44px;
+  display: grid;
+  place-items: center;
+}
+.ui-v2-screen > header.ui-v2-page-header app-ui-page-heading .ui-page-heading__icon mat-icon {
+  line-height: 24px;
+  width: 24px;
+  height: 24px;
+}
+.ui-v2-screen > header.ui-v2-page-header :is(.ui-v2-header-actions, .catalog-top-actions, .heading-actions, .actions) {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+.ui-v2-screen > header.ui-v2-page-header :is(.ui-v2-header-actions,.catalog-top-actions,.heading-actions,.actions) > button,
+.ui-v2-screen > header.ui-v2-page-header > button {
+  box-sizing: border-box !important;
+  height: 34px !important;
+  min-height: 34px !important;
+  max-height: 34px !important;
+  padding: 0 12px !important;
+  margin: 0 !important;
+  border-radius: 11px !important;
+  font-size: 12px !important;
+  line-height: 1.1 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 7px !important;
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+.ui-v2-screen > header.ui-v2-page-header button > mat-icon,
+.ui-v2-screen > header.ui-v2-page-header button > ng-template + mat-icon {
+  flex: 0 0 18px;
+  width: 18px !important;
+  height: 18px !important;
+  font-size: 18px !important;
+  line-height: 18px !important;
+  margin: 0;
+}
+.ui-v2-screen > header.ui-v2-page-header :is(.ui-v2-header-actions,.catalog-top-actions,.heading-actions,.actions) > button:has(mat-icon:first-child):not(:disabled) {
+  vertical-align: middle;
+}
+/* Las clases de botón de la pantalla no deben vencer al tema por empresa. */
+.ui-v2-screen > header.ui-v2-page-header :is(.ui-v2-header-actions,.catalog-top-actions,.heading-actions,.actions) > button:is(.ui-v2-button--primary,.ui-button--primary,.create-item,.primary-action):not(:disabled),
+.ui-v2-screen:is(.entries-page,.outputs-page) > header.ui-v2-page-header .actions > button:not(:first-child):not(:disabled) {
+  background: var(--inv-v3-brand) !important;
+  border: 1px solid var(--inv-v3-brand) !important;
+  color: var(--inv-company-on-accent) !important;
+}
+.ui-v2-screen > header.ui-v2-page-header :is(.ui-v2-header-actions,.catalog-top-actions,.heading-actions,.actions) > button:not(.ui-v2-button--primary):not(.ui-button--primary):not(.create-item):not(.primary-action),
+.ui-v2-screen:is(.entries-page,.outputs-page) > header.ui-v2-page-header .actions > button:first-child {
+  background: #263947 !important;
+  border: 1px solid #62798a !important;
+  color: #e4eff8 !important;
+}
+
+/* 2. Gestión Dev: evitar tarjeta doble y rótulo sobre el borde. */
+.ui-v2-screen.dev-page {
+  border: 0 !important;
+  background: transparent !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  width: 100%;
+  max-width: none;
+  gap: 16px;
+}
+.ui-v2-screen.dev-page > header.ui-v2-page-header.dev-head {
+  border: 1px solid var(--inv-v2-border) !important;
+  border-radius: 15px;
+  padding: 18px 20px !important;
+  background: var(--inv-v2-surface);
+  margin: 0;
+  min-height: 94px;
+  align-items: center;
+}
+.ui-v2-screen.dev-page > header.dev-head > div:first-child {
+  flex: 1 1 300px;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+}
+.ui-v2-screen.dev-page > header.dev-head > div:first-child > small {
+  display: block;
+  margin: 0;
+  padding: 0;
+  line-height: 1.25;
+  color: var(--inv-v3-brand);
+  letter-spacing: .06em;
+}
+.ui-v2-screen.dev-page > header.dev-head app-ui-page-heading { width: 100%; }
+.ui-v2-screen.dev-page > .dev-card { margin: 0; }
+
+/* 3. Consultas SUNAT: eliminar el tope antiguo de 1000px. */
+.ui-v2-screen.lookup-page {
+  width: 100% !important;
+  max-width: none !important;
+  margin: 0 !important;
+  min-width: 0;
+  grid-template-columns: minmax(0, 1fr);
+}
+.ui-v2-screen.lookup-page > :is(header,section) { width: 100%; min-width: 0; box-sizing: border-box; }
+.ui-v2-screen.lookup-page > header.ui-v2-page-header { padding: 12px 16px 19px; }
+.ui-v2-screen.lookup-page :is(.lookup-inline,.fx-heading) { min-width: 0; }
+.ui-v2-screen.lookup-page button:not(.ui-v2-button--secondary):not(.ui-v2-button--danger):not(.danger):not(:disabled) {
+  background: var(--inv-v3-brand) !important;
+  border-color: var(--inv-v3-brand) !important;
+  color: var(--inv-company-on-accent) !important;
+}
+
+/* 4. Asignaciones: el marco exterior debe tener un margen interior perceptible. */
+.ui-v2-screen.assignment-page {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: none;
+  padding: 18px 20px 20px !important;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.ui-v2-screen.assignment-page > :is(header,.assignment-stats,.assignment-section) { width: 100%; box-sizing: border-box; margin: 0; min-width: 0; }
+.ui-v2-screen.assignment-page > .assignment-stats { margin-top: 0; gap: 13px; }
+.ui-v2-screen.assignment-page .assignment-section { overflow: hidden; }
+.ui-v2-screen.assignment-page .assignment-toolbar { padding: 16px 18px; }
+.ui-v2-screen.assignment-page .ui-v3-assignment-search { padding: 12px 18px 4px; }
+.ui-v2-screen.assignment-page .assignment-tabs { box-sizing: border-box; padding: 10px 18px; }
+.ui-v2-screen.assignment-page .assignment-table-wrap { margin: 0 18px 18px; }
+
+/* 5. Tablas homogéneas, incluyendo Parámetros generales. */
+.ui-v2-screen.catalog-page .panel:not(.supplier-panel) > .list { min-width: 0; overflow-x: auto; }
+.ui-v2-screen.catalog-page .panel:not(.supplier-panel) > .list table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 650px;
+  font-size: 12px;
+}
+.ui-v2-screen.catalog-page .panel:not(.supplier-panel) > .list table th {
+  box-sizing: border-box;
+  height: 36px;
+  padding: 7px 12px;
+  background: var(--inv-v2-header);
+  font-size: 11px;
+  color: #bbcbdb;
+  font-weight: 700;
+  vertical-align: middle;
+}
+.ui-v2-screen.catalog-page .panel:not(.supplier-panel) > .list table td {
+  padding: 9px 12px;
+  border-bottom: 1px solid #3a5163;
+  vertical-align: middle;
+}
+.ui-v2-screen.catalog-page .panel:not(.supplier-panel) > .list table tbody tr:nth-child(even) td {
+  background: rgba(166,197,224,.035);
+}
+.ui-v2-screen.catalog-page .panel:not(.supplier-panel) > .list table :is(th:last-child,td:last-child) {
+  text-align: center;
+  width: 90px;
+  white-space: nowrap;
+}
+/* Acciones: sin bloques azules, transparentes y 28x28, también en proveedores. */
+.ui-v2-screen button.ui-v2-table-action,
+.ui-v2-screen button.ui-v3-1-parameter-action,
+.ui-v2-screen .supplier-list button.supplier-icon-button,
+.ui-v2-screen .category-table td.actions-col button.row-icon,
+.ui-v2-screen .subcategories-table td.actions-col button.row-icon,
+.ui-v2-screen .companies-table .table-actions > button {
+  box-sizing: border-box !important;
+  width: 28px !important;
+  height: 28px !important;
+  min-width: 28px !important;
+  min-height: 28px !important;
+  max-width: 28px !important;
+  max-height: 28px !important;
+  padding: 0 !important;
+  margin: 0 2px !important;
+  border: 1px solid transparent !important;
+  border-radius: 7px !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  color: var(--inv-v3-brand) !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  vertical-align: middle;
+}
+.ui-v2-screen :is(button.ui-v2-table-action,button.ui-v3-1-parameter-action,button.supplier-icon-button) mat-icon,
+.ui-v2-screen .companies-table .table-actions > button mat-icon {
+  display: block;
+  width: 19px !important;
+  height: 19px !important;
+  font-size: 19px !important;
+  line-height: 19px !important;
+  margin: 0 !important;
+  flex: 0 0 19px;
+}
+.ui-v2-screen button.ui-v2-table-action--danger,
+.ui-v2-screen button.ui-v3-1-parameter-action--danger,
+.ui-v2-screen .supplier-list button.supplier-disable,
+.ui-v2-screen .companies-table .table-actions > button.danger-button,
+.ui-v2-screen .companies-table .table-actions > button[disabled].danger-button,
+.ui-v2-screen .category-table td.actions-col button.row-icon.danger,
+.ui-v2-screen .subcategories-table td.actions-col button.row-icon.danger { color: var(--inv-v2-danger) !important; }
+.ui-v2-screen :is(button.ui-v2-table-action,button.ui-v3-1-parameter-action,button.supplier-icon-button):hover:not(:disabled),
+.ui-v2-screen .companies-table .table-actions > button:hover:not(:disabled) {
+  background: var(--inv-v3-brand-soft) !important;
+  border-color: var(--inv-v3-brand-border) !important;
+}
+.ui-v2-screen :is(button.ui-v2-table-action,button.ui-v3-1-parameter-action,button.supplier-icon-button):disabled,
+.ui-v2-screen .companies-table .table-actions > button:disabled { opacity: .4; cursor: not-allowed; }
+.ui-v2-screen .supplier-list .supplier-action-group { display:flex; justify-content:center; gap:5px; }
+.ui-v2-screen :is(td.actions,td.entry-actions,td.actions-col,td.supplier-actions-col) { text-align: center !important; }
+/* Los botones con texto de Gestión Dev mantienen su nombre accesible, solo se oculta visualmente. */
+.ui-v2-screen.dev-page .companies-table .table-actions > button { font-size: 0 !important; gap: 0 !important; overflow: hidden; }
+.ui-v2-screen.dev-page .companies-table .table-actions > button mat-icon { font-size: 19px !important; }
+.ui-v2-screen.dev-page .companies-table .table-actions { display: flex; align-items: center; justify-content: center; gap: 6px; }
+/* Alinear columnas numéricas y de estado, manteniendo identificación de empresa a la izquierda. */
+.ui-v2-screen.dev-page .companies-table thead th:not(:first-child),
+.ui-v2-screen.dev-page .companies-table tbody td:not(:first-child) { text-align: center !important; }
+.ui-v2-screen.dev-page .companies-table :is(th,td) { padding-inline: 15px; }
+.ui-v2-screen.dev-page .companies-table .company-identity { display: flex; align-items: center; gap: 12px; }
+.ui-v2-screen.dev-page .companies-table td.action-cell { min-width: 80px; }
+
+/* 6. Color de empresa en controles primarios que conservaban verdes fijos. */
+.ui-v2-screen.catalog-page .tabs button.active,
+.ui-v2-screen.catalog-page .panel button.primary,
+.ui-v2-screen.catalog-page .supplier-panel button.ruc-lookup:not(:disabled),
+.ui-v2-screen.sharing-page button.primary:not(:disabled),
+.ui-v2-screen.dev-page button:is(.save,.primary,.action-reactivate):not(:disabled),
+.ui-v2-screen.master-history button[type=submit]:not(:disabled),
+.ui-v2-dialog button:is(.save-button,.action-next,.button-primary,.confirm,.primary,.submit-button):not(:disabled) {
+  background: var(--inv-v3-brand) !important;
+  border-color: var(--inv-v3-brand) !important;
+  color: var(--inv-company-on-accent) !important;
+}
+.ui-v2-screen.catalog-page .supplier-heading-icon,
+.ui-v2-screen .lookup-page .fx-symbol { color: var(--inv-v3-brand); background: var(--inv-v3-brand-soft); }
+.ui-v2-screen :is(input[type=checkbox],input[type=radio]) { accent-color: var(--inv-v3-brand); }
+.mat-mdc-select-panel.inventory-select-options .mat-mdc-option:hover,
+.mat-mdc-select-panel.inventory-select-options .mat-mdc-option.mdc-list-item--selected {
+  background: var(--inv-v3-brand-soft) !important;
+  color: var(--inv-v3-brand) !important;
+}
+
+/* 7. Selector de inventario Angular Material, alineado con el resto. */
+app-main-layout .top-toolbar .active-inventory-field {
+  box-sizing: border-box;
+  flex: 0 1 245px;
+  width: min(245px, 36vw);
+  min-width: 115px;
+  margin: 0;
+  --mdc-outlined-text-field-outline-color: #657887;
+  --mdc-outlined-text-field-hover-outline-color: #91acbd;
+  --mdc-outlined-text-field-focus-outline-color: var(--inv-v3-brand);
+  --mat-select-enabled-trigger-text-color: #f1f8fd;
+  --mat-select-enabled-arrow-color: #c6d6e4;
+  --mat-select-focused-arrow-color: var(--inv-v3-brand);
+}
+app-main-layout .top-toolbar .active-inventory-field .mat-mdc-text-field-wrapper {
+  box-sizing: border-box;
+  min-height: 39px;
+  height: 39px;
+  background: #1d2e3b;
+  border-radius: 9px;
+}
+app-main-layout .top-toolbar .active-inventory-field .mat-mdc-form-field-infix {
+  box-sizing: border-box;
+  min-height: 39px;
+  height: 39px;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  display: flex;
+  align-items: center;
+}
+app-main-layout .top-toolbar .active-inventory-field .mat-mdc-form-field-subscript-wrapper { display: none; }
+app-main-layout .top-toolbar .active-inventory-field .mat-mdc-select { font-size: 12px; }
+app-main-layout .top-toolbar .active-inventory-field .mat-mdc-select-value { color: #edf5fa; }
+
+/* 8. Nunca mostrar el scroll horizontal en el menú contraído. */
+app-main-layout .sidenav,
+app-main-layout .sidenav .mat-drawer-inner-container,
+app-main-layout .sidenav mat-nav-list { overflow-x: hidden !important; }
+app-main-layout .sidenav .mat-drawer-inner-container { overflow-y: auto; scrollbar-width: none; }
+app-main-layout .sidenav .mat-drawer-inner-container::-webkit-scrollbar { display: none; }
+app-main-layout .sidenav.collapsed mat-nav-list,
+app-main-layout .sidenav.collapsed .logo-container { max-width: 100%; min-width: 0; }
+app-main-layout .sidenav.collapsed .logo-label { visibility: hidden; }
+
+@media(max-width: 768px) {
+  .ui-v2-screen > header.ui-v2-page-header :is(.ui-v2-header-actions,.catalog-top-actions,.heading-actions,.actions) {
+    width: 100%; justify-content: flex-start;
+  }
+  .ui-v2-screen.assignment-page { padding: 12px !important; }
+  .ui-v2-screen.assignment-page .assignment-table-wrap { margin: 0 9px 12px; }
+  .ui-v2-screen.dev-page > header.ui-v2-page-header.dev-head { padding: 16px !important; }
+  app-main-layout .top-toolbar .active-inventory-field { flex: 0 1 185px; width: min(185px,43vw); min-width: 90px; }
+}
+@media(max-width: 480px) {
+  .ui-v2-screen > header.ui-v2-page-header :is(.ui-v2-header-actions,.catalog-top-actions,.heading-actions,.actions) > button { white-space: normal; height: auto !important; min-height: 34px !important; max-height: none !important; }
+  .ui-v2-screen.catalog-page .panel:not(.supplier-panel) > .list { overflow-x: auto; }
+  app-main-layout .top-toolbar .active-inventory-field { max-width: 42vw; }
+}

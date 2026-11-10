@@ -1,3 +1,7 @@
+import { UiControlDirective } from '../../shared/ui/v2/ui-control.directive';
+import { UiTableActionDirective } from '../../shared/ui/v2/ui-table-action.directive';
+import { UiButtonDirective } from '../../shared/ui/v2/ui-button.directive';
+import { UiPageHeadingComponent } from '../../shared/ui/v2/ui-page-heading.component';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { ChangeDetectorRef, Component, OnInit, PLATFORM_ID, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -34,7 +38,7 @@ import { UiSearchComponent } from '../../shared/ui/ui-search.component';
 
 @Component({
   selector: 'app-master-catalogs', standalone: true,
-  imports: [CommonModule, FormsModule, MatIconModule, UiSearchComponent],
+  imports: [UiControlDirective, UiTableActionDirective, UiButtonDirective, UiPageHeadingComponent, CommonModule, FormsModule, MatIconModule, UiSearchComponent],
   templateUrl: './master-catalogs.html', styleUrl: './master-catalogs.scss'
 })
 export class MasterCatalogsComponent implements OnInit {

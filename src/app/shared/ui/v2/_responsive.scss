@@ -1,0 +1,18 @@
+@media(max-width:800px) {
+  .ui-v2-screen > header.ui-v2-page-header {align-items:flex-start;}
+  .ui-v2-screen .ui-v2-header-actions {flex:1 1 100%;justify-content:flex-start;}
+}
+@media(max-width:620px) {
+  .ui-v2-screen:is(.catalog-page,.category-overview,.entries-page,.outputs-page) {padding:13px;}
+  .ui-v2-screen .ui-v2-header-actions {display:grid;grid-template-columns:repeat(auto-fit,minmax(135px,1fr));width:100%;}
+  .ui-v2-screen .ui-v2-header-actions .ui-v2-button {min-width:0;width:100%;}
+  .ui-v2-screen :is(.ui-table-toolbar,.ui-v2-table-toolbar) {display:flex;align-items:stretch;flex-direction:column;gap:10px;}
+  .ui-v2-screen :is(.ui-table-toolbar,.ui-v2-table-toolbar)>app-ui-search {flex:1 1 auto;width:100%;max-width:100%;}
+  .ui-v2-screen :is(.ui-table-toolbar,.ui-v2-table-toolbar) label:has(input[type=checkbox]) {margin-left:0;}
+  .ui-v2-screen .ui-v2-filter-panel {grid-template-columns:1fr;}
+  .ui-v2-dialog.ui-v2-dialog--simple > header {padding:13px 14px;}
+  .ui-v2-dialog.ui-v2-dialog--simple > footer {padding:11px 14px;}
+}
+@media(prefers-reduced-motion:reduce) {
+  .ui-v2-screen .ui-v2-button {transition:none;}
+}

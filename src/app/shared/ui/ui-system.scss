@@ -12,7 +12,7 @@
   --inv-text: #edf4fc;
   --inv-muted: #a9bac8;
   --inv-border: #455a6d;
-  --inv-accent: #a8d73d;
+  --inv-accent: var(--inv-company-accent, #A2D149);
   --inv-danger: #ffacb1;
   --inv-control-height: 43px;
   --inv-button-height: 40px;
@@ -85,8 +85,8 @@
   white-space:normal;
 }
 .ui-button--primary {
-  background:#7e9e28;
-  border:1px solid #92ae43;
+  background:var(--inv-company-accent, #A2D149);
+  border:1px solid var(--inv-company-accent, #A2D149);
   color:#f4ffe9;
 }
 .ui-button--secondary {

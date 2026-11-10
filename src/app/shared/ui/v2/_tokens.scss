@@ -1,0 +1,26 @@
+/* Valores únicos del sistema visual de WebInventory.
+   Inspirados por la centralización en ControlRestaurant, NO por sus colores naranjas. */
+:root {
+  --inv-v2-surface: #14212b;
+  --inv-v2-panel: #172531;
+  --inv-v2-header: #203342;
+  --inv-v2-input: #0f1923;
+  --inv-v2-border: #51697c;
+  --inv-v2-text: #edf5fc;
+  --inv-v2-muted: #b0c3d1;
+  --inv-v2-accent: var(--inv-company-accent, #A2D149);
+  --inv-v2-accent-bg: var(--inv-company-accent, #A2D149);
+  --inv-v2-danger: #ffaeb7;
+  --inv-v2-danger-bg: #422a31;
+  --inv-v2-radius-control: 9px;
+  --inv-v2-radius-card: 14px;
+  --inv-v2-control-height: 43px;
+  --inv-v2-button-height: 42px;
+  --inv-v2-action-size: 34px;
+  --inv-v2-search-width: 420px;
+  --inv-v2-space-1: 4px;
+  --inv-v2-space-2: 8px;
+  --inv-v2-space-3: 12px;
+  --inv-v2-space-4: 16px;
+  --inv-v2-space-5: 20px;
+}

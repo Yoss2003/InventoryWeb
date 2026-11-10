@@ -1,0 +1,44 @@
+/* Campos de datos estándar; no transformar inputs file, checkbox, hidden ni color. */
+.ui-v2-screen :is(input.ui-v2-control,select.ui-v2-control):not([type=checkbox]):not([type=color]):not([type=file]),
+.ui-v2-dialog--simple :is(input:not([type=checkbox]):not([type=file]):not([type=color]),select) {
+  box-sizing:border-box;min-height:var(--inv-v3-field-height);height:var(--inv-v3-field-height);
+  border-radius:9px;
+}
+.ui-v2-screen .mat-mdc-form-field:has(mat-select) .mat-mdc-text-field-wrapper,
+.ui-v2-screen .mat-mdc-form-field:has(mat-select) .mat-mdc-form-field-infix {
+  height:var(--inv-v3-field-height);min-height:var(--inv-v3-field-height);
+}
+.ui-v2-screen label:not(.check):not(.show-inactive):not(.mat-mdc-label),
+.ui-v2-dialog--simple label:not(.check) {line-height:1.4;}
+.ui-v2-screen .ui-v2-control:focus-visible,
+.ui-v2-dialog .ui-v2-control:focus-visible {outline-color:var(--inv-v3-brand);}
+.ui-v2-screen .ui-v2-filter-panel :is(label,input,select) {min-width:0;}
+.ui-v2-screen .dev-form .field:has(input) > .field-label,
+.ui-v2-screen .dev-form label.field > .field-label {display:block;margin-bottom:6px;}
+.ui-v2-screen :is(.primary,.save,.confirm):not(.danger):not(.muted):not(.read-only) {
+  --inv-v3-primary-local:var(--inv-v3-brand);
+}
+/* Mantener dos columnas cuando el formulario ya tiene un contenedor de campos. */
+.ui-v2-dialog--simple .fields,
+.ui-v2-screen .ui-v3-two-column {
+  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;
+}
+.ui-v2-dialog--simple .fields > .wide,
+.ui-v2-screen .ui-v3-two-column > .wide {grid-column:1/-1;}
+.ui-v2-dialog--simple footer,
+.ui-v2-dialog--simple .actions {justify-content:flex-end;}
+/* Gestión Dev antes definía tres columnas; el documento oficial solicita dos.
+   Las condiciones de campos y sus validaciones HTML permanecen intactas. */
+.ui-v2-screen.dev-page .fields-grid,
+.ui-v2-screen .supplier-panel > form .fields {
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:12px;
+}
+.ui-v2-screen.dev-page .fields-grid .field-wide {grid-column:span 1;}
+/* Campos y etiquetas de formulario alineados en la parte superior. */
+.ui-v2-screen :is(.fields-grid,.fields) > label,
+.ui-v2-screen :is(.fields-grid,.fields) > .field {min-width:0;align-self:start;}
+@media(max-width:650px){
+  .ui-v2-screen.dev-page .fields-grid,
+  .ui-v2-screen .supplier-panel > form .fields {grid-template-columns:1fr;}
+}

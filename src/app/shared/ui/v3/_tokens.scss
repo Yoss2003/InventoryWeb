@@ -1,0 +1,37 @@
+/* Estándar oficial exportado desde Estandar_Visual_WebInventory.md (2026-11-09).
+   Todos los módulos V2 comparten estas variables. */
+:root {
+  --inv-company-accent: #A2D149;
+  --inv-company-on-accent: #12202B;
+  --inv-v3-brand: var(--inv-company-accent);
+  --inv-v3-brand-soft: color-mix(in srgb, var(--inv-company-accent) 17%, #14212b);
+  --inv-v3-brand-border: color-mix(in srgb, var(--inv-company-accent) 55%, #455a6d);
+  --inv-v3-card-padding: 16px;
+  --inv-v3-card-radius: 15px;
+  --inv-v3-section-gap: 8px;
+  --inv-v3-header-icon-size: 44px;
+  --inv-v3-title-size: 21px;
+  --inv-v3-header-separator-gap: 19px;
+  --inv-v3-button-height: 34px;
+  --inv-v3-button-radius: 11px;
+  --inv-v3-search-width: 360px;
+  --inv-v3-search-height: 42px;
+  --inv-v3-table-heading-height: 36px;
+  --inv-v3-row-action-size: 28px;
+  --inv-v3-field-height: 39px;
+  --inv-v3-modal-general-width: 650px;
+  /* Compatibilidad con los tres kits anteriores. */
+  --inv-accent: var(--inv-company-accent);
+  --inv-v2-accent: var(--inv-company-accent);
+  --inv-v2-accent-bg: var(--inv-company-accent);
+  --inv-button-height: var(--inv-v3-button-height);
+  --inv-v2-button-height: var(--inv-v3-button-height);
+  --inv-v2-action-size: var(--inv-v3-row-action-size);
+  --inv-action-size: var(--inv-v3-row-action-size);
+  --inv-v2-radius-card: var(--inv-v3-card-radius);
+  --inv-v2-radius-control: var(--inv-v3-button-radius);
+  --inv-v2-search-width: var(--inv-v3-search-width);
+  --inv-search-width: var(--inv-v3-search-width);
+  --inv-control-height: var(--inv-v3-search-height);
+  --inv-v2-control-height: var(--inv-v3-field-height);
+}

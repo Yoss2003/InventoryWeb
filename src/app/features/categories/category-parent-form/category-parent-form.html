@@ -1,4 +1,4 @@
-<div class="parent-modal">
+<div class="parent-modal ui-v2-dialog ui-v2-dialog--simple">
   <header class="parent-header"><div class="header-heading"><span class="header-symbol"><mat-icon>category</mat-icon></span><div><h2>{{ isEdit ? 'EDITAR CATEGORÍA PADRE' : 'NUEVA CATEGORÍA PADRE' }}</h2><p>Organiza las categorías principales de tu inventario</p></div></div><button type="button" class="close-button" (click)="dialogRef.close()" aria-label="Cerrar"><mat-icon>close</mat-icon></button></header>
   <app-loading-indicator *ngIf="loadingInventories" message="Cargando inventarios del formulario..." />
   <form *ngIf="!loadingInventories" [formGroup]="parentForm" (ngSubmit)="onSubmit()" class="parent-form" autocomplete="off">

@@ -1,3 +1,8 @@
+import { UiEmptyStateComponent } from '../../../shared/ui/v2/ui-empty-state.component';
+import { UiStatusComponent } from '../../../shared/ui/v2/ui-status.component';
+import { UiTableActionDirective } from '../../../shared/ui/v2/ui-table-action.directive';
+import { UiButtonDirective } from '../../../shared/ui/v2/ui-button.directive';
+import { UiPageHeadingComponent } from '../../../shared/ui/v2/ui-page-heading.component';
 import { Component, OnInit, inject, ChangeDetectorRef, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { animate, state, style, transition, trigger } from '@angular/animations';
@@ -21,7 +26,7 @@ import { UiSearchComponent } from '../../../shared/ui/ui-search.component';
 
 @Component({
   selector:'app-category-list',standalone:true,
-  imports:[MatTableModule,MatCardModule,MatButtonModule,MatIconModule,MatInputModule,MatCheckboxModule,FormsModule,CommonModule,LoadingIndicatorComponent,UiSearchComponent],
+  imports:[UiEmptyStateComponent, UiStatusComponent, UiTableActionDirective, UiButtonDirective, UiPageHeadingComponent, MatTableModule,MatCardModule,MatButtonModule,MatIconModule,MatInputModule,MatCheckboxModule,FormsModule,CommonModule,LoadingIndicatorComponent,UiSearchComponent],
   templateUrl:'./category-list.html',styleUrl:'./category-list.scss',
   animations:[trigger('detailExpand',[
     state('collapsed,void',style({height:'0px',minHeight:'0'})),

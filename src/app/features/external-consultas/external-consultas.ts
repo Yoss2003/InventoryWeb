@@ -1,3 +1,5 @@
+import { UiControlDirective } from '../../shared/ui/v2/ui-control.directive';
+import { UiPageHeadingComponent } from '../../shared/ui/v2/ui-page-heading.component';
 import { CommonModule } from '@angular/common';
 import { ChangeDetectorRef, Component, inject } from '@angular/core';
 import { finalize, timeout } from 'rxjs';
@@ -6,7 +8,7 @@ import { ExternalConsultasService, SunatRuc, ExchangeRate } from '../../core/ser
 import { LoadingIndicatorComponent } from '../../shared/loading/loading-indicator';
 import { ToastService } from '../../shared/toast/toast.service';
 
-@Component({selector:'app-external-consultas',standalone:true,imports:[CommonModule,FormsModule,LoadingIndicatorComponent],templateUrl:'./external-consultas.html',styleUrl:'./external-consultas.scss'})
+@Component({selector:'app-external-consultas',standalone:true,imports:[UiControlDirective, UiPageHeadingComponent, CommonModule,FormsModule,LoadingIndicatorComponent],templateUrl:'./external-consultas.html',styleUrl:'./external-consultas.scss'})
 export class ExternalConsultasComponent {
   private readonly api=inject(ExternalConsultasService);
   private readonly cdr=inject(ChangeDetectorRef);

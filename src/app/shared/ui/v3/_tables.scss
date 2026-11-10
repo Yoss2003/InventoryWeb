@@ -1,0 +1,48 @@
+/* Tablas HTML y Material, sin tocar columnas ni datos. */
+.ui-v2-screen :is(.ui-table-shell,.table-wrapper,.assignment-table-wrap,.sharing-table-wrap,.companies-table,.outputs-table,.entries-table) {
+  border:1px solid var(--inv-v2-border);border-radius:10px;
+  overflow-x:auto;max-width:100%;
+}
+.ui-v2-screen :is(.ui-table-shell,.table-wrapper,.assignment-table-wrap,.sharing-table-wrap,.companies-table,.outputs-table,.entries-table)
+  table:not(.mat-mdc-table)>thead>tr>th {
+  height:var(--inv-v3-table-heading-height);min-height:0;
+  padding:7px 12px;box-sizing:border-box;
+  background:var(--inv-v2-header);vertical-align:middle;
+}
+.ui-v2-screen .category-table .mat-mdc-header-row {height:var(--inv-v3-table-heading-height);}
+.ui-v2-screen .category-table .mat-mdc-header-cell {padding-block:7px!important;}
+.ui-v2-screen :is(.ui-table-shell,.table-wrapper,.assignment-table-wrap,.sharing-table-wrap,.companies-table,.outputs-table,.entries-table)
+  table:not(.mat-mdc-table)>tbody>tr>td {padding:9px 12px;}
+.ui-v2-screen :is(.ui-table-shell,.table-wrapper,.assignment-table-wrap,.sharing-table-wrap,.companies-table,.outputs-table,.entries-table)
+  table:not(.mat-mdc-table)>tbody>tr:nth-child(even)>td {
+  background:rgba(166,197,224,.035);
+}
+/* No colorear filas de detalle expandidas de Angular Material. */
+.ui-v2-screen .category-table .mat-mdc-row.parent-row .mat-mdc-cell {padding-block:9px!important;}
+.ui-v2-screen .category-table .detail-row .mat-mdc-cell {padding:0!important;}
+.ui-v2-screen button.ui-v2-table-action,
+.ui-v2-screen .category-table button.row-icon,
+.ui-v2-screen .subcategories-table button.row-icon {
+  width:var(--inv-v3-row-action-size);height:var(--inv-v3-row-action-size);
+  min-width:var(--inv-v3-row-action-size);min-height:var(--inv-v3-row-action-size);
+  padding:0;margin:0 2px;border:1px solid transparent;border-radius:7px;
+  background:transparent;color:var(--inv-v3-brand);vertical-align:middle;
+}
+.ui-v2-screen button.ui-v2-table-action--danger,
+.ui-v2-screen .category-table button.row-icon.danger,
+.ui-v2-screen .subcategories-table button.row-icon.danger {background:transparent;border-color:transparent;color:var(--inv-v2-danger);}
+.ui-v2-screen :is(td.actions,td.entry-actions,td.actions-col,td.supplier-actions-col,th.actions-col) {text-align:center!important;white-space:nowrap;}
+.ui-v2-screen :is(button.ui-v2-table-action,.category-table button.row-icon):hover:not(:disabled) {
+  background:var(--inv-v3-brand-soft);border-color:var(--inv-v3-brand-border);
+}
+.ui-v2-screen :is(.mat-mdc-tab,.mat-mdc-tab.mdc-tab--active) {--mdc-tab-indicator-active-indicator-color:var(--inv-v3-brand);}
+.ui-v2-screen .mat-mdc-tab.mdc-tab--active .mdc-tab__text-label {color:var(--inv-v3-brand);}
+/* Estados positivos usan marca; los negativos continúan rojos. */
+.ui-v2-screen app-ui-status .ui-v2-status:not(.ui-v2-status--danger):not(.ui-v2-status--warning):not(.ui-v2-status--neutral),
+.ui-v2-screen .state-pill:not(.inactive),
+.ui-v2-screen .status:not(.inactive):not(.cancelled),
+.ui-v2-screen .assignment-tag {
+  background:var(--inv-v3-brand-soft);
+  border-color:var(--inv-v3-brand-border);
+  color:var(--inv-v3-brand);
+}

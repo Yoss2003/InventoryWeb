@@ -1,3 +1,5 @@
+import { UiButtonDirective } from '../../shared/ui/v2/ui-button.directive';
+import { UiPageHeadingComponent } from '../../shared/ui/v2/ui-page-heading.component';
 import { CleanArticleNamePipe } from '../../shared/clean-article-name.pipe';
 import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
@@ -12,7 +14,7 @@ import { LoadingIndicatorComponent } from '../../shared/loading/loading-indicato
 import { UiSearchComponent } from '../../shared/ui/ui-search.component';
 
 @Component({selector:'app-assignment-history',standalone:true,
-  imports:[CleanArticleNamePipe, CommonModule,FormsModule,MatIconModule,LoadingIndicatorComponent,UiSearchComponent],
+  imports:[UiButtonDirective, UiPageHeadingComponent, CleanArticleNamePipe, CommonModule,FormsModule,MatIconModule,LoadingIndicatorComponent,UiSearchComponent],
   templateUrl:'./assignment-history.html',styleUrl:'./assignment-history.scss'})
 export class AssignmentHistoryComponent implements OnInit {
   private readonly api=inject(AssignmentService);

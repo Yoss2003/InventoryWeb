@@ -1,0 +1,21 @@
+/* Modal compartido ligero. Los modales complejos conservan tamaños, scroll y distribución. */
+.ui-v2-dialog {color:var(--inv-v2-text);--inv-control-height:var(--inv-v2-control-height);}
+.ui-v2-dialog :is(button,input,select,textarea):focus-visible {
+  outline:2px solid var(--inv-v2-accent);outline-offset:2px;
+}
+.ui-v2-dialog.ui-v2-dialog--simple > header {
+  display:flex;align-items:center;gap:12px;box-sizing:border-box;
+  padding:16px 20px;background:#203342;
+  border-bottom:1px solid #42586a;
+}
+.ui-v2-dialog.ui-v2-dialog--simple > header h2 {font-size:18px;line-height:1.3;margin:0;}
+.ui-v2-dialog.ui-v2-dialog--simple > footer {
+  display:flex;align-items:center;justify-content:flex-end;
+  gap:10px;padding:12px 20px;
+  border-top:1px solid #435a6c;background:#203342;
+}
+.ui-v2-dialog.ui-v2-dialog--simple > footer button {
+  min-height:40px;border-radius:9px;
+}
+/* Complejos: NO imponer width, max-height, overflow, grid ni tamaño de campos. */
+.ui-v2-dialog.ui-v2-dialog--special {--inv-v2-dialog-special:1;}

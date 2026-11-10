@@ -42,7 +42,7 @@ td strong { font-size: 12.5px; }
 .field { display: flex; flex-direction: column; gap: 7px; font-weight: 600; font-size: 12px; color: #c3d2de; min-width: 0; }
 .field-wide { grid-column: span 2; }
 .field input, .color-control input:not(.color-picker), .read-only { box-sizing: border-box; width: 100%; background: #0f1923; color: #f0f7fc; border: 1px solid #708191; padding: 10px 12px; border-radius: 8px; min-height: 43px; height: 43px; font: inherit; font-size: 13px; }
-.field input:focus { outline: 2px solid #a8d73d; outline-offset: 1px; }
+.field input:focus { outline: 2px solid var(--inv-company-accent, #A2D149); outline-offset: 1px; }
 .field input:read-only, .field input.read-only { color: #b6c8d3; background: #1c2a34; border-color: #536778; }
 .required { color: #ccea79; }
 .field-help { font-size: 11px; color: #9fb5c4; margin: 0; line-height: 1.5; }
@@ -61,7 +61,7 @@ td strong { font-size: 12.5px; }
 .renew-box p, .renew-box small { margin: 0; max-width: 670px; color: #b1c9bb; font-size: 11px; line-height: 1.6; }
 .renew-controls { display: flex; align-items: center; gap: 11px; flex-shrink: 0; }
 /* Integración visual Angular Material: misma línea y esquinas de otros selectores. */
-:host ::ng-deep .dev-select { min-width: 155px; width: 100%; --mdc-outlined-text-field-outline-color: #708191; --mdc-outlined-text-field-focus-outline-color: #a8d73d; }
+:host ::ng-deep .dev-select { min-width: 155px; width: 100%; --mdc-outlined-text-field-outline-color: #708191; --mdc-outlined-text-field-focus-outline-color: var(--inv-company-accent, #A2D149); }
 :host ::ng-deep .dev-select .mat-mdc-text-field-wrapper { background: #0f1923; border-radius: 8px; height: 43px; }
 :host ::ng-deep .dev-select .mat-mdc-form-field-flex { height: 43px; align-items: center; }
 :host ::ng-deep .dev-select .mat-mdc-form-field-infix { min-height: 43px; padding-top: 9px; padding-bottom: 9px; }
@@ -85,7 +85,7 @@ td strong { font-size: 12.5px; }
 .table-search { display:flex; align-items:center; gap:8px; background:#101b25; border:1px solid #506879; border-radius:10px; padding:0 11px; min-width:240px; width:min(340px,100%); }
 .table-search mat-icon { color:#8fa8b9; font-size:18px; width:18px; height:18px; }
 .table-search input { flex:1; min-width:0; height:40px; background:transparent; border:0; outline:none; color:#f2f7fa; font:inherit; font-size:12px; }
-.table-search:focus-within { outline:1px solid #a2d149; }
+.table-search:focus-within { outline:1px solid var(--inv-company-accent, #A2D149); }
 .count-chip { display:inline-grid; place-items:center; min-width:24px; height:23px; padding:0 7px; margin-left:6px; font-size:11px; border-radius:30px; background:#273e46; color:#d7e6ee; vertical-align:middle; }
 .overflow { border:1px solid #415a6d; border-radius:12px; overflow:auto; }
 .overflow table { border-collapse:separate; border-spacing:0; }

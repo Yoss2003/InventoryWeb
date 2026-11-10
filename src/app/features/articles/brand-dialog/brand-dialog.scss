@@ -47,12 +47,12 @@
   width: 40px;
   height: 40px;
   background: #263c25;
-  color: #a8d73d;
+  color: var(--inv-company-accent, #A2D149);
   border-radius: 11px;
 }
 h2 { margin: 0; font-size: 18px; font-weight: 750; line-height: 1.35; }
 h3 { margin: 0; font-size: 13px; font-weight: 750; }
-h3 span { color: #a8d73d; }
+h3 span { color: var(--inv-company-accent, #A2D149); }
 p { margin: 0; }
 .brand-heading p { color: #b0bdc9; font-size: 11px; margin-top: 3px; }
 .close-button {
@@ -68,7 +68,7 @@ p { margin: 0; }
   background: #182531;
   cursor: pointer;
 }
-.close-button:hover:not(:disabled) { color: #fff; border-color: #a8d73d; }
+.close-button:hover:not(:disabled) { color: #fff; border-color: var(--inv-company-accent, #A2D149); }
 
 /* SIN scroll exterior. Los dos bloques no se mueven al editar. */
 .brand-content {
@@ -125,7 +125,7 @@ p { margin: 0; }
   font-size: 12px;
   outline: none;
 }
-.brand-form-row input:focus, .search-field:focus-within { border-color: #a8d73d; }
+.brand-form-row input:focus, .search-field:focus-within { border-color: var(--inv-company-accent, #A2D149); }
 .save-button {
   display: inline-flex;
   align-items: center;
@@ -158,7 +158,7 @@ p { margin: 0; }
 .feedback { display: block; font-size: 11px; line-height: 1.4; }
 .error { color: #ff9f9f; }
 .success { color: #c9ed8b; }
-.feedback button { border: 0; background: transparent; color: #a8d73d; cursor: pointer; text-decoration: underline; }
+.feedback button { border: 0; background: transparent; color: var(--inv-company-accent, #A2D149); cursor: pointer; text-decoration: underline; }
 .separator { flex: 0 0 auto; border-top: 1px solid #364b5c; margin: 10px 0 12px; }
 
 .refresh-button {
@@ -169,7 +169,7 @@ p { margin: 0; }
   padding: 3px 0;
   border: 0;
   background: transparent;
-  color: #a8d73d;
+  color: var(--inv-company-accent, #A2D149);
   font: inherit;
   font-size: 11px;
   cursor: pointer;
@@ -193,7 +193,7 @@ p { margin: 0; }
   width: 15px;
   height: 15px;
   margin: 0;
-  accent-color: #a8d73d;
+  accent-color: var(--inv-company-accent, #A2D149);
   cursor: pointer;
 }
 .inactive-counter {
@@ -306,7 +306,7 @@ p { margin: 0; }
   cursor: pointer;
 }
 .edit-button { border: 1px solid #597085; background: #283c4b; color: #e3f0fd; }
-.edit-button:hover:not(:disabled) { background: #34516a; border-color: #a8d73d; }
+.edit-button:hover:not(:disabled) { background: #34516a; border-color: var(--inv-company-accent, #A2D149); }
 .delete-button { border: 1px solid #89505a; background: #37262c; color: #ff9a9a; }
 .delete-button:hover:not(:disabled) { background: #563039; }
 .brand-actions mat-icon { width: 17px; height: 17px; font-size: 17px; }
@@ -328,7 +328,7 @@ p { margin: 0; }
   font-size: 12px;
 }
 .brand-loading mat-spinner, .refresh-button mat-spinner {
-  --mdc-circular-progress-active-indicator-color: #a8d73d;
+  --mdc-circular-progress-active-indicator-color: var(--inv-company-accent, #A2D149);
 }
 
 .brand-footer {
@@ -347,7 +347,7 @@ p { margin: 0; }
   cursor: pointer;
 }
 button:disabled { opacity: .52; cursor: not-allowed; }
-button:focus-visible { outline: 2px solid #a8d73d; outline-offset: 2px; }
+button:focus-visible { outline: 2px solid var(--inv-company-accent, #A2D149); outline-offset: 2px; }
 
 @media (max-width: 460px) {
   .brand-header, .brand-footer { padding-left: 14px; padding-right: 14px; }

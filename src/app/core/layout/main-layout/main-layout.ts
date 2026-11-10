@@ -6,20 +6,25 @@ import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatListModule } from '@angular/material/list';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
+import { MatSelectModule } from '@angular/material/select';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { filter } from 'rxjs';
 import { AuthService } from '../../services/auth.service';
+import { CompanyPublicService } from '../../services/companies';
+import { CompanyThemeService } from '../../../shared/ui/v3/company-theme.service';
 import { InventoryService, InventorySummary } from '../../services/inventories';
 import { InventoryContextService } from '../../services/inventory-context';
 import { ToastService } from '../../../shared/toast/toast.service';
 
 @Component({
   selector:'app-main-layout', standalone:true,
-  imports:[CommonModule,RouterModule,MatSidenavModule,MatToolbarModule,MatListModule,MatIconModule,MatButtonModule],
+  imports:[CommonModule,RouterModule,MatSidenavModule,MatToolbarModule,MatListModule,MatIconModule,MatButtonModule,MatSelectModule],
   templateUrl:'./main-layout.html',styleUrl:'./main-layout.scss'
 })
 export class MainLayoutComponent {
   private readonly authService=inject(AuthService);
+  private readonly publicCompanies=inject(CompanyPublicService);
+  private readonly companyTheme=inject(CompanyThemeService);
   private readonly inventoryApi=inject(InventoryService);
   private readonly inventoryContext=inject(InventoryContextService);
   private readonly toast=inject(ToastService);
@@ -39,6 +44,14 @@ export class MainLayoutComponent {
   }
   ngOnInit():void {
     const session = isPlatformBrowser(this.platform) ? JSON.parse(localStorage.getItem('userSession') || '{}') : {};
+    this.companyTheme.reset();
+    this.publicCompanies.getActiveCompanies().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: companies => {
+        const company = companies.find(c => Number(c.id) === Number(session.companyId));
+        this.companyTheme.apply(company?.primaryColorHex);
+      },
+      error: () => this.companyTheme.reset()
+    });
     this.inventoryApi.getInventories().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: rows => {
         this.inventoryContext.initialize(rows, Number(session.id) || 0);
@@ -52,8 +65,9 @@ export class MainLayoutComponent {
       }
     });
   }
-  selectInventory(event:Event):void {
-    const id = Number((event.target as HTMLSelectElement).value);
+  selectInventoryById(value: number | string | null):void {
+    const id = Number(value);
+    if (!Number.isInteger(id) || id <= 0) return;
     if (id === this.selectedInventoryId || !this.inventoryContext.select(id)) return;
     // Evita presentar datos en caché del inventario anterior al cambiar de contexto.
     if (isPlatformBrowser(this.platform)) window.location.reload();
@@ -64,5 +78,5 @@ export class MainLayoutComponent {
     return titles[segment] ?? 'Panel de gestión';
   }
   toggleSidebar():void {this.isSidebarOpen.update(open=>!open);}
-  logout():void {this.authService.logout();void this.router.navigate(['/login']);}
+  logout():void {this.companyTheme.reset();this.authService.logout();void this.router.navigate(['/login']);}
 }

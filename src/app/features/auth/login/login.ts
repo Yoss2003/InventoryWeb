@@ -8,6 +8,7 @@ import { CompanySelectorComponent } from '../../../shared/company-selector/compa
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { AuthService } from '../../../core/services/auth.service';
 import { CompanyPublicService } from '../../../core/services/companies';
+import { CompanyThemeService } from '../../../shared/ui/v3/company-theme.service';
 import { CompanyPublic } from '../../../core/models/company-public.model';
 import { LoginRequest } from '../../../core/models/auth.model';
 import { LoadingIndicatorComponent } from '../../../shared/loading/loading-indicator';
@@ -23,6 +24,7 @@ export class Login implements OnInit {
   private readonly fb = inject(FormBuilder);
   private readonly authService = inject(AuthService);
   private readonly companiesService = inject(CompanyPublicService);
+  private readonly companyTheme = inject(CompanyThemeService);
   private readonly router = inject(Router);
   private readonly snackBar = inject(MatSnackBar);
   private readonly cdr = inject(ChangeDetectorRef);
@@ -43,7 +45,7 @@ export class Login implements OnInit {
   showPassword = false;
   logoFailed = false;
 
-  ngOnInit(): void { this.loadCompanies(); }
+  ngOnInit(): void { this.companyTheme.reset(); this.loadCompanies(); }
 
   get selectedCompany(): CompanyPublic | null {
     const id = Number(this.loginForm.get('companyId')?.value);
@@ -96,6 +98,7 @@ export class Login implements OnInit {
   }
 
   onCompanyChange(): void {
+    this.companyTheme.apply(this.selectedCompany?.primaryColorHex);
     this.logoFailed = false;
     this.loginError = '';
     this.requiresTwoFactor = false;

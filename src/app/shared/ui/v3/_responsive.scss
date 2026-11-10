@@ -1,0 +1,15 @@
+@media(max-width:768px){
+  .ui-v2-screen >header.ui-v2-page-header{align-items:flex-start;}
+  .ui-v2-screen .ui-v2-header-actions{width:100%;flex:1 1 100%;justify-content:flex-start;}
+  .ui-v2-screen .ui-v2-header-actions button{max-width:100%;}
+  .ui-v2-screen .ui-v3-two-column,.ui-v2-dialog--simple .fields{grid-template-columns:1fr;}
+  .ui-v2-screen .ui-v3-assignment-search{padding:10px 10px 0;}
+}
+@media(max-width:480px){
+  .ui-v2-screen{padding:12px!important;}
+  .ui-v2-screen .ui-v2-header-actions{display:grid;grid-template-columns:repeat(auto-fit,minmax(125px,1fr));gap:7px;}
+  .ui-v2-screen .ui-v2-header-actions button{width:100%;}
+  .ui-v2-screen :is(.ui-table-toolbar,.ui-v2-table-toolbar)>app-ui-search {width:100%;max-width:100%;flex:1 1 100%;}
+  .ui-v2-screen .assignment-tabs button{font-size:11px;}
+  .ui-v2-screen :is(.entries-tabs,.outputs-tabs) .mat-mdc-tab{min-width:0;padding-inline:4px;}
+}

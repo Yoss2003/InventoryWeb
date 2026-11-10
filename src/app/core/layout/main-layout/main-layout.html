@@ -22,10 +22,16 @@
       <span class="current-title">{{ currentTitle() }}</span>
       <span class="spacer"></span>
       <label class="active-inventory-label" for="active-inventory-select">Inventario</label>
-      <select id="active-inventory-select" class="active-inventory-select" [value]="selectedInventoryId ?? ''" (change)="selectInventory($event)" [disabled]="loadingInventories || !inventories.length" aria-label="Inventario de trabajo">
-        <option *ngIf="!inventories.length" value="">{{loadingInventories ? 'Cargando...' : 'Sin inventarios'}}</option>
-        <option *ngFor="let item of inventories" [value]="item.id">{{item.alias || item.inventoryName}} ({{item.id}})</option>
-      </select>
+      <mat-form-field appearance="outline" class="active-inventory-field" subscriptSizing="dynamic">
+        <mat-select id="active-inventory-select" aria-label="Inventario de trabajo"
+          [value]="selectedInventoryId"
+          (selectionChange)="selectInventoryById($event.value)"
+          [disabled]="loadingInventories || !inventories.length"
+          panelClass="inventory-select-options">
+          <mat-option *ngIf="!inventories.length" [value]="null" disabled>{{loadingInventories ? 'Cargando...' : 'Sin inventarios'}}</mat-option>
+          <mat-option *ngFor="let item of inventories" [value]="item.id">{{item.alias || item.inventoryName}} ({{item.id}})</mat-option>
+        </mat-select>
+      </mat-form-field>
       <button mat-icon-button (click)="logout()" title="Cerrar sesión" aria-label="Cerrar sesión"><mat-icon>logout</mat-icon></button>
     </mat-toolbar>
     <div class="main-content"><router-outlet></router-outlet></div>

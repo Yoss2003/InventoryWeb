@@ -35,7 +35,7 @@ import { MatIconModule } from '@angular/material/icon';
       transition:border-color .15s, box-shadow .15s; }
     .ui-search-box:hover { border-color:#91a8b7; }
     .ui-search-box:focus-within { border-color:var(--inv-accent,#a8d73d);
-      box-shadow:0 0 0 2px rgba(168,215,61,.13); }
+      box-shadow:0 0 0 2px color-mix(in srgb, var(--inv-company-accent, #A2D149) 13%, transparent); }
     mat-icon { width:19px; height:19px; font-size:19px; flex:none; }
     input { flex:1; min-width:0; width:100%; height:100%;
       border:0; outline:0; box-shadow:none; background:transparent;
