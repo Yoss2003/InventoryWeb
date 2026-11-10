@@ -63,3 +63,137 @@
 .top-toolbar .menu-trigger{margin-right:4px;border:1px solid #657d8f;background:#20323e;box-shadow:0 0 0 3px #14212b}
 .top-toolbar .menu-trigger:hover{border-color:var(--inv-company-accent, #A2D149);background:#293d49}
 @media(max-width:700px){:host ::ng-deep .sidenav.collapsed .mat-mdc-list-item{width:44px!important;min-width:44px}.top-toolbar{padding-left:14px!important;gap:10px}}
+
+
+/* Menú lateral agrupado */
+.sidebar-groups {
+  height: calc(100% - 70px);
+  padding: 10px 6px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: thin;
+}
+
+.sidebar-group {
+  margin-bottom: 6px;
+}
+
+.sidebar-group-trigger {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  height: 46px;
+  padding: 0 12px;
+  background: transparent;
+  color: #c4d4e2;
+  border: 0;
+  border-radius: 9px;
+  cursor: pointer;
+  text-align: left;
+  font: inherit;
+}
+
+.sidebar-group-trigger:hover {
+  background: #243746;
+}
+
+.sidebar-group-trigger.group-active {
+  color: var(--inv-company-accent, #A2D149);
+  background: var(--inv-v3-brand-soft);
+}
+
+.sidebar-group-trigger > mat-icon:first-child {
+  flex: 0 0 24px;
+  width: 24px;
+  height: 24px;
+}
+
+.group-label {
+  flex: 1;
+  font-size: 13px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.group-chevron {
+  flex: none;
+  color: #a7bac9;
+}
+
+.sidebar-group-items {
+  padding: 2px 0 5px 10px;
+}
+
+:host ::ng-deep .sidebar-group-items .mat-mdc-list-item {
+  height: 42px;
+  margin-top: 2px;
+  margin-bottom: 2px;
+}
+
+/* Barra contraída: solamente iconos de grupos */
+.sidenav.collapsed .sidebar-group-trigger {
+  justify-content: center;
+  padding: 0;
+  width: 48px;
+  height: 48px;
+  margin: 4px auto;
+}
+
+.sidenav.collapsed .sidebar-group-trigger > mat-icon {
+  margin: 0;
+}
+
+:host ::ng-deep .sidenav .mat-drawer-inner-container {
+  overflow-x: hidden;
+}
+
+@media (max-width: 700px) {
+  .sidenav.collapsed .sidebar-group-trigger {
+    width: 44px;
+    height: 44px;
+  }
+}
+
+
+/* Apertura y cierre del lateral */
+.sidenav {
+  transition: width 260ms cubic-bezier(.2, .7, .2, 1);
+}
+
+.sidenav-container > mat-sidenav-content {
+  transition: margin-left 260ms cubic-bezier(.2, .7, .2, 1);
+}
+
+/* Acordeón de grupos */
+.sidebar-group-items {
+  display: block;
+  max-height: 0;
+  padding-top: 0;
+  padding-bottom: 0;
+  overflow: hidden;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition:
+    max-height 250ms ease,
+    opacity 180ms ease,
+    visibility 250ms;
+}
+
+.sidebar-group-items.is-open {
+  max-height: 250px;
+  padding-bottom: 5px;
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+
+/* Flecha de los grupos */
+.group-chevron {
+  transition: transform 250ms ease;
+}
+
+.sidebar-group-trigger[aria-expanded="true"] .group-chevron {
+  transform: rotate(90deg);
+}

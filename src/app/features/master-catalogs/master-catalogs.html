@@ -1,6 +1,9 @@
 <section class="catalog-page inv-core-page inv-secondary-page">
   <header class="inv-core-header"><app-ui-page-heading icon="storefront" title="Catálogo general" subtitle="Todos los inventarios de la empresa utilizan estos registros. Las claves del sistema no se muestran aquí."></app-ui-page-heading><button type="button" (click)="refresh()" [disabled]="loading" appUiButton="secondary"><mat-icon aria-hidden="true">refresh</mat-icon>Actualizar</button></header>
-  <div class="tabs inv-secondary-tabs" role="tablist" aria-label="Catálogo general"><button type="button" role="tab" [attr.aria-selected]="tab==='suppliers'" [class.active]="tab==='suppliers'" (click)="tab='suppliers'">Proveedores</button><button type="button" role="tab" [attr.aria-selected]="tab==='parameters'" [class.active]="tab==='parameters'" (click)="tab='parameters'">Parámetros generales</button></div>
+  <div class="tabs inv-secondary-tabs" role="tablist" aria-label="Catálogo general">
+    <button type="button" role="tab" [attr.aria-selected]="tab==='suppliers'" [class.active]="tab==='suppliers'" (click)="switchCatalogTab('suppliers')">Proveedores</button>
+    <button type="button" role="tab" [attr.aria-selected]="tab==='parameters'" [class.active]="tab==='parameters'" (click)="switchCatalogTab('parameters')">Parámetros generales</button>
+  </div>
   <p *ngIf="loading" role="status">Consultando catálogos...</p>
   <!-- FASE 4.1.1: PROVEEDORES UI -->
   <div class="panel supplier-panel" *ngIf="tab==='suppliers'">

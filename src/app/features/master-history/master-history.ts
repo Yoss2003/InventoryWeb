@@ -36,7 +36,7 @@ interface HistoryUser { id: number; username: string; firstName?: string; lastNa
 
 @Component({
   selector: 'app-master-history', standalone: true,
-  imports: [UiControlDirective, UiButtonDirective, UiPageHeadingComponent, CleanArticleNamePipe, CommonModule, FormsModule, MatIconModule, MatDatepickerModule, MatFormFieldModule, MatInputModule, MatSelectModule],
+  imports: [UiButtonDirective, UiPageHeadingComponent, CleanArticleNamePipe, CommonModule, FormsModule, MatIconModule, MatDatepickerModule, MatFormFieldModule, MatInputModule, MatSelectModule],
   providers: [provideNativeDateAdapter(), { provide: MAT_DATE_LOCALE, useValue: 'es-PE' }],
   templateUrl: './master-history.html', styleUrl: './master-history.scss'
 })

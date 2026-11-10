@@ -437,3 +437,123 @@
 .inv-secondary-page.lookup-page .fx-advanced-trigger {display:inline-flex;align-items:center;gap:7px;padding:7px 11px;border:1px solid #677f90;border-radius:9px;background:#263947;color:#eaf4fb;font-size:12px;font-weight:700;white-space:nowrap;cursor:pointer;}
 .inv-secondary-page.lookup-page .fx-advanced-trigger mat-icon {font-size:19px;width:19px;height:19px;}
 @media(max-width:650px) {.fx-history-modal .fx-history-controls {grid-template-columns:1fr;} .inv-secondary-page.lookup-page .fx-heading {flex-wrap:wrap;}}
+
+
+/* Indicador deslizante de pestañas */
+.inv-secondary-page .inv-secondary-tabs {
+  --tab-index: 0;
+  --tab-padding: 0px;
+  position: relative;
+}
+
+.inv-secondary-page.assignment-page .assignment-tabs {
+  --tab-padding: 16px;
+}
+
+.inv-secondary-page .inv-secondary-tabs:has(
+  > button:nth-child(2).active
+) {
+  --tab-index: 1;
+}
+
+.inv-secondary-page .inv-secondary-tabs > button.active {
+  border-bottom-color: transparent;
+}
+
+.inv-secondary-page .inv-secondary-tabs::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: var(--tab-padding);
+  width: calc((100% - 2 * var(--tab-padding)) / 2);
+  height: 2px;
+  background: var(--core-accent);
+  transform: translateX(calc(var(--tab-index) * 100%));
+  transition: transform 250ms ease;
+  pointer-events: none;
+}
+
+
+/* Contenido de las pestañas */
+.inv-secondary-page.assignment-page .assignment-tab-content {
+  view-transition-name: assignment-tab;
+}
+
+.inv-secondary-page.catalog-page .panel {
+  view-transition-name: catalog-tab;
+}
+
+/* Salida: desplazamiento y desvanecimiento */
+@keyframes tab-fade-out {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+}
+
+/* Entrada: aparece suavemente */
+@keyframes tab-fade-in {
+  from {
+    opacity: 0;
+    transform: translateX(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+::view-transition-old(assignment-tab),
+::view-transition-old(catalog-tab) {
+  animation: tab-fade-out 130ms ease-in both;
+}
+
+::view-transition-new(assignment-tab),
+::view-transition-new(catalog-tab) {
+  animation: tab-fade-in 150ms ease-out 130ms both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(assignment-tab),
+  ::view-transition-old(catalog-tab),
+  ::view-transition-new(assignment-tab),
+  ::view-transition-new(catalog-tab) {
+    animation: none;
+  }
+}
+
+.inv-secondary-page.catalog-page .panel {
+  animation: tabRevealA 250ms ease both;
+}
+
+.inv-secondary-page.assignment-page
+.assignment-section:has(.assignment-tabs > button:first-child.active)
+:is(.assignment-table-wrap, .assignment-state:not(.assignment-state--error)) {
+  animation: tabRevealA 250ms ease both;
+}
+
+.inv-secondary-page.assignment-page
+.assignment-section:has(.assignment-tabs > button:nth-child(2).active)
+:is(.assignment-table-wrap, .assignment-state:not(.assignment-state--error)) {
+  animation: tabRevealB 250ms ease both;
+}
+
+@media (max-width: 650px) {
+  .inv-secondary-page.assignment-page .assignment-tabs {
+    --tab-padding: 8px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .inv-secondary-page .inv-secondary-tabs::after,
+  .inv-secondary-page.catalog-page .panel,
+  .inv-secondary-page.assignment-page .assignment-table-wrap,
+  .inv-secondary-page.assignment-page .assignment-state {
+    transition: none;
+    animation: none;
+  }
+}

@@ -211,4 +211,23 @@ export class MasterCatalogsComponent implements OnInit {
       error:err=>this.toast.error(String(err?.error?.error||'No se pudo eliminar el parámetro.'))
     });
   }
+
+  switchCatalogTab(tab: 'suppliers' | 'parameters'): void {
+    if (this.tab === tab) return;
+
+    const update = () => {
+      this.tab = tab;
+      this.cdr.detectChanges();
+    };
+
+    const doc = document as Document & {
+      startViewTransition?: (callback: () => void) => unknown;
+    };
+
+    if (doc.startViewTransition) {
+      doc.startViewTransition(update);
+    } else {
+      update();
+    }
+  }
 }

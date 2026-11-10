@@ -16,6 +16,18 @@ import { InventoryService, InventorySummary } from '../../services/inventories';
 import { InventoryContextService } from '../../services/inventory-context';
 import { ToastService } from '../../../shared/toast/toast.service';
 
+interface SidebarGroup {
+  id: string;
+  title: string;
+  icon: string;
+  developerOnly?: boolean;
+  items: {
+    label: string;
+    icon: string;
+    route: string;
+    adminOnly?: boolean;
+  }[];
+}
 @Component({
   selector:'app-main-layout', standalone:true,
   imports:[CommonModule,RouterModule,MatSidenavModule,MatToolbarModule,MatListModule,MatIconModule,MatButtonModule,MatSelectModule],
@@ -37,10 +49,79 @@ export class MainLayoutComponent {
   private readonly router=inject(Router);
   private readonly destroyRef=inject(DestroyRef);
   readonly isSidebarOpen=signal(false);
+
+  readonly menuGroups: SidebarGroup[] = [
+    {
+      id: 'catalogos',
+      title: 'Catálogos',
+      icon: 'layers',
+      items: [
+        { label: 'Artículos', icon: 'inventory_2', route: '/dashboard/articulos' },
+        { label: 'Categorías', icon: 'category', route: '/dashboard/categorias' },
+        { label: 'Catálogo general', icon: 'collections_bookmark', route: '/dashboard/catalogo-general' }
+      ]
+    },
+    {
+      id: 'movimientos',
+      title: 'Movimientos',
+      icon: 'swap_horiz',
+      items: [
+        { label: 'Entradas', icon: 'add_circle', route: '/dashboard/entradas' },
+        { label: 'Salidas', icon: 'remove_circle', route: '/dashboard/salidas' },
+        { label: 'Asignados', icon: 'assignment_ind', route: '/dashboard/asignaciones' },
+        { label: 'Historial general', icon: 'history', route: '/dashboard/historial-general', adminOnly: true }
+      ]
+    },
+    {
+      id: 'herramientas',
+      title: 'Herramientas',
+      icon: 'build',
+      items: [
+        { label: 'Compartir', icon: 'group_add', route: '/dashboard/compartir-inventario' },
+        { label: 'Consultas', icon: 'currency_exchange', route: '/dashboard/consultas' }
+      ]
+    },
+    {
+      id: 'administracion',
+      title: 'Administración',
+      icon: 'admin_panel_settings',
+      developerOnly: true,
+      items: [
+        { label: 'Gestión Dev', icon: 'admin_panel_settings', route: '/dashboard/gestion-dev' }
+      ]
+    }
+  ];
+
+  readonly expandedGroup = signal(this.groupForRoute(this.router.url));
+  readonly activeGroup = signal(this.groupForRoute(this.router.url));
+
+  private groupForRoute(url: string): string {
+    const path = url.split('?')[0].split('#')[0];
+    return this.menuGroups.find(group =>
+      group.items.some(item => item.route === path)
+    )?.id ?? 'catalogos';
+  }
+
+  toggleGroup(id: string): void {
+    if (!this.isSidebarOpen()) {
+      this.isSidebarOpen.set(true);
+      this.expandedGroup.set(id);
+      return;
+    }
+
+    this.expandedGroup.update(current => current === id ? '' : id);
+  }
+
   readonly currentTitle=signal(this.resolveTitle(this.router.url));
   constructor(){
     this.router.events.pipe(filter((event):event is NavigationEnd=>event instanceof NavigationEnd),takeUntilDestroyed(this.destroyRef))
-      .subscribe(event=>this.currentTitle.set(this.resolveTitle(event.urlAfterRedirects)));
+    .subscribe(event => {
+      this.currentTitle.set(this.resolveTitle(event.urlAfterRedirects));
+
+      const group = this.groupForRoute(event.urlAfterRedirects);
+      this.activeGroup.set(group);
+      this.expandedGroup.set(group);
+    });
   }
   ngOnInit():void {
     const session = isPlatformBrowser(this.platform) ? JSON.parse(localStorage.getItem('userSession') || '{}') : {};

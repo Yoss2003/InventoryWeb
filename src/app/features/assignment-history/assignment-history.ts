@@ -55,4 +55,24 @@ export class AssignmentHistoryComponent implements OnInit {
     });
     ref.afterClosed().subscribe(changed=>{if(changed)this.loadHistory();});
   }
+
+  switchAssignmentTab(tab: 'history' | 'received'): void {
+    if (this.currentTab === tab) return;
+
+    const update = () => {
+      this.currentTab = tab;
+      this.search = '';
+      this.cdr.detectChanges();
+    };
+
+    const doc = document as Document & {
+      startViewTransition?: (callback: () => void) => unknown;
+    };
+
+    if (doc.startViewTransition) {
+      doc.startViewTransition(update);
+    } else {
+      update();
+    }
+  }
 }

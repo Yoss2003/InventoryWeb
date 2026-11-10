@@ -1,18 +1,58 @@
 <mat-sidenav-container class="sidenav-container" [class.sidebar-expanded]="isSidebarOpen()" [class.sidebar-collapsed]="!isSidebarOpen()">
   <mat-sidenav mode="side" [opened]="true" class="sidenav" [class.expanded]="isSidebarOpen()" [class.collapsed]="!isSidebarOpen()">
     <div class="logo-container"><span class="logo-mark"><mat-icon>inventory_2</mat-icon></span><span class="logo-label" [attr.aria-hidden]="!isSidebarOpen()">Inventario Pro</span></div>
-    <mat-nav-list aria-label="Navegación de inventario">
-      <a mat-list-item routerLink="/dashboard/articulos" routerLinkActive="active-link" title="Maestro de artículos" aria-label="Maestro de artículos"><mat-icon matListItemIcon>inventory_2</mat-icon><span class="sidebar-label" matListItemTitle>Artículos</span></a>
-      <a mat-list-item routerLink="/dashboard/categorias" routerLinkActive="active-link" title="Categorías" aria-label="Categorías"><mat-icon matListItemIcon>category</mat-icon><span class="sidebar-label" matListItemTitle>Categorías</span></a>
-      <a mat-list-item routerLink="/dashboard/entradas" routerLinkActive="active-link" title="Entradas" aria-label="Entradas"><mat-icon matListItemIcon>add_circle</mat-icon><span class="sidebar-label" matListItemTitle>Entradas</span></a>
-      <a mat-list-item routerLink="/dashboard/salidas" routerLinkActive="active-link" title="Salidas" aria-label="Salidas"><mat-icon matListItemIcon>remove_circle</mat-icon><span class="sidebar-label" matListItemTitle>Salidas</span></a>
-      <a mat-list-item routerLink="/dashboard/asignaciones" routerLinkActive="active-link" title="Artículos asignados" aria-label="Artículos asignados"><mat-icon matListItemIcon>assignment_ind</mat-icon><span class="sidebar-label" matListItemTitle>Asignados</span></a>
-      <a mat-list-item routerLink="/dashboard/compartir-inventario" routerLinkActive="active-link" title="Compartir inventario" aria-label="Compartir inventario"><mat-icon matListItemIcon>group_add</mat-icon><span class="sidebar-label" matListItemTitle>Compartir</span></a>
-      <a mat-list-item routerLink="/dashboard/consultas" routerLinkActive="active-link" title="Consultas SUNAT y cambio" aria-label="Consultas SUNAT y cambio"><mat-icon matListItemIcon>currency_exchange</mat-icon><span matListItemTitle class="sidebar-label">Consultas</span></a>
-      <a mat-list-item routerLink="/dashboard/catalogo-general" routerLinkActive="active-link" title="Catálogo general" aria-label="Catálogo general"><mat-icon matListItemIcon>collections_bookmark</mat-icon><span matListItemTitle class="sidebar-label">Catálogo general</span></a>
-      <a mat-list-item *ngIf="isAdmin" routerLink="/dashboard/historial-general" routerLinkActive="active-link" title="Historial general" aria-label="Historial general"><mat-icon matListItemIcon>history</mat-icon><span matListItemTitle class="sidebar-label">Historial general</span></a>
-      <a mat-list-item *ngIf="isDeveloper" routerLink="/dashboard/gestion-dev" routerLinkActive="active-link" title="Gestión Dev" aria-label="Gestión Dev"><mat-icon matListItemIcon>admin_panel_settings</mat-icon><span matListItemTitle class="sidebar-label">Gestión Dev</span></a>
-    </mat-nav-list>
+    
+    <nav class="sidebar-groups" aria-label="Navegación de inventario">
+
+      <ng-container *ngFor="let group of menuGroups">
+
+        <section class="sidebar-group" *ngIf="!group.developerOnly || isDeveloper">
+
+          <button
+            type="button"
+            class="sidebar-group-trigger"
+            [class.group-active]="activeGroup() === group.id"
+            [attr.aria-expanded]="isSidebarOpen() && expandedGroup() === group.id"
+            [attr.aria-label]="group.title"
+            [title]="group.title"
+            (click)="toggleGroup(group.id)">
+
+            <mat-icon>{{ group.icon }}</mat-icon>
+
+            <span class="group-label" *ngIf="isSidebarOpen()">
+              {{ group.title }}
+            </span>
+
+            <mat-icon class="group-chevron" *ngIf="isSidebarOpen()">
+              {{ expandedGroup() === group.id ? 'expand_more' : 'chevron_right' }}
+            </mat-icon>
+
+          </button>
+
+          <mat-nav-list class="sidebar-group-items" [class.is-open]="isSidebarOpen() && expandedGroup() === group.id">
+
+            <ng-container *ngFor="let item of group.items">
+              <a
+                *ngIf="!item.adminOnly || isAdmin"
+                mat-list-item
+                [routerLink]="item.route"
+                routerLinkActive="active-link"
+                [title]="item.label">
+
+                <mat-icon matListItemIcon>{{ item.icon }}</mat-icon>
+                <span matListItemTitle class="sidebar-label">{{ item.label }}</span>
+
+              </a>
+            </ng-container>
+
+          </mat-nav-list>
+
+        </section>
+
+      </ng-container>
+
+    </nav>
+
   </mat-sidenav>
   <mat-sidenav-content>
     <mat-toolbar class="top-toolbar">
