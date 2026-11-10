@@ -22,7 +22,7 @@
       <div *ngIf="!sunat && !error && !loadingRuc" class="fx-empty lookup-hint">Ingresa un RUC para consultar sus datos fiscales.</div>
     </section>
     <section class="fx-dashboard" aria-labelledby="fx-heading">
-      <div class="fx-heading"><div><h2 id="fx-heading">Tipo de cambio referencial</h2><p>Última cotización verificada y consulta histórica</p></div></div>
+      <div class="fx-heading"><div><h2 id="fx-heading">Tipo de cambio referencial</h2><p>Última cotización verificada y consulta histórica</p></div><button type="button" class="fx-advanced-trigger" (click)="openAdvancedFilters()"><mat-icon>tune</mat-icon>Filtro avanzado</button></div>
       <div class="fx-grid" *ngIf="usd || eur; else fxEmpty">
         <article class="fx-card" *ngIf="usd">
           <header class="fx-card-heading"><div class="fx-symbol">US$</div><div class="fx-title"><strong>Dólar estadounidense</strong><small>USD / PEN</small></div></header>
@@ -39,6 +39,9 @@
       </div>
       <ng-template #fxEmpty><div class="fx-empty">{{loadingRates ? 'Consultando las últimas cotizaciones...' : 'No hay cotizaciones verificadas disponibles.'}}</div></ng-template>
       <p *ngIf="usdError || eurError" class="error">{{usdError}} {{eurError}}</p>
+      <ng-template #fxHistoryDialog>
+        <section class="fx-history-dialog" aria-label="Filtro avanzado de cotizaciones">
+          <header class="fx-modal-head"><h2>Filtro avanzado</h2><button type="button" class="fx-close-button" (click)="closeAdvancedFilters()" aria-label="Cerrar filtro avanzado"><mat-icon>close</mat-icon></button></header>
       <div class="fx-history-filters">
         <h3>Consultar otras fechas</h3>
         <div class="fx-history-controls">
@@ -54,6 +57,8 @@
         </div>
         <p *ngIf="loadingHistory" role="status">Consultando el historial almacenado...</p>
       </div>
+        </section>
+      </ng-template>
       <p class="fx-disclaimer">Solo se muestran cotizaciones verificadas. Las fechas históricas están limitadas a los registros guardados por la API.</p>
     </section>
   </div>

@@ -26,14 +26,13 @@
         <label>Correo <input [(ngModel)]="supplier.email" name="email" type="email"  appUiControl /></label>
         <label>Dirección <input [(ngModel)]="supplier.address" name="address"  appUiControl /></label>
         <label>Estado SUNAT <input [(ngModel)]="supplier.estado" name="estado" readonly  appUiControl /></label>
-        <label>Condición SUNAT <input [(ngModel)]="supplier.condicion" name="condicion" readonly  appUiControl /></label>
         <label>Distrito <input [(ngModel)]="supplier.distrito" name="distrito"  appUiControl /></label>
         <label>Provincia <input [(ngModel)]="supplier.provincia" name="provincia"  appUiControl /></label>
         <label>Departamento <input [(ngModel)]="supplier.departamento" name="departamento"  appUiControl /></label>
         <!-- FASE 4.1.2: nota comercial opcional, guardada con el proveedor -->
         <label class="supplier-relationship-field">Relación con el proveedor
           <textarea [(ngModel)]="supplier.relationshipDescription" name="relationshipDescription"
-                    maxlength="700" rows="3"
+                    maxlength="700" rows="1"
                     placeholder="Ej.: distribuidor habitual de equipos y accesorios" appUiControl></textarea>
         </label>
       </div>

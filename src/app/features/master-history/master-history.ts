@@ -31,6 +31,8 @@ interface MasterMovementRow {
   articleCode: string;
 }
 interface MasterHistoryResponse { items: MasterMovementRow[]; total: number; page: number; pageSize: number; }
+interface HistoryInventory { id: number; inventoryName: string; alias?: string | null; userId: number; isMaster: boolean; }
+interface HistoryUser { id: number; username: string; firstName?: string; lastName?: string; }
 
 @Component({
   selector: 'app-master-history', standalone: true,
@@ -44,6 +46,10 @@ export class MasterHistoryComponent implements OnInit {
   private readonly cdr = inject(ChangeDetectorRef);
   /* FASE 4.1 */
   readonly api = 'https://localhost:7295/api/Movements/master/history';
+  private readonly apiRoot = 'https://localhost:7295/api';
+  inventoryOptions: HistoryInventory[] = [];
+  userOptions: HistoryUser[] = [];
+  optionsError = '';
   items: MasterMovementRow[] = [];
   total = 0;
   loading = false;
@@ -67,7 +73,41 @@ export class MasterHistoryComponent implements OnInit {
     const pad = (n: number) => String(n).padStart(2, '0');
     return date.getFullYear() + '-' + pad(date.getMonth() + 1) + '-' + pad(date.getDate());
   }
-  ngOnInit(): void { this.load(); }
+  ngOnInit(): void { this.loadFilterOptions(); this.load(); }
+  userLabel(user: HistoryUser): string {
+    const name=[user.firstName,user.lastName].filter(Boolean).join(' ').trim();
+    return name && name.toLocaleLowerCase('es')!==user.username.toLocaleLowerCase('es')
+      ? name+' ('+user.username+')' : user.username;
+  }
+  inventoryLabel(inventory: HistoryInventory): string {
+    const name=(inventory.alias || inventory.inventoryName || 'Sin nombre').trim();
+    const owner=this.userOptions.find(x=>x.id===inventory.userId);
+    return owner ? name+' · '+owner.username : name;
+  }
+  responsibleName(id: number | null | undefined): string {
+    if (!id) return '—';
+    const user=this.userOptions.find(x=>x.id===id);
+    return user ? this.userLabel(user) : 'Usuario no disponible';
+  }
+  loadFilterOptions(): void {
+    this.optionsError='';
+    this.http.get<HistoryInventory[]>(this.apiRoot+'/Inventories').subscribe({
+      next:rows=>{
+        this.inventoryOptions=(Array.isArray(rows)?rows:[]).filter(x=>!x.isMaster)
+          .sort((a,b)=>this.inventoryLabel(a).localeCompare(this.inventoryLabel(b),'es'));
+        this.cdr.markForCheck();
+      },
+      error:()=>{this.optionsError='No se pudieron cargar los inventarios para el filtro por nombre.';this.cdr.markForCheck();}
+    });
+    this.http.get<HistoryUser[]>(this.apiRoot+'/Users').subscribe({
+      next:rows=>{
+        this.userOptions=(Array.isArray(rows)?rows:[])
+          .sort((a,b)=>this.userLabel(a).localeCompare(this.userLabel(b),'es'));
+        this.cdr.markForCheck();
+      },
+      error:()=>{this.optionsError='No se pudieron cargar los usuarios para el filtro por nombre.';this.cdr.markForCheck();}
+    });
+  }
   applyFilters(): void { this.page = 1; this.load(); }
   next(): void { if (this.page * this.pageSize < this.total) { this.page++; this.load(); } }
   previous(): void { if (this.page > 1) { this.page--; this.load(); } }

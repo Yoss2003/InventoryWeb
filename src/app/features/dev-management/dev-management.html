@@ -31,7 +31,7 @@
               </ng-container>
               <ng-template #companyFallbackIcon><mat-icon [title]="c.logoUrl ? 'No se pudo mostrar el logo de la empresa' : 'Empresa sin logo'">domain</mat-icon></ng-template>
             </span><div><strong>{{c.businessName}}</strong><small>RUC {{c.ruc}}</small><small class="subtle">ID {{c.id}} · {{c.contactEmail || 'Sin correo'}}</small></div></div></td>
-            <td><strong>{{c.userCount}}</strong><small>{{c.totalUsers}} registrados</small><small>Cupo: {{displayLimit(c.license?.plan, c.license?.maxUsers)}}</small></td>
+            <td class="company-user-count"><span>Registrados: <strong>{{c.totalUsers}}</strong></span><span>Máximo: <strong>{{displayLimit(c.license?.plan, c.license?.maxUsers)}}</strong></span></td>
             <td class="number-cell">{{c.inventoryCount}}</td>
             <td><span class="plan-tag" [class.plan-max]="c.license?.plan === 'Max'">{{c.license?.plan || 'Sin licencia'}}</span></td>
             <td>
@@ -70,7 +70,7 @@
       <div class="editor-group">
         <div class="group-heading"><h3>Datos de la empresa</h3><p>Identificación y contacto</p></div>
         <div class="fields-grid">
-          <label class="field"><span class="field-label">RUC <span class="required">*</span></span>
+          <div class="dev-ruc-inline"><label class="field"><span class="field-label">RUC <span class="required">*</span></span>
             <input name="ruc" [(ngModel)]="form.ruc" (ngModelChange)="onRucChanged()" type="text" inputmode="numeric" maxlength="11" minlength="11" pattern="[0-9]{11}" required
               [readonly]="isSelectedProtected" placeholder="11 dígitos"  appUiControl />
           </label>
@@ -78,7 +78,7 @@
               <mat-icon *ngIf="!lookingUpRuc">manage_search</mat-icon>
               <app-loading-indicator *ngIf="lookingUpRuc" [compact]="true" message="Consultando..." />
               <span *ngIf="!lookingUpRuc">Consultar RUC</span>
-            </button></div>
+            </button></div></div>
           <div *ngIf="rucResult" class="ruc-feedback ruc-feedback--ok" role="status"><mat-icon>verified</mat-icon><span><strong>Consulta exitosa</strong> · {{rucResult.estado || 'Estado no informado'}} · {{rucResult.condicion || 'Condición no informada'}}</span></div>
           <div *ngIf="rucLookupError" class="ruc-feedback ruc-feedback--error" role="alert"><mat-icon>{{rucNeedsConfiguration ? 'settings' : 'info_outline'}}</mat-icon><span>{{rucLookupError}}</span></div>
           <label class="field field-wide"><span class="field-label">Razón social <span class="required">*</span></span>

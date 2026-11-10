@@ -4,25 +4,26 @@
     <button type="button" (click)="load()" [disabled]="loading" appUiButton="secondary"><mat-icon>refresh</mat-icon> Actualizar</button>
   </header>
   <form class="filters inv-admin-filters" (ngSubmit)="applyFilters()">
-    <label>Inventario (ID)<input name="inventoryId" [(ngModel)]="inventoryId" type="number" min="1" placeholder="Todos"  appUiControl /></label>
-    <label>Propietario (ID)<input name="userId" [(ngModel)]="userId" type="number" min="1" placeholder="Todos"  appUiControl /></label>
-    <label>Usuario responsable (ID)<input name="actorUserId" [(ngModel)]="actorUserId" type="number" min="1" placeholder="Todos"  appUiControl /></label>
+    <div class="filter-field"><label id="history-inventory-label">Inventario</label><mat-form-field appearance="outline" class="history-mat-select" subscriptSizing="dynamic"><mat-select aria-labelledby="history-inventory-label" [value]="inventoryId" (selectionChange)="inventoryId=$event.value" panelClass="inventory-select-options"><mat-option value="">Todos</mat-option><mat-option *ngFor="let i of inventoryOptions" [value]="i.id.toString()">{{inventoryLabel(i)}}</mat-option></mat-select></mat-form-field></div>
+    <div class="filter-field"><label id="history-owner-label">Propietario</label><mat-form-field appearance="outline" class="history-mat-select" subscriptSizing="dynamic"><mat-select aria-labelledby="history-owner-label" [value]="userId" (selectionChange)="userId=$event.value" panelClass="inventory-select-options"><mat-option value="">Todos</mat-option><mat-option *ngFor="let u of userOptions" [value]="u.id.toString()">{{userLabel(u)}}</mat-option></mat-select></mat-form-field></div>
+    <div class="filter-field"><label id="history-actor-label">Usuario responsable</label><mat-form-field appearance="outline" class="history-mat-select" subscriptSizing="dynamic"><mat-select aria-labelledby="history-actor-label" [value]="actorUserId" (selectionChange)="actorUserId=$event.value" panelClass="inventory-select-options"><mat-option value="">Todos</mat-option><mat-option *ngFor="let u of userOptions" [value]="u.id.toString()">{{userLabel(u)}}</mat-option></mat-select></mat-form-field></div>
     <div class="filter-field"><label id="history-action-label">Movimiento</label><mat-form-field appearance="outline" class="history-mat-select" subscriptSizing="dynamic"><mat-select aria-labelledby="history-action-label" [value]="actionId" (selectionChange)="actionId=$event.value" panelClass="inventory-select-options"><mat-option value="">Todos</mat-option><mat-option value="1">Entradas</mat-option><mat-option value="2">Salidas</mat-option><mat-option value="3">Custodias</mat-option></mat-select></mat-form-field></div>
     <div class="filter-field"><label id="history-from-label">Desde</label><mat-form-field appearance="outline" class="history-date" subscriptSizing="dynamic"><input matInput [matDatepicker]="historyFrom" [value]="fromDate" (dateChange)="setFromDate($event.value)" aria-labelledby="history-from-label" readonly /><mat-datepicker-toggle matIconSuffix [for]="historyFrom"></mat-datepicker-toggle><mat-datepicker #historyFrom></mat-datepicker></mat-form-field></div>
     <div class="filter-field"><label id="history-to-label">Hasta</label><mat-form-field appearance="outline" class="history-date" subscriptSizing="dynamic"><input matInput [matDatepicker]="historyTo" [value]="toDate" (dateChange)="setToDate($event.value)" aria-labelledby="history-to-label" readonly /><mat-datepicker-toggle matIconSuffix [for]="historyTo"></mat-datepicker-toggle><mat-datepicker #historyTo></mat-datepicker></mat-form-field></div>
     <button type="submit" [disabled]="loading">Filtrar</button>
   </form>
+  <div role="alert" *ngIf="optionsError" class="error">{{optionsError}}</div>
   <div role="status" *ngIf="loading" class="status">Consultando movimientos...</div>
   <div role="alert" *ngIf="error" class="error">{{error}}</div>
   <div class="table-wrapper inv-core-table-wrap" *ngIf="!loading && !error">
     <table>
-      <thead><tr><th>Fecha</th><th>Tipo</th><th>Inventario</th><th>Propietario</th><th>Responsable (ID)</th><th>Artículo</th><th>Cantidad</th><th>Observación</th></tr></thead>
+      <thead><tr><th>Fecha</th><th>Tipo</th><th>Inventario</th><th>Propietario</th><th>Responsable</th><th>Artículo</th><th>Cantidad</th><th>Observación</th></tr></thead>
       <tbody><tr *ngFor="let row of items">
         <td>{{row.movementDate | date:'dd/MM/yyyy HH:mm'}}</td>
         <td><span class="type" [class.out]="row.actionId===2" [class.custody]="row.actionId===3">{{row.actionId===1?'Entrada':row.actionId===2?'Salida':'Custodia'}}</span></td>
         <td>{{row.inventoryName}} <small>#{{row.inventoryId}}</small></td>
         <td>{{row.username}}</td>
-        <td>{{row.actorUserId ?? '—'}}</td>
+        <td>{{responsibleName(row.actorUserId)}}</td>
         <td>{{row.articleName | cleanArticleName}} <small>{{row.articleCode}}</small></td>
         <td>{{row.amount ?? '—'}}</td>
         <td>{{row.observation || '—'}}</td>

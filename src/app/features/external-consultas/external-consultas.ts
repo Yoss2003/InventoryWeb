@@ -1,8 +1,9 @@
 import { UiControlDirective } from '../../shared/ui/v2/ui-control.directive';
 import { UiPageHeadingComponent } from '../../shared/ui/v2/ui-page-heading.component';
 import { CommonModule } from '@angular/common';
-import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, TemplateRef, ViewChild, inject } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
+import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -17,6 +18,9 @@ import { ToastService } from '../../shared/toast/toast.service';
 export class ExternalConsultasComponent implements OnInit {
   private readonly api=inject(ExternalConsultasService);
   private readonly cdr=inject(ChangeDetectorRef);
+  private readonly matDialog=inject(MatDialog);
+  @ViewChild('fxHistoryDialog') private fxHistoryTemplate?: TemplateRef<unknown>;
+  private fxHistoryRef?: MatDialogRef<unknown>;
   private readonly toast=inject(ToastService); // UX_FINAL_TOAST_CONSULTAS
   ruc=''; sunat:SunatRuc|null=null; usd:ExchangeRate|null=null; eur:ExchangeRate|null=null;
   usdStatus='';eurStatus='';
@@ -24,6 +28,17 @@ export class ExternalConsultasComponent implements OnInit {
   private pendingRates=0;
   ratesFrom=''; ratesTo=''; loadingHistory=false; historyRequested=false;
   historyError=''; historyRates:ExchangeRate[]=[];
+  openAdvancedFilters():void {
+    if (!this.fxHistoryTemplate || this.fxHistoryRef) return;
+    const ref=this.matDialog.open(this.fxHistoryTemplate,{
+      panelClass:'fx-history-modal',
+      width:'min(620px, calc(100vw - 24px))',maxWidth:'calc(100vw - 24px)',
+      maxHeight:'calc(100dvh - 24px)',autoFocus:false,restoreFocus:true
+    });
+    this.fxHistoryRef=ref;
+    ref.afterClosed().subscribe(()=>{if(this.fxHistoryRef===ref)this.fxHistoryRef=undefined;});
+  }
+  closeAdvancedFilters():void {this.fxHistoryRef?.close();}
   /* Última cotización verificada al entrar a la vista. */
   ngOnInit():void { this.loadRates(); }
   get ratesFromDate():Date|null { return this.ratesFrom ? new Date(this.ratesFrom+'T12:00:00') : null; }

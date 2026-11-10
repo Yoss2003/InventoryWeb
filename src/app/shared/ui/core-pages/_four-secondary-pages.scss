@@ -140,18 +140,24 @@
 
 /* 2. COMPARTIR INVENTARIO: paneles adaptables y tabla de colaboradores. */
 .inv-secondary-page.sharing-page {display:flex;flex-direction:column;}
-.inv-secondary-page.sharing-page .sharing-info {align-self:flex-start;min-width:0;max-width:100%;}
-.inv-secondary-page.sharing-page .sharing-info summary {
-  display:inline-flex;align-items:center;gap:6px;padding:7px 10px;
-  border:1px solid #536a7d;border-radius:9px;color:#c8dbea;
-  font-size:12px;cursor:pointer;list-style:none;
+.inv-secondary-page.sharing-page .sharing-info {align-self:flex-start;position:relative;min-width:0;max-width:100%;z-index:3;}
+.inv-secondary-page.sharing-page .sharing-info-trigger {
+  display:inline-grid;place-items:center;width:32px;height:32px;min-width:32px;min-height:32px;padding:0;
+  border:1px solid var(--core-accent);border-radius:9px;background:#1a2835;color:var(--core-accent);
+  cursor:help;
 }
-.inv-secondary-page.sharing-page .sharing-info summary::-webkit-details-marker {display:none;}
-.inv-secondary-page.sharing-page .sharing-info summary mat-icon {color:var(--core-accent);}
-.inv-secondary-page.sharing-page .sharing-info p {
-  margin:8px 0 0;padding:10px 12px;line-height:1.5;
-  border:1px solid #536a7d;border-radius:9px;color:#c8d6e2;font-size:12px;
+.inv-secondary-page.sharing-page .sharing-info-trigger mat-icon {font-size:20px;width:20px;height:20px;}
+.inv-secondary-page.sharing-page .sharing-info-content {
+  position:absolute;top:calc(100% + 7px);left:0;z-index:12;
+  width:max-content;max-width:min(390px,calc(100vw - 48px));
+  padding:12px 13px;line-height:1.45;
+  border:1px solid #6a8293;border-radius:10px;background:#233340;
+  box-shadow:0 12px 28px rgba(0,0,0,.4);color:#e7f2fa;font-size:12px;
+  visibility:hidden;opacity:0;pointer-events:none;
 }
+.inv-secondary-page.sharing-page .sharing-info:hover .sharing-info-content,
+.inv-secondary-page.sharing-page .sharing-info:focus-within .sharing-info-content {visibility:visible;opacity:1;}
+.inv-secondary-page.sharing-page .sharing-info .sr-only {position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;}
 .inv-secondary-page.sharing-page .sharing-workspace {
   display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);
   gap:14px;min-width:0;align-items:start;
@@ -249,26 +255,26 @@
 .inv-secondary-page.lookup-page .fx-prices strong {font-size:clamp(14px,1.2vw,21px);font-variant-numeric:tabular-nums;color:#f2f8fc;overflow-wrap:anywhere;}
 .inv-secondary-page.lookup-page .fx-date {padding-top:10px;border-top:1px solid #425969;font-size:11px;color:#abc0d0;}
 .inv-secondary-page.lookup-page .fx-empty {margin-top:12px;padding:16px;border:1px dashed #556c7c;border-radius:10px;color:#b7c7d7;font-size:12px;}
-.inv-secondary-page.lookup-page .fx-history-filters {margin-top:15px;padding-top:14px;border-top:1px solid #4a6170;}
-.inv-secondary-page.lookup-page .fx-history-filters h3 {margin:0 0 10px;font-size:13px;}
-.inv-secondary-page.lookup-page .fx-history-controls {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;align-items:end;}
-.inv-secondary-page.lookup-page .rate-date-field {display:grid;gap:5px;min-width:0;}
-.inv-secondary-page.lookup-page .rate-date-field label {font-size:12px;color:#c5d7e4;}
-.inv-secondary-page.lookup-page .fx-history-controls button {grid-column:1/-1;min-height:39px;}
-.inv-secondary-page.lookup-page .fx-mat-date {display:block;width:100%;margin:0;min-width:0;}
-.inv-secondary-page.lookup-page .fx-mat-date .mat-mdc-text-field-wrapper {height:39px;min-height:39px;background:var(--secondary-input);border-radius:9px;}
-.inv-secondary-page.lookup-page .fx-mat-date .mat-mdc-form-field-infix {height:39px;min-height:39px;padding-block:7px;}
-.inv-secondary-page.lookup-page .fx-mat-date .mat-mdc-form-field-subscript-wrapper {display:none;}
-.inv-secondary-page.lookup-page .fx-mat-date input {color:#eaf4fc;font-size:12px;}
-.inv-secondary-page.lookup-page .fx-mat-date .mat-datepicker-toggle {color:#b9cad7;}
-.inv-secondary-page.lookup-page .history-rates-scroll {max-height:250px;margin-top:12px;}
-.inv-secondary-page.lookup-page .history-rates-scroll > table {min-width:380px;}
+.fx-history-modal .fx-history-filters {margin:0;padding:0;border:0;}
+.fx-history-modal .fx-history-filters h3 {margin:0 0 10px;font-size:13px;}
+.fx-history-modal .fx-history-controls {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;align-items:end;}
+.fx-history-modal .rate-date-field {display:grid;gap:5px;min-width:0;}
+.fx-history-modal .rate-date-field label {font-size:12px;color:#c5d7e4;}
+.fx-history-modal .fx-history-controls button {grid-column:1/-1;min-height:39px;}
+.fx-history-modal .fx-mat-date {display:block;width:100%;margin:0;min-width:0;}
+.fx-history-modal .fx-mat-date .mat-mdc-text-field-wrapper {height:39px;min-height:39px;background:var(--secondary-input,#101c26);border-radius:9px;}
+.fx-history-modal .fx-mat-date .mat-mdc-form-field-infix {height:39px;min-height:39px;padding-block:7px;}
+.fx-history-modal .fx-mat-date .mat-mdc-form-field-subscript-wrapper {display:none;}
+.fx-history-modal .fx-mat-date input {color:#eaf4fc;font-size:12px;}
+.fx-history-modal .fx-mat-date .mat-datepicker-toggle {color:#b9cad7;}
+.fx-history-modal .history-rates-scroll {max-height:250px;margin-top:12px;}
+.fx-history-modal .history-rates-scroll > table {min-width:380px;}
 .inv-secondary-page.lookup-page .fx-disclaimer {margin:12px 0 0;color:#9cb2c2;font-size:11px;}
 
 /* 4. CATALOGO GENERAL: pestañas, formulario fiscal, proveedores y parametros. */
 .inv-secondary-page.catalog-page {display:flex;flex-direction:column;}
 .inv-secondary-page.catalog-page .panel {display:grid;grid-template-columns:minmax(0,.98fr) minmax(0,1.25fr);gap:14px;align-items:start;min-width:0;}
-.inv-secondary-page.catalog-page .panel.supplier-panel {grid-template-columns:minmax(0,1.16fr) minmax(0,.84fr);}
+.inv-secondary-page.catalog-page .panel.supplier-panel {grid-template-columns:minmax(0,1.08fr) minmax(0,.92fr);}
 .inv-secondary-page.catalog-page .panel > form,
 .inv-secondary-page.catalog-page .panel > .list {padding:16px;min-width:0;}
 .inv-secondary-page.catalog-page .panel h2 {margin:0 0 12px;font-size:16px;}
@@ -287,13 +293,17 @@
 .inv-secondary-page.catalog-page .panel .actions {display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:flex-end;margin-top:14px;}
 .inv-secondary-page.catalog-page .panel .actions button.primary {background:var(--core-accent);border-color:var(--core-accent);color:var(--core-accent-text);}
 .inv-secondary-page.catalog-page .panel .hint {margin:12px 0 0;}
+.inv-secondary-page.catalog-page .supplier-panel .fields {grid-template-columns:repeat(3,minmax(0,1fr));}
 .inv-secondary-page.catalog-page .supplier-panel .supplier-ruc-control {
-  display:grid;grid-column:1/-1;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:end;min-width:0;
+  display:grid;grid-column:span 2;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:end;min-width:0;
 }
 .inv-secondary-page.catalog-page .supplier-ruc-control label {display:grid;gap:5px;min-width:0;font-size:12px;}
 .inv-secondary-page.catalog-page .supplier-ruc-control input {width:100%;height:39px;padding:8px 11px;border:1px solid #5b7588;background:var(--secondary-input);color:#eff6fb;}
 .inv-secondary-page.catalog-page .supplier-ruc-control .ruc-lookup {height:39px;min-height:39px;white-space:nowrap;}
 .inv-secondary-page.catalog-page .supplier-panel .supplier-relationship-field {grid-column:1/-1;}
+.inv-secondary-page.catalog-page .supplier-panel .supplier-relationship-field textarea {
+  box-sizing:border-box;min-height:39px;height:39px;max-height:39px;resize:none;overflow:auto;
+}
 .inv-secondary-page.catalog-page .fiscal-summary {margin-top:14px;padding:14px;border:1px solid #526b7a;border-radius:10px;background:#13222e;}
 .inv-secondary-page.catalog-page .fiscal-summary h3 {margin:0 0 12px;font-size:13px;}
 .inv-secondary-page.catalog-page .fiscal-summary h3 span {display:block;margin-top:3px;color:#a9bfca;font-size:11px;font-weight:400;}
@@ -301,7 +311,7 @@
 .inv-secondary-page.catalog-page .fiscal-summary dl > div {min-width:0;border-bottom:1px solid #3b5261;padding-bottom:8px;}
 .inv-secondary-page.catalog-page .fiscal-summary dt {font-size:11px;color:#adbfcd;}
 .inv-secondary-page.catalog-page .fiscal-summary dd {margin:3px 0 0;overflow-wrap:anywhere;font-size:12px;color:#eff6fb;}
-.inv-secondary-page.catalog-page .supplier-list {padding:0!important;overflow:hidden;}
+.inv-secondary-page.catalog-page .supplier-list {padding:0;overflow:hidden;min-width:0;max-width:100%;}
 .inv-secondary-page.catalog-page .supplier-list-heading {padding:16px;border-bottom:1px solid #41596b;}
 .inv-secondary-page.catalog-page .supplier-heading-title {display:flex;align-items:center;gap:10px;}
 .inv-secondary-page.catalog-page .supplier-heading-title h2 {margin:0 0 4px;font-size:15px;}
@@ -312,8 +322,16 @@
 }
 .inv-secondary-page.catalog-page .supplier-heading-icon mat-icon {width:20px;height:20px;font-size:20px;}
 .inv-secondary-page.catalog-page .supplier-list > .inv-core-toolbar {padding:12px 16px;margin:0;}
-.inv-secondary-page.catalog-page .supplier-list > .supplier-table-viewport {margin:0 12px 12px;max-height:420px;}
-.inv-secondary-page.catalog-page .supplier-table-viewport > table {min-width:430px;}
+.inv-secondary-page.catalog-page .supplier-list > .supplier-table-viewport {
+  margin:0 12px 12px;max-height:420px;max-width:calc(100% - 24px);
+  overflow:auto;box-sizing:border-box;
+}
+.inv-secondary-page.catalog-page .supplier-table-viewport > table {min-width:0;width:100%;table-layout:fixed;}
+.inv-secondary-page.catalog-page .supplier-table > thead > tr > th:first-child {width:116px;}
+.inv-secondary-page.catalog-page .supplier-table > thead > tr > th:nth-child(3) {width:110px;}
+.inv-secondary-page.catalog-page .supplier-table > :is(thead,tbody) > tr > :is(th,td) {padding-inline:9px;min-width:0;}
+.inv-secondary-page.catalog-page .supplier-name {white-space:normal;overflow-wrap:anywhere;}
+
 .inv-secondary-page.catalog-page .supplier-table .supplier-row-detail {cursor:pointer;}
 .inv-secondary-page.catalog-page .supplier-table .supplier-row-detail:focus-visible td {outline:1px solid var(--core-accent);outline-offset:-2px;}
 .inv-secondary-page.catalog-page .supplier-table :is(th.supplier-actions-col,td.supplier-actions-col) {text-align:center;width:88px;white-space:nowrap;}
@@ -341,7 +359,9 @@
 .inv-secondary-page.catalog-page .parameter-table-viewport button.ui-v3-1-parameter-action mat-icon {width:19px;height:19px;font-size:19px;}
 .inv-secondary-page.catalog-page .supplier-list button[appUiTableAction]:hover,
 .inv-secondary-page.catalog-page .parameter-table-viewport button.ui-v3-1-parameter-action:hover {background:var(--core-accent-soft);}
-.inv-secondary-page.catalog-page .parameter-table-viewport {max-height:390px;}
+.inv-secondary-page.catalog-page .parameter-table-viewport {max-height:342px;overflow-y:auto;}
+.inv-secondary-page.catalog-page .parameter-table-viewport > table > tbody > tr {height:60px;}
+.inv-secondary-page.catalog-page .parameter-table-viewport > table > thead > tr > th {height:42px;position:sticky;top:0;z-index:2;}
 .inv-secondary-page.catalog-page .parameter-table-viewport > table {min-width:640px;}
 .inv-secondary-page.catalog-page .parameter-table-viewport :is(th:last-child,td:last-child) {width:100px;text-align:center;white-space:nowrap;}
 .inv-secondary-page.catalog-page .parameter-table-viewport td:nth-child(3) {max-width:420px;overflow-wrap:anywhere;}
@@ -351,6 +371,10 @@
   .inv-secondary-page.lookup-page .lookup-grid {grid-template-columns:1fr;}
   .inv-secondary-page.lookup-page .fx-grid {grid-template-columns:repeat(2,minmax(0,1fr));}
   .inv-secondary-page.sharing-page .sharing-workspace {grid-template-columns:1fr;}
+}
+@media(max-width:1200px) {
+  .inv-secondary-page.catalog-page .supplier-panel .fields {grid-template-columns:repeat(2,minmax(0,1fr));}
+  .inv-secondary-page.catalog-page .supplier-panel .supplier-ruc-control {grid-column:1/-1;}
 }
 @media(max-width:1000px) {
   .inv-secondary-page.catalog-page .panel,
@@ -363,16 +387,40 @@
 }
 @media(max-width:650px) {
   .inv-secondary-page.lookup-page .fx-grid {grid-template-columns:1fr;}
-  .inv-secondary-page.catalog-page .panel .fields {grid-template-columns:1fr;}
-  .inv-secondary-page.catalog-page .supplier-panel .supplier-ruc-control {grid-template-columns:minmax(0,1fr) auto;}
+  .inv-secondary-page.catalog-page .panel .fields,
+  .inv-secondary-page.catalog-page .supplier-panel .fields {grid-template-columns:1fr;}
+  .inv-secondary-page.catalog-page .supplier-panel .supplier-ruc-control {grid-column:1/-1;grid-template-columns:minmax(0,1fr) auto;}
   .inv-secondary-page .inv-secondary-tabs > button {font-size:11px;padding-inline:5px;}
   .inv-secondary-page.assignment-page .assignment-tabs {padding-inline:8px;}
   .inv-secondary-page.assignment-page .assignment-table-wrap {margin-inline:8px;}
   .inv-secondary-page.sharing-page .sharing-workspace {grid-template-columns:1fr;}
 }
 @media(max-width:460px) {
-  .inv-secondary-page.lookup-page .fx-history-controls {grid-template-columns:1fr;}
+  .fx-history-modal .fx-history-controls {grid-template-columns:1fr;}
   .inv-secondary-page.catalog-page .supplier-panel .supplier-ruc-control {grid-template-columns:1fr;}
   .inv-secondary-page.lookup-page .lookup-inline > button {flex:1 1 auto;}
   .inv-secondary-page .inv-secondary-tabs > button {flex-wrap:wrap;}
 }
+
+/* Fase 2: el historial de cotizaciones vive en MatDialog, no dentro de la tarjeta. */
+.fx-history-modal .mat-mdc-dialog-surface {
+  background:#172734;color:#edf5fc;border:1px solid #556e80;border-radius:14px;
+}
+.fx-history-modal .fx-history-dialog {padding:18px;min-width:0;max-height:calc(100dvh - 48px);overflow:auto;box-sizing:border-box;}
+.fx-history-modal .fx-modal-head {display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px;}
+.fx-history-modal .fx-modal-head h2 {margin:0;color:#edf6fc;font-size:19px;}
+.fx-history-modal .fx-close-button {display:inline-grid;place-items:center;width:34px;height:34px;padding:0;border:1px solid #647c8b;border-radius:9px;background:#263947;color:#edf5fa;cursor:pointer;}
+.fx-history-modal .fx-close-button mat-icon {font-size:19px;width:19px;height:19px;}
+.fx-history-modal .fx-history-filters h3 {margin:0 0 13px;color:#d7e5ef;font-size:13px;}
+.fx-history-modal .fx-history-controls button {display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:39px;padding:7px 12px;border:1px solid var(--inv-company-accent,#A2D149);border-radius:9px;background:var(--inv-company-accent,#A2D149);color:var(--inv-company-on-accent,#12202B);font-weight:700;cursor:pointer;}
+.fx-history-modal .fx-history-controls button mat-icon {width:18px;height:18px;font-size:18px;}
+.fx-history-modal .history-rates-scroll {border:1px solid #485f70;border-radius:9px;overflow:auto;}
+.fx-history-modal .history-rates-scroll > table {width:100%;border-collapse:collapse;}
+.fx-history-modal .history-rates-scroll th {position:sticky;top:0;background:#233746;color:#c6d8e6;}
+.fx-history-modal .history-rates-scroll :is(th,td) {padding:9px 10px;text-align:left;font-size:12px;border-bottom:1px solid #40576a;}
+.fx-history-modal .history-rates-scroll tbody tr:nth-child(even) {background:#233645;}
+.fx-history-modal .fx-empty {margin:8px 0;padding:14px;font-size:12px;color:#abc2cf;}
+.fx-history-modal .error {color:#ffb5ba;font-size:12px;}
+.inv-secondary-page.lookup-page .fx-advanced-trigger {display:inline-flex;align-items:center;gap:7px;padding:7px 11px;border:1px solid #677f90;border-radius:9px;background:#263947;color:#eaf4fb;font-size:12px;font-weight:700;white-space:nowrap;cursor:pointer;}
+.inv-secondary-page.lookup-page .fx-advanced-trigger mat-icon {font-size:19px;width:19px;height:19px;}
+@media(max-width:650px) {.fx-history-modal .fx-history-controls {grid-template-columns:1fr;} .inv-secondary-page.lookup-page .fx-heading {flex-wrap:wrap;}}
