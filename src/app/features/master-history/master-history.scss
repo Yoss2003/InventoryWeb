@@ -26,3 +26,24 @@ footer{font-size:12px;color:#b7c8d6}footer div{display:flex;align-items:center;g
 
 /* UX_FINAL_CUSTODIAS_HISTORIAL */
 .master-history .type.custody{background:#244b50;border:1px solid #437c7b;color:#c6f0ed}
+
+/* ESTANDAR_V3_2: mostrar aprox. cinco registros antes del desplazamiento. */
+:host .master-history.ui-v2-screen .table-wrapper { max-height:388px !important; overflow-y:auto !important; overflow-x:auto !important; }
+:host .master-history.ui-v2-screen .table-wrapper thead th { position:sticky;top:0;z-index:2; }
+:host .master-history.ui-v2-screen .filters { grid-template-columns:repeat(7,minmax(0,1fr)); align-items:end; }
+:host .master-history.ui-v2-screen .filters > :is(label,.filter-field) { min-width:0; }
+:host .master-history.ui-v2-screen .filters :is(.history-mat-select,.history-date) {width:100%;margin:0;}
+:host ::ng-deep .history-mat-select .mat-mdc-text-field-wrapper,
+:host ::ng-deep .history-date .mat-mdc-text-field-wrapper {background:#111c26;min-height:39px;height:39px;border-radius:9px;}
+:host ::ng-deep .history-mat-select .mat-mdc-form-field-infix,
+:host ::ng-deep .history-date .mat-mdc-form-field-infix {min-height:39px;padding-top:7px;padding-bottom:7px;}
+:host ::ng-deep .history-mat-select .mat-mdc-form-field-subscript-wrapper,
+:host ::ng-deep .history-date .mat-mdc-form-field-subscript-wrapper{display:none;}
+:host ::ng-deep .history-mat-select .mat-mdc-select-value,
+:host ::ng-deep .history-date input {color:#eef7ff;font-size:12px;}
+:host ::ng-deep .history-date .mat-datepicker-toggle {color:#bbcfde;}
+:host .master-history.ui-v2-screen .filter-field {display:flex;flex-direction:column;gap:5px;font-size:12px;color:#d2dfe9;}
+:host .master-history.ui-v2-screen .filters > button[type=submit] {height:39px;min-height:39px;}
+@media(max-width:1300px){:host .master-history.ui-v2-screen .filters {grid-template-columns:repeat(4,minmax(0,1fr));}}
+@media(max-width:760px){:host .master-history.ui-v2-screen .filters {grid-template-columns:repeat(2,minmax(0,1fr));}}
+@media(max-width:430px){:host .master-history.ui-v2-screen .filters {grid-template-columns:1fr;}}

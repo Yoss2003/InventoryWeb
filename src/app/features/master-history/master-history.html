@@ -7,9 +7,9 @@
     <label>Inventario (ID)<input name="inventoryId" [(ngModel)]="inventoryId" type="number" min="1" placeholder="Todos"  appUiControl /></label>
     <label>Propietario (ID)<input name="userId" [(ngModel)]="userId" type="number" min="1" placeholder="Todos"  appUiControl /></label>
     <label>Usuario responsable (ID)<input name="actorUserId" [(ngModel)]="actorUserId" type="number" min="1" placeholder="Todos"  appUiControl /></label>
-    <label>Movimiento<select name="actionId" [(ngModel)]="actionId" appUiControl><option value="">Todos</option><option value="1">Entradas</option><option value="2">Salidas</option><option value="3">Custodias</option></select></label>
-    <label>Desde<input name="from" [(ngModel)]="from" type="date"  appUiControl /></label>
-    <label>Hasta<input name="to" [(ngModel)]="to" type="date"  appUiControl /></label>
+    <div class="filter-field"><label id="history-action-label">Movimiento</label><mat-form-field appearance="outline" class="history-mat-select" subscriptSizing="dynamic"><mat-select aria-labelledby="history-action-label" [value]="actionId" (selectionChange)="actionId=$event.value" panelClass="inventory-select-options"><mat-option value="">Todos</mat-option><mat-option value="1">Entradas</mat-option><mat-option value="2">Salidas</mat-option><mat-option value="3">Custodias</mat-option></mat-select></mat-form-field></div>
+    <div class="filter-field"><label id="history-from-label">Desde</label><mat-form-field appearance="outline" class="history-date" subscriptSizing="dynamic"><input matInput [matDatepicker]="historyFrom" [value]="fromDate" (dateChange)="setFromDate($event.value)" aria-labelledby="history-from-label" readonly /><mat-datepicker-toggle matIconSuffix [for]="historyFrom"></mat-datepicker-toggle><mat-datepicker #historyFrom></mat-datepicker></mat-form-field></div>
+    <div class="filter-field"><label id="history-to-label">Hasta</label><mat-form-field appearance="outline" class="history-date" subscriptSizing="dynamic"><input matInput [matDatepicker]="historyTo" [value]="toDate" (dateChange)="setToDate($event.value)" aria-labelledby="history-to-label" readonly /><mat-datepicker-toggle matIconSuffix [for]="historyTo"></mat-datepicker-toggle><mat-datepicker #historyTo></mat-datepicker></mat-form-field></div>
     <button type="submit" [disabled]="loading">Filtrar</button>
   </form>
   <div role="status" *ngIf="loading" class="status">Consultando movimientos...</div>

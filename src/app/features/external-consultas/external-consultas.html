@@ -1,26 +1,60 @@
-<div class="lookup-page ui-v2-screen"><header class="ui-v2-page-header"><app-ui-page-heading icon="account_balance" title="Consultas SUNAT y tipo de cambio" subtitle="Datos obtenidos a través de la API de InventarioWeb (integración original de MAUI)."></app-ui-page-heading></header>
-
-<section><h2>Consultar RUC</h2><div class="lookup-inline"><input [(ngModel)]="ruc" maxlength="11" inputmode="numeric" placeholder="Número RUC (11 dígitos)" appUiControl /><button (click)="searchRuc()" [disabled]="loadingRuc"><app-loading-indicator *ngIf="loadingRuc; else rucButtonLabel" [compact]="true" message="Cargando..." /><ng-template #rucButtonLabel>Consultar</ng-template></button></div>
-<div *ngIf="sunat" class="data"><p><strong>{{sunat.businessName}}</strong> · {{sunat.ruc}}</p><p>{{sunat.address||'Sin dirección'}}</p><p>Estado: {{sunat.estado||'Sin información'}} · Condición: {{sunat.condicion||'Sin información'}}</p></div></section>
-<section class="fx-dashboard" aria-labelledby="fx-heading">
-  <div class="fx-heading"><div><h2 id="fx-heading">Tipo de cambio referencial</h2><p>Comparación de compra y venta frente al sol peruano</p></div>
-    <button type="button" class="fx-refresh" (click)="loadRates()" [disabled]="loadingRates"><app-loading-indicator *ngIf="loadingRates; else fxLabel" [compact]="true" message="Consultando..."/><ng-template #fxLabel>Actualizar cotizaciones</ng-template></button>
+<div class="lookup-page ui-v2-screen">
+  <header class="ui-v2-page-header">
+    <app-ui-page-heading icon="account_balance" title="Consultas SUNAT y tipo de cambio" subtitle="Información fiscal y cotizaciones verificadas por la API."></app-ui-page-heading>
+  </header>
+  <div class="lookup-grid">
+    <section class="ruc-panel">
+      <h2>Consultar RUC</h2>
+      <div class="lookup-inline">
+        <input [(ngModel)]="ruc" maxlength="11" inputmode="numeric" placeholder="Número RUC (11 dígitos)" aria-label="Número de RUC" appUiControl />
+        <button type="button" (click)="searchRuc()" [disabled]="loadingRuc">
+          <app-loading-indicator *ngIf="loadingRuc; else rucButtonLabel" [compact]="true" message="Cargando..." />
+          <ng-template #rucButtonLabel><mat-icon>search</mat-icon> Consultar</ng-template>
+        </button>
+        <button type="button" class="lookup-clear" (click)="clearRuc()" [disabled]="loadingRuc || (!ruc && !sunat && !error)"><mat-icon>close</mat-icon><span>Limpiar</span></button>
+      </div>
+      <p *ngIf="error" class="error" role="alert">{{error}}</p>
+      <div *ngIf="sunat" class="data">
+        <p><strong>{{sunat.businessName}}</strong> · {{sunat.ruc}}</p>
+        <p>{{sunat.address || 'Sin dirección'}}</p>
+        <p>Estado: {{sunat.estado || 'Sin información'}} · Condición: {{sunat.condicion || 'Sin información'}}</p>
+      </div>
+      <div *ngIf="!sunat && !error && !loadingRuc" class="fx-empty lookup-hint">Ingresa un RUC para consultar sus datos fiscales.</div>
+    </section>
+    <section class="fx-dashboard" aria-labelledby="fx-heading">
+      <div class="fx-heading"><div><h2 id="fx-heading">Tipo de cambio referencial</h2><p>Última cotización verificada y consulta histórica</p></div></div>
+      <div class="fx-grid" *ngIf="usd || eur; else fxEmpty">
+        <article class="fx-card" *ngIf="usd">
+          <header class="fx-card-heading"><div class="fx-symbol">US$</div><div class="fx-title"><strong>Dólar estadounidense</strong><small>USD / PEN</small></div></header>
+          <span class="fx-status" [class.fx-historical]="usdStatus !== 'Actual según fecha de API'">{{usdStatus}}</span>
+          <div class="fx-prices"><div><span>Compra</span><strong>S/ {{usd.buyPrice | number:'1.3-3'}}</strong></div><div><span>Venta</span><strong>S/ {{usd.sellPrice | number:'1.3-3'}}</strong></div></div>
+          <footer class="fx-date">Fecha informada: {{usd.date.slice(0,10) | date:'dd/MM/yyyy':'UTC'}}</footer>
+        </article>
+        <article class="fx-card" *ngIf="eur">
+          <header class="fx-card-heading"><div class="fx-symbol fx-euro">€</div><div class="fx-title"><strong>Euro</strong><small>EUR / PEN</small></div></header>
+          <span class="fx-status" [class.fx-historical]="eurStatus !== 'Actual según fecha de API'">{{eurStatus}}</span>
+          <div class="fx-prices"><div><span>Compra</span><strong>S/ {{eur.buyPrice | number:'1.3-3'}}</strong></div><div><span>Venta</span><strong>S/ {{eur.sellPrice | number:'1.3-3'}}</strong></div></div>
+          <footer class="fx-date">Fecha informada: {{eur.date.slice(0,10) | date:'dd/MM/yyyy':'UTC'}}</footer>
+        </article>
+      </div>
+      <ng-template #fxEmpty><div class="fx-empty">{{loadingRates ? 'Consultando las últimas cotizaciones...' : 'No hay cotizaciones verificadas disponibles.'}}</div></ng-template>
+      <p *ngIf="usdError || eurError" class="error">{{usdError}} {{eurError}}</p>
+      <div class="fx-history-filters">
+        <h3>Consultar otras fechas</h3>
+        <div class="fx-history-controls">
+          <div class="rate-date-field"><label id="fx-from-label">Desde</label><mat-form-field appearance="outline" class="fx-mat-date" subscriptSizing="dynamic"><input matInput [matDatepicker]="fxFrom" [value]="ratesFromDate" (dateChange)="setRatesFrom($event.value)" aria-labelledby="fx-from-label" readonly /><mat-datepicker-toggle matIconSuffix [for]="fxFrom"></mat-datepicker-toggle><mat-datepicker #fxFrom></mat-datepicker></mat-form-field></div>
+          <div class="rate-date-field"><label id="fx-to-label">Hasta</label><mat-form-field appearance="outline" class="fx-mat-date" subscriptSizing="dynamic"><input matInput [matDatepicker]="fxTo" [value]="ratesToDate" (dateChange)="setRatesTo($event.value)" aria-labelledby="fx-to-label" readonly /><mat-datepicker-toggle matIconSuffix [for]="fxTo"></mat-datepicker-toggle><mat-datepicker #fxTo></mat-datepicker></mat-form-field></div>
+          <button type="button" (click)="loadHistoryRates()" [disabled]="loadingHistory"><mat-icon>event</mat-icon> Consultar historial</button>
+        </div>
+        <p *ngIf="historyError" class="error" role="alert">{{historyError}}</p>
+        <div class="history-rates-scroll ui-table-shell" *ngIf="historyRequested && !historyError && !loadingHistory">
+          <table><thead><tr><th>Fecha</th><th>Moneda</th><th>Compra</th><th>Venta</th></tr></thead>
+          <tbody><tr *ngFor="let rate of historyRates"><td>{{rate.date.slice(0,10) | date:'dd/MM/yyyy':'UTC'}}</td><td>{{rate.baseCurrency}} / PEN</td><td>{{rate.buyPrice | number:'1.3-3'}}</td><td>{{rate.sellPrice | number:'1.3-3'}}</td></tr></tbody></table>
+          <p *ngIf="!historyRates.length" class="fx-empty">No existen cotizaciones guardadas para ese rango.</p>
+        </div>
+        <p *ngIf="loadingHistory" role="status">Consultando el historial almacenado...</p>
+      </div>
+      <p class="fx-disclaimer">Solo se muestran cotizaciones verificadas. Las fechas históricas están limitadas a los registros guardados por la API.</p>
+    </section>
   </div>
-  <div class="fx-grid" *ngIf="usd || eur; else fxEmpty">
-    <article class="fx-card" *ngIf="usd">
-      <header class="fx-card-heading"><div class="fx-symbol">US$</div><div class="fx-title"><strong>Dólar estadounidense</strong><small>USD / PEN</small></div></header>
-      <span class="fx-status" [class.fx-historical]="usdStatus !== 'Actual según fecha de API'">{{usdStatus}}</span>
-      <div class="fx-prices"><div><span>Compra</span><strong>S/ {{usd.buyPrice | number:'1.3-3'}}</strong></div><div><span>Venta</span><strong>S/ {{usd.sellPrice | number:'1.3-3'}}</strong></div></div>
-      <footer class="fx-date">Fecha informada: {{usd.date.slice(0,10) | date:'dd/MM/yyyy':'UTC'}}</footer>
-    </article>
-    <article class="fx-card" *ngIf="eur">
-      <header class="fx-card-heading"><div class="fx-symbol fx-euro">€</div><div class="fx-title"><strong>Euro</strong><small>EUR / PEN</small></div></header>
-      <span class="fx-status" [class.fx-historical]="eurStatus !== 'Actual según fecha de API'">{{eurStatus}}</span>
-      <div class="fx-prices"><div><span>Compra</span><strong>S/ {{eur.buyPrice | number:'1.3-3'}}</strong></div><div><span>Venta</span><strong>S/ {{eur.sellPrice | number:'1.3-3'}}</strong></div></div>
-      <footer class="fx-date">Fecha informada: {{eur.date.slice(0,10) | date:'dd/MM/yyyy':'UTC'}}</footer>
-    </article>
-  </div>
-  <ng-template #fxEmpty><div class="fx-empty">Utiliza «Actualizar cotizaciones» para consultar los valores disponibles.</div></ng-template>
-  <p class="fx-disclaimer">Valores referenciales. La fecha comunicada por la API puede diferir de la fecha original del proveedor.</p>
-</section>
 </div>

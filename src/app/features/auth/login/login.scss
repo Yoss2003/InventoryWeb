@@ -125,3 +125,21 @@
 @media (prefers-reduced-motion: reduce) { .spinning { animation: none; } .login-submit { transition: none; } }
 
 .forgot-link{text-align:center;margin:12px 0}.forgot-link a{color:#b5de76;text-decoration:underline;text-underline-offset:3px}
+
+/* ESTANDAR_V3_2: selector y foto de empresa juntos en la columna izquierda. */
+:host .login-side {justify-content:space-between;gap:14px;}
+:host .login-company-chooser {display:flex;flex-direction:column;gap:9px;min-width:0;}
+:host .login-company-chooser .company-field {min-width:0;}
+:host .login-company-chooser .selected-company {min-width:0;padding:9px;}
+:host .login-company-chooser .selected-company__copy > span {display:none;}
+:host .login-company-chooser .selected-company__logo {width:44px;height:44px;}
+:host .login-panel {display:flex;flex-direction:column;justify-content:center;}
+:host .login-form {margin-top:22px;gap:12px;}
+:host .login-shell {min-height:0;}
+@media(max-width:760px){:host .login-side {flex-direction:column;align-items:stretch;gap:12px;}
+ :host .login-side .login-company-chooser{width:100%;}
+ :host .login-side-footer{display:none;}}
+
+:host .login-page .app-mark {background:color-mix(in srgb,var(--company-accent) 16%,#172431);}
+:host .login-company-chooser .selected-company {background:color-mix(in srgb,var(--company-accent) 12%,#131e28);border-color:color-mix(in srgb,var(--company-accent) 40%,#526779);}
+:host .login-page .login-submit {background:var(--company-accent) !important;color:var(--company-on-accent,#0f190c) !important;}

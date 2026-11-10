@@ -24,3 +24,41 @@
 .fx-empty{padding:22px;border:1px dashed #526879;border-radius:10px;color:#afc4d2;font-size:12px}
 .fx-disclaimer{font-size:11px;line-height:1.5;margin:14px 0 0;color:#9fb1c0}
 @media(max-width:760px){.fx-grid{grid-template-columns:1fr}.fx-dashboard{padding:15px}.fx-heading{align-items:stretch}.fx-refresh{width:100%}.fx-prices strong{font-size:20px}}
+
+/* ESTANDAR_V3_2: SUNAT y tipo de cambio lado a lado. */
+:host .lookup-page.ui-v2-screen {display:flex !important;flex-direction:column !important;gap:14px !important;max-width:none !important;}
+:host .lookup-page.ui-v2-screen > header.ui-v2-page-header {flex:0 0 auto;}
+:host .lookup-grid {display:grid;grid-template-columns:minmax(0,.92fr) minmax(0,1.08fr);gap:14px;align-items:start;min-width:0;}
+:host .lookup-grid > section {min-width:0;box-sizing:border-box;padding:16px;border:1px solid #506779;border-radius:14px;background:#15232d;}
+:host .lookup-grid > .fx-dashboard {margin:0;}
+:host .lookup-inline {display:flex;flex-wrap:wrap;gap:8px;align-items:center;}
+:host .lookup-inline > input{flex:1 1 220px;min-height:39px;}
+:host .lookup-inline button {min-height:39px;height:39px;display:inline-flex;align-items:center;gap:6px;padding:0 12px;}
+:host .lookup-inline button mat-icon,.fx-history-controls button mat-icon {width:18px;height:18px;font-size:18px;}
+:host .lookup-inline .lookup-clear {background:#263947 !important;border:1px solid #657887 !important;color:#e4eef9 !important;}
+:host .lookup-hint {margin-top:14px;}
+:host .fx-grid {gap:10px;}
+:host .fx-card{padding:12px;gap:10px;}
+:host .fx-prices{grid-template-columns:repeat(2,minmax(0,1fr));}
+:host .fx-prices strong {font-size:clamp(14px,1.3vw,21px);white-space:normal;overflow-wrap:anywhere;}
+:host .fx-history-filters {border-top:1px solid #3a5161;margin-top:15px;padding-top:14px;}
+:host .fx-history-filters h3{margin:0 0 10px;font-size:13px;color:#e5f0f9;}
+:host .fx-history-controls {display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px;align-items:end;}
+:host .fx-history-controls label {display:flex;flex-direction:column;gap:5px;font-size:12px;min-width:0;}
+:host .fx-history-controls input {box-sizing:border-box;width:100%;min-width:0;height:39px;padding:0 8px;}
+:host .fx-history-controls button {grid-column:1/-1;min-height:39px;display:inline-flex;align-items:center;justify-content:center;gap:7px;}
+:host .history-rates-scroll{border:1px solid #485f70;border-radius:10px;max-height:250px;overflow:auto;margin-top:12px;}
+:host .history-rates-scroll table{width:100%;border-collapse:collapse;font-size:12px;min-width:380px;}
+:host .history-rates-scroll th,:host .history-rates-scroll td {padding:8px 10px;border-bottom:1px solid #384e60;text-align:left;}
+:host .history-rates-scroll th {position:sticky;top:0;background:#233746;}
+:host .history-rates-scroll tbody tr:nth-child(even) {background:#20313f;}
+@media(max-width:1250px){:host .lookup-grid{grid-template-columns:1fr;} :host .fx-grid{grid-template-columns:repeat(2,minmax(0,1fr));}}
+@media(max-width:650px){:host .lookup-grid{grid-template-columns:1fr;} :host .fx-grid{grid-template-columns:1fr;} :host .lookup-inline button{flex:1 1 auto;}}
+
+:host .fx-history-controls .rate-date-field{display:flex;flex-direction:column;gap:5px;min-width:0;}
+:host .fx-history-controls .fx-mat-date {width:100%;min-width:0;}
+:host ::ng-deep .fx-mat-date .mat-mdc-text-field-wrapper {height:39px;min-height:39px;background:#111c26;border-radius:9px;}
+:host ::ng-deep .fx-mat-date .mat-mdc-form-field-infix {min-height:39px;padding-top:7px;padding-bottom:7px;}
+:host ::ng-deep .fx-mat-date .mat-mdc-form-field-subscript-wrapper {display:none;}
+:host ::ng-deep .fx-mat-date input{font-size:12px;color:#eaf4fc;}
+:host ::ng-deep .fx-mat-date .mat-datepicker-toggle{color:#b9cbd9;}

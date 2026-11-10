@@ -181,3 +181,16 @@ td strong { font-size: 12.5px; }
   background: #29533e;
 }
 .table-actions .action-reactivate:disabled { opacity: .5; cursor: not-allowed; }
+
+/* ESTANDAR_V3_2: dimensionamiento fijo del encabezado, sin fila grid estirada. */
+:host .dev-page.ui-v2-screen { display:flex !important; flex-direction:column !important; align-items:stretch !important; gap:14px !important; }
+:host .dev-page.ui-v2-screen > .dev-head.ui-v2-page-header {
+  display:flex !important; flex-direction:row !important; align-items:center !important;
+  align-self:stretch !important; flex:0 0 auto !important;
+  height:auto !important; min-height:94px !important; max-height:none !important;
+  padding:16px 20px !important; margin:0 !important; box-sizing:border-box;
+}
+:host .dev-page.ui-v2-screen > .dev-head > div:first-child { flex:1 1 auto !important; min-width:0; gap:5px !important; }
+:host .dev-page.ui-v2-screen > .dev-head > button { align-self:center !important; margin:0 !important; }
+@media(max-width:700px){ :host .dev-page.ui-v2-screen > .dev-head.ui-v2-page-header { flex-wrap:wrap; }
+  :host .dev-page.ui-v2-screen > .dev-head > button { margin-left:auto !important; } }

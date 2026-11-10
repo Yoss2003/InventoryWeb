@@ -186,3 +186,30 @@ button:disabled{opacity:.5;cursor:not-allowed}.tabs button.active,.primary{backg
   }
   .supplier-panel > form .ruc-lookup.supplier-lookup-compact { min-width: 101px; }
 }
+
+/* ESTANDAR_V3_2: pestañas de ancho completo, como Entradas/Salidas. */
+:host .catalog-page.ui-v2-screen > .tabs {display:flex !important;gap:0 !important;width:100%;border-bottom:1px solid #526779;overflow:hidden;}
+:host .catalog-page.ui-v2-screen > .tabs > button {flex:1 1 0;min-width:0;min-height:44px;background:transparent !important;
+  border:0 !important;border-bottom:2px solid transparent !important;border-radius:0 !important;
+  color:#d7e7f1 !important;padding:8px 10px !important;font-weight:700;}
+:host .catalog-page.ui-v2-screen > .tabs > button.active {border-bottom-color:var(--inv-v3-brand) !important;
+  background:transparent !important;color:var(--inv-v3-brand) !important;}
+:host .catalog-page.ui-v2-screen > .tabs > button:focus-visible{outline:2px solid var(--inv-v3-brand);outline-offset:-3px;}
+:host .catalog-page.ui-v2-screen .supplier-list .ui-table-toolbar {margin:0 !important;padding:12px 16px !important;box-sizing:border-box;}
+:host .catalog-page.ui-v2-screen .supplier-list .supplier-table {border-collapse:separate;border-spacing:0;}
+:host .catalog-page.ui-v2-screen .supplier-list {overflow:hidden;border-radius:12px;}
+:host .catalog-page.ui-v2-screen .supplier-list tbody tr:nth-child(even) td {background:rgba(166,197,224,.055);}
+:host .catalog-page.ui-v2-screen .supplier-list .supplier-table thead th:first-child {border-top-left-radius:9px;}
+:host .catalog-page.ui-v2-screen .supplier-list .supplier-table thead th:last-child {border-top-right-radius:9px;}
+:host .catalog-page.ui-v2-screen .panel:not(.supplier-panel) {grid-template-columns:minmax(0,0.92fr) minmax(0,1.5fr);align-items:start;}
+:host .catalog-page.ui-v2-screen .panel:not(.supplier-panel) form .fields {grid-template-columns:repeat(2,minmax(0,1fr));}
+:host .catalog-page.ui-v2-screen .panel:not(.supplier-panel) form .fields > label:last-child {grid-column:1/-1;}
+:host .catalog-page.ui-v2-screen .panel:not(.supplier-panel) form .fields > label:last-child textarea{width:100%;min-height:114px;box-sizing:border-box;resize:vertical;}
+:host .catalog-page.ui-v2-screen .parameter-table-viewport {max-height:390px;overflow:auto;border:1px solid #455a6d;border-radius:10px;}
+:host .catalog-page.ui-v2-screen .parameter-table-viewport table {border-collapse:separate;border-spacing:0;min-width:640px;}
+:host .catalog-page.ui-v2-screen .parameter-table-viewport thead th {position:sticky;top:0;z-index:2;}
+:host .catalog-page.ui-v2-screen .parameter-table-viewport tbody tr:nth-child(even) td {background:rgba(166,197,224,.045);}
+:host .catalog-page.ui-v2-screen .parameter-table-viewport th:last-child,
+:host .catalog-page.ui-v2-screen .parameter-table-viewport td:last-child {text-align:center !important;white-space:nowrap;}
+@media(max-width:1100px){:host .catalog-page.ui-v2-screen .panel:not(.supplier-panel){grid-template-columns:1fr;}}
+@media(max-width:650px){:host .catalog-page.ui-v2-screen .panel:not(.supplier-panel) form .fields{grid-template-columns:1fr;}}

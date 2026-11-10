@@ -7,6 +7,11 @@ import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { MatIconModule } from '@angular/material/icon';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
+import { provideNativeDateAdapter, MAT_DATE_LOCALE } from '@angular/material/core';
 import { ToastService } from '../../shared/toast/toast.service';
 
 interface MasterMovementRow {
@@ -29,7 +34,8 @@ interface MasterHistoryResponse { items: MasterMovementRow[]; total: number; pag
 
 @Component({
   selector: 'app-master-history', standalone: true,
-  imports: [UiControlDirective, UiButtonDirective, UiPageHeadingComponent, CleanArticleNamePipe, CommonModule, FormsModule, MatIconModule],
+  imports: [UiControlDirective, UiButtonDirective, UiPageHeadingComponent, CleanArticleNamePipe, CommonModule, FormsModule, MatIconModule, MatDatepickerModule, MatFormFieldModule, MatInputModule, MatSelectModule],
+  providers: [provideNativeDateAdapter(), { provide: MAT_DATE_LOCALE, useValue: 'es-PE' }],
   templateUrl: './master-history.html', styleUrl: './master-history.scss'
 })
 export class MasterHistoryComponent implements OnInit {
@@ -51,6 +57,16 @@ export class MasterHistoryComponent implements OnInit {
   to = '';
   error = '';
 
+  /* Fechas civiles para Angular Material; no cambian los parámetros de la API. */
+  get fromDate(): Date | null { return this.from ? new Date(this.from + 'T12:00:00') : null; }
+  get toDate(): Date | null { return this.to ? new Date(this.to + 'T12:00:00') : null; }
+  setFromDate(date: Date | null): void { this.from = this.dateOnly(date); }
+  setToDate(date: Date | null): void { this.to = this.dateOnly(date); }
+  private dateOnly(date: Date | null): string {
+    if (!date || Number.isNaN(date.getTime())) return '';
+    const pad = (n: number) => String(n).padStart(2, '0');
+    return date.getFullYear() + '-' + pad(date.getMonth() + 1) + '-' + pad(date.getDate());
+  }
   ngOnInit(): void { this.load(); }
   applyFilters(): void { this.page = 1; this.load(); }
   next(): void { if (this.page * this.pageSize < this.total) { this.page++; this.load(); } }

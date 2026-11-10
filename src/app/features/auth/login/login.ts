@@ -61,6 +61,12 @@ export class Login implements OnInit {
     return /^#[0-9a-f]{6}$/i.test(value) ? value : '#a2d149';
   }
 
+  get selectedCompanyContrast(): string {
+    const hex=this.selectedCompanyAccent.slice(1);
+    const channels=[0,2,4].map(offset=>parseInt(hex.slice(offset,offset+2),16)/255);
+    const linear=channels.map(c=>c<=0.04045?c/12.92:Math.pow((c+0.055)/1.055,2.4));
+    return 0.2126*linear[0]+0.7152*linear[1]+0.0722*linear[2]>0.38?'#101a23':'#ffffff';
+  }
   get selectedCompanyInitials(): string {
     const words = (this.selectedCompany?.businessName || 'Empresa').trim().split(/\s+/);
     return words.slice(0, 2).map(word => word[0]?.toUpperCase() || '').join('');

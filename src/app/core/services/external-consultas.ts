@@ -10,4 +10,6 @@ export class ExternalConsultasService {
   // Contratos que utilizaba MAUI: siempre pasar por la API propia; nunca exponer el token Decolecta en Angular.
   ruc(ruc:string){return this.http.get<SunatRuc>(`${this.base}/consultas/ruc/${encodeURIComponent(ruc)}`);}
   exchangeRate(currency:'USD'|'EUR'){return this.http.get<ExchangeRate>(`${this.base}/ExchangeRates/today/${currency}`);}
+  /** Solo historial previamente registrado por la API; no consulta fechas externas. */
+  exchangeRatesAll(){return this.http.get<ExchangeRate[]>(`${this.base}/ExchangeRates`);}
 }

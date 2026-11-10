@@ -1,10 +1,7 @@
-<div class="login-page ui-v2-auth" [style.--company-accent]="selectedCompanyAccent">
+<div class="login-page ui-v2-auth" [style.--company-accent]="selectedCompanyAccent" [style.--company-on-accent]="selectedCompanyContrast">
   <div class="login-background-shape shape-one"></div><div class="login-background-shape shape-two"></div>
   <main class="login-shell">
-    <aside class="login-side"><div class="app-mark"><mat-icon>inventory_2</mat-icon></div><div class="welcome-copy"><span class="eyebrow">INVENTARIO WEB</span><h1>Controla tu inventario desde un solo lugar.</h1><p>Acceso seguro por empresa. Cada sesión trabaja únicamente con los datos autorizados de la organización seleccionada.</p></div><div class="login-side-footer"><mat-icon>verified_user</mat-icon> Sesión vinculada a la empresa</div></aside>
-    <section class="login-panel" aria-label="Inicio de sesión">
-      <header class="panel-header"><span class="small-overline">BIENVENIDO</span><h2>Iniciar sesión</h2><p>Selecciona tu empresa e ingresa tus credenciales.</p></header>
-      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form" autocomplete="on">
+    <aside class="login-side"><div class="app-mark"><mat-icon>inventory_2</mat-icon></div><div class="welcome-copy"><span class="eyebrow">INVENTARIO WEB</span><h1>Controla tu inventario desde un solo lugar.</h1><p>Acceso seguro por empresa. Cada sesión trabaja únicamente con los datos autorizados de la organización seleccionada.</p></div><div class="login-company-chooser">
         <div class="company-field">
           <div class="field-heading"><label for="login-company">Empresa / sucursal <span>*</span></label>
             <button class="inline-refresh" type="button" (click)="loadCompanies()" [disabled]="loadingCompanies || submitting" title="Actualizar empresas">
@@ -20,6 +17,10 @@
           <div class="selected-company__logo"><img *ngIf="selectedCompanyLogo as logo; else initials" [src]="logo" [alt]="'Logo de ' + company.businessName" (error)="logoFailed = true" /><ng-template #initials><span>{{ selectedCompanyInitials }}</span></ng-template></div>
           <div class="selected-company__copy"><small>EMPRESA SELECCIONADA</small><strong>{{ company.businessName }}</strong><span>El acceso se validará para esta empresa.</span></div><mat-icon class="company-verified">check_circle</mat-icon>
         </div>
+      </div><div class="login-side-footer"><mat-icon>verified_user</mat-icon> Sesión vinculada a la empresa</div></aside>
+    <section class="login-panel" aria-label="Inicio de sesión">
+      <header class="panel-header"><span class="small-overline">BIENVENIDO</span><h2>Iniciar sesión</h2><p>Selecciona tu empresa e ingresa tus credenciales.</p></header>
+      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form" autocomplete="on">
         <div class="form-field"><label for="login-username">Usuario <span>*</span></label><div class="input-wrap"><mat-icon>person_outline</mat-icon><input id="login-username" type="text" formControlName="username" maxlength="150" autocomplete="username" spellcheck="false" placeholder="Ingresa tu usuario" /></div></div>
         <div class="form-field"><label for="login-password">Contraseña <span>*</span></label><div class="input-wrap"><mat-icon>lock_outline</mat-icon><input id="login-password" [type]="showPassword ? 'text' : 'password'" formControlName="password" autocomplete="current-password" placeholder="Ingresa tu contraseña" /><button type="button" class="password-toggle" (click)="showPassword = !showPassword" [attr.aria-label]="showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'"><mat-icon>{{ showPassword ? 'visibility_off' : 'visibility' }}</mat-icon></button></div></div>
         <div *ngIf="requiresTwoFactor" class="form-field two-factor-field"><label for="login-2fa">Código de verificación <span>*</span></label><div class="input-wrap"><mat-icon>pin</mat-icon><input id="login-2fa" type="text" formControlName="twoFactorCode" maxlength="6" inputmode="numeric" autocomplete="one-time-code" placeholder="000000" /></div><small>Introduce los 6 dígitos generados por tu aplicación de autenticación.</small></div>

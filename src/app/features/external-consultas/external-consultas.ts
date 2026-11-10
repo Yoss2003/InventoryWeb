@@ -1,15 +1,20 @@
 import { UiControlDirective } from '../../shared/ui/v2/ui-control.directive';
 import { UiPageHeadingComponent } from '../../shared/ui/v2/ui-page-heading.component';
 import { CommonModule } from '@angular/common';
-import { ChangeDetectorRef, Component, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
+import { MatIconModule } from '@angular/material/icon';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { provideNativeDateAdapter, MAT_DATE_LOCALE } from '@angular/material/core';
 import { finalize, timeout } from 'rxjs';
 import { FormsModule } from '@angular/forms';
 import { ExternalConsultasService, SunatRuc, ExchangeRate } from '../../core/services/external-consultas';
 import { LoadingIndicatorComponent } from '../../shared/loading/loading-indicator';
 import { ToastService } from '../../shared/toast/toast.service';
 
-@Component({selector:'app-external-consultas',standalone:true,imports:[UiControlDirective, UiPageHeadingComponent, CommonModule,FormsModule,LoadingIndicatorComponent],templateUrl:'./external-consultas.html',styleUrl:'./external-consultas.scss'})
-export class ExternalConsultasComponent {
+@Component({selector:'app-external-consultas',standalone:true,imports:[UiControlDirective, UiPageHeadingComponent, CommonModule,FormsModule,LoadingIndicatorComponent,MatIconModule,MatDatepickerModule,MatFormFieldModule,MatInputModule],providers:[provideNativeDateAdapter(),{provide:MAT_DATE_LOCALE,useValue:'es-PE'}],templateUrl:'./external-consultas.html',styleUrl:'./external-consultas.scss'})
+export class ExternalConsultasComponent implements OnInit {
   private readonly api=inject(ExternalConsultasService);
   private readonly cdr=inject(ChangeDetectorRef);
   private readonly toast=inject(ToastService); // UX_FINAL_TOAST_CONSULTAS
@@ -17,6 +22,36 @@ export class ExternalConsultasComponent {
   usdStatus='';eurStatus='';
   error=''; usdError=''; eurError=''; loadingRuc=false; loadingRates=false;
   private pendingRates=0;
+  ratesFrom=''; ratesTo=''; loadingHistory=false; historyRequested=false;
+  historyError=''; historyRates:ExchangeRate[]=[];
+  /* Última cotización verificada al entrar a la vista. */
+  ngOnInit():void { this.loadRates(); }
+  get ratesFromDate():Date|null { return this.ratesFrom ? new Date(this.ratesFrom+'T12:00:00') : null; }
+  get ratesToDate():Date|null { return this.ratesTo ? new Date(this.ratesTo+'T12:00:00') : null; }
+  setRatesFrom(date:Date|null):void { this.ratesFrom=this.dateOnly(date); }
+  setRatesTo(date:Date|null):void { this.ratesTo=this.dateOnly(date); }
+  private dateOnly(date:Date|null):string { if(!date||Number.isNaN(date.getTime()))return '';const pad=(n:number)=>String(n).padStart(2,'0');return date.getFullYear()+'-'+pad(date.getMonth()+1)+'-'+pad(date.getDate()); }
+  clearRuc():void { this.ruc=''; this.sunat=null; this.error=''; this.cdr.markForCheck(); }
+
+  loadHistoryRates():void {
+    if(this.loadingHistory)return;
+    this.historyError=''; this.historyRequested=false;
+    if(!/^\d{4}-\d{2}-\d{2}$/.test(this.ratesFrom) || !/^\d{4}-\d{2}-\d{2}$/.test(this.ratesTo)){
+      this.historyError='Selecciona ambas fechas para consultar el historial.';this.cdr.markForCheck();return;
+    }
+    if(this.ratesFrom>this.ratesTo){this.historyError='La fecha Desde no puede ser posterior a Hasta.';this.cdr.markForCheck();return;}
+    this.loadingHistory=true;this.cdr.markForCheck();
+    this.api.exchangeRatesAll().pipe(timeout(20000),finalize(()=>{this.loadingHistory=false;this.cdr.markForCheck();})).subscribe({
+      next:rates=>{
+        this.historyRates=(Array.isArray(rates)?rates:[]).filter(rate=>
+          (rate.baseCurrency==='USD'||rate.baseCurrency==='EUR') &&
+          (rate.date||'').slice(0,10)>=this.ratesFrom && (rate.date||'').slice(0,10)<=this.ratesTo
+        ).sort((a,b)=>b.date.localeCompare(a.date));
+        this.historyRequested=true;this.cdr.markForCheck();
+      },
+      error:()=>{this.historyError='No se pudo consultar el historial registrado en la API.';this.cdr.markForCheck();}
+    });
+  }
 
   searchRuc():void {
     this.error='';this.sunat=null;

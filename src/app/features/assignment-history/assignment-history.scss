@@ -62,3 +62,14 @@ button {font:inherit;cursor:pointer}
 /* CUSTODIA_HISTORIALES_V2_SCROLL_ASIGNACIONES */
 .assignment-table-wrap { max-height: 615px; overflow-x: auto; overflow-y: auto; scrollbar-width: thin; scrollbar-color: #536b7b #172532; }
 .assignment-table th { position: sticky; top: 0; z-index: 1; background: #253443; }
+
+/* ESTANDAR_V3_2: navegación idéntica a las pestañas de movimientos. */
+:host .assignment-page.ui-v2-screen .assignment-toolbar {display:none !important;}
+:host .assignment-page.ui-v2-screen .assignment-tabs {display:flex;gap:0;padding:0 16px !important;
+ background:transparent;border-bottom:1px solid #536779;}
+:host .assignment-page.ui-v2-screen .assignment-tabs > button {flex:1 1 0;display:inline-flex;align-items:center;
+ justify-content:center;min-height:44px;border:0 !important;border-bottom:2px solid transparent !important;
+ border-radius:0 !important;background:transparent !important;color:#d6e2ed !important;}
+:host .assignment-page.ui-v2-screen .assignment-tabs > button.active {color:var(--inv-v3-brand) !important;
+ border-bottom-color:var(--inv-v3-brand) !important;background:transparent !important;}
+:host .assignment-page.ui-v2-screen .assignment-tabs > button:focus-visible{outline:2px solid var(--inv-v3-brand);outline-offset:-3px;}
