@@ -954,3 +954,166 @@ $muted: #a8b5c2;
 /* WEBINVENTORY_UNIDADES_INGRESOS_2026_V1: categoryScss */
 
 .units-helper { color: #a8b5c2; font-size: 11px; line-height: 1.4; }
+
+/* WEBINVENTORY_UNIDADES_UX_V1 */
+
+/* Selector resumido: el campo enseña solo abreviaturas. */
+.category-modal .unit-selection-trigger {
+  display: flex; align-items: center; gap: 10px; width: 100%; height: 43px;
+  min-width: 0; padding: 0 11px; border: 1px solid #6c8094; border-radius: 8px;
+  background: #111922; color: #f2f8fc; cursor: pointer; text-align: left;
+}
+.category-modal .unit-selection-trigger:hover:not(:disabled),
+.category-modal .unit-selection-trigger:focus-visible {
+  outline: none; border-color: var(--inv-company-accent, #a2d149);
+}
+.category-modal .unit-selection-trigger:disabled { opacity: .55; cursor: default; }
+.category-modal .unit-selection-trigger__value {
+  flex: 1; min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis;
+  font-size: 13px; letter-spacing: .15px;
+}
+.category-modal .unit-selection-trigger__value.is-empty { color: #9eb0bf; }
+.category-modal .unit-selection-trigger mat-icon { color: var(--inv-company-accent, #a2d149); flex: none; }
+.category-modal .units-helper--error { color: #ff9c9c; }
+/* WEBINV_CATEGORIA_VISUAL_2026_V1 */
+
+/* Reglas visuales de Categorías hijas: mismo acento dinámico que Artículos. */
+.category-modal {
+  border-color: color-mix(in srgb, var(--inv-company-accent, #a2d149) 60%, #596b7d);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--inv-company-accent, #a2d149) 22%, transparent),
+    0 0 19px color-mix(in srgb, var(--inv-company-accent, #a2d149) 14%, transparent),
+    inset 0 0 0 1px color-mix(in srgb, var(--inv-company-accent, #a2d149) 16%, transparent);
+}
+:host ::ng-deep .category-stepper .mat-step-icon-selected,
+:host ::ng-deep .category-stepper .mat-step-icon-state-edit,
+:host ::ng-deep .category-stepper .mat-step-icon-state-done {
+  background-color: var(--inv-company-accent, #a2d149) !important;
+  color: var(--inv-company-on-accent, #12202b) !important;
+}
+:host ::ng-deep .category-stepper .mat-step-header[aria-selected="true"] {
+  border-color: color-mix(in srgb, var(--inv-company-accent, #a2d149) 58%, #556a7a);
+  background: color-mix(in srgb, var(--inv-company-accent, #a2d149) 13%, #19232e);
+}
+:host ::ng-deep .category-stepper .mat-step-header[aria-selected="true"] .mat-step-label {
+  color: var(--inv-company-accent, #a2d149);
+}
+:host ::ng-deep .category-stepper .mat-step-icon:not(.mat-step-icon-selected):not(.mat-step-icon-state-done):not(.mat-step-icon-state-edit) {
+  background: #283440; color: #c1cfdf;
+}
+/* Fila 1: tracking + unidades; fila 2: ambos interruptores. */
+.category-stepper .rules-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  align-items: start;
+  gap: 13px 16px;
+}
+.category-stepper .rules-grid > .rules-tracking-field,
+.category-stepper .rules-grid > .units-selection,
+.category-stepper .rules-grid > .rules-returnable,
+.category-stepper .rules-grid > .rules-custom-formula {
+  grid-column: auto !important;
+  min-width: 0;
+}
+.category-stepper .rules-grid > .rules-naming-field,
+.category-stepper .rules-grid > .rules-bulk-note {
+  grid-column: 1 / -1 !important;
+  min-width: 0;
+}
+.category-stepper .rules-grid > .toggle-tile {
+  min-height: 62px;
+  height: 100%;
+  padding: 11px 13px;
+  gap: 12px;
+}
+.rules-toggle-copy { flex: 1 1 auto; min-width: 0; }
+.rules-inline-title { display: inline-flex; gap: 6px; align-items: center; min-width: 0; }
+.rules-inline-title strong { color: #e7eff8; font-size: 12px; }
+.rules-naming-field { max-width: 100%; }
+.rules-naming-field > .rules-inline-title { min-height: 22px; }
+.rules-naming-field .rules-inline-title label { font-size: 12px; font-weight: 700; color: #d3deea; }
+.rules-bulk-note { display: flex; align-items: center; gap: 8px; font-size: 12px; color: #adbdca; }
+.category-info-button,
+.category-modal .formula-info-button {
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  width: 28px; height: 28px;
+  min-width: 28px;
+  padding: 0;
+  border: 1px solid color-mix(in srgb, var(--inv-company-accent, #a2d149) 58%, #536678);
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--inv-company-accent, #a2d149) 12%, #1a2733);
+  color: var(--inv-company-accent, #a2d149);
+  cursor: help;
+}
+.category-info-button mat-icon,
+.category-modal .formula-info-button mat-icon { width: 18px; height: 18px; font-size: 18px; color: inherit; }
+.category-info-button:hover,
+.category-info-button:focus-visible,
+.category-modal .formula-info-button:hover,
+.category-modal .formula-info-button:focus-visible {
+  border-color: var(--inv-company-accent, #a2d149);
+  outline-color: var(--inv-company-accent, #a2d149);
+  background: color-mix(in srgb, var(--inv-company-accent, #a2d149) 20%, #1a2733);
+}
+.attributes-title-row { display: flex; align-items: center; gap: 9px; min-width: 0; }
+.attributes-title-row h3 { margin: 0; min-width: 0; }
+.category-modal .attributes-info-button { width: 26px; height: 26px; min-width: 26px; }
+/* Angular Material: casillas e interruptores activos respetan el tema empresarial. */
+:host ::ng-deep .category-modal .mat-mdc-checkbox-checked .mdc-checkbox__background {
+  background-color: var(--inv-company-accent, #a2d149) !important;
+  border-color: var(--inv-company-accent, #a2d149) !important;
+}
+.category-modal .mat-mdc-slide-toggle {
+  --mdc-switch-selected-handle-color: var(--inv-company-accent, #a2d149);
+  --mdc-switch-selected-track-color: color-mix(in srgb, var(--inv-company-accent, #a2d149) 52%, #17222d);
+  --mdc-switch-selected-focus-handle-color: var(--inv-company-accent, #a2d149);
+  --mdc-switch-selected-hover-handle-color: var(--inv-company-accent, #a2d149);
+  --mdc-switch-selected-pressed-handle-color: var(--inv-company-accent, #a2d149);
+}
+.category-modal .tag-btn.active {
+  border-color: var(--inv-company-accent, #a2d149);
+  background: color-mix(in srgb, var(--inv-company-accent, #a2d149) 23%, #121b25);
+  color: var(--inv-company-accent, #a2d149);
+}
+.category-modal .tag-btn:hover:not(:disabled) { border-color: var(--inv-company-accent, #a2d149); }
+.category-modal .preview-text,
+.category-modal .default-naming { color: var(--inv-company-accent, #a2d149); }
+.category-modal .preview-box { margin-top: 12px; padding: 10px 12px; }
+.category-modal .preview-header { margin-bottom: 7px; }
+/* Interacción familiar: thumb discreto y dinámico, como en las tablas. */
+.category-content.mat-mdc-dialog-content {
+  scrollbar-width: thin;
+  scrollbar-color: var(--inv-company-accent, #a2d149) transparent;
+}
+.category-content.mat-mdc-dialog-content::-webkit-scrollbar { width: 7px; }
+.category-content.mat-mdc-dialog-content::-webkit-scrollbar-track { background: transparent; }
+.category-content.mat-mdc-dialog-content::-webkit-scrollbar-thumb {
+  background: var(--inv-company-accent, #a2d149);
+  border-radius: 9px;
+}
+@media(max-width:760px) {
+  .category-stepper .rules-grid { grid-template-columns: minmax(0, 1fr) !important; }
+  .category-stepper .rules-grid > .rules-tracking-field,
+  .category-stepper .rules-grid > .units-selection,
+  .category-stepper .rules-grid > .rules-returnable,
+  .category-stepper .rules-grid > .rules-custom-formula,
+  .category-stepper .rules-grid > .rules-naming-field,
+  .category-stepper .rules-grid > .rules-bulk-note { grid-column: 1 !important; }
+}
+
+/* INV_DIALOG_MOTION_2026_V1 - fade del stepper y expansión vertical fluida. */
+@keyframes inv-category-content-fade {
+  from { opacity: 0; transform: translateY(7px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.category-modal .category-stepper .mat-horizontal-stepper-content[aria-expanded="true"] .step-form {
+  animation: inv-category-content-fade 260ms cubic-bezier(.22, 1, .36, 1) both;
+}
+.category-modal .preview-inputs {
+  animation: inv-category-content-fade 220ms ease-out both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .category-modal .category-stepper .mat-horizontal-stepper-content[aria-expanded="true"] .step-form,
+  .category-modal .preview-inputs { animation: none !important; }
+}

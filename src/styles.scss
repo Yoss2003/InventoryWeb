@@ -149,3 +149,23 @@ select:not([multiple]):focus-visible{outline:2px solid var(--inv-company-accent,
 @media (prefers-reduced-motion: reduce) {
   .cdk-overlay-pane:has(app-article-form) .mat-mdc-dialog-surface { animation: none; }
 }
+/* WEBINV_CATEGORIA_VISUAL_2026_V1 */
+
+/* Solo el modal Categorías hijas: crecimiento/reducción horizontal del panel. */
+.cdk-overlay-pane.inv-category-width-transition {
+  transition: width 290ms cubic-bezier(.22, 1, .36, 1);
+  will-change: width;
+}
+@media (prefers-reduced-motion: reduce) {
+  .cdk-overlay-pane.inv-category-width-transition { transition: none; will-change: auto; }
+}
+
+/* INV_DIALOG_MOTION_2026_V1 - ancho animado de ambos modales especiales. */
+.cdk-overlay-pane.inv-article-motion-width,
+.cdk-overlay-pane.inv-category-width-transition {
+  transition: width 310ms cubic-bezier(.22, 1, .36, 1);
+}
+@media (prefers-reduced-motion: reduce) {
+  .cdk-overlay-pane.inv-article-motion-width,
+  .cdk-overlay-pane.inv-category-width-transition { transition: none !important; }
+}

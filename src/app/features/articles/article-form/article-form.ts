@@ -1,5 +1,6 @@
 import { ChangeDetectorRef, Component, ElementRef, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { InventoryDialogMotionDirective } from '../../../shared/ui/inv-dialog-motion.directive';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { MatDialog, MatDialogRef, MatDialogModule, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { HttpErrorResponse } from '@angular/common/http';
@@ -30,7 +31,7 @@ interface AttributeField {
 @Component({
   selector: 'app-article-form',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, MatDialogModule, MatIconModule, MatSelectModule, MatFormFieldModule],
+  imports: [CommonModule, ReactiveFormsModule, MatDialogModule, MatIconModule, MatSelectModule, MatFormFieldModule, InventoryDialogMotionDirective],
   templateUrl: './article-form.html',
   styleUrls: ['./article-form.scss']
 })
@@ -607,6 +608,31 @@ export class ArticleFormComponent implements OnInit, OnDestroy {
     initial?.updateValueAndValidity({emitEvent:false});
     stock?.updateValueAndValidity({emitEvent:false});
     this.calculateProfit();
+  }
+
+  /** Valida de inmediato el valor tecleado, sin esperar a "Siguiente". */
+  onUnitQuantityInput(field: 'stock' | 'initialQuantity' | 'conversionFactor'): void {
+    const control = this.logisticsForm.get(field);
+    if (!control || control.disabled) return;
+    this.clearedMessages.delete('logistics.' + field);
+    control.markAsTouched();
+    control.updateValueAndValidity({ emitEvent: false });
+    this.cdr.markForCheck();
+  }
+
+  /** Si la cantidad sigue inválida al salir, devuelve el foco al campo. */
+  onUnitQuantityBlur(field: 'stock' | 'initialQuantity' | 'conversionFactor', event: FocusEvent): void {
+    this.onUnitQuantityInput(field);
+    const control = this.logisticsForm.get(field);
+    const input = event.target as HTMLInputElement;
+    if (!control?.invalid || control.disabled || input.readOnly) return;
+    setTimeout(() => {
+      if (input.isConnected && !input.disabled && !input.readOnly &&
+          this.currentStep === 2 && control.invalid) {
+        input.focus({ preventScroll: true });
+        input.select();
+      }
+    }, 0);
   }
 
   setStep(step: number): void {
@@ -1236,3 +1262,5 @@ export class ArticleFormComponent implements OnInit, OnDestroy {
 }
 
 /* WEBINVENTORY_UNIDADES_INGRESOS_2026_V1: articleTs */
+
+/* WEBINVENTORY_UNIDADES_UX_V1 */

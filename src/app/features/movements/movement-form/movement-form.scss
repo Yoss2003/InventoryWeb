@@ -7,3 +7,8 @@
 .stock-panel .stock-added { font-size: 16px; color: var(--inv-company-accent, #A2D149); }
 .unit-value-error { display:block; color:#ff9a9a; font-size:11px; }
 .field input.ng-invalid.ng-touched { border-color: #ff9999; }
+
+/* WEBINVENTORY_UNIDADES_UX_V1 */
+
+/* Campo de entrada no válido: aviso visible antes de intentar guardar. */
+.field input.invalid-quantity { border-color: #ff9999; box-shadow: 0 0 0 1px #ff999933; }

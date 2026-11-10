@@ -15,10 +15,12 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { ToastService } from '../../../shared/toast/toast.service';
 import { CatalogSimilarDialogComponent, CatalogSimilarChoice } from '../../../shared/catalog-similar-dialog/catalog-similar-dialog';
 import { CommonModule } from '@angular/common';
+import { InventoryDialogMotionDirective } from '../../../shared/ui/inv-dialog-motion.directive';
 import { CategoryService } from '../services/category';
 import { Category } from '../../../core/models/category.model';
 import { FormControl } from '@angular/forms';
 import type { Observable } from 'rxjs';
+import { CategoryUnitPickerDialogComponent } from './category-unit-picker-dialog';
 import {MeasurementUnitsService, MeasurementUnit} from '../../../core/services/measurement-units';
 
 @Component({
@@ -27,7 +29,7 @@ import {MeasurementUnitsService, MeasurementUnit} from '../../../core/services/m
     imports: [
         ReactiveFormsModule, MatInputModule, MatButtonModule, MatDialogModule,
         MatSelectModule, MatStepperModule, MatSlideToggleModule, MatCheckboxModule,
-        MatIconModule, MatTooltipModule, CommonModule
+        MatIconModule, MatTooltipModule, CommonModule, InventoryDialogMotionDirective
     ],
     templateUrl: './category-child-form.html',
     styleUrl: './category-child-form.scss'
@@ -94,12 +96,21 @@ export class CategoryChildFormComponent implements OnInit {
 
     readonly formulaTagEnabled: boolean[] = Array(6).fill(false);
 
+    // La primera apertura no anima desde el ancho inicial de la ventana.
+    private categoryWidthAnimationReady = false;
+
+    categoryMotionStep = 0;
+
     setDialogWidth(step: number): void {
-        this.dialogRef.updateSize(
-            step === 2 && this.showAttributesStep
-                ? 'min(1100px, calc(100vw - 32px))'
-                : 'min(700px, calc(100vw - 32px))'
-        );
+        this.categoryMotionStep = step;
+        const width = step === 2 && this.showAttributesStep
+            ? 'min(1100px, calc(100vw - 32px))'
+            : 'min(700px, calc(100vw - 32px))';
+        this.dialogRef.updateSize(width);
+        if (!this.categoryWidthAnimationReady) {
+            this.dialogRef.addPanelClass('inv-category-width-transition');
+            this.categoryWidthAnimationReady = true;
+        }
     }
 
     cargarUnidades(): void {
@@ -133,6 +144,34 @@ export class CategoryChildFormComponent implements OnInit {
         if (!allowed && label && this.getTagStatus(label) === 'active') {
             this.toggleTag('[' + label + ']');
         }
+    }
+
+    /** En el campo solo aparecen abreviaturas, sin paréntesis ni espacios de la BD. */
+    get selectedUnitAbbreviations(): string {
+        const ids = (this.rulesForm?.get('selectedUnitIds')?.value ?? []) as number[];
+        if (!ids.length) return 'Seleccionar unidades';
+        return ids.map(id => {
+            const unit = this.unidadesDisponibles.find(u => Number(u.id) === Number(id));
+            return unit ? String(unit.abbreviation || unit.unitName).trim() : String(id);
+        }).join(', ');
+    }
+
+    openUnitPicker(): void {
+        if (this.cargandoUnidades || !this.unidadesDisponibles.length) return;
+        const selectedIds = (this.rulesForm.get('selectedUnitIds')?.value ?? []) as number[];
+        this.dialogs.open(CategoryUnitPickerDialogComponent, {
+            width: 'min(590px, calc(100vw - 24px))',
+            maxWidth: 'calc(100vw - 24px)',
+            maxHeight: 'calc(100dvh - 24px)',
+            autoFocus: false,
+            data: { units: this.unidadesDisponibles, selectedIds }
+        }).afterClosed().subscribe((ids: number[] | undefined) => {
+            if (!Array.isArray(ids)) return;
+            const control = this.rulesForm.get('selectedUnitIds');
+            control?.setValue(ids);
+            control?.markAsDirty();
+            control?.markAsTouched();
+        });
     }
 
     ngOnInit() {
@@ -546,3 +585,6 @@ export class CategoryChildFormComponent implements OnInit {
 }
 
 /* WEBINVENTORY_UNIDADES_INGRESOS_2026_V1: categoryTs */
+
+/* WEBINVENTORY_UNIDADES_UX_V1 */
+/* WEBINV_CATEGORIA_VISUAL_2026_V1 */

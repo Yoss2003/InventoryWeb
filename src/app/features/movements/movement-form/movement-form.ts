@@ -115,6 +115,30 @@ export class MovementForm implements OnInit {
       error: () => {this.error = 'No se pudo consultar el almacén.'; this.loading = false; this.cdr.markForCheck();}
     });
   }
+  /** Los ingresos discrecionales deben avisar al teclear y conservar el foco. */
+  onEntryQuantityInput(field: 'amount' | 'conversionFactor'): void {
+    if (!this.isEntry) return;
+    const control = this.form.controls[field];
+    control.markAsTouched();
+    control.updateValueAndValidity({ emitEvent: false });
+    this.cdr.markForCheck();
+  }
+
+  onEntryQuantityBlur(field: 'amount' | 'conversionFactor', event: FocusEvent): void {
+    if (!this.isEntry) return;
+    this.onEntryQuantityInput(field);
+    const invalid = field === 'amount' ? !this.enteredQuantityValid : !this.enteredFactorValid;
+    const input = event.target as HTMLInputElement;
+    if (!invalid || input.readOnly || input.disabled) return;
+    setTimeout(() => {
+      if (input.isConnected && this.isEntry && !input.disabled &&
+          (field === 'amount' ? !this.enteredQuantityValid : !this.enteredFactorValid)) {
+        input.focus({ preventScroll: true });
+        input.select();
+      }
+    }, 0);
+  }
+
   onSubmit(): void {
     if (!this.canSave || !this.selected) return;
     this.saving = true; this.error = '';this.cdr.markForCheck();
@@ -150,3 +174,5 @@ export class MovementForm implements OnInit {
 }
 
 /* WEBINVENTORY_UNIDADES_INGRESOS_2026_V1: movementTs */
+
+/* WEBINVENTORY_UNIDADES_UX_V1 */

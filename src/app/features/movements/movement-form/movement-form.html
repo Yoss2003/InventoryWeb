@@ -18,7 +18,7 @@
         <div class="field">
           <label>{{isEntry ? 'Cantidad recibida (' + (purchaseUnit || 'unidad') + ')' : 'Cantidad'}} <span>*</span></label>
           <input type="number" [attr.min]="amountStep === 1 ? 1 : 0" [attr.step]="amountStep"
-            formControlName="amount" />
+            formControlName="amount" [class.invalid-quantity]="isEntry && !!selected && !enteredQuantityValid" (input)="onEntryQuantityInput('amount')" (blur)="onEntryQuantityBlur('amount', $event)" />
           <small class="unit-step-hint" *ngIf="isEntry && selected">
             {{amountStep === 1 ? 'Solo cantidades enteras (↑↓ de 1 en 1)' : 'Permite decimales (↑↓ de 0.1)'}}
           </small>
@@ -37,7 +37,7 @@
       </div>
       <div class="field" *ngIf="needsConversion && fixedFactor === null">
         <label>Unidades por {{purchaseUnit}} <span>*</span></label>
-        <input type="number" min="1" step="1" formControlName="conversionFactor" />
+        <input type="number" min="1" step="1" formControlName="conversionFactor" [class.invalid-quantity]="isEntry && !enteredFactorValid" (input)="onEntryQuantityInput('conversionFactor')" (blur)="onEntryQuantityBlur('conversionFactor', $event)" />
         <small class="unit-step-hint">El factor corresponde a este ingreso. Debe ser entero.</small>
         <small class="unit-value-error" *ngIf="!enteredFactorValid">Ingresa un factor entero mayor que cero.</small>
       </div>
@@ -57,3 +57,5 @@
     </footer>
   </form>
 </div>
+
+/* WEBINVENTORY_UNIDADES_UX_V1 */

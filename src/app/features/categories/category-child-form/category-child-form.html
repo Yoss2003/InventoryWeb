@@ -1,4 +1,4 @@
-<div class="category-modal ui-v2-dialog ui-v2-dialog--special">
+<div class="category-modal ui-v2-dialog ui-v2-dialog--special" [invDialogMotion]="categoryMotionStep + '-' + showPreviewInputs">
   <header class="category-header">
     <div class="heading-group">
       <div class="heading-icon"><mat-icon>category</mat-icon></div>
@@ -78,53 +78,72 @@
                 <p>Define el seguimiento y la forma de nombrar los productos</p>
               </div>
             </div>
-            <div class="rules-grid">
-              <div class="category-field">
+                        <div class="rules-grid">
+              <div class="category-field rules-tracking-field">
                 <label for="child-category-tracking">Modo de tracking <span class="required">*</span></label>
                 <mat-form-field appearance="outline" class="inventory-select">
-    <mat-select
-      id="child-units"
-      formControlName="selectedUnitIds"
-      multiple
-                  placeholder="Seleccionar unidades"
-                  panelClass="inventory-select-options">
-
-                  <mat-option
-                    *ngFor="let unidad of unidadesDisponibles"
-                    [value]="unidad.id">
-                    {{ unidad.unitName }}
-                    ({{ unidad.abbreviation }})
-                  </mat-option>
-
-                </mat-select>
-              </mat-form-field>
+                  <mat-select id="child-category-tracking" formControlName="trackingMode" panelClass="inventory-select-options">
+                    <mat-option *ngFor="let opt of trackingOptions" [value]="opt.value">{{ opt.label }}</mat-option>
+                  </mat-select>
+                </mat-form-field>
               </div>
-              <div class="toggle-tile" *ngIf="isTrackingConfigurable">
-                <div><strong>Artículo retornable</strong><small>Puede devolverse después de una salida</small></div>
+              <div class="category-field units-selection">
+                <label>Unidades de medida permitidas <span class="required">*</span></label>
+                <button type="button" class="unit-selection-trigger" (click)="openUnitPicker()"
+                  [disabled]="cargandoUnidades || !unidadesDisponibles.length"
+                  [title]="selectedUnitAbbreviations" aria-label="Abrir selector de unidades de medida">
+                  <span class="unit-selection-trigger__value"
+                    [class.is-empty]="!(rulesForm.get('selectedUnitIds')?.value?.length)">{{selectedUnitAbbreviations}}</span>
+                  <mat-icon>tune</mat-icon>
+                </button>
+                <span class="units-helper" *ngIf="cargandoUnidades">Cargando unidades...</span>
+                <span class="units-helper" *ngIf="!cargandoUnidades && !unidadesDisponibles.length">No se pudo cargar el catálogo de unidades.</span>
+              </div>
+              <div class="toggle-tile rules-returnable" *ngIf="isTrackingConfigurable">
+                <div class="rules-toggle-copy">
+                  <span class="rules-inline-title"><strong>Artículo retornable</strong>
+                    <button type="button" class="category-info-button" aria-label="Información sobre artículos retornables"
+                      matTooltip="Permite devolver el artículo después de una salida." matTooltipPosition="above">
+                      <mat-icon>info_outline</mat-icon>
+                    </button>
+                  </span>
+                </div>
                 <mat-slide-toggle color="primary" formControlName="isReturnable"
                   aria-label="Artículo retornable"></mat-slide-toggle>
               </div>
-              <div class="naming-config" *ngIf="isTrackingConfigurable">
-                <div class="category-field" *ngIf="!rulesForm.get('isNamingLibre')?.value">
-                  <label for="child-category-naming">Método de nombramiento</label>
-                  <mat-form-field appearance="outline" class="inventory-select">
-                    <mat-select id="child-category-naming" formControlName="namingMethod"
-                      panelClass="inventory-select-options">
-                      <mat-option *ngFor="let option of namingOptions" [value]="option">{{ option }}</mat-option>
-                    </mat-select>
-                  </mat-form-field>
+              <div class="toggle-tile naming-toggle rules-custom-formula"
+                *ngIf="isTrackingConfigurable" [class.enabled]="rulesForm.get('isNamingLibre')?.value">
+                <div class="rules-toggle-copy">
+                  <span class="rules-inline-title"><strong>Fórmula personalizada</strong>
+                    <button type="button" class="category-info-button" aria-label="Información sobre la fórmula personalizada"
+                      matTooltip="Activa la combinación de atributos para generar nombres. La fórmula se configura en el siguiente paso." matTooltipPosition="above">
+                      <mat-icon>info_outline</mat-icon>
+                    </button>
+                  </span>
                 </div>
-                <div class="toggle-tile naming-toggle" [class.enabled]="rulesForm.get('isNamingLibre')?.value">
-                  <div><strong>Fórmula personalizada</strong><small>{{ rulesForm.get('isNamingLibre')?.value ?
-                      'Configura el nombre en el siguiente paso' : 'Usa los atributos para formar nombres
-                      personalizados' }}</small></div>
-                  <mat-slide-toggle color="primary" formControlName="isNamingLibre"
-                    aria-label="Activar fórmula personalizada"></mat-slide-toggle>
-                </div>
+                <mat-slide-toggle color="primary" formControlName="isNamingLibre"
+                  aria-label="Activar fórmula personalizada"></mat-slide-toggle>
               </div>
-              <div class="bulk-hint" *ngIf="!isTrackingConfigurable">
-                <mat-icon>info_outline</mat-icon>
-                <span>Los artículos a granel utilizan un nombre libre. No requieren un constructor de fórmulas.</span>
+              <div class="category-field rules-naming-field"
+                *ngIf="isTrackingConfigurable && !rulesForm.get('isNamingLibre')?.value">
+                <span class="rules-inline-title">
+                  <label for="child-category-naming">Método de nombramiento</label>
+                  <button type="button" class="category-info-button" aria-label="Información sobre el método de nombramiento"
+                    matTooltip="Define cómo se genera el nombre de los artículos registrados en esta categoría." matTooltipPosition="above">
+                    <mat-icon>info_outline</mat-icon>
+                  </button>
+                </span>
+                <mat-form-field appearance="outline" class="inventory-select">
+                  <mat-select id="child-category-naming" formControlName="namingMethod" panelClass="inventory-select-options">
+                    <mat-option *ngFor="let option of namingOptions" [value]="option">{{ option }}</mat-option>
+                  </mat-select>
+                </mat-form-field>
+              </div>
+              <div class="rules-bulk-note" *ngIf="!isTrackingConfigurable">
+                <span>A granel: nombre libre</span>
+                <button type="button" class="category-info-button" aria-label="Información de artículos a granel"
+                  matTooltip="Los artículos a granel utilizan un nombre libre y no requieren un constructor de fórmulas."
+                  matTooltipPosition="above"><mat-icon>info_outline</mat-icon></button>
               </div>
             </div>
           </section>
@@ -149,7 +168,13 @@
               <div class="section-heading">
                 <span class="section-icon"><mat-icon>tune</mat-icon></span>
                 <div>
-                  <h3>Atributos dinámicos</h3>
+                  <div class="attributes-title-row">
+                    <h3>Atributos dinámicos</h3>
+                    <button type="button" class="category-info-button attributes-info-button"
+                      aria-label="Información sobre los atributos dinámicos"
+                      matTooltip="La casilla habilita la etiqueta en la fórmula. Usa _ en nombres compuestos. No se permiten atributos repetidos."
+                      matTooltipPosition="above"><mat-icon>info_outline</mat-icon></button>
+                  </div>
                   <p>Hasta seis características de la categoría</p>
                 </div>
               </div>
@@ -174,8 +199,6 @@
                   </span>
                 </div>
               </div>
-              <p class="attribute-note"><mat-icon>info_outline</mat-icon> La casilla habilita la etiqueta en la fórmula.
-                Usa _ en nombres compuestos. No se permiten atributos repetidos.</p>
             </section>
 
             <section class="section-card formula-panel" *ngIf="rulesForm.get('isNamingLibre')?.value">
@@ -196,8 +219,6 @@
                 <input id="child-category-formula" type="text" class="category-input" formControlName="namingCustom"
                   spellcheck="false" autocomplete="off" placeholder="[Pres.] + [Marca] | [color]"
                   (focus)="onNamingFocused()" (input)="onNamingInput($event)" (blur)="onNamingUnfocused()" />
-                <span class="field-hint">Sin espacios dentro de [etiqueta]. Máximo un espacio a cada lado de los
-                  operadores.</span>
               </div>
 
               <div class="tags-toolbar">
@@ -267,4 +288,4 @@
     </button>
   </mat-dialog-actions>
 </div>
-/* WEBINVENTORY_UNIDADES_INGRESOS_2026_V1: categoryHtml */
+<!-- WEBINV_CATEGORIA_VISUAL_2026_V1 -->

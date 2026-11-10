@@ -1,4 +1,6 @@
-<div class="custom-modal ui-v2-dialog ui-v2-dialog--special">
+<div class="custom-modal ui-v2-dialog ui-v2-dialog--special"
+  [invDialogMotion]="currentStep + '-' + activeSubTab"
+  [invDialogMotionWidth]="currentStep === 1 ? 'min(1080px, calc(100vw - 24px))' : currentStep === 2 ? 'min(950px, calc(100vw - 24px))' : 'min(1040px, calc(100vw - 24px))'">
   <header class="modal-header">
     <div class="title-area">
       <span class="title-mark"><mat-icon>inventory_2</mat-icon></span>
@@ -308,7 +310,7 @@
               <input id="initial-quantity" type="number" min="0" step="1" formControlName="initialQuantity"
                 class="custom-input" [readonly]="currentTrackingMode === 'Serializado' && isEditMode"
                 [class.invalid]="isInvalid('logistics','initialQuantity')"
-                (focus)="resetFieldMessage('logistics','initialQuantity')" />
+                (focus)="resetFieldMessage('logistics','initialQuantity')" (input)="onUnitQuantityInput('initialQuantity')" (blur)="onUnitQuantityBlur('initialQuantity', $event)" />
               <span class="error-text" *ngIf="isInvalid('logistics','initialQuantity')">Ingresa un número entero de agrupaciones.</span>
             </div>
             <div class="field-tile" *ngIf="requiresUnitConversion && fixedFactor === null">
@@ -317,7 +319,7 @@
               </div>
               <input id="conversion" type="number" min="1" step="1" formControlName="conversionFactor"
                 class="custom-input" [class.invalid]="isInvalid('logistics','conversionFactor')"
-                (focus)="resetFieldMessage('logistics','conversionFactor')" />
+                (focus)="resetFieldMessage('logistics','conversionFactor')" (input)="onUnitQuantityInput('conversionFactor')" (blur)="onUnitQuantityBlur('conversionFactor', $event)" />
               <span class="error-text" *ngIf="isInvalid('logistics','conversionFactor')">Solo valores enteros mayores que cero.</span>
             </div>
             <div class="field-tile" [class.stock-calculated]="requiresUnitConversion">
@@ -327,7 +329,7 @@
               <input id="article-stock" type="number" min="0" [attr.step]="stockStep" formControlName="stock"
                 class="custom-input" [class.invalid]="isInvalid('logistics','stock')"
                 [readonly]="requiresUnitConversion || (currentTrackingMode === 'Serializado' && isEditMode)"
-                (focus)="resetFieldMessage('logistics','stock')" />
+                (focus)="resetFieldMessage('logistics','stock')" (input)="onUnitQuantityInput('stock')" (blur)="onUnitQuantityBlur('stock', $event)" />
               <span class="error-text" *ngIf="isInvalid('logistics','stock')">
                 {{stockStep === 1 ? 'Solo números enteros válidos.' : 'Máximo dos decimales.'}}
               </span>
@@ -463,3 +465,5 @@
 </dialog>
 
 <!-- /* FASE 4.1 */ -->
+
+/* WEBINVENTORY_UNIDADES_UX_V1 */

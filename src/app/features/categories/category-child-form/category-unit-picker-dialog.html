@@ -1,0 +1,49 @@
+<div class="unit-picker">
+  <header class="unit-picker__header">
+    <div class="unit-picker__icon"><mat-icon>straighten</mat-icon></div>
+    <div class="unit-picker__titles">
+      <h2>Unidades de medida</h2>
+      <p>Elige las unidades permitidas en esta categoría hija</p>
+    </div>
+    <button type="button" class="unit-picker__close" (click)="cancel()" aria-label="Cerrar sin guardar"><mat-icon>close</mat-icon></button>
+  </header>
+
+  <div class="unit-picker__body">
+    <div class="unit-picker__search-heading">
+      <label class="unit-picker__search-label" for="unit-picker-search">Buscar por nombre o abreviatura</label>
+      <span class="unit-picker__invalid" *ngIf="selectedCount === 0" role="status">Selecciona al menos una unidad de medida.</span>
+    </div>
+    <div class="unit-picker__search">
+      <mat-icon>search</mat-icon>
+      <input id="unit-picker-search" type="search" [value]="search" (input)="onSearch($event)" autocomplete="off" placeholder="Ej. cajas, BOX, gramos..." />
+    </div>
+
+    <div class="unit-picker__actions">
+      <div class="unit-picker__count">{{selectedCount}} seleccionadas · {{visibleUnits.length}} resultados</div>
+      <button type="button" (click)="selectAllVisible()" [disabled]="visibleUnits.length === 0 || allVisibleSelected">Seleccionar todas</button>
+      <button type="button" (click)="clearAllVisible()" [disabled]="selectedVisibleCount === 0">Deseleccionar todas</button>
+    </div>
+    <p *ngIf="search.trim()" class="unit-picker__filter-note">Estas dos acciones se aplican a los resultados visibles de la búsqueda.</p>
+
+    <div class="unit-picker__list" role="group" aria-label="Unidades disponibles">
+      <div class="unit-picker__option" *ngFor="let unit of visibleUnits; trackBy: trackByUnit">
+        <mat-checkbox [checked]="selected.has(unit.id)" (change)="toggle(unit.id, $event.checked)">
+          <span class="unit-picker__name">{{unit.unitName}}</span>
+        </mat-checkbox>
+        <span class="unit-picker__abbr">{{unit.abbreviation.trim()}}</span>
+      </div>
+      <p class="unit-picker__empty" *ngIf="visibleUnits.length === 0">No se encontraron unidades con esa búsqueda.</p>
+    </div>
+
+  </div>
+
+  <footer class="unit-picker__footer">
+    <button type="button" class="unit-picker__cancel" (click)="cancel()">Cancelar</button>
+    <button type="button" class="unit-picker__apply" (click)="apply()" [disabled]="selectedCount === 0">
+      <mat-icon>check</mat-icon> Aplicar selección
+    </button>
+  </footer>
+</div>
+
+/* WEBINVENTORY_UNIDADES_UX_V1 */
+<!-- WEBINV_CATEGORIA_VISUAL_2026_V1 -->

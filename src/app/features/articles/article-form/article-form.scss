@@ -885,3 +885,17 @@ button:focus-visible { outline: 2px solid $lime; outline-offset: 2px; }
 @media(max-width:530px) {
   .tile-grid.has-conversion.fixed-conversion { grid-template-columns: 1fr; }
 }
+
+/* INV_DIALOG_MOTION_2026_V1 - cambios de etapa y pestañas de Identidad. */
+@keyframes inv-article-content-fade {
+  from { opacity: 0; transform: translateY(7px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.custom-modal .step-content,
+.custom-modal .form-container > form > .card-section {
+  animation: inv-article-content-fade 260ms cubic-bezier(.22, 1, .36, 1) both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .custom-modal .step-content,
+  .custom-modal .form-container > form > .card-section { animation: none !important; }
+}
