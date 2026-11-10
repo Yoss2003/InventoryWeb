@@ -1,5 +1,5 @@
-<div class="lookup-page ui-v2-screen">
-  <header class="ui-v2-page-header">
+<div class="lookup-page inv-core-page inv-secondary-page">
+  <header class="inv-core-header">
     <app-ui-page-heading icon="account_balance" title="Consultas SUNAT y tipo de cambio" subtitle="Información fiscal y cotizaciones verificadas por la API."></app-ui-page-heading>
   </header>
   <div class="lookup-grid">
@@ -47,7 +47,7 @@
           <button type="button" (click)="loadHistoryRates()" [disabled]="loadingHistory"><mat-icon>event</mat-icon> Consultar historial</button>
         </div>
         <p *ngIf="historyError" class="error" role="alert">{{historyError}}</p>
-        <div class="history-rates-scroll ui-table-shell" *ngIf="historyRequested && !historyError && !loadingHistory">
+        <div class="history-rates-scroll inv-core-table-wrap" *ngIf="historyRequested && !historyError && !loadingHistory">
           <table><thead><tr><th>Fecha</th><th>Moneda</th><th>Compra</th><th>Venta</th></tr></thead>
           <tbody><tr *ngFor="let rate of historyRates"><td>{{rate.date.slice(0,10) | date:'dd/MM/yyyy':'UTC'}}</td><td>{{rate.baseCurrency}} / PEN</td><td>{{rate.buyPrice | number:'1.3-3'}}</td><td>{{rate.sellPrice | number:'1.3-3'}}</td></tr></tbody></table>
           <p *ngIf="!historyRates.length" class="fx-empty">No existen cotizaciones guardadas para ese rango.</p>

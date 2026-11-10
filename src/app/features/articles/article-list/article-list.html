@@ -1,21 +1,21 @@
-<section class="catalog-page ui-v2-screen">
-  <header class="ui-v2-page-header"><app-ui-page-heading icon="inventory_2" title="Maestro de artículos" subtitle="Información relevante de productos e inventarios. Pulsa una fila para abrir su ficha completa."></app-ui-page-heading>
-    <div class="catalog-top-actions ui-v2-header-actions"><button type="button" class="create-item ui-button ui-button--primary" (click)="create()" appUiButton="primary"><mat-icon>add</mat-icon>Nuevo artículo</button>
-      <button type="button" class="reload ui-button ui-button--secondary" (click)="load()" [disabled]="loading" appUiButton="secondary">
+<section class="catalog-page inv-core-page">
+  <header class="inv-core-header"><app-ui-page-heading icon="inventory_2" title="Maestro de artículos" subtitle="Información relevante de productos e inventarios. Pulsa una fila para abrir su ficha completa."></app-ui-page-heading>
+    <div class="inv-core-header-actions"><button type="button" class="create-item" (click)="create()" appUiButton="primary"><mat-icon>add</mat-icon>Nuevo artículo</button>
+      <button type="button" class="reload" (click)="load()" [disabled]="loading" appUiButton="secondary">
         <app-loading-indicator *ngIf="loading; else articleRefresh" [compact]="true" message="Cargando..." />
         <ng-template #articleRefresh><mat-icon>refresh</mat-icon>Actualizar</ng-template>
       </button>
     </div>
   </header>
-  <div class="catalog-filters ui-table-toolbar"><app-ui-search [(value)]="search" placeholder="Buscar artículo, marca, código…" label="Buscar artículos" /><label class="check"><input type="checkbox" [(ngModel)]="showInactive" /> Mostrar inactivos</label></div>
+  <div class="inv-core-toolbar"><app-ui-search [(value)]="search" placeholder="Buscar artículo, marca, código…" label="Buscar artículos" /><label class="check"><input type="checkbox" [(ngModel)]="showInactive" /> Mostrar inactivos</label></div>
   <div class="catalog-state" *ngIf="loading && !hasLoaded"><app-loading-indicator message="Cargando artículos y catálogos..." /></div>
   <div class="catalog-state err" *ngIf="error" role="alert">{{error}}</div>
-  <div class="catalog-table-wrap ui-table-shell" *ngIf="hasLoaded && (!error || dataSource.length)">
+  <div class="inv-core-table-wrap catalog-table-wrap" *ngIf="hasLoaded && (!error || dataSource.length)">
     <table><thead><tr><th>Código</th><th>Artículo</th><th>Categoría</th><th>Marca</th><th>Modelo</th><th>Stock</th><th>Unidad</th><th>Precio</th><th>Estado</th><th>Acciones</th></tr></thead>
       <tbody><tr *ngFor="let a of visible" tabindex="0" (click)="showDetail(a)" (keydown.enter)="showDetail(a)">
         <td>{{a.code}}</td><td><strong>{{a.name}}</strong></td><td>{{a.categoryName}}</td><td>{{a.brandName}}</td><td>{{a.model}}</td>
         <td>{{a.stock | number:'1.0-2'}}</td><td>{{a.measurementUnit}}</td><td>{{a.salePrice ?? 0 | number:'1.2-2'}} {{a.saleCurrency}}</td><td><app-ui-status [tone]="a.isActive ? 'success' : 'danger'" [label]="a.isActive ? 'Activo' : 'Inactivo'"></app-ui-status></td>
-        <td class="actions"><button type="button" title="Editar artículo" [disabled]="!a.isActive" (click)="edit(a,$event)" appUiTableAction="normal"><mat-icon>edit</mat-icon></button><button type="button" class="danger" title="Dar de baja artículo" [disabled]="!a.isActive" (click)="delete(a,$event)" appUiTableAction="danger"><mat-icon>delete_outline</mat-icon></button></td>
+        <td class="inv-core-action-cell"><button type="button" title="Editar artículo" [disabled]="!a.isActive" (click)="edit(a,$event)" appUiTableAction="normal"><mat-icon>edit</mat-icon></button><button type="button" class="danger" title="Dar de baja artículo" [disabled]="!a.isActive" (click)="delete(a,$event)" appUiTableAction="danger"><mat-icon>delete_outline</mat-icon></button></td>
       </tr></tbody></table>
     <app-ui-empty-state *ngIf="visible.length===0" message="No hay registros que coincidan con los filtros."></app-ui-empty-state>
   </div>

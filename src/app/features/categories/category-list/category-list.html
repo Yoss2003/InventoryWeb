@@ -1,7 +1,7 @@
-<section class="category-overview ui-v2-screen">
-  <header class="category-overview__header ui-v2-page-header">
+<section class="category-overview inv-core-page">
+  <header class="inv-core-header">
     <app-ui-page-heading icon="category" title="Maestro de categorías" subtitle="Grupos, subcategorías, reglas de seguimiento y nombramiento."></app-ui-page-heading>
-    <div class="heading-actions ui-v2-header-actions">
+    <div class="inv-core-header-actions">
       <button type="button" class="secondary-action ui-button ui-button--secondary" (click)="loadData()" [disabled]="loading" appUiButton="secondary">
         <app-loading-indicator *ngIf="loading; else categoryRefresh" [compact]="true" message="Cargando..." />
         <ng-template #categoryRefresh><mat-icon>refresh</mat-icon>Actualizar</ng-template>
@@ -10,13 +10,13 @@
       <button type="button" class="secondary-action ui-button ui-button--secondary" (click)="nuevaCategoriaPadre()" appUiButton="secondary"><mat-icon>create_new_folder</mat-icon>Categoría padre</button>
     </div>
   </header>
-  <div class="category-overview__filters ui-table-toolbar">
+  <div class="inv-core-toolbar">
     <app-ui-search [value]="dataSource.filter" (valueChange)="applyFilterText($event)" placeholder="Buscar grupo por nombre…" label="Buscar categoría padre" />
     <label class="show-inactive"><input type="checkbox" [(ngModel)]="mostrarInactivos" (change)="toggleInactivos()" /> Mostrar inactivos</label>
   </div>
   <div *ngIf="loading && !hasLoaded"><app-loading-indicator message="Cargando categorías..." /></div>
   <p *ngIf="error" role="alert" class="empty-categories">{{error}}</p>
-  <div class="category-overview__table-wrap ui-table-shell" *ngIf="hasLoaded && (!error || rawDataCount)">
+  <div class="inv-core-table-wrap category-overview__table-wrap" *ngIf="hasLoaded && (!error || rawDataCount)">
     <table mat-table [dataSource]="dataSource" multiTemplateDataRows class="category-table">
       <ng-container matColumnDef="expand"><th mat-header-cell *matHeaderCellDef class="expand-col"></th>
         <td mat-cell *matCellDef="let element" class="expand-col">
@@ -28,7 +28,7 @@
         <td mat-cell *matCellDef="let element"><div class="cell-title">{{element.name}}</div><small class="row-meta">{{element.subcategorias?.length || 0}} subcategorías</small></td></ng-container>
       <ng-container matColumnDef="description"><th mat-header-cell *matHeaderCellDef>Descripción</th><td mat-cell *matCellDef="let element"><span class="cell-muted">{{element.description || 'Sin descripción'}}</span></td></ng-container>
       <ng-container matColumnDef="isActive"><th mat-header-cell *matHeaderCellDef>Estado</th><td mat-cell *matCellDef="let element"><app-ui-status [tone]="element.isActive ? 'success' : 'danger'" [label]="element.isActive ? 'Activo' : 'Inactivo'"></app-ui-status></td></ng-container>
-      <ng-container matColumnDef="actions"><th mat-header-cell *matHeaderCellDef class="actions-col">Acciones</th><td mat-cell *matCellDef="let element" class="actions-col">
+      <ng-container matColumnDef="actions"><th mat-header-cell *matHeaderCellDef class="inv-core-action-cell">Acciones</th><td mat-cell *matCellDef="let element" class="inv-core-action-cell">
         <button type="button" class="row-icon" title="Editar grupo" [disabled]="!element.isActive || !canManage" (click)="nuevaCategoriaPadre(element); $event.stopPropagation()" appUiTableAction="normal"><mat-icon>edit</mat-icon></button>
         <button type="button" class="row-icon danger" title="Desactivar grupo" [disabled]="!element.isActive || !canManage" (click)="eliminarCategoria(element.id,$event)" appUiTableAction="danger"><mat-icon>delete_outline</mat-icon></button>
       </td></ng-container>
@@ -36,12 +36,12 @@
         <div class="expanded-detail" [@detailExpand]="element === expandedElement ? 'expanded' : 'collapsed'">
           <div *ngIf="!element.subcategorias?.length" class="empty-categories">Este grupo todavía no tiene subcategorías.</div>
           <div class="subcategories-wrap" *ngIf="element.subcategorias?.length"><table class="subcategories-table">
-            <thead><tr><th>Subcategoría</th><th>Descripción</th><th>Tracking</th><th>Nombramiento</th><th>Estado</th><th class="actions-col">Acciones</th></tr></thead>
+            <thead><tr><th>Subcategoría</th><th>Descripción</th><th>Tracking</th><th>Nombramiento</th><th>Estado</th><th class="inv-core-action-cell">Acciones</th></tr></thead>
             <tbody><tr *ngFor="let sub of element.subcategorias" [class.inactive]="!sub.isActive">
               <td><strong>{{sub.name}}</strong></td><td class="cell-muted">{{sub.description || '—'}}</td>
               <td><span class="chip tracking">{{sub.trackingMode || '—'}}</span></td><td><span class="chip naming">{{sub.namingMethod || '—'}}</span></td>
               <td><app-ui-status [tone]="sub.isActive ? 'success' : 'danger'" [label]="sub.isActive ? 'Activa' : 'Inactiva'"></app-ui-status></td>
-              <td class="actions-col"><button type="button" class="row-icon" title="Editar subcategoría" [disabled]="!sub.isActive || !canManage" (click)="nuevaCategoriaHija(sub);$event.stopPropagation()" appUiTableAction="normal"><mat-icon>edit</mat-icon></button>
+              <td class="inv-core-action-cell"><button type="button" class="row-icon" title="Editar subcategoría" [disabled]="!sub.isActive || !canManage" (click)="nuevaCategoriaHija(sub);$event.stopPropagation()" appUiTableAction="normal"><mat-icon>edit</mat-icon></button>
               <button type="button" class="row-icon danger" title="Desactivar subcategoría" [disabled]="!sub.isActive || !canManage" (click)="eliminarCategoria(sub.id,$event)" appUiTableAction="danger"><mat-icon>delete_outline</mat-icon></button></td>
             </tr></tbody></table></div>
         </div>

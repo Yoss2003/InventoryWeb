@@ -1,6 +1,6 @@
-<div class="dev-page ui-v2-screen" *ngIf="developer; else forbidden">
-  <header class="dev-head ui-v2-page-header">
-    <div>
+<div class="dev-page inv-core-page inv-admin-page" *ngIf="developer; else forbidden">
+  <header class="dev-head inv-core-header">
+    <div class="dev-head-info">
       <small>ACCESO EXCLUSIVO · ROL DESARROLLADOR</small>
       <app-ui-page-heading icon="admin_panel_settings" title="Gestión Dev" subtitle="Empresas, licencias y recuperaciones pendientes."></app-ui-page-heading>
     </div>
@@ -20,7 +20,7 @@
     <p *ngIf="companiesError" class="inline-alert inline-alert--error" role="alert"><mat-icon>error_outline</mat-icon>{{companiesError}}</p>
     <button *ngIf="companiesError" type="button" (click)="loadCompanies()" [disabled]="loadingCompanies">Reintentar empresas</button>
     <app-loading-indicator *ngIf="loadingCompanies && !companies.length" message="Cargando empresas..." />
-    <div class="overflow companies-table ui-table-shell" *ngIf="companies.length">
+    <div class="overflow companies-table inv-core-table-wrap" *ngIf="companies.length">
       <table>
         <thead><tr><th>Empresa</th><th>Usuarios</th><th>Almacenes</th><th>Licencia</th><th>Vencimiento</th><th>Estado</th><th>Acciones</th></tr></thead>
         <tbody>
@@ -186,7 +186,7 @@
     </div>
     <p *ngIf="pendingError" class="inline-alert inline-alert--error" role="alert"><mat-icon>error_outline</mat-icon>{{pendingError}}</p>
     <app-loading-indicator *ngIf="loadingPending && !pending.length" message="Cargando recuperaciones..." />
-    <div *ngIf="pending.length" class="overflow recovery-table"><table>
+    <div *ngIf="pending.length" class="overflow recovery-table inv-core-table-wrap"><table>
       <thead><tr><th>Usuario</th><th>Empresa</th><th>Fecha de solicitud</th><th>Estado</th><th>Acciones</th></tr></thead>
       <tbody>
         <tr *ngFor="let r of pending; trackBy: trackPending">

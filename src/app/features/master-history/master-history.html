@@ -1,9 +1,9 @@
-<section class="master-history ui-v2-screen">
-  <header class="ui-v2-page-header">
+<section class="master-history inv-core-page inv-admin-page">
+  <header class="inv-core-header">
     <app-ui-page-heading icon="history" title="Historial general" subtitle="Entradas y salidas de los inventarios personales de esta empresa."></app-ui-page-heading>
     <button type="button" (click)="load()" [disabled]="loading" appUiButton="secondary"><mat-icon>refresh</mat-icon> Actualizar</button>
   </header>
-  <form class="filters ui-v2-filter-panel" (ngSubmit)="applyFilters()">
+  <form class="filters inv-admin-filters" (ngSubmit)="applyFilters()">
     <label>Inventario (ID)<input name="inventoryId" [(ngModel)]="inventoryId" type="number" min="1" placeholder="Todos"  appUiControl /></label>
     <label>Propietario (ID)<input name="userId" [(ngModel)]="userId" type="number" min="1" placeholder="Todos"  appUiControl /></label>
     <label>Usuario responsable (ID)<input name="actorUserId" [(ngModel)]="actorUserId" type="number" min="1" placeholder="Todos"  appUiControl /></label>
@@ -14,7 +14,7 @@
   </form>
   <div role="status" *ngIf="loading" class="status">Consultando movimientos...</div>
   <div role="alert" *ngIf="error" class="error">{{error}}</div>
-  <div class="table-wrapper ui-table-shell" *ngIf="!loading && !error">
+  <div class="table-wrapper inv-core-table-wrap" *ngIf="!loading && !error">
     <table>
       <thead><tr><th>Fecha</th><th>Tipo</th><th>Inventario</th><th>Propietario</th><th>Responsable (ID)</th><th>Artículo</th><th>Cantidad</th><th>Observación</th></tr></thead>
       <tbody><tr *ngFor="let row of items">

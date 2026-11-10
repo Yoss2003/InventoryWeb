@@ -1,0 +1,338 @@
+/*
+ * WebInventory — Historial general y Gestión Dev.
+ * Misma base visual que las otras ocho vistas (.inv-core-page), SIN apilar V2/V3.
+ * Estas reglas son la fuente única de diseño de SOLO estos dos módulos.
+ * Eventos, validaciones, peticiones, ventanas y lógica Angular permanecen intactos.
+ */
+
+.inv-admin-page {
+  --admin-surface: #182936;
+  --admin-border: #455d6e;
+  --admin-muted: #a9bfcd;
+  --admin-field-bg: #101c26;
+  gap: 14px;
+  font: 13px Roboto, 'Segoe UI', sans-serif;
+}
+.inv-admin-page, .inv-admin-page * { box-sizing: border-box; }
+.inv-admin-page :is(h2,h3) { color: #edf5fc; }
+.inv-admin-page button { font: inherit; cursor: pointer; }
+.inv-admin-page button:disabled { opacity: .48; cursor: not-allowed; }
+.inv-admin-page button:focus-visible,
+.inv-admin-page :is(input,select,textarea):focus-visible { outline: 2px solid var(--core-accent); outline-offset: 2px; }
+.inv-admin-page > .inv-core-header > button[appUiButton] {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  gap: 7px;
+  min-width: 0;
+  min-height: 34px;
+  height: 34px;
+  padding: 0 12px;
+  border: 1px solid #62798b;
+  border-radius: 11px;
+  background: #263947;
+  color: #e7f0f8;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.1;
+  white-space: nowrap;
+}
+.inv-admin-page > .inv-core-header > button[appUiButton] mat-icon,
+.inv-admin-page button mat-icon { width: 19px; height: 19px; font-size: 19px; line-height: 19px; vertical-align: middle; }
+.inv-admin-page :is(.inv-core-table-wrap,.dev-card) { min-width: 0; }
+.inv-admin-page :is(.inv-core-table-wrap,.dev-card) p { line-height: 1.5; }
+.inv-admin-page :is(input.ui-v2-control,textarea.ui-v2-control):not([type='checkbox']):not([type='file']):not([type='color']) {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  height: 39px;
+  padding: 8px 11px;
+  border: 1px solid #657b8d;
+  border-radius: 9px;
+  background: var(--admin-field-bg);
+  color: #f0f7fc;
+  font: inherit;
+  font-size: 12px;
+}
+.inv-admin-page :is(.inv-core-table-wrap,.companies-table,.recovery-table) { scrollbar-width: thin; }
+.inv-admin-page .inv-core-table-wrap > table > tbody > tr > td { min-width: 0; }
+
+/* HISTORIAL GENERAL: filtros con Material, scroll y paginación preexistentes. */
+.inv-admin-page.master-history .filters {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0,1fr));
+  align-items: end;
+  gap: 12px;
+  min-width: 0;
+  margin: 0;
+  padding: 14px;
+  border: 1px solid var(--admin-border);
+  border-radius: 12px;
+  background: var(--admin-surface);
+}
+.inv-admin-page.master-history .filters > :is(label,.filter-field) {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 0;
+  margin: 0;
+  color: #c6d8e5;
+  font-size: 12px;
+  line-height: 1.3;
+}
+.inv-admin-page.master-history .filters :is(.history-mat-select,.history-date) {
+  width: 100%; min-width: 0; margin: 0;
+  --mdc-outlined-text-field-outline-color: #61798a;
+  --mdc-outlined-text-field-focus-outline-color: var(--core-accent);
+  --mat-select-focused-arrow-color: var(--core-accent);
+}
+.inv-admin-page.master-history .filters :is(.history-mat-select,.history-date) .mat-mdc-text-field-wrapper {
+  box-sizing: border-box; height: 39px; min-height: 39px; background: var(--admin-field-bg); border-radius: 9px;
+}
+.inv-admin-page.master-history .filters :is(.history-mat-select,.history-date) .mat-mdc-form-field-infix {
+  box-sizing: border-box; min-height: 39px; height: 39px; padding: 7px 0; align-items: center;
+}
+.inv-admin-page.master-history .filters :is(.history-mat-select,.history-date) .mat-mdc-form-field-subscript-wrapper { display: none; }
+.inv-admin-page.master-history .filters .mat-mdc-select-value,
+.inv-admin-page.master-history .filters .history-date input { color: #eff6fc; font-size: 12px; }
+.inv-admin-page.master-history .filters .history-date .mat-datepicker-toggle { color: #bdcfdb; }
+.inv-admin-page.master-history .filters > button[type='submit'] {
+  height: 39px;
+  min-height: 39px;
+  display: inline-flex; align-items: center; justify-content: center;
+  gap: 6px; padding: 0 12px;
+  border: 1px solid var(--core-accent);
+  border-radius: 9px;
+  background: var(--core-accent);
+  color: var(--core-accent-text);
+  font-size: 12px; font-weight: 700;
+}
+.inv-admin-page.master-history .table-wrapper { max-height: 388px; }
+.inv-admin-page.master-history .table-wrapper > table { min-width: 980px; }
+.inv-admin-page.master-history .table-wrapper > table > tbody > tr > td { height: auto; min-height: 55px; }
+.inv-admin-page.master-history .table-wrapper td small { display: block; margin-top: 3px; color: #a9bdca; font-size: 11px; }
+.inv-admin-page.master-history .type {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-height: 27px; padding: 4px 9px;
+  border: 1px solid #457653; border-radius: 100px;
+  background: #243d32; color: #b6edbf; font-size: 11px; font-weight: 700;
+}
+.inv-admin-page.master-history .type.out { background: #49372c; color: #ffd2b2; border-color: #866247; }
+.inv-admin-page.master-history .type.custody { background: #24454c; color: #c6eced; border-color: #467880; }
+.inv-admin-page.master-history :is(.status,.error) { padding: 15px; text-align: center; font-size: 12px; }
+.inv-admin-page.master-history .status { color: #b9cbd7; }
+.inv-admin-page.master-history .error { color: #ffb1b9; }
+.inv-admin-page.master-history > footer {
+  display: flex; justify-content: space-between; align-items: center;
+  flex-wrap: wrap; gap: 10px;
+  color: #b7c8d6; font-size: 12px;
+}
+.inv-admin-page.master-history > footer > div { display: flex; align-items: center; gap: 10px; }
+.inv-admin-page.master-history > footer button {
+  min-height: 34px; padding: 7px 12px; border: 1px solid #62798b;
+  border-radius: 9px; background: #263947; color: #e7f0f8; font-size: 12px;
+}
+
+/* GESTION DEV: cabecera compacta y tarjetas independientes. */
+.inv-admin-page.dev-page { width: 100%; display: flex; flex-direction: column; max-width: none; }
+.inv-admin-page.dev-page > .dev-head { flex: none; min-height: 44px; height: auto; }
+.inv-admin-page.dev-page > .dev-head .dev-head-info {
+  display: flex; flex: 1 1 360px; flex-direction: column; align-items: flex-start;
+  gap: 6px; min-width: 0;
+}
+.inv-admin-page.dev-page .dev-head-info > small { color: var(--core-accent); font-size: 10px; line-height: 1.2; letter-spacing: .08em; }
+.inv-admin-page.dev-page .dev-head-info app-ui-page-heading { display: block; min-width: 0; width: 100%; }
+.inv-admin-page.dev-page .dev-card {
+  display: block;
+  width: 100%;
+  margin: 0;
+  padding: 18px;
+  border: 1px solid var(--admin-border);
+  border-radius: 13px;
+  background: var(--admin-surface);
+}
+.inv-admin-page.dev-page .dev-card.company-editor { display: grid; gap: 16px; }
+.inv-admin-page.dev-page :is(.section-head,.section-head--table) {
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: 12px;
+  min-width: 0; margin-bottom: 14px;
+}
+.inv-admin-page.dev-page .section-head > div { min-width: 0; }
+.inv-admin-page.dev-page .section-head h2 { margin: 0 0 4px; font-size: 17px; }
+.inv-admin-page.dev-page .section-head small { display: block; margin: 0; color: #adbfce; font-size: 12px; }
+.inv-admin-page.dev-page .section-head app-ui-search { --inv-search-width:360px; --inv-control-height:42px; flex:0 1 360px; max-width:100%; }
+.inv-admin-page.dev-page :is(.section-head,.dev-form,.editor-group) button:not([appUiTableAction]) {
+  display: inline-flex; align-items: center; justify-content: center; gap: 7px;
+  box-sizing: border-box;
+  min-height: 39px; padding: 7px 12px;
+  border: 1px solid #60798a; border-radius: 9px;
+  background: #263947; color: #e8f3fb;
+  font-size: 12px; font-weight: 650;
+}
+.inv-admin-page.dev-page :is(.section-head,.dev-form,.editor-group) button:disabled { opacity: .48; }
+.inv-admin-page.dev-page :is(button.save,button.renew-btn,.ruc-lookup button):not(:disabled) {
+  border-color: var(--core-accent);
+  background: var(--core-accent);
+  color: var(--core-accent-text);
+  font-weight: 750;
+}
+.inv-admin-page.dev-page .count-chip {
+  display: inline-grid; place-items: center; vertical-align: middle;
+  min-height: 22px; min-width: 24px; padding: 0 7px; margin-left: 5px;
+  border-radius: 20px; background: #293e4b; color: #dbe9f3; font-size: 11px;
+}
+.inv-admin-page.dev-page .companies-table { max-height: 316px; }
+.inv-admin-page.dev-page .companies-table > table { min-width: 1000px; }
+.inv-admin-page.dev-page .companies-table > table > tbody > tr > td { height: 90px; }
+.inv-admin-page.dev-page .companies-table > table > tbody > tr.selected-row > td { background: #263d38; }
+.inv-admin-page.dev-page .recovery-table { max-height: 390px; }
+.inv-admin-page.dev-page .recovery-table > table { min-width: 670px; }
+.inv-admin-page.dev-page .companies-table :is(th,td):not(:first-child) { text-align: center; }
+.inv-admin-page.dev-page .recovery-table :is(th:last-child,td:last-child) { text-align: center; }
+.inv-admin-page.dev-page .company-cell { text-align: left; }
+.inv-admin-page.dev-page .company-identity { display: flex; align-items: center; gap: 11px; min-width: 0; text-align: left; }
+.inv-admin-page.dev-page .company-identity > div { min-width: 0; }
+.inv-admin-page.dev-page .company-mark {
+  display: grid; place-items: center; flex: 0 0 36px;
+  width: 36px; height: 36px; overflow: hidden;
+  border: 1px solid #647887; border-radius: 10px; background: #243744; color: #c5d9e6;
+}
+.inv-admin-page.dev-page .company-mark img { display: block; width: 100%; height: 100%; padding: 2px; object-fit: contain; }
+.inv-admin-page.dev-page .company-mark mat-icon { width: 20px; height: 20px; font-size: 20px; }
+.inv-admin-page.dev-page .company-cell strong { display: block; max-width: 280px; color: #eff7fc; overflow-wrap: anywhere; font-size: 12px; }
+.inv-admin-page.dev-page .company-cell small { display: block; max-width: 280px; margin-top: 4px; color: #9fb2c1; font-size: 11px; overflow-wrap: anywhere; }
+.inv-admin-page.dev-page .number-cell { font-weight: 700; }
+.inv-admin-page.dev-page .subtle { color: #9fb4c3; }
+.inv-admin-page.dev-page .days-left { display: block; margin-top: 4px; color: #b7c7d6; font-size: 11px; }
+.inv-admin-page.dev-page .days-left.expired { color: #ffb0b5; }
+.inv-admin-page.dev-page .plan-tag,
+.inv-admin-page.dev-page .status-pill {
+  display: inline-flex; justify-content: center; align-items: center;
+  min-height: 27px; padding: 4px 9px;
+  border: 1px solid #4d8257; border-radius: 100px;
+  background: #253d30; color: #b4e7ba;
+  font-size: 11px; font-weight: 700; white-space: nowrap;
+}
+.inv-admin-page.dev-page .plan-tag.plan-max { background: #342b47; border-color: #7b68a9; color: #dbcfff; }
+.inv-admin-page.dev-page .status-pill.status-muted { background: #303c46; border-color: #647887; color: #c0d0db; }
+.inv-admin-page.dev-page .status-pill.status-warning { background: #4a3c25; border-color: #89734c; color: #ffdda6; }
+.inv-admin-page.dev-page .status-pill.status-danger { background: #462c35; border-color: #94616c; color: #ffb9c0; }
+.inv-admin-page.dev-page .table-actions { display: flex; justify-content: center; align-items: center; gap: 6px; }
+.inv-admin-page.dev-page .table-actions > button {
+  display: inline-flex; align-items: center; justify-content: center;
+  box-sizing: border-box;
+  flex: 0 0 28px;
+  width: 28px; height: 28px; min-height: 28px;
+  margin: 0; padding: 0;
+  border: 1px solid transparent; border-radius: 7px;
+  background: transparent; color: var(--core-accent);
+  font-size: 0; line-height: 1; overflow: hidden;
+}
+.inv-admin-page.dev-page .table-actions > button mat-icon { flex: none; width: 19px; height: 19px; font-size: 19px; line-height: 19px; }
+.inv-admin-page.dev-page .table-actions > button.danger-button { color: #ffacb4; }
+.inv-admin-page.dev-page .table-actions > button.action-reactivate { color: #b0e6bc; }
+.inv-admin-page.dev-page .table-actions > button:hover:not(:disabled) {
+  background: var(--core-accent-soft);
+  border-color: color-mix(in srgb, var(--core-accent) 45%, var(--core-border));
+}
+.inv-admin-page.dev-page .empty-table {
+  display: flex; align-items: center; justify-content: center; flex-direction: column;
+  gap: 8px; min-height: 115px; padding: 22px; text-align: center;
+  color: #abc0d0; font-size: 12px;
+}
+.inv-admin-page.dev-page .empty-table mat-icon { width: 29px; height: 29px; font-size: 29px; }
+.inv-admin-page.dev-page .empty-table strong { color: #edf5fa; font-size: 13px; }
+
+/* Gestión Dev: el editor sigue agrupando todos los campos y sus validaciones originales. */
+.inv-admin-page.dev-page .dev-form { display: grid; gap: 15px; }
+.inv-admin-page.dev-page .form-lock { display: grid; gap: 16px; min-width: 0; padding: 0; margin: 0; border: 0; }
+.inv-admin-page.dev-page .form-lock:disabled { opacity: .88; }
+.inv-admin-page.dev-page .editor-group {
+  display: grid; gap: 14px; min-width: 0; padding: 16px;
+  border: 1px solid #3d5366; border-radius: 12px; background: #182733;
+}
+.inv-admin-page.dev-page .group-heading h3 { margin: 0 0 5px; font-size: 15px; }
+.inv-admin-page.dev-page .group-heading p { margin: 0; color: #9fb3c2; font-size: 12px; }
+.inv-admin-page.dev-page .fields-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 12px; align-items: end; }
+.inv-admin-page.dev-page .field { display: flex; flex-direction: column; gap: 6px; min-width: 0; font-size: 12px; color: #c8d8e5; font-weight: 600; }
+.inv-admin-page.dev-page .field-wide { grid-column: span 1; }
+.inv-admin-page.dev-page .field-label { display: inline-flex; align-items: center; gap: 4px; min-width: 0; font-size: 12px; color: #cbd9e4; font-weight: 700; }
+.inv-admin-page.dev-page .required { color: var(--core-accent); }
+.inv-admin-page.dev-page .field input:not([type='file']):not([type='color']),
+.inv-admin-page.dev-page .color-control input.color-hex {
+  width: 100%; min-width: 0; height: 39px;
+  border: 1px solid #657b8d; border-radius: 9px;
+  background: var(--admin-field-bg); color: #f0f7fc;
+  padding: 8px 11px; font: inherit; font-size: 12px;
+}
+.inv-admin-page.dev-page .field input[readonly] { background: #21303b; border-color: #526b7b; color: #b7c9d6; }
+.inv-admin-page.dev-page .field-help { margin: 0; line-height: 1.5; color: #a8bdcc; font-size: 11px; }
+.inv-admin-page.dev-page .field-help.warning { color: #ffdaa4; }
+.inv-admin-page.dev-page .ruc-lookup { display: flex; align-items: flex-start; justify-content: flex-end; align-self: end; min-width: 0; }
+.inv-admin-page.dev-page .ruc-lookup button { min-height: 39px; white-space: nowrap; }
+.inv-admin-page.dev-page .ruc-feedback {
+  display: flex; align-items: flex-start; gap: 9px; grid-column: 1 / -1;
+  padding: 10px 11px; border: 1px solid #566b79; border-radius: 10px;
+  font-size: 12px; line-height: 1.45; overflow-wrap: anywhere;
+}
+.inv-admin-page.dev-page .ruc-feedback mat-icon { flex: none; }
+.inv-admin-page.dev-page .ruc-feedback--ok { background: #223d31; border-color: #4d7e5d; color: #c4f0d0; }
+.inv-admin-page.dev-page .ruc-feedback--error { background: #45312b; border-color: #86634e; color: #ffdbc8; }
+.inv-admin-page.dev-page .visual-fields { display: grid; grid-template-columns: 90px minmax(0,1fr); gap: 16px; align-items: start; }
+.inv-admin-page.dev-page .logo-preview { display: grid; place-items: center; width: 90px; height: 90px; overflow: hidden; border: 1px solid #647887; border-radius: 13px; background: #253743; }
+.inv-admin-page.dev-page .logo-preview img { width: 100%; height: 100%; object-fit: contain; }
+.inv-admin-page.dev-page .logo-preview mat-icon { width: 34px; height: 34px; font-size: 34px; color: #acbfcc; }
+.inv-admin-page.dev-page .visual-controls { display: grid; gap: 10px; min-width: 0; }
+.inv-admin-page.dev-page .color-control { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.inv-admin-page.dev-page .palette-launch {
+  display: inline-flex; align-items: center; gap: 7px; min-height: 39px;
+  border: 1px solid #637b8a; border-radius: 9px; background: #253846;
+  color: #edf4fb; padding: 5px 10px 5px 5px; font-size: 12px;
+}
+.inv-admin-page.dev-page .palette-swatch { display: block; width: 30px; height: 28px; border-radius: 7px; border: 1px solid #8296a3; }
+.inv-admin-page.dev-page input.color-picker-accessible { width: 43px; min-width: 43px; height: 39px; padding: 4px; cursor: pointer; border: 1px solid #647d8b; border-radius: 8px; background: #1e2e3c; }
+.inv-admin-page.dev-page input.color-hex { flex: 1 1 140px; min-width: 120px; max-width: 240px; }
+.inv-admin-page.dev-page .color-presets { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 3px; }
+.inv-admin-page.dev-page .preset-swatch { width: 29px; height: 29px; min-width: 29px; min-height: 29px; padding: 0; border: 2px solid #718694; border-radius: 8px; }
+.inv-admin-page.dev-page .preset-swatch.preset-current { outline: 2px solid var(--core-accent); outline-offset: 2px; }
+.inv-admin-page.dev-page .visual-controls input[type='file'] { width: 100%; min-height: 39px; height: auto; padding: 8px; border: 1px solid #647d8e; border-radius: 9px; background: #152430; color: #e7f2fa; }
+.inv-admin-page.dev-page .visual-controls input[type='file']::file-selector-button { margin-right: 8px; padding: 6px 9px; border: 1px solid #657d8c; border-radius: 7px; background: #253847; color: #eaf4fc; }
+.inv-admin-page.dev-page .check { display: inline-flex; align-items: center; gap: 8px; min-height: 39px; font-size: 12px; color: #c5d7e2; }
+.inv-admin-page.dev-page .check input { width: 18px; height: 18px; accent-color: var(--core-accent); }
+.inv-admin-page.dev-page .dev-select { width: 100%; min-width: 0; margin: 0; --mdc-outlined-text-field-outline-color: #637b8e; --mdc-outlined-text-field-focus-outline-color: var(--core-accent); }
+.inv-admin-page.dev-page .dev-select .mat-mdc-text-field-wrapper { height: 39px; min-height: 39px; background: var(--admin-field-bg); border-radius: 9px; }
+.inv-admin-page.dev-page .dev-select .mat-mdc-form-field-infix { height: 39px; min-height: 39px; padding: 7px 0; }
+.inv-admin-page.dev-page .dev-select .mat-mdc-form-field-subscript-wrapper { display: none; }
+.inv-admin-page.dev-page .dev-select .mat-mdc-select-value { color: #eaf4fa; font-size: 12px; }
+.inv-admin-page.dev-page .renew-box {
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: 15px; min-width: 0; padding: 16px;
+  border: 1px dashed #648468; border-radius: 12px; background: #1d312a;
+}
+.inv-admin-page.dev-page .renew-box :is(p,small) { margin: 0; font-size: 11px; color: #b5ccc3; }
+.inv-admin-page.dev-page .renew-controls { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; min-width: 0; }
+.inv-admin-page.dev-page .renew-controls .dev-select { min-width: 155px; flex: 1 1 180px; }
+.inv-admin-page.dev-page .form-actions { display: flex; justify-content: flex-end; }
+.inv-admin-page.dev-page .form-actions button.save { min-height: 39px; padding: 8px 12px; }
+.inv-admin-page.dev-page .inline-alert { display: flex; align-items: flex-start; gap: 8px; padding: 11px; border: 1px solid #805963; border-radius: 9px; background: #3b282e; color: #ffc5c5; font-size: 12px; }
+.inv-admin-page.dev-page .inline-alert mat-icon { flex: none; }
+
+@media(max-width:1300px) {
+  .inv-admin-page.master-history .filters { grid-template-columns: repeat(4,minmax(0,1fr)); }
+}
+@media(max-width:760px) {
+  .inv-admin-page.master-history .filters { grid-template-columns: repeat(2,minmax(0,1fr)); }
+  .inv-admin-page.dev-page .fields-grid { grid-template-columns: 1fr; }
+  .inv-admin-page.dev-page .visual-fields { grid-template-columns: 1fr; }
+  .inv-admin-page.dev-page > .dev-head { align-items: flex-start; }
+  .inv-admin-page.dev-page .section-head { align-items: flex-start; }
+}
+@media(max-width:480px) {
+  .inv-admin-page.master-history .filters { grid-template-columns: 1fr; }
+  .inv-admin-page.dev-page .renew-controls { align-items: stretch; flex-direction: column; }
+  .inv-admin-page.dev-page .renew-controls .dev-select { min-width: 0; width: 100%; }
+  .inv-admin-page.dev-page .section-head app-ui-search { flex: 1 1 100%; width: 100%; }
+}
+
+/* El mensaje de acceso denegado se muestra fuera de .dev-page por el ng-template. */
+app-dev-management > p.error { margin: 12px 0; padding: 14px; color: #ffc0c0; }

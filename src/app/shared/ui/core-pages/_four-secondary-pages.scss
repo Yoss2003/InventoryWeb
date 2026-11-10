@@ -1,0 +1,378 @@
+/* WebInventory: Articulos asignados, Compartir inventario, Consultas SUNAT y Catalogo general.
+   Usa inv-core-page del primer paquete validado; NO crea tokens ni capas V4.
+   Este archivo es la unica fuente de estilos para estas cuatro vistas.
+   Los colores de estados de error/alerta mantienen su significado semantico. */
+
+/* Controles y superficies comunes de estas cuatro vistas. */
+.inv-secondary-page {
+  --secondary-panel: #182936;
+  --secondary-panel-border: #455d6f;
+  --secondary-text-muted: #abc0d1;
+  --secondary-input: #101c26;
+  min-width: 0;
+  gap: 12px;
+}
+.inv-secondary-page :is(.assignment-section,.sharing-card,.ruc-panel,.fx-dashboard,.panel > form,.panel > .list) {
+  min-width: 0;
+  box-sizing: border-box;
+  border: 1px solid var(--secondary-panel-border);
+  border-radius: 12px;
+  background: var(--secondary-panel);
+}
+.inv-secondary-page :is(h2,h3) { color:#edf5fb; }
+.inv-secondary-page :is(input:not([type=checkbox]):not([type=color]),textarea) {
+  box-sizing: border-box;
+  min-width: 0;
+  border-radius: 9px;
+}
+.inv-secondary-page :is(button,[role='tab']):focus-visible,
+.inv-secondary-page :is(input,textarea):focus-visible {
+  outline:2px solid var(--core-accent); outline-offset:2px;
+}
+.inv-secondary-page button { font:inherit; cursor:pointer; }
+.inv-secondary-page button:disabled { opacity:.48; cursor:not-allowed; }
+.inv-secondary-page .inv-core-header > button[appUiButton] {
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:7px;
+  height:34px;
+  min-height:34px;
+  padding:0 12px;
+  box-sizing:border-box;
+  border:1px solid #62798b;
+  border-radius:11px;
+  background:#263947;
+  color:#e7f0f8;
+  font-size:12px;
+  font-weight:700;
+  line-height:1.15;
+  white-space:nowrap;
+}
+.inv-secondary-page .inv-core-header > button[appUiButton] mat-icon {
+  width:18px;height:18px;font-size:18px;line-height:18px;
+}
+.inv-secondary-page :is(.sharing-card-heading button,.lookup-inline button,.fx-history-controls button),
+.inv-secondary-page.catalog-page button:not([appUiTableAction]):not(.ui-v3-1-parameter-action):not([role="tab"]) {
+  display:inline-flex;align-items:center;justify-content:center;gap:7px;
+  box-sizing:border-box;border:1px solid #647c8b;border-radius:9px;
+  min-height:34px;padding:6px 12px;background:#263947;color:#e5eff8;
+  font-size:12px;font-weight:700;
+}
+.inv-secondary-page button.primary,
+.inv-secondary-page .ruc-lookup:not(:disabled),
+.inv-secondary-page .lookup-inline button:not(.lookup-clear):not(:disabled),
+.inv-secondary-page .fx-history-controls button:not(:disabled) {
+  background:var(--core-accent);border-color:var(--core-accent);color:var(--core-accent-text);
+}
+.inv-secondary-page button mat-icon {vertical-align:middle;width:18px;height:18px;font-size:18px;line-height:18px;}
+.inv-secondary-page .inv-core-table-wrap { border-radius:10px; }
+.inv-secondary-page .inv-core-table-wrap > table > thead > tr > th:last-child,
+.inv-secondary-page .inv-core-table-wrap > table > tbody > tr > td:last-child {
+  text-align:center;
+}
+.inv-secondary-page .inv-core-table-wrap > table > thead > tr > th,
+.inv-secondary-page .inv-core-table-wrap > table > tbody > tr > td {padding-inline:12px;}
+.inv-secondary-page :is(.sharing-card,.ruc-panel,.fx-dashboard,.panel > form,.panel > .list) p {
+  font-size:12px;line-height:1.5;color:var(--secondary-text-muted);
+}
+
+/* Navegacion estilo Entradas/Salidas, tanto Angular nativo como botones ARIA. */
+.inv-secondary-page .inv-secondary-tabs {
+  display:flex;width:100%;min-width:0;gap:0;
+  margin:0; padding:0;
+  border-bottom:1px solid #536779;
+  background:transparent;
+}
+.inv-secondary-page .inv-secondary-tabs > button {
+  display:inline-flex;flex:1 1 0;align-items:center;justify-content:center;gap:7px;
+  min-width:0;min-height:44px;margin:0;padding:8px 10px;
+  border:0;border-bottom:2px solid transparent;border-radius:0;
+  background:transparent;color:#d4e2ed;font-weight:700;font-size:12px;
+}
+.inv-secondary-page .inv-secondary-tabs > button.active,
+.inv-secondary-page .inv-secondary-tabs > button[aria-selected='true'] {
+  border-bottom-color:var(--core-accent);
+  color:var(--core-accent);background:transparent;
+}
+.inv-secondary-page .inv-secondary-tabs > button mat-icon {width:19px;height:19px;font-size:19px;}
+
+/* 1. ARTICULOS ASIGNADOS: tarjetas de resumen, busqueda, tabs y tabla de custodias. */
+.inv-secondary-page.assignment-page {display:flex;flex-direction:column;}
+.inv-secondary-page.assignment-page .assignment-stats {
+  display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;min-width:0;
+}
+.inv-secondary-page.assignment-page .assignment-stat {
+  display:flex;flex-direction:column;gap:7px;
+  min-width:0;padding:16px;
+  border:1px solid var(--secondary-panel-border);border-radius:12px;
+  background:#192834;
+}
+.inv-secondary-page.assignment-page .assignment-stat > span {color:#b6c7d5;font-size:12px;font-weight:700;}
+.inv-secondary-page.assignment-page .assignment-stat strong {color:var(--core-accent);font-size:29px;line-height:1.15;}
+.inv-secondary-page.assignment-page .assignment-stat small {color:#94abbd;font-size:11px;}
+.inv-secondary-page.assignment-page .assignment-section {overflow:hidden;}
+.inv-secondary-page.assignment-page .assignment-search-row {margin:0;padding:14px 16px;}
+.inv-secondary-page.assignment-page .assignment-tabs {padding-inline:16px;}
+.inv-secondary-page.assignment-page .assignment-table-wrap {margin:12px 16px 16px;max-height:440px;}
+.inv-secondary-page.assignment-page .assignment-table-wrap > table {min-width:900px;}
+.inv-secondary-page.assignment-page .assignment-table-wrap tr[role=button] {cursor:pointer;}
+.inv-secondary-page.assignment-page .assignment-table-wrap tr[role=button]:focus-visible td {
+  outline:1px solid var(--core-accent);outline-offset:-1px;
+}
+.inv-secondary-page.assignment-page .assignment-table-wrap td strong {display:block;font-weight:700;}
+.inv-secondary-page.assignment-page .assignment-table-wrap td small {display:block;color:#9cbbcc;margin-top:3px;font-size:11px;}
+.inv-secondary-page.assignment-page .assignment-table__end {text-align:center;}
+.inv-secondary-page.assignment-page .assignment-table__end mat-icon {color:var(--core-accent);}
+.inv-secondary-page.assignment-page .assignment-tag {
+  display:inline-block;border:1px solid #637281;border-radius:20px;
+  padding:5px 9px;color:#d5e3ee;font-size:11px;white-space:nowrap;
+}
+.inv-secondary-page.assignment-page .assignment-state {
+  min-height:95px;margin:12px 16px 16px;padding:16px;display:flex;
+  align-items:center;justify-content:center;flex-direction:column;gap:6px;
+  border:1px dashed #4c6375;border-radius:10px;color:#b7c9d8;
+  text-align:center;font-size:12px;
+}
+.inv-secondary-page.assignment-page .assignment-state mat-icon {color:var(--core-accent);}
+.inv-secondary-page.assignment-page .assignment-state--error {color:#ffb4b8;min-height:52px;}
+.inv-secondary-page.assignment-page .assignment-state strong {color:#e9f4fc;}
+
+/* 2. COMPARTIR INVENTARIO: paneles adaptables y tabla de colaboradores. */
+.inv-secondary-page.sharing-page {display:flex;flex-direction:column;}
+.inv-secondary-page.sharing-page .sharing-info {align-self:flex-start;min-width:0;max-width:100%;}
+.inv-secondary-page.sharing-page .sharing-info summary {
+  display:inline-flex;align-items:center;gap:6px;padding:7px 10px;
+  border:1px solid #536a7d;border-radius:9px;color:#c8dbea;
+  font-size:12px;cursor:pointer;list-style:none;
+}
+.inv-secondary-page.sharing-page .sharing-info summary::-webkit-details-marker {display:none;}
+.inv-secondary-page.sharing-page .sharing-info summary mat-icon {color:var(--core-accent);}
+.inv-secondary-page.sharing-page .sharing-info p {
+  margin:8px 0 0;padding:10px 12px;line-height:1.5;
+  border:1px solid #536a7d;border-radius:9px;color:#c8d6e2;font-size:12px;
+}
+.inv-secondary-page.sharing-page .sharing-workspace {
+  display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);
+  gap:14px;min-width:0;align-items:start;
+}
+.inv-secondary-page.sharing-page .sharing-setup {
+  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:14px;min-width:0;align-items:start;
+}
+.inv-secondary-page.sharing-page .sharing-card {display:grid;align-content:start;gap:12px;padding:16px;}
+.inv-secondary-page.sharing-page .sharing-card h2 {margin:0;color:#edf5fb;font-size:16px;}
+.inv-secondary-page.sharing-page .sharing-card-heading {display:flex;justify-content:space-between;align-items:center;gap:9px;}
+.inv-secondary-page.sharing-page .sharing-card-heading button {white-space:nowrap;}
+.inv-secondary-page.sharing-page :is(label,.sharing-card label) {display:block;font-weight:700;font-size:12px;color:#c5d6e5;}
+.inv-secondary-page.sharing-page .sharing-form {display:grid;grid-template-columns:minmax(0,1fr);gap:10px;}
+.inv-secondary-page.sharing-page .sharing-form > div {min-width:0;display:grid;gap:6px;}
+.inv-secondary-page.sharing-page .sharing-form input {
+  width:100%;min-height:39px;height:39px;padding:8px 12px;
+  border:1px solid #647d8e;background:var(--secondary-input);color:#edf5fb;
+}
+.inv-secondary-page.sharing-page .sharing-form .primary {justify-self:end;}
+.inv-secondary-page.sharing-page .sharing-select {
+  display:block;width:100%;margin:0;min-width:0;
+  --mdc-outlined-text-field-outline-color:#60798a;
+  --mdc-outlined-text-field-focus-outline-color:var(--core-accent);
+}
+.inv-secondary-page.sharing-page .sharing-select .mat-mdc-text-field-wrapper,
+.inv-secondary-page.sharing-page .sharing-select .mat-mdc-form-field-infix {
+  box-sizing:border-box;height:39px;min-height:39px;
+}
+.inv-secondary-page.sharing-page .sharing-select .mat-mdc-text-field-wrapper {background:var(--secondary-input);border-radius:9px;}
+.inv-secondary-page.sharing-page .sharing-select .mat-mdc-form-field-infix {padding-block:8px;}
+.inv-secondary-page.sharing-page .sharing-select .mat-mdc-form-field-subscript-wrapper {display:none;}
+.inv-secondary-page.sharing-page .sharing-select .mat-mdc-select-value {color:#f1f6fb;}
+.inv-secondary-page.sharing-page .sharing-hint {color:#9fb5c6;font-size:11px;}
+.inv-secondary-page.sharing-page .sharing-error {color:#ffb0b8;font-size:12px;}
+.inv-secondary-page.sharing-page .sharing-state,.inv-secondary-page.sharing-page .empty {color:#aebdcb;font-size:12px;}
+.inv-secondary-page.sharing-page .sharing-members {min-width:0;}
+.inv-secondary-page.sharing-page .sharing-table-wrap {max-height:405px;}
+.inv-secondary-page.sharing-page .sharing-table-wrap > table {min-width:420px;}
+.inv-secondary-page.sharing-page .sharing-table-wrap :is(td:last-child,th:last-child) {text-align:center;}
+.inv-secondary-page.sharing-page .sharing-table-wrap td button.danger {
+  display:inline-grid;place-items:center;width:28px;height:28px;min-width:28px;min-height:28px;
+  margin:0;padding:0;border:1px solid transparent;border-radius:7px;
+  background:transparent;color:#ffabb4;
+}
+.inv-secondary-page.sharing-page .sharing-table-wrap td button.danger:hover {background:#513039;}
+
+/* 3. CONSULTAS SUNAT Y TIPO DE CAMBIO: dos columnas con historico intacto. */
+.inv-secondary-page.lookup-page {display:flex;flex-direction:column;}
+.inv-secondary-page.lookup-page .lookup-grid {
+  display:grid;grid-template-columns:minmax(0,.92fr) minmax(0,1.08fr);
+  gap:14px;min-width:0;align-items:start;
+}
+.inv-secondary-page.lookup-page .lookup-grid > section {padding:16px;min-width:0;}
+.inv-secondary-page.lookup-page .lookup-grid h2 {margin:0 0 10px;font-size:17px;}
+.inv-secondary-page.lookup-page .lookup-inline {display:flex;align-items:center;flex-wrap:wrap;gap:8px;}
+.inv-secondary-page.lookup-page .lookup-inline > input {
+  flex:1 1 190px;height:39px;padding:8px 12px;
+  border:1px solid #647d8e;background:var(--secondary-input);color:#edf5fb;
+}
+.inv-secondary-page.lookup-page .lookup-inline button {height:39px;min-height:39px;white-space:nowrap;padding:0 10px;}
+.inv-secondary-page.lookup-page .lookup-inline button.lookup-clear {background:#263947;color:#e1eff9;border-color:#5b7284;}
+.inv-secondary-page.lookup-page .ruc-panel .data {margin-top:12px;padding:12px;border:1px solid #485e6e;border-radius:9px;background:#1a2e3b;}
+.inv-secondary-page.lookup-page .ruc-panel .data p {margin:5px 0;overflow-wrap:anywhere;}
+.inv-secondary-page.lookup-page .ruc-panel .data strong {color:#ecf7ff;}
+.inv-secondary-page.lookup-page .error {color:#ffb0b8;font-size:12px;}
+.inv-secondary-page.lookup-page .fx-heading {display:flex;justify-content:space-between;gap:12px;align-items:center;}
+.inv-secondary-page.lookup-page .fx-heading h2 {margin:0 0 4px;}
+.inv-secondary-page.lookup-page .fx-heading p {margin:0;}
+.inv-secondary-page.lookup-page .fx-grid {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:12px;}
+.inv-secondary-page.lookup-page .fx-card {
+  display:grid;gap:9px;min-width:0;padding:12px;
+  border:1px solid #506778;border-radius:11px;
+  background:linear-gradient(145deg,#1b303e,#162733);
+}
+.inv-secondary-page.lookup-page .fx-card-heading {display:flex;align-items:center;gap:10px;}
+.inv-secondary-page.lookup-page .fx-symbol {
+  width:44px;height:44px;flex:0 0 44px;display:grid;place-items:center;
+  border-radius:10px;background:var(--core-accent-soft);color:var(--core-accent);
+  border:1px solid color-mix(in srgb,var(--core-accent) 50%,#4a6071);
+  font-size:17px;font-weight:800;
+}
+.inv-secondary-page.lookup-page .fx-symbol.fx-euro {background:#27404a;color:#c4e9f0;border-color:#4b7280;font-size:24px;}
+.inv-secondary-page.lookup-page .fx-title {display:grid;gap:3px;min-width:0;}
+.inv-secondary-page.lookup-page .fx-title strong {color:#edf6fc;font-size:13px;}
+.inv-secondary-page.lookup-page .fx-title small {color:#a8c0d0;font-size:11px;}
+.inv-secondary-page.lookup-page .fx-status {
+  justify-self:start;border-radius:20px;padding:5px 9px;
+  background:#253e32;border:1px solid #427b55;color:#afe4b7;font-size:11px;font-weight:700;
+}
+.inv-secondary-page.lookup-page .fx-status.fx-historical {background:#443a2b;border-color:#806b4d;color:#f4d3a0;}
+.inv-secondary-page.lookup-page .fx-prices {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;}
+.inv-secondary-page.lookup-page .fx-prices > div {padding:11px;border:1px solid #3f5667;border-radius:9px;background:#11212c;min-width:0;}
+.inv-secondary-page.lookup-page .fx-prices span {display:block;margin-bottom:5px;color:#a7bfcd;font-size:11px;}
+.inv-secondary-page.lookup-page .fx-prices strong {font-size:clamp(14px,1.2vw,21px);font-variant-numeric:tabular-nums;color:#f2f8fc;overflow-wrap:anywhere;}
+.inv-secondary-page.lookup-page .fx-date {padding-top:10px;border-top:1px solid #425969;font-size:11px;color:#abc0d0;}
+.inv-secondary-page.lookup-page .fx-empty {margin-top:12px;padding:16px;border:1px dashed #556c7c;border-radius:10px;color:#b7c7d7;font-size:12px;}
+.inv-secondary-page.lookup-page .fx-history-filters {margin-top:15px;padding-top:14px;border-top:1px solid #4a6170;}
+.inv-secondary-page.lookup-page .fx-history-filters h3 {margin:0 0 10px;font-size:13px;}
+.inv-secondary-page.lookup-page .fx-history-controls {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;align-items:end;}
+.inv-secondary-page.lookup-page .rate-date-field {display:grid;gap:5px;min-width:0;}
+.inv-secondary-page.lookup-page .rate-date-field label {font-size:12px;color:#c5d7e4;}
+.inv-secondary-page.lookup-page .fx-history-controls button {grid-column:1/-1;min-height:39px;}
+.inv-secondary-page.lookup-page .fx-mat-date {display:block;width:100%;margin:0;min-width:0;}
+.inv-secondary-page.lookup-page .fx-mat-date .mat-mdc-text-field-wrapper {height:39px;min-height:39px;background:var(--secondary-input);border-radius:9px;}
+.inv-secondary-page.lookup-page .fx-mat-date .mat-mdc-form-field-infix {height:39px;min-height:39px;padding-block:7px;}
+.inv-secondary-page.lookup-page .fx-mat-date .mat-mdc-form-field-subscript-wrapper {display:none;}
+.inv-secondary-page.lookup-page .fx-mat-date input {color:#eaf4fc;font-size:12px;}
+.inv-secondary-page.lookup-page .fx-mat-date .mat-datepicker-toggle {color:#b9cad7;}
+.inv-secondary-page.lookup-page .history-rates-scroll {max-height:250px;margin-top:12px;}
+.inv-secondary-page.lookup-page .history-rates-scroll > table {min-width:380px;}
+.inv-secondary-page.lookup-page .fx-disclaimer {margin:12px 0 0;color:#9cb2c2;font-size:11px;}
+
+/* 4. CATALOGO GENERAL: pestañas, formulario fiscal, proveedores y parametros. */
+.inv-secondary-page.catalog-page {display:flex;flex-direction:column;}
+.inv-secondary-page.catalog-page .panel {display:grid;grid-template-columns:minmax(0,.98fr) minmax(0,1.25fr);gap:14px;align-items:start;min-width:0;}
+.inv-secondary-page.catalog-page .panel.supplier-panel {grid-template-columns:minmax(0,1.16fr) minmax(0,.84fr);}
+.inv-secondary-page.catalog-page .panel > form,
+.inv-secondary-page.catalog-page .panel > .list {padding:16px;min-width:0;}
+.inv-secondary-page.catalog-page .panel h2 {margin:0 0 12px;font-size:16px;}
+.inv-secondary-page.catalog-page .panel .list {min-width:0;}
+.inv-secondary-page.catalog-page .panel .fields {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;}
+.inv-secondary-page.catalog-page .panel .fields > label {display:flex;flex-direction:column;gap:5px;min-width:0;color:#c8d9e8;font-size:12px;}
+.inv-secondary-page.catalog-page .panel .fields :is(input,textarea) {
+  display:block;width:100%;padding:9px 11px;
+  border:1px solid #5b7588;background:var(--secondary-input);color:#eff6fb;
+  font-size:12px;
+}
+.inv-secondary-page.catalog-page .panel .fields input {height:39px;}
+.inv-secondary-page.catalog-page .panel .fields textarea {min-height:100px;resize:vertical;line-height:1.5;}
+.inv-secondary-page.catalog-page .panel .fields > label:last-child:has(textarea) {grid-column:1/-1;}
+.inv-secondary-page.catalog-page .panel .fields > label:last-child:has(textarea) textarea {min-height:112px;}
+.inv-secondary-page.catalog-page .panel .actions {display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:flex-end;margin-top:14px;}
+.inv-secondary-page.catalog-page .panel .actions button.primary {background:var(--core-accent);border-color:var(--core-accent);color:var(--core-accent-text);}
+.inv-secondary-page.catalog-page .panel .hint {margin:12px 0 0;}
+.inv-secondary-page.catalog-page .supplier-panel .supplier-ruc-control {
+  display:grid;grid-column:1/-1;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:end;min-width:0;
+}
+.inv-secondary-page.catalog-page .supplier-ruc-control label {display:grid;gap:5px;min-width:0;font-size:12px;}
+.inv-secondary-page.catalog-page .supplier-ruc-control input {width:100%;height:39px;padding:8px 11px;border:1px solid #5b7588;background:var(--secondary-input);color:#eff6fb;}
+.inv-secondary-page.catalog-page .supplier-ruc-control .ruc-lookup {height:39px;min-height:39px;white-space:nowrap;}
+.inv-secondary-page.catalog-page .supplier-panel .supplier-relationship-field {grid-column:1/-1;}
+.inv-secondary-page.catalog-page .fiscal-summary {margin-top:14px;padding:14px;border:1px solid #526b7a;border-radius:10px;background:#13222e;}
+.inv-secondary-page.catalog-page .fiscal-summary h3 {margin:0 0 12px;font-size:13px;}
+.inv-secondary-page.catalog-page .fiscal-summary h3 span {display:block;margin-top:3px;color:#a9bfca;font-size:11px;font-weight:400;}
+.inv-secondary-page.catalog-page .fiscal-summary dl {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:0;}
+.inv-secondary-page.catalog-page .fiscal-summary dl > div {min-width:0;border-bottom:1px solid #3b5261;padding-bottom:8px;}
+.inv-secondary-page.catalog-page .fiscal-summary dt {font-size:11px;color:#adbfcd;}
+.inv-secondary-page.catalog-page .fiscal-summary dd {margin:3px 0 0;overflow-wrap:anywhere;font-size:12px;color:#eff6fb;}
+.inv-secondary-page.catalog-page .supplier-list {padding:0!important;overflow:hidden;}
+.inv-secondary-page.catalog-page .supplier-list-heading {padding:16px;border-bottom:1px solid #41596b;}
+.inv-secondary-page.catalog-page .supplier-heading-title {display:flex;align-items:center;gap:10px;}
+.inv-secondary-page.catalog-page .supplier-heading-title h2 {margin:0 0 4px;font-size:15px;}
+.inv-secondary-page.catalog-page .supplier-heading-title p {margin:0;color:#aabfcd;font-size:11px;}
+.inv-secondary-page.catalog-page .supplier-heading-icon {
+  width:36px;height:36px;display:grid;place-items:center;flex:0 0 36px;border-radius:9px;
+  background:var(--core-accent-soft);color:var(--core-accent);
+}
+.inv-secondary-page.catalog-page .supplier-heading-icon mat-icon {width:20px;height:20px;font-size:20px;}
+.inv-secondary-page.catalog-page .supplier-list > .inv-core-toolbar {padding:12px 16px;margin:0;}
+.inv-secondary-page.catalog-page .supplier-list > .supplier-table-viewport {margin:0 12px 12px;max-height:420px;}
+.inv-secondary-page.catalog-page .supplier-table-viewport > table {min-width:430px;}
+.inv-secondary-page.catalog-page .supplier-table .supplier-row-detail {cursor:pointer;}
+.inv-secondary-page.catalog-page .supplier-table .supplier-row-detail:focus-visible td {outline:1px solid var(--core-accent);outline-offset:-2px;}
+.inv-secondary-page.catalog-page .supplier-table :is(th.supplier-actions-col,td.supplier-actions-col) {text-align:center;width:88px;white-space:nowrap;}
+.inv-secondary-page.catalog-page .supplier-ruc {white-space:nowrap;font-variant-numeric:tabular-nums;color:#c2e0f1;}
+.inv-secondary-page.catalog-page .supplier-name {display:block;color:#eff7fc;font-size:12px;overflow-wrap:anywhere;}
+.inv-secondary-page.catalog-page .supplier-status-group {display:flex;justify-content:flex-start;}
+.inv-secondary-page.catalog-page .supplier-status-pill {
+  display:inline-flex;align-items:center;gap:6px;padding:4px 9px;border:1px solid transparent;
+  border-radius:100px;font-size:11px;font-weight:700;white-space:nowrap;
+}
+.inv-secondary-page.catalog-page .supplier-status-pill::before {content:'';display:inline-block;width:6px;height:6px;border-radius:50%;background:currentColor;}
+.inv-secondary-page.catalog-page .supplier-status--active {background:#233e2e;border-color:#4c8156;color:#b7e8be;}
+.inv-secondary-page.catalog-page .supplier-status--inactive {background:#482e35;border-color:#8c5360;color:#ffb4bb;}
+.inv-secondary-page.catalog-page .supplier-action-group {display:flex;align-items:center;justify-content:center;gap:5px;}
+.inv-secondary-page.catalog-page .supplier-empty {display:grid;place-items:center;gap:5px;padding:24px;text-align:center;color:#afc2cf;font-size:12px;}
+.inv-secondary-page.catalog-page .supplier-empty mat-icon {color:var(--core-accent);}
+.inv-secondary-page.catalog-page .supplier-list button[appUiTableAction],
+.inv-secondary-page.catalog-page .parameter-table-viewport button.ui-v3-1-parameter-action {
+  width:28px;height:28px;min-width:28px;min-height:28px;padding:0;margin:0 2px;
+  display:inline-flex;align-items:center;justify-content:center;
+  border:1px solid transparent;border-radius:7px;background:transparent;color:var(--core-accent);
+}
+.inv-secondary-page.catalog-page .parameter-table-viewport button.ui-v3-1-parameter-action--danger {color:#ffabb4;}
+.inv-secondary-page.catalog-page .supplier-list button[appUiTableAction='danger'] {color:#ffabb4;}
+.inv-secondary-page.catalog-page .parameter-table-viewport button.ui-v3-1-parameter-action mat-icon {width:19px;height:19px;font-size:19px;}
+.inv-secondary-page.catalog-page .supplier-list button[appUiTableAction]:hover,
+.inv-secondary-page.catalog-page .parameter-table-viewport button.ui-v3-1-parameter-action:hover {background:var(--core-accent-soft);}
+.inv-secondary-page.catalog-page .parameter-table-viewport {max-height:390px;}
+.inv-secondary-page.catalog-page .parameter-table-viewport > table {min-width:640px;}
+.inv-secondary-page.catalog-page .parameter-table-viewport :is(th:last-child,td:last-child) {width:100px;text-align:center;white-space:nowrap;}
+.inv-secondary-page.catalog-page .parameter-table-viewport td:nth-child(3) {max-width:420px;overflow-wrap:anywhere;}
+.inv-secondary-page.catalog-page .list > .inv-core-toolbar {margin:0 0 12px;}
+
+@media(max-width:1250px) {
+  .inv-secondary-page.lookup-page .lookup-grid {grid-template-columns:1fr;}
+  .inv-secondary-page.lookup-page .fx-grid {grid-template-columns:repeat(2,minmax(0,1fr));}
+  .inv-secondary-page.sharing-page .sharing-workspace {grid-template-columns:1fr;}
+}
+@media(max-width:1000px) {
+  .inv-secondary-page.catalog-page .panel,
+  .inv-secondary-page.catalog-page .panel.supplier-panel {grid-template-columns:1fr;}
+  .inv-secondary-page.catalog-page .supplier-list {min-width:0;}
+}
+@media(max-width:800px) {
+  .inv-secondary-page.assignment-page .assignment-stats {grid-template-columns:1fr;}
+  .inv-secondary-page.sharing-page .sharing-setup {grid-template-columns:1fr;}
+}
+@media(max-width:650px) {
+  .inv-secondary-page.lookup-page .fx-grid {grid-template-columns:1fr;}
+  .inv-secondary-page.catalog-page .panel .fields {grid-template-columns:1fr;}
+  .inv-secondary-page.catalog-page .supplier-panel .supplier-ruc-control {grid-template-columns:minmax(0,1fr) auto;}
+  .inv-secondary-page .inv-secondary-tabs > button {font-size:11px;padding-inline:5px;}
+  .inv-secondary-page.assignment-page .assignment-tabs {padding-inline:8px;}
+  .inv-secondary-page.assignment-page .assignment-table-wrap {margin-inline:8px;}
+  .inv-secondary-page.sharing-page .sharing-workspace {grid-template-columns:1fr;}
+}
+@media(max-width:460px) {
+  .inv-secondary-page.lookup-page .fx-history-controls {grid-template-columns:1fr;}
+  .inv-secondary-page.catalog-page .supplier-panel .supplier-ruc-control {grid-template-columns:1fr;}
+  .inv-secondary-page.lookup-page .lookup-inline > button {flex:1 1 auto;}
+  .inv-secondary-page .inv-secondary-tabs > button {flex-wrap:wrap;}
+}
