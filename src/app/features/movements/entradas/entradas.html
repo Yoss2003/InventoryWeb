@@ -12,7 +12,7 @@
   <div class="inv-core-toolbar"><app-ui-search [(value)]="search" placeholder="Buscar artículo, código o modelo" label="Buscar en entradas" /></div>
   <app-loading-indicator *ngIf="loading && !hasLoaded" message="Consultando inventario y movimientos..." />
   <p *ngIf="error" class="entries-loading" role="alert">{{error}}</p>
-  <mat-tab-group *ngIf="hasLoaded && (!error || standard.length || bulk.length || serialized.length || movements.length)" animationDuration="250ms" class="entries-tabs inv-core-tabs" [selectedIndex]="selectedEntryTab" (selectedIndexChange)="selectedEntryTab = $event">
+  <mat-tab-group *ngIf="hasLoaded && (!error || standard.length || bulk.length || serialized.length || movements.length)" animationDuration="0ms" class="entries-tabs inv-core-tabs" appTabViewTransition [selectedIndex]="selectedEntryTab" (selectedIndexChange)="selectedEntryTab = $event">
     <mat-tab label="Estándar"><ng-container *ngTemplateOutlet="articleRows;context:{$implicit:filteredStandard}"></ng-container></mat-tab>
     <mat-tab label="A granel"><ng-container *ngTemplateOutlet="articleRows;context:{$implicit:filteredBulk}"></ng-container></mat-tab>
     <mat-tab label="Serializados"><ng-container *ngTemplateOutlet="articleRows;context:{$implicit:filteredSerialized}"></ng-container></mat-tab>

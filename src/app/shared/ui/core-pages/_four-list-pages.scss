@@ -321,15 +321,45 @@
   border-color: var(--core-accent);
 }
 .inv-core-page .inv-core-tabs .inv-core-table-wrap { margin-top: 12px; }
-.inv-core-page .inv-core-tabs .mat-mdc-tab-body .mat-mdc-tab-body-content {
-  opacity: 0;
-  transition: opacity 130ms ease-in;
+/* FADE_COMPARTIDO_ENTRADAS_SALIDAS_V1: transición nativa del contenido, sin overlays ni copias de tablas. */
+.inv-core-page .entries-tabs .mat-mdc-tab-body-wrapper {
+  view-transition-name: inv-entries-tab-content;
+}
+.inv-core-page .outputs-tabs .mat-mdc-tab-body-wrapper {
+  view-transition-name: inv-outputs-tab-content;
 }
 
-.inv-core-page .inv-core-tabs .mat-mdc-tab-body.mat-mdc-tab-body-active .mat-mdc-tab-body-content {
-  opacity: 1;
-  transition: opacity 150ms ease-out 110ms;
+@keyframes inv-movement-tab-out {
+  from { opacity: 1; transform: translateX(0); }
+  to   { opacity: 0; transform: translateX(-10px); }
 }
+@keyframes inv-movement-tab-in {
+  from { opacity: 0; transform: translateX(10px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+::view-transition-old(inv-entries-tab-content),
+::view-transition-old(inv-outputs-tab-content) {
+  animation: inv-movement-tab-out 130ms ease-in both;
+}
+::view-transition-new(inv-entries-tab-content),
+::view-transition-new(inv-outputs-tab-content) {
+  animation: inv-movement-tab-in 150ms ease-out 130ms both;
+}
+
+/* No hay motivo para animar también el resto del dashboard. */
+html.inv-movement-tab-transition::view-transition-old(root),
+html.inv-movement-tab-transition::view-transition-new(root) {
+  animation: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(inv-entries-tab-content),
+  ::view-transition-new(inv-entries-tab-content),
+  ::view-transition-old(inv-outputs-tab-content),
+  ::view-transition-new(inv-outputs-tab-content) { animation: none; }
+}
+
 /* Utilidades puntuales de contenido. */
 .inv-core-page .catalog-state,
 .inv-core-page .entries-loading,
@@ -403,8 +433,3 @@
   }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .inv-core-page .inv-core-tabs .mat-mdc-tab-body-content {
-    transition: none;
-  }
-}

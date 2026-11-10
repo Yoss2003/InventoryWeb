@@ -7,6 +7,7 @@ import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTabsModule } from '@angular/material/tabs';
+import { TabViewTransitionDirective } from '../../../shared/ui/tab-view-transition.directive';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { forkJoin, filter, take } from 'rxjs';
@@ -23,7 +24,7 @@ import { LoadingIndicatorComponent } from '../../../shared/loading/loading-indic
 
 import { UiSearchComponent } from '../../../shared/ui/ui-search.component';
 
-@Component({selector:'app-entradas',standalone:true,imports:[UiEmptyStateComponent, UiTableActionDirective, UiButtonDirective, UiPageHeadingComponent, CommonModule,MatIconModule,MatTabsModule,LoadingIndicatorComponent,UiSearchComponent],templateUrl:'./entradas.html',styleUrl:'./entradas.scss'})
+@Component({selector:'app-entradas',standalone:true,imports:[UiEmptyStateComponent, UiTableActionDirective, UiButtonDirective, UiPageHeadingComponent, CommonModule,MatIconModule,MatTabsModule,TabViewTransitionDirective,LoadingIndicatorComponent,UiSearchComponent],templateUrl:'./entradas.html',styleUrl:'./entradas.scss'})
 export class EntradasComponent implements OnInit {
   private readonly dialog=inject(MatDialog);
   private readonly articles=inject(ArticleService);

@@ -1,0 +1,45 @@
+/* WebInventory: indicadores flotantes compartidos para tablas.
+   Una sola implementacion, sin alterar la estructura ni las columnas de Angular. */
+.inv-overlay-scroll-target {
+  scrollbar-width: none !important;
+  -ms-overflow-style: none;
+}
+.inv-overlay-scroll-target::-webkit-scrollbar {
+  width: 0 !important;
+  height: 0 !important;
+  display: none;
+}
+
+.inv-table-scroll-track {
+  position: fixed;
+  z-index: 1150;
+  box-sizing: border-box;
+  padding: 0;
+  overflow: hidden;
+  border-radius: 10px;
+  background: color-mix(in srgb, #273947 82%, transparent);
+  touch-action: none;
+  cursor: pointer;
+  user-select: none;
+}
+.inv-table-scroll-thumb {
+  position: absolute;
+  top: 0;
+  left: 0;
+  box-sizing: border-box;
+  border-radius: inherit;
+  background: var(--inv-company-accent, #9226e8);
+  cursor: grab;
+  touch-action: none;
+}
+.inv-table-scroll-track:active .inv-table-scroll-thumb { cursor: grabbing; }
+.inv-table-scroll-track:focus-visible {
+  outline: 2px solid var(--inv-company-accent, #9226e8);
+  outline-offset: 2px;
+}
+.inv-table-scroll-track:hover .inv-table-scroll-thumb {
+  background: color-mix(in srgb, var(--inv-company-accent, #9226e8) 82%, white);
+}
+@media (prefers-reduced-motion: reduce) {
+  .inv-table-scroll-track, .inv-table-scroll-thumb { transition: none; }
+}

@@ -67,11 +67,14 @@
 
 /* Menú lateral agrupado */
 .sidebar-groups {
+  box-sizing: border-box;
   height: calc(100% - 70px);
   padding: 10px 6px;
   overflow-y: auto;
   overflow-x: hidden;
+
   scrollbar-width: thin;
+  scrollbar-color: var(--inv-company-accent, #9226e8) transparent;
 }
 
 .sidebar-group {
@@ -145,7 +148,7 @@
 }
 
 :host ::ng-deep .sidenav .mat-drawer-inner-container {
-  overflow-x: hidden;
+  overflow: hidden;
 }
 
 @media (max-width: 700px) {
