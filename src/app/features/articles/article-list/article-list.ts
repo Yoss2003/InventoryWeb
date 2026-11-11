@@ -38,6 +38,7 @@ export class ArticleListComponent implements OnInit {
   private readonly snack=inject(MatSnackBar);
   dataSource:ArticleRow[]=[];
   search='';showInactive=false;loading=false;hasLoaded=false;error='';
+  get hasOperationalInventory(): boolean { return this.inventoryContext.activeInventoryId !== null; }
   get visible():ArticleRow[]{
     const q=this.search.trim().toLocaleLowerCase('es');
     return this.dataSource.filter(a=>(this.showInactive||a.isActive)&&

@@ -43,6 +43,11 @@ export class MainLayoutComponent {
   inventories: InventorySummary[]=[];
   selectedInventoryId: number | null = null;
   loadingInventories = true;
+  inventoryLoadFailed = false;
+  generalInventoryExists = false;
+  get noOperationalInventories(): boolean {
+    return !this.loadingInventories && !this.inventoryLoadFailed && this.inventories.length === 0;
+  }
   private readonly platform=inject(PLATFORM_ID);
   get isDeveloper(): boolean { if(!isPlatformBrowser(this.platform))return false;try{return Number(JSON.parse(localStorage.getItem('userSession')||'{}').roleId)===1;}catch{return false;} }
   get isAdmin(): boolean { if(!isPlatformBrowser(this.platform))return false;try{return [1,2].includes(Number(JSON.parse(localStorage.getItem('userSession')||'{}').roleId));}catch{return false;} }
@@ -135,12 +140,15 @@ export class MainLayoutComponent {
     });
     this.inventoryApi.getInventories().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: rows => {
+        this.inventoryLoadFailed = false;
+        this.generalInventoryExists = rows.some(i => i.isMaster && i.isActive);
         this.inventoryContext.initialize(rows, Number(session.id) || 0);
         this.inventories = this.inventoryContext.options;
         this.selectedInventoryId = this.inventoryContext.activeInventoryId;
         this.loadingInventories = false;
       },
       error: () => {
+        this.inventoryLoadFailed = true;
         this.loadingInventories = false;
         this.toast.error('No se pudieron cargar los inventarios.');
       }
