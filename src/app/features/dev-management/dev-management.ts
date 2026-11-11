@@ -413,13 +413,17 @@ export class DevManagementComponent implements OnInit, OnDestroy {
   /** Confirmación coherente con el tema oscuro, con soporte de Escape y foco del teclado. */
   private askConfirmation(data: DevConfirmDialogData, onConfirm: () => void): void {
     this.dialog.open(DevConfirmDialogComponent, {
-      width: 'min(440px, calc(100vw - 32px))',
-      maxWidth: 'calc(100vw - 32px)',
+      panelClass: ['inv-seven-modal', 'inv-standard-confirm-modal'],
+      width: 'min(470px, calc(100vw - 24px))',
+      maxWidth: 'calc(100vw - 24px)',
+      maxHeight: 'calc(100dvh - 24px)',
+      enterAnimationDuration: 260,
+      exitAnimationDuration: 220,
       autoFocus: 'first-tabbable',
       restoreFocus: true,
       data
-    }).afterClosed().subscribe((confirmed: boolean | undefined) => {
-      if (confirmed) onConfirm();
+    }).afterClosed().subscribe((confirmed: boolean | string | undefined) => {
+      if (confirmed === true) onConfirm();
     });
   }
 
