@@ -1,5 +1,7 @@
 
-<div class="sale-dialog ui-v2-dialog ui-v2-dialog--special">
+<div
+  class="sale-dialog ui-v2-dialog ui-v2-dialog--special"
+  [invDialogMotion]="step">
 
   <header class="sale-header">
     <div class="sale-header__identity">
@@ -23,40 +25,62 @@
     </button>
   </header>
 
+  <!-- NAVEGACIÓN -->
   <nav class="sale-steps" aria-label="Etapas de la venta">
+
     <button
       type="button"
-      [class.active]="step === 1"
-      [class.completed]="step > 1"
+      class="sale-step-button"
+      [class.is-active]="step === 1"
+      [class.is-done]="step > 1"
+      [attr.aria-current]="step === 1 ? 'step' : null"
+      [disabled]="submitting"
       (click)="goStep(1)">
-      <span>1</span> Artículos
+
+      <span class="sale-step-index">
+        <mat-icon *ngIf="step > 1">check</mat-icon>
+        <ng-container *ngIf="step <= 1">1</ng-container>
+      </span>
+      Artículos
     </button>
 
-    <span class="step-line"></span>
+    <span class="sale-step-line"></span>
 
     <button
       type="button"
-      [class.active]="step === 2"
-      [class.completed]="step > 2"
-      [disabled]="!canAdvanceArticle"
+      class="sale-step-button"
+      [class.is-active]="step === 2"
+      [class.is-done]="step > 2"
+      [attr.aria-current]="step === 2 ? 'step' : null"
+      [disabled]="submitting || !canAdvanceArticle"
       (click)="goStep(2)">
-      <span>2</span> Comprador
+
+      <span class="sale-step-index">
+        <mat-icon *ngIf="step > 2">check</mat-icon>
+        <ng-container *ngIf="step <= 2">2</ng-container>
+      </span>
+      Comprador
     </button>
 
-    <span class="step-line"></span>
+    <span class="sale-step-line"></span>
 
     <button
       type="button"
-      [class.active]="step === 3"
-      [disabled]="!canAdvanceArticle || !canAdvanceCustomer"
+      class="sale-step-button"
+      [class.is-active]="step === 3"
+      [attr.aria-current]="step === 3 ? 'step' : null"
+      [disabled]="submitting || !canAdvanceArticle || !canAdvanceCustomer"
       (click)="goStep(3)">
-      <span>3</span> Pago
+
+      <span class="sale-step-index">3</span>
+      Pago
     </button>
+
   </nav>
 
   <main class="sale-body" [formGroup]="form">
 
-    <!-- ETAPA 1: ARTÍCULOS -->
+    <!-- PASO 1 -->
     <section class="sale-step" *ngIf="step === 1">
       <div class="step-heading">
         <mat-icon>inventory_2</mat-icon>
@@ -68,13 +92,12 @@
 
       <div class="sale-grid">
         <div class="sale-field wide">
-          <label class="sale-field__label" for="pos-article">
+          <label class="sale-field__label">
             Artículo <span class="required">*</span>
           </label>
 
           <mat-form-field appearance="outline">
             <mat-select
-              id="pos-article"
               formControlName="articleId"
               placeholder="Seleccionar artículo"
               panelClass="inventory-select-options">
@@ -92,27 +115,19 @@
             <small>Código</small>
             <strong>{{ chosen.code }}</strong>
           </div>
-
           <div>
             <small>Modelo</small>
             <strong>{{ chosen.model || '—' }}</strong>
           </div>
-
           <div>
             <small>Seguimiento</small>
             <strong>{{ trackingLabel }}</strong>
           </div>
-
           <div>
             <small>Stock disponible</small>
             <strong>
               {{ chosen.stock }} {{ chosen.measurementUnit }}
             </strong>
-          </div>
-
-          <div>
-            <small>Condición</small>
-            <strong>No detallada en este registro</strong>
           </div>
         </div>
 
@@ -120,28 +135,25 @@
           <label class="sale-field__label" for="pos-quantity">
             Cantidad <span class="required">*</span>
           </label>
-
           <input
             id="pos-quantity"
-            formControlName="quantity"
             type="number"
             min="0.01"
             step="0.01"
+            formControlName="quantity"
             [readOnly]="isSerialized" />
         </div>
 
         <div class="sale-field">
           <label class="sale-field__label" for="pos-price">
-            Precio unitario (S/)
-            <span class="required">*</span>
+            Precio unitario (S/) <span class="required">*</span>
           </label>
-
           <input
             id="pos-price"
-            formControlName="unitPrice"
             type="number"
             min="0"
-            step="0.01" />
+            step="0.01"
+            formControlName="unitPrice" />
         </div>
       </div>
 
@@ -158,14 +170,15 @@
               unit.id,
               $any($event.target).checked
             )" />
+
           Serie {{ unit.serialNumber }} · Unidad #{{ unit.id }}
         </label>
 
         <p *ngIf="!availableSerials.length">
-          No hay series disponibles; registra las unidades antes de vender.
+          No hay series disponibles; registra primero las unidades.
         </p>
 
-        <p class="sale-warning" *ngIf="serialError">
+        <p *ngIf="serialError" class="sale-warning">
           {{ serialError }}
         </p>
 
@@ -173,17 +186,93 @@
       </div>
     </section>
 
-    <!-- ETAPA 2: COMPRADOR -->
+    <!-- PASO 2 -->
     <section class="sale-step" *ngIf="step === 2">
       <div class="step-heading">
         <mat-icon>badge</mat-icon>
         <div>
           <strong>Datos del comprador</strong>
-          <small>Identifica al cliente que recibirá los artículos.</small>
+          <small>Consulta SUNAT o registra los datos manualmente.</small>
         </div>
       </div>
 
-      <div class="sale-grid">
+      <div class="sale-ruc-panel">
+        <div class="sale-ruc-panel__heading">
+          <mat-icon>manage_search</mat-icon>
+          <div>
+            <strong>Consulta SUNAT</strong>
+            <small>Buscar una empresa por RUC</small>
+          </div>
+        </div>
+
+        <div class="sale-ruc-row">
+          <div class="sale-field">
+            <label class="sale-field__label" for="pos-ruc">
+              RUC <span class="optional">(opcional)</span>
+            </label>
+
+            <input
+              id="pos-ruc"
+              type="text"
+              inputmode="numeric"
+              autocomplete="off"
+              maxlength="11"
+              placeholder="11 dígitos"
+              [value]="rucQuery"
+              (input)="onRucInput($event)" />
+          </div>
+
+          <button
+            type="button"
+            class="sale-ruc-search"
+            [disabled]="loadingRuc || rucQuery.length !== 11"
+            (click)="consultarRuc()">
+            <mat-icon>search</mat-icon>
+            {{ loadingRuc ? 'Consultando...' : 'Consultar' }}
+          </button>
+        </div>
+
+        <p class="sale-ruc-error" *ngIf="sunatError" role="alert">
+          {{ sunatError }}
+        </p>
+
+        <div class="sale-ruc-result" *ngIf="sunatResult as empresa">
+          <div class="sale-ruc-result__title">
+            <mat-icon>check_circle</mat-icon>
+            <strong>Resultado de consulta</strong>
+          </div>
+
+          <div class="sale-ruc-result__grid">
+            <div>
+              <span>RUC</span>
+              <strong>{{ empresa.ruc }}</strong>
+            </div>
+            <div>
+              <span>Razón social</span>
+              <strong>{{ empresa.businessName }}</strong>
+            </div>
+            <div>
+              <span>Estado</span>
+              <strong>{{ empresa.estado || 'No informado' }}</strong>
+            </div>
+            <div>
+              <span>Condición</span>
+              <strong>{{ empresa.condicion || 'No informada' }}</strong>
+            </div>
+            <div class="wide">
+              <span>Dirección fiscal</span>
+              <strong>{{ empresa.address || 'No informada' }}</strong>
+            </div>
+          </div>
+        </div>
+
+        <small class="sale-ruc-note">
+          La razón social se completa automáticamente.
+          Esta venta registra el nombre del comprador, no el RUC.
+        </small>
+      </div>
+
+      <div class="sale-grid sale-customer-fields">
         <div class="sale-field wide">
           <label class="sale-field__label" for="pos-customer">
             Nombre / razón social
@@ -198,43 +287,32 @@
             placeholder="Nombre de persona o empresa" />
         </div>
       </div>
-
-      <div class="sale-warning muted">
-        <mat-icon>info_outline</mat-icon>
-        <span>
-          La consulta automática de DNI/RUC todavía requiere una
-          integración validada. Esta versión registra el nombre
-          del comprador, sin simular una verificación de identidad.
-        </span>
-      </div>
     </section>
 
-    <!-- ETAPA 3: PAGO -->
+    <!-- PASO 3 -->
     <section class="sale-step" *ngIf="step === 3">
       <div class="step-heading">
         <mat-icon>payments</mat-icon>
         <div>
           <strong>Cierre de venta</strong>
-          <small>Confirma el total y selecciona la forma de pago.</small>
+          <small>Revisa los datos y confirma el pago.</small>
         </div>
       </div>
 
       <div class="sale-grid">
         <div class="sale-field wide">
-          <label class="sale-field__label" for="pos-payment">
-            Método de pago
-            <span class="required">*</span>
+          <label class="sale-field__label">
+            Método de pago <span class="required">*</span>
           </label>
 
           <mat-form-field appearance="outline">
             <mat-select
-              id="pos-payment"
               formControlName="paymentMethod"
               panelClass="inventory-select-options">
               <mat-option
-                *ngFor="let m of paymentMethods"
-                [value]="m">
-                {{ m }}
+                *ngFor="let method of paymentMethods"
+                [value]="method">
+                {{ method }}
               </mat-option>
             </mat-select>
           </mat-form-field>
@@ -242,8 +320,7 @@
 
         <div class="sale-field wide">
           <label class="sale-field__label" for="pos-notes">
-            Observaciones
-            <span class="optional">(opcional)</span>
+            Observaciones <span class="optional">(opcional)</span>
           </label>
 
           <textarea
@@ -256,44 +333,51 @@
         </div>
       </div>
 
-      <div class="checkout-summary">
-        <div>
-          <small>Artículo</small>
-          <strong>{{ chosen?.name || '—' }}</strong>
+      <div class="sale-sale-summary">
+        <div class="sale-sale-summary__heading">
+          <mat-icon>receipt_long</mat-icon>
+          <strong>Resumen de la venta</strong>
         </div>
 
-        <div>
-          <small>Cliente</small>
-          <strong>{{ form.controls.customerName.value }}</strong>
+        <div class="checkout-summary">
+          <div>
+            <small>Artículo</small>
+            <strong>{{ chosen?.name || '—' }}</strong>
+          </div>
+
+          <div>
+            <small>Comprador</small>
+            <strong>{{ form.controls.customerName.value }}</strong>
+          </div>
+
+          <div>
+            <small>Cantidad</small>
+            <strong>{{ form.controls.quantity.value }}</strong>
+          </div>
+
+          <div>
+            <small>Precio unitario</small>
+            <strong>
+              S/ {{ form.controls.unitPrice.value | number:'1.2-2' }}
+            </strong>
+          </div>
         </div>
 
-        <div>
-          <small>Cantidad</small>
-          <strong>{{ form.controls.quantity.value }}</strong>
+        <div class="sale-total">
+          <span>Total de venta</span>
+          <strong>S/ {{ total | number:'1.2-2' }}</strong>
         </div>
-
-        <div>
-          <small>Precio unitario</small>
-          <strong>
-            S/ {{ form.controls.unitPrice.value | number:'1.2-2' }}
-          </strong>
-        </div>
-      </div>
-
-      <div class="sale-total">
-        <span>Total de venta</span>
-        <strong>S/ {{ total | number:'1.2-2' }}</strong>
       </div>
 
       <p class="sale-hint">
-        Venta interna. No genera comprobante SUNAT
+        Venta interna. No emite comprobantes SUNAT
         ni procesa pagos externos.
       </p>
     </section>
 
   </main>
 
-  <!-- PIE ÚNICO -->
+  <!-- PIE -->
   <footer class="sale-footer">
     <button
       *ngIf="step > 1"
