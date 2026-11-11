@@ -7,6 +7,7 @@ import { MAT_DIALOG_DATA, MatDialog, MatDialogModule, MatDialogRef } from '@angu
 import { PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { ToastService } from '../../../shared/toast/toast.service';
+import { ConfirmationDialogService } from '../../../shared/confirm-dialog/confirmation-dialog.service';
 import { CatalogSimilarDialogComponent, CatalogSimilarChoice } from '../../../shared/catalog-similar-dialog/catalog-similar-dialog';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatIconModule } from '@angular/material/icon';
@@ -33,6 +34,7 @@ export class BrandDialogComponent implements OnInit {
   private readonly brandsService = inject(BrandService);
   private readonly toast = inject(ToastService);
   private readonly dialogs = inject(MatDialog);
+  private readonly confirms = inject(ConfirmationDialogService);
   private readonly platformId = inject(PLATFORM_ID);
   get canManage(): boolean {
     if (!isPlatformBrowser(this.platformId)) return false;
@@ -213,28 +215,35 @@ export class BrandDialogComponent implements OnInit {
 
   deleteBrand(brand: Brand): void {
     if (!this.canManage || this.isSaving || !brand.isActive || this.editingBrand?.id === brand.id) return;
-    if (!window.confirm(`¿Deseas eliminar la marca "${brand.name}"?`)) return;
-
-    this.isSaving = true;
-    this.saveError = '';
-    this.successMessage = '';
-    this.brandsService.deleteBrand(brand.id).subscribe({
-      next: () => {
-        // La API debe realizar BAJA LÓGICA: IsActive = false.
-        this.brands = this.brands.map(item =>
-          item.id === brand.id ? { ...item, isActive: false } : item
-        );
-        this.isSaving = false;
-        this.hasChanges = true;
-        this.successMessage = 'Marca desactivada correctamente.';
-        this.toast.success(this.successMessage);
-        this.cdr.markForCheck();
-      },
-      error: (error: HttpErrorResponse) => {
-        this.isSaving = false;
-        this.saveError = this.formatHttpError(error, 'eliminar');
-        this.cdr.markForCheck();
-      }
+    this.confirms.confirm({
+      title: 'Desactivar marca',
+      message: `¿Desactivar «${brand.name}»? Se conservarán las referencias históricas.`,
+      confirmLabel: 'Desactivar',
+      tone: 'danger',
+      icon: 'block'
+    }).subscribe(confirmed => {
+      if (!confirmed || !this.canManage || this.isSaving ||
+          !brand.isActive || this.editingBrand?.id === brand.id) return;
+      this.isSaving = true;
+      this.saveError = '';
+      this.successMessage = '';
+      this.brandsService.deleteBrand(brand.id).subscribe({
+        next: () => {
+          this.brands = this.brands.map(item =>
+            item.id === brand.id ? { ...item, isActive: false } : item
+          );
+          this.isSaving = false;
+          this.hasChanges = true;
+          this.successMessage = 'Marca desactivada correctamente.';
+          this.toast.success(this.successMessage);
+          this.cdr.markForCheck();
+        },
+        error: (error: HttpErrorResponse) => {
+          this.isSaving = false;
+          this.saveError = this.formatHttpError(error, 'eliminar');
+          this.cdr.markForCheck();
+        }
+      });
     });
   }
 
