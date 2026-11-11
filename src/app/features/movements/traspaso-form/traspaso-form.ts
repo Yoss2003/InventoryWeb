@@ -1,6 +1,7 @@
 import { CleanArticleNamePipe } from '../../../shared/clean-article-name.pipe';
 import { ToastService } from '../../../shared/toast/toast.service';
 import { InventoryContextService } from '../../../core/services/inventory-context';
+import { InventoryDialogMotionDirective } from '../../../shared/ui/inv-dialog-motion.directive';
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -18,7 +19,7 @@ import { SerialUnitsService, SerialUnit } from '../../../core/services/serial-un
 @Component({
   selector: 'app-traspaso-form',
   standalone: true,
-  imports: [CleanArticleNamePipe, CommonModule, ReactiveFormsModule, MatDialogModule, MatInputModule, MatSelectModule, MatIconModule, MatFormFieldModule],
+  imports: [InventoryDialogMotionDirective, CleanArticleNamePipe, CommonModule, ReactiveFormsModule, MatDialogModule, MatInputModule, MatSelectModule, MatIconModule, MatFormFieldModule],
   templateUrl: './traspaso-form.html',
   styleUrl: './traspaso-form.scss'
 })

@@ -1,3 +1,4 @@
+import { InventoryDialogMotionDirective } from '../../../shared/ui/inv-dialog-motion.directive';
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -12,7 +13,7 @@ import { Article } from '../../../core/models/article.model';
 import { SerialUnitsService, SerialUnit } from '../../../core/services/serial-units';
 import { SalesService } from '../../../core/services/sales';
 
-@Component({selector:'app-quick-sale-form',standalone:true,imports:[CommonModule,ReactiveFormsModule,MatIconModule,MatSelectModule,MatInputModule, MatFormFieldModule],templateUrl:'./quick-sale-form.html',styleUrl:'./quick-sale-form.scss'})
+@Component({selector:'app-quick-sale-form',standalone:true,imports:[InventoryDialogMotionDirective,CommonModule,ReactiveFormsModule,MatIconModule,MatSelectModule,MatInputModule, MatFormFieldModule],templateUrl:'./quick-sale-form.html',styleUrl:'./quick-sale-form.scss'})
 export class QuickSaleFormComponent implements OnInit {
   private readonly fb=inject(FormBuilder);
   private readonly articlesApi=inject(ArticleService);

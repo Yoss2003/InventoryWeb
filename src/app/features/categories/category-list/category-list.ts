@@ -78,7 +78,7 @@ export class CategoryListComponent implements OnInit {
   toggleInactivos():void{this.processData();}
   applyFilterText(text:string):void{this.dataSource.filter=text.trim().toLocaleLowerCase('es');}
   nuevaCategoriaPadre(categoriaEdit?:Category):void{
-    const ref=this.dialog.open(CategoryParentFormComponent,{width:'min(540px,calc(100vw - 24px))',maxWidth:'calc(100vw - 24px)',data:categoriaEdit||null});
+    const ref=this.dialog.open(CategoryParentFormComponent,{panelClass:'inv-seven-modal',enterAnimationDuration:260,exitAnimationDuration:220,width:'min(540px,calc(100vw - 24px))',maxWidth:'calc(100vw - 24px)',data:categoriaEdit||null});
     ref.afterClosed().subscribe(ok=>{if(ok)this.loadData();});
   }
   nuevaCategoriaHija(categoriaEdit?:Category):void{

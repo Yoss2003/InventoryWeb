@@ -39,26 +39,153 @@
       </div>
       <ng-template #fxEmpty><div class="fx-empty">{{loadingRates ? 'Consultando las últimas cotizaciones...' : 'No hay cotizaciones verificadas disponibles.'}}</div></ng-template>
       <p *ngIf="usdError || eurError" class="error">{{usdError}} {{eurError}}</p>
+      
       <ng-template #fxHistoryDialog>
-        <section class="fx-history-dialog" aria-label="Filtro avanzado de cotizaciones">
-          <header class="fx-modal-head"><h2>Filtro avanzado</h2><button type="button" class="fx-close-button" (click)="closeAdvancedFilters()" aria-label="Cerrar filtro avanzado"><mat-icon>close</mat-icon></button></header>
-      <div class="fx-history-filters">
-        <h3>Consultar otras fechas</h3>
-        <div class="fx-history-controls">
-          <div class="rate-date-field"><label id="fx-from-label">Desde</label><mat-form-field appearance="outline" class="fx-mat-date" subscriptSizing="dynamic"><input matInput [matDatepicker]="fxFrom" [value]="ratesFromDate" (dateChange)="setRatesFrom($event.value)" aria-labelledby="fx-from-label" readonly /><mat-datepicker-toggle matIconSuffix [for]="fxFrom"></mat-datepicker-toggle><mat-datepicker #fxFrom></mat-datepicker></mat-form-field></div>
-          <div class="rate-date-field"><label id="fx-to-label">Hasta</label><mat-form-field appearance="outline" class="fx-mat-date" subscriptSizing="dynamic"><input matInput [matDatepicker]="fxTo" [value]="ratesToDate" (dateChange)="setRatesTo($event.value)" aria-labelledby="fx-to-label" readonly /><mat-datepicker-toggle matIconSuffix [for]="fxTo"></mat-datepicker-toggle><mat-datepicker #fxTo></mat-datepicker></mat-form-field></div>
-          <button type="button" (click)="loadHistoryRates()" [disabled]="loadingHistory"><mat-icon>event</mat-icon> Consultar historial</button>
-        </div>
-        <p *ngIf="historyError" class="error" role="alert">{{historyError}}</p>
-        <div class="history-rates-scroll inv-core-table-wrap" *ngIf="historyRequested && !historyError && !loadingHistory">
-          <table><thead><tr><th>Fecha</th><th>Moneda</th><th>Compra</th><th>Venta</th></tr></thead>
-          <tbody><tr *ngFor="let rate of historyRates"><td>{{rate.date.slice(0,10) | date:'dd/MM/yyyy':'UTC'}}</td><td>{{rate.baseCurrency}} / PEN</td><td>{{rate.buyPrice | number:'1.3-3'}}</td><td>{{rate.sellPrice | number:'1.3-3'}}</td></tr></tbody></table>
-          <p *ngIf="!historyRates.length" class="fx-empty">No existen cotizaciones guardadas para ese rango.</p>
-        </div>
-        <p *ngIf="loadingHistory" role="status">Consultando el historial almacenado...</p>
-      </div>
+        <section
+          class="fx-history-dialog fx-unified-dialog"
+          role="dialog"
+          aria-labelledby="fx-dialog-title">
+
+          <header class="fx-unified-header">
+            <div class="fx-unified-heading">
+              <span class="fx-unified-icon">
+                <mat-icon>tune</mat-icon>
+              </span>
+
+              <div class="fx-unified-title">
+                <h2 id="fx-dialog-title">Filtro avanzado</h2>
+                <p>Consulta el historial de cotizaciones</p>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              class="fx-unified-close"
+              (click)="closeAdvancedFilters()"
+              aria-label="Cerrar filtro avanzado">
+              <mat-icon>close</mat-icon>
+            </button>
+          </header>
+
+          <main class="fx-unified-content">
+            <div class="fx-history-filters">
+              <h3>Consultar otras fechas</h3>
+
+              <div class="fx-history-controls">
+                <div class="rate-date-field">
+                  <label id="fx-from-label">Desde</label>
+
+                  <mat-form-field
+                    appearance="outline"
+                    class="fx-mat-date"
+                    subscriptSizing="dynamic">
+                    <input
+                      matInput
+                      [matDatepicker]="fxFrom"
+                      [value]="ratesFromDate"
+                      (dateChange)="setRatesFrom($event.value)"
+                      aria-labelledby="fx-from-label"
+                      readonly />
+
+                    <mat-datepicker-toggle
+                      matIconSuffix
+                      [for]="fxFrom">
+                    </mat-datepicker-toggle>
+
+                    <mat-datepicker #fxFrom></mat-datepicker>
+                  </mat-form-field>
+                </div>
+
+                <div class="rate-date-field">
+                  <label id="fx-to-label">Hasta</label>
+
+                  <mat-form-field
+                    appearance="outline"
+                    class="fx-mat-date"
+                    subscriptSizing="dynamic">
+                    <input
+                      matInput
+                      [matDatepicker]="fxTo"
+                      [value]="ratesToDate"
+                      (dateChange)="setRatesTo($event.value)"
+                      aria-labelledby="fx-to-label"
+                      readonly />
+
+                    <mat-datepicker-toggle
+                      matIconSuffix
+                      [for]="fxTo">
+                    </mat-datepicker-toggle>
+
+                    <mat-datepicker #fxTo></mat-datepicker>
+                  </mat-form-field>
+                </div>
+
+                <button
+                  type="button"
+                  class="fx-search-button"
+                  [disabled]="loadingHistory"
+                  (click)="loadHistoryRates()">
+                  <mat-icon>event</mat-icon>
+                  {{ loadingHistory ? 'Consultando...' : 'Consultar historial' }}
+                </button>
+              </div>
+
+              <p
+                *ngIf="historyError"
+                class="error"
+                role="alert">
+                {{ historyError }}
+              </p>
+
+              <div
+                *ngIf="historyRequested && !historyError && !loadingHistory"
+                class="history-rates-scroll inv-core-table-wrap">
+
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Fecha</th>
+                      <th>Moneda</th>
+                      <th>Compra</th>
+                      <th>Venta</th>
+                    </tr>
+                  </thead>
+
+                  <tbody>
+                    <tr *ngFor="let rate of historyRates">
+                      <td>{{ rate.date.slice(0,10) | date:'dd/MM/yyyy':'UTC' }}</td>
+                      <td>{{ rate.baseCurrency }} / PEN</td>
+                      <td>{{ rate.buyPrice | number:'1.3-3' }}</td>
+                      <td>{{ rate.sellPrice | number:'1.3-3' }}</td>
+                    </tr>
+
+                    <tr *ngIf="historyRates.length === 0">
+                      <td colspan="4" class="fx-empty-result">
+                        No existen cotizaciones guardadas para ese rango.
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <p *ngIf="loadingHistory" role="status" class="fx-loading">
+                Consultando el historial almacenado...
+              </p>
+            </div>
+          </main>
+
+          <footer class="fx-unified-footer">
+            <button
+              type="button"
+              class="fx-footer-close"
+              (click)="closeAdvancedFilters()">
+              Cerrar
+            </button>
+          </footer>
+
         </section>
       </ng-template>
+
       <p class="fx-disclaimer">Solo se muestran cotizaciones verificadas. Las fechas históricas están limitadas a los registros guardados por la API.</p>
     </section>
   </div>

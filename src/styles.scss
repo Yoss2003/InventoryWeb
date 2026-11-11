@@ -243,3 +243,519 @@ select:not([multiple]):focus-visible{outline:2px solid var(--inv-company-accent,
     opacity: 1;
   }
 }
+
+
+/* INV_SEVEN_DIALOGS_2026_V1 | 7 modales · sin respaldos */
+.cdk-overlay-pane.inv-seven-modal {
+  overflow: visible !important;
+  filter: drop-shadow(0 0 9px color-mix(in srgb, var(--inv-company-accent, #a2d149) 20%, transparent));
+}
+.cdk-overlay-pane.inv-seven-modal .mat-mdc-dialog-surface {
+  border: 1px solid color-mix(in srgb, var(--inv-company-accent, #a2d149) 75%, white) !important;
+  border-radius: 18px !important;
+  background: #11161d !important;
+  color: #edf4fc !important;
+  overflow: hidden !important;
+  box-shadow: 0 18px 70px rgba(0, 0, 0, .76),
+    0 0 24px color-mix(in srgb, var(--inv-company-accent, #a2d149) 34%, transparent) !important;
+  transform-origin: 50% 50%;
+  transform: scale(.82) !important;
+  opacity: 0;
+  animation: none !important;
+  transition: transform var(--mat-dialog-transition-duration, 260ms) cubic-bezier(.22, 1, .36, 1),
+              opacity var(--mat-dialog-transition-duration, 260ms) ease-out !important;
+}
+.cdk-overlay-pane.inv-seven-modal .mat-mdc-dialog-container.mdc-dialog--open .mat-mdc-dialog-surface {
+  transform: scale(1) !important;
+  opacity: 1;
+}
+.cdk-overlay-pane.inv-seven-modal .mat-mdc-dialog-container.mdc-dialog--closing .mat-mdc-dialog-surface {
+  transform: scale(.82) !important;
+  opacity: 0;
+  transition-timing-function: cubic-bezier(.4, 0, .9, .55), ease-in !important;
+}
+/* La línea exterior del diálogo es la única línea; las internas se eliminan. */
+.cdk-overlay-pane.inv-seven-modal :is(
+  .parent-modal,.transfer-dialog,.sale-dialog,.assignment-dialog,
+  .movement-dialog,.record-dialog,.fx-history-dialog
+) {
+  border: 0 !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+  background: #111820;
+  max-height: calc(100dvh - 28px);
+}
+/* Cabecera homogénea. Los bloques internos conservan sus propias divisiones. */
+.cdk-overlay-pane.inv-seven-modal :is(
+  .parent-header,.transfer-header,.sale-dialog > header,
+  .assignment-dialog__header,.movement-dialog > header,
+  .record-dialog > header,.fx-modal-head
+) {
+  background: #1b2936 !important;
+  border-bottom: 1px solid #405265 !important;
+}
+.cdk-overlay-pane.inv-seven-modal :is(
+  .header-symbol,.transfer-icon,.sale-header-icon,
+  .assignment-dialog__icon,.inv-seven-title-icon
+) {
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  width: 44px;
+  height: 44px;
+  box-sizing: border-box;
+  padding: 0;
+  background: #1d2935 !important;
+  border: 1px solid #465769 !important;
+  border-radius: 12px !important;
+  color: var(--inv-company-accent, #a2d149) !important;
+}
+.cdk-overlay-pane.inv-seven-modal :is(
+  .header-symbol,.transfer-icon,.sale-header-icon,
+  .assignment-dialog__icon,.inv-seven-title-icon
+) mat-icon {color: inherit !important; width:24px;height:24px;font-size:24px;}
+.cdk-overlay-pane.inv-seven-modal :is(
+  .parent-header .close-button,.transfer-header .close-button,
+  .sale-dialog > header > button,.assignment-dialog__close,
+  .movement-dialog > header > button,.record-dialog > header > button,
+  .fx-close-button
+) {
+  width: 35px !important;
+  height: 35px !important;
+  flex: none;
+  margin-left: auto;
+  background: #18232e !important;
+  color: #e5f0f9 !important;
+  border: 1px solid #5b6b7b !important;
+  border-radius: 9px !important;
+  cursor: pointer;
+}
+.cdk-overlay-pane.inv-seven-modal :is(
+  .parent-header .close-button,.transfer-header .close-button,
+  .sale-dialog > header > button,.assignment-dialog__close,
+  .movement-dialog > header > button,.record-dialog > header > button,
+  .fx-close-button
+):hover {border-color:var(--inv-company-accent, #a2d149)!important;}
+.cdk-overlay-pane.inv-seven-modal :is(.movement-dialog > header,.record-dialog > header,.fx-modal-head) {
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+.cdk-overlay-pane.inv-seven-modal :is(.movement-dialog > header h2,.record-dialog > header h2,.fx-modal-head h2) {
+  margin: 0;
+  min-width: 0;
+}
+.cdk-overlay-pane.inv-seven-modal :is(.movement-dialog > header,.record-dialog > header,.fx-modal-head) {
+  justify-content:flex-start !important;
+}
+.cdk-overlay-pane.inv-seven-modal :is(.movement-dialog > header > button,.record-dialog > header > button,.fx-modal-head > button) {
+  margin-left:auto !important;
+}
+.cdk-overlay-pane.inv-seven-modal :is(.sale-dialog .step-heading > mat-icon,.transfer-dialog .card-heading > mat-icon) {
+  color:var(--inv-company-accent, #a2d149) !important;
+  background:color-mix(in srgb, var(--inv-company-accent, #a2d149) 14%, #19232e) !important;
+}
+/* Botoneras: un solo nivel, secundarios transparentes, principales en píldora. */
+.cdk-overlay-pane.inv-seven-modal :is(
+  .parent-footer,.transfer-footer,.sale-dialog > footer,
+  .assignment-dialog__footer,.movement-dialog > footer,.record-dialog > footer
+) {
+  flex: none;
+  min-height: 0;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 20px;
+  background: #151e27 !important;
+  border-top: 1px solid #344353 !important;
+  margin: 0;
+}
+.cdk-overlay-pane.inv-seven-modal :is(
+  .parent-footer .button-secondary,.transfer-footer .outline-btn,
+  .sale-dialog > footer > button:not(.confirm),
+  .assignment-dialog__footer > button,.movement-dialog > footer > button,
+  .record-dialog > footer > button
+) {
+  background: transparent !important;
+  border: 1px solid transparent !important;
+  color: #b1bbca !important;
+  padding: 10px 12px !important;
+  border-radius: 8px !important;
+  font-size: 12px;
+  font-weight: 700;
+  box-shadow: none !important;
+}
+.cdk-overlay-pane.inv-seven-modal :is(
+  .parent-footer .button-secondary,.transfer-footer .outline-btn,
+  .sale-dialog > footer > button:not(.confirm),
+  .assignment-dialog__footer > button,.movement-dialog > footer > button,
+  .record-dialog > footer > button
+):hover {background:#24303a !important;color:#fff !important;}
+.cdk-overlay-pane.inv-seven-modal :is(
+  .parent-footer .button-primary,.transfer-footer .submit-btn,
+  .sale-dialog > footer > button.confirm,
+  .fx-history-controls > button
+) {
+  background:var(--inv-company-accent, #a2d149) !important;
+  border:0 !important;
+  color:var(--inv-company-on-accent, #12202b) !important;
+  border-radius:24px !important;
+  padding:11px 19px !important;
+  font-size:12px;
+  font-weight:750;
+  cursor:pointer;
+}
+.cdk-overlay-pane.inv-seven-modal :is(
+  .parent-footer .button-primary,.transfer-footer .submit-btn,
+  .sale-dialog > footer > button.confirm,
+  .fx-history-controls > button
+):hover:not(:disabled) {filter:brightness(1.09);}
+.cdk-overlay-pane.inv-seven-modal button:disabled {opacity:.45;cursor:not-allowed;}
+/* Las medidas de contenido pequeñas reducen el alto del diálogo. */
+.cdk-overlay-pane.inv-seven-modal :is(.transfer-body,.sale-dialog > main,.record-dialog > main,
+  .movement-dialog > main,.assignment-dialog__body,.fx-history-filters) {
+  flex: 0 1 auto;
+  min-height: 0 !important;
+  overflow-y: auto;
+  max-height: calc(100dvh - 185px);
+  scrollbar-width: thin;
+  scrollbar-color: var(--inv-company-accent, #a2d149) transparent;
+}
+.cdk-overlay-pane.inv-seven-modal :is(.transfer-body,.sale-dialog > main,.record-dialog > main,
+  .movement-dialog > main,.assignment-dialog__body,.fx-history-filters)::-webkit-scrollbar {width:7px;}
+.cdk-overlay-pane.inv-seven-modal :is(.transfer-body,.sale-dialog > main,.record-dialog > main,
+  .movement-dialog > main,.assignment-dialog__body,.fx-history-filters)::-webkit-scrollbar-thumb {
+  background:var(--inv-company-accent, #a2d149);border-radius:10px;
+}
+.cdk-overlay-pane.inv-seven-modal .sale-dialog > main {max-height:calc(100dvh - 235px);}
+.cdk-overlay-pane.inv-seven-modal .assignment-dialog__body {max-height:calc(100dvh - 165px);}
+.cdk-overlay-pane.inv-seven-modal .record-dialog > main {max-height:calc(100dvh - 165px);}
+.cdk-overlay-pane.inv-seven-modal .parent-form {max-height:calc(100dvh - 125px);overflow:auto;}
+.cdk-overlay-pane.inv-seven-modal :is(.sale-steps button.active span,.wizard-nav button.active span) {
+  background:var(--inv-company-accent, #a2d149) !important;
+  color:var(--inv-company-on-accent, #12202b) !important;
+}
+/* La misma aparición suave para Venta y Traspaso, sin deslizamiento lateral. */
+.cdk-overlay-pane.inv-seven-modal :is(.wizard-page,.sale-step) {
+  animation:inv-ui-panel-reveal 230ms cubic-bezier(.22, 1, .36, 1) both !important;
+}
+.cdk-overlay-pane.inv-seven-modal .fx-history-dialog {display:flex;flex-direction:column;}
+.cdk-overlay-pane.inv-seven-modal .fx-history-filters {padding:18px 20px;}
+@media (max-width:600px) {
+  .cdk-overlay-pane.inv-seven-modal :is(.parent-footer,.transfer-footer,.sale-dialog > footer,
+    .assignment-dialog__footer,.movement-dialog > footer,.record-dialog > footer) {padding:11px 12px;gap:6px;}
+  .cdk-overlay-pane.inv-seven-modal :is(.header-symbol,.transfer-icon,.sale-header-icon,
+    .assignment-dialog__icon,.inv-seven-title-icon) {width:38px;height:38px;}
+  .cdk-overlay-pane.inv-seven-modal .fx-history-controls {display:grid;grid-template-columns:1fr 1fr;}
+  .cdk-overlay-pane.inv-seven-modal .fx-history-controls > button {grid-column:1/-1;}
+}
+@media (prefers-reduced-motion:reduce) {
+  .cdk-overlay-pane.inv-seven-modal .mat-mdc-dialog-container .mat-mdc-dialog-surface {transition:none!important;}
+  .cdk-overlay-pane.inv-seven-modal .mat-mdc-dialog-container.mdc-dialog--open .mat-mdc-dialog-surface {transform:none!important;opacity:1;}
+  .cdk-overlay-pane.inv-seven-modal :is(.wizard-page,.sale-step) {animation:none!important;}
+}
+
+
+/* ===========================================
+   FILTRO AVANZADO - MODAL ESTANDARIZADO
+   =========================================== */
+
+/* Solo la superficie exterior dibuja el marco */
+.cdk-overlay-pane.fx-history-modal .mat-mdc-dialog-surface {
+  background: #11161d !important;
+  color: #edf1f5;
+  border-radius: 18px !important;
+  overflow: hidden !important;
+}
+
+/* Elimina bordes y márgenes interiores heredados */
+.cdk-overlay-pane.fx-history-modal .fx-unified-dialog {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-width: 0;
+  max-height: calc(100dvh - 28px);
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  background: #11161d;
+  overflow: hidden !important;
+  box-sizing: border-box;
+}
+
+/* CABECERA */
+.cdk-overlay-pane.fx-history-modal .fx-unified-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  flex: 0 0 auto;
+
+  width: 100%;
+  margin: 0 !important;
+  padding: 16px 22px !important;
+
+  background: #1d2a37;
+  border: 0 !important;
+  border-bottom: 1px solid #405265 !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+  box-sizing: border-box;
+}
+
+.fx-unified-heading {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  min-width: 0;
+}
+
+/* Icono sin fondo verde */
+.fx-unified-icon {
+  width: 44px;
+  height: 44px;
+  flex: 0 0 44px;
+  display: grid;
+  place-items: center;
+
+  border: 1px solid #465769;
+  border-radius: 12px;
+  background: #1d2935;
+  color: var(--inv-company-accent, #a2d149);
+}
+
+.fx-unified-icon mat-icon {
+  width: 24px;
+  height: 24px;
+  font-size: 24px;
+}
+
+.fx-unified-title {
+  min-width: 0;
+}
+
+.fx-unified-title h2 {
+  margin: 0 !important;
+  color: #edf1f5;
+  font-size: 19px;
+  font-weight: 750;
+  line-height: 1.25;
+}
+
+.fx-unified-title p {
+  margin: 4px 0 0;
+  color: #a8b5c2;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+/* Botón de cierre */
+.fx-unified-close {
+  display: grid;
+  place-items: center;
+  flex: 0 0 35px;
+
+  width: 35px;
+  height: 35px;
+  padding: 0;
+  margin: 0;
+
+  border: 1px solid #5b6b7b;
+  border-radius: 9px;
+  background: #18232e;
+  color: #e1ebf3;
+  cursor: pointer;
+}
+
+.fx-unified-close:hover {
+  border-color: var(--inv-company-accent, #a2d149);
+}
+
+.fx-unified-close mat-icon {
+  width: 21px;
+  height: 21px;
+  font-size: 21px;
+}
+
+/* CUERPO */
+.cdk-overlay-pane.fx-history-modal .fx-unified-content {
+  display: block;
+  flex: 0 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+
+  padding: 20px 22px !important;
+  margin: 0 !important;
+
+  background: #11161d;
+  border: 0 !important;
+  box-sizing: border-box;
+
+  scrollbar-width: thin;
+  scrollbar-color:
+    var(--inv-company-accent, #a2d149) transparent;
+}
+
+.fx-unified-content::-webkit-scrollbar {
+  width: 7px;
+}
+
+.fx-unified-content::-webkit-scrollbar-thumb {
+  background: var(--inv-company-accent, #a2d149);
+  border-radius: 10px;
+}
+
+.fx-unified-content::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.fx-unified-content .fx-history-filters {
+  padding: 0;
+  margin: 0;
+  border: 0;
+}
+
+.fx-unified-content .fx-history-filters h3 {
+  margin: 0 0 16px;
+  font-size: 13px;
+  color: #d7e5ef;
+}
+
+/* Campos */
+.fx-unified-content .fx-history-controls {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  align-items: end;
+}
+
+.fx-unified-content .rate-date-field {
+  min-width: 0;
+}
+
+.fx-unified-content .fx-mat-date {
+  width: 100%;
+}
+
+/* Botón principal */
+.cdk-overlay-pane.fx-history-modal
+.fx-history-controls > .fx-search-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  grid-column: 1 / -1;
+
+  width: 100%;
+  min-height: 43px;
+  padding: 10px 16px;
+
+  border: 0;
+  border-radius: 24px;
+  background: var(--inv-company-accent, #a2d149);
+  color: var(--inv-company-on-accent, #12202b);
+
+  font-weight: 750;
+  cursor: pointer;
+}
+
+.fx-search-button:hover:not(:disabled) {
+  filter: brightness(1.09);
+}
+
+.fx-search-button:disabled {
+  opacity: .45;
+  cursor: not-allowed;
+}
+
+/* Tabla */
+.fx-unified-content .history-rates-scroll {
+  margin-top: 14px;
+  border-radius: 10px;
+  overflow: auto;
+}
+
+.fx-unified-content .history-rates-scroll table {
+  width: 100%;
+}
+
+.fx-unified-content .fx-empty-result {
+  padding: 24px 14px !important;
+  text-align: center !important;
+  color: #aebfcd;
+  font-size: 12px;
+  border-bottom: 0 !important;
+}
+
+.fx-unified-content .fx-loading {
+  padding: 12px 0;
+  color: #b6c9d6;
+  font-size: 12px;
+}
+
+/* PIE DEL MODAL */
+.cdk-overlay-pane.fx-history-modal .fx-unified-footer {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  flex: 0 0 auto;
+  gap: 12px;
+
+  width: 100%;
+  min-height: 0;
+  margin: 0 !important;
+  padding: 14px 22px !important;
+
+  background: #151e27;
+  border: 0 !important;
+  border-top: 1px solid #344353 !important;
+  box-sizing: border-box;
+}
+
+.fx-footer-close {
+  appearance: none;
+  padding: 10px 14px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: transparent;
+  color: #b1bbca;
+  font-size: 12px;
+  font-weight: 750;
+  cursor: pointer;
+}
+
+.fx-footer-close:hover {
+  background: #24303a;
+  color: #fff;
+}
+
+/* RESPONSIVE */
+@media (max-width: 520px) {
+  .cdk-overlay-pane.fx-history-modal .fx-unified-header {
+    padding: 14px !important;
+  }
+
+  .cdk-overlay-pane.fx-history-modal .fx-unified-content {
+    padding: 16px 14px !important;
+  }
+
+  .cdk-overlay-pane.fx-history-modal .fx-unified-footer {
+    padding: 11px 14px !important;
+  }
+
+  .fx-unified-title h2 {
+    font-size: 16px;
+  }
+
+  .fx-unified-content .fx-history-controls {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .fx-unified-content .history-rates-scroll {
+    overflow-x: auto;
+  }
+}

@@ -1,5 +1,5 @@
 <div class="movement-dialog ui-v2-dialog ui-v2-dialog--simple">
-  <header><h2>Detalle de movimiento #{{data.movement.id}}</h2><button type="button" (click)="dialogRef.close()"><mat-icon>close</mat-icon></button></header>
+  <header><span class="inv-seven-title-icon"><mat-icon>receipt_long</mat-icon></span><h2>Detalle de movimiento #{{data.movement.id}}</h2><button type="button" (click)="dialogRef.close()"><mat-icon>close</mat-icon></button></header>
   <main><div class="record-grid">
     <div><label>Artículo</label><strong>{{data.articleName | cleanArticleName}}</strong></div><div><label>Código</label><strong>{{data.articleCode}}</strong></div>
     <div><label>Acción</label><strong>{{data.movement.actionId===1?'Entrada':data.movement.actionId===2?'Salida':'Custodia / traspaso'}}</strong></div>

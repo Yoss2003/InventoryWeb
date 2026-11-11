@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit, inject } from '@angular/core';
+import { ChangeDetectorRef, DestroyRef, Component, OnDestroy, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatDialogModule, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
@@ -14,6 +14,9 @@ export class ArticleDetailDialogComponent implements OnInit, OnDestroy {
   readonly dialogRef = inject(MatDialogRef<ArticleDetailDialogComponent>);
   readonly data: {id: number} = inject(MAT_DIALOG_DATA);
   private readonly api = inject(ArticleService);
+  private readonly cdr = inject(ChangeDetectorRef);
+  private readonly destroyRef = inject(DestroyRef);
+  private refreshView(): void { if (!this.destroyRef.destroyed) this.cdr.detectChanges(); }
   private readonly serials=inject(SerialUnitsService);
   newSerial="";savingSerial=false;serialNotice="";
   article: Article | null = null;
@@ -34,11 +37,11 @@ export class ArticleDetailDialogComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.api.getArticle(this.data.id).subscribe({
       next: article => {
-        this.article = article; this.loading = false;
-        if (article.mainPhotoPath) this.api.getMedia(article.id,'photo').subscribe({next:b=>this.photo=URL.createObjectURL(b)});
-        if (article.mainVoucherPath) this.api.getMedia(article.id,'voucher').subscribe({next:b=>{this.voucher=URL.createObjectURL(b);this.voucherIsPdf=b.type==='application/pdf';}});
+        this.article = article; this.loading = false; this.refreshView();
+        if (article.mainPhotoPath) this.api.getMedia(article.id,'photo').subscribe({next:b=>{this.photo=URL.createObjectURL(b);this.refreshView();}});
+        if (article.mainVoucherPath) this.api.getMedia(article.id,'voucher').subscribe({next:b=>{this.voucher=URL.createObjectURL(b);this.voucherIsPdf=b.type==='application/pdf';this.refreshView();}});
       },
-      error: err => { this.loading = false; this.error = String(err?.error?.error??'No se pudo consultar el artículo.'); }
+      error: err => { this.loading = false; this.error = String(err?.error?.error??'No se pudo consultar el artículo.'); this.refreshView(); }
     });
   }
   addSerial():void {
@@ -46,9 +49,9 @@ export class ArticleDetailDialogComponent implements OnInit, OnDestroy {
     this.savingSerial=true;this.serialNotice='';
     this.serials.add(this.article.id,{serialNumber:this.newSerial.trim()}).subscribe({
       next:()=>{
-        this.savingSerial=false;this.newSerial='';this.serialNotice='Unidad registrada con movimiento de entrada.';
-        this.api.getArticle(this.data.id).subscribe({next:a=>this.article=a});
-      },error:e=>{this.savingSerial=false;this.serialNotice=String(e.error?.error??'No se pudo registrar la unidad.');}
+        this.savingSerial=false;this.newSerial='';this.serialNotice='Unidad registrada con movimiento de entrada.';this.refreshView();
+        this.api.getArticle(this.data.id).subscribe({next:a=>{this.article=a;this.refreshView();}});
+      },error:e=>{this.savingSerial=false;this.serialNotice=String(e.error?.error??'No se pudo registrar la unidad.');this.refreshView();}
     });
   }
   ngOnDestroy(): void { if(this.photo)URL.revokeObjectURL(this.photo); if(this.voucher)URL.revokeObjectURL(this.voucher); }

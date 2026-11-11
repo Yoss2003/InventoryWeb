@@ -1,5 +1,5 @@
 <div class="record-dialog ui-v2-dialog ui-v2-dialog--simple">
-  <header><div><h2>Ficha completa del artículo</h2><small>ID #{{ data.id }}</small></div><button type="button" (click)="dialogRef.close()"><mat-icon>close</mat-icon></button></header>
+  <header><span class="inv-seven-title-icon"><mat-icon>inventory_2</mat-icon></span><div><h2>Ficha completa del artículo</h2><small>ID #{{ data.id }}</small></div><button type="button" (click)="dialogRef.close()"><mat-icon>close</mat-icon></button></header>
   <main>
     <p *ngIf="loading">Consultando artículo…</p><p *ngIf="error" role="alert">{{error}}</p>
     <ng-container *ngIf="article as a">

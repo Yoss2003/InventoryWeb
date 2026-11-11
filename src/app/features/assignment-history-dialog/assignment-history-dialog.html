@@ -1,64 +1,326 @@
+
 <div class="assignment-dialog ui-v2-dialog ui-v2-dialog--special">
+
   <header class="assignment-dialog__header">
-    <div class="assignment-dialog__title"><span class="assignment-dialog__icon"><mat-icon>assignment</mat-icon></span>
-      <div><h2>Detalle de custodia</h2><p>Asignación #{{data.id}} · {{data.status}}</p></div>
+    <div class="assignment-dialog__title">
+      <span class="assignment-dialog__icon">
+        <mat-icon>assignment</mat-icon>
+      </span>
+
+      <div>
+        <h2>Detalle de custodia</h2>
+        <p>Asignación #{{ data.id }} · {{ data.status }}</p>
+      </div>
     </div>
-    <button type="button" class="assignment-dialog__close" (click)="dialogRef.close()" aria-label="Cerrar"><mat-icon>close</mat-icon></button>
+
+    <button
+      type="button"
+      class="assignment-dialog__close"
+      (click)="dialogRef.close()"
+      aria-label="Cerrar">
+      <mat-icon>close</mat-icon>
+    </button>
   </header>
+
   <mat-dialog-content class="assignment-dialog__body">
-    <section class="assignment-dialog__block"><h3><mat-icon>inventory_2</mat-icon> Artículo</h3>
-      <div class="assignment-dialog__grid">
-        <div><span>Nombre</span><strong>{{data.articleName | cleanArticleName}}</strong></div>
-        <div><span>Código</span><strong>{{data.articleCode}}</strong></div>
-        <div><span>Almacén de origen</span><strong>{{inventoryLabel}}</strong></div>
-        <div><span>Unidad</span><strong>{{data.measurementUnit}}</strong></div>
-        <div><span>Entregado</span><strong>{{data.quantity | number:'1.0-2'}}</strong></div>
-        <div><span>Devuelto</span><strong>{{data.returnedQuantity | number:'1.0-2'}}</strong></div>
-        <div><span>Pendiente</span><strong>{{data.remainingQuantity | number:'1.0-2'}}</strong></div>
-        <div><span>Estado</span><strong>{{data.status}}</strong></div>
+
+    <!-- ARTÍCULO -->
+    <section class="assignment-dialog__block custody-card">
+      <h3>
+        <mat-icon>inventory_2</mat-icon>
+        Información del artículo
+      </h3>
+
+      <div class="custody-info-grid">
+        <div class="custody-info-item">
+          <span>Nombre del artículo</span>
+          <strong>{{ data.articleName | cleanArticleName }}</strong>
+        </div>
+
+        <div class="custody-info-item">
+          <span>Código</span>
+          <strong>{{ data.articleCode }}</strong>
+        </div>
+
+        <div class="custody-info-item">
+          <span>Almacén de origen</span>
+          <strong>{{ inventoryLabel }}</strong>
+        </div>
+
+        <div class="custody-info-item">
+          <span>Unidad de medida</span>
+          <strong>{{ data.measurementUnit }}</strong>
+        </div>
+      </div>
+
+      <div class="custody-stats">
+        <div class="custody-stat">
+          <span>Entregado</span>
+          <strong>{{ data.quantity | number:'1.0-2' }}</strong>
+        </div>
+
+        <div class="custody-stat">
+          <span>Devuelto</span>
+          <strong>{{ data.returnedQuantity | number:'1.0-2' }}</strong>
+        </div>
+
+        <div class="custody-stat custody-stat--pending">
+          <span>Pendiente</span>
+          <strong>{{ data.remainingQuantity | number:'1.0-2' }}</strong>
+        </div>
+      </div>
+
+      <div class="custody-status-row">
+        <span>Estado de la custodia</span>
+
+        <span
+          class="custody-status"
+          [class.is-complete]="data.remainingQuantity <= 0">
+          <mat-icon>
+            {{ data.remainingQuantity > 0 ? 'schedule' : 'check_circle' }}
+          </mat-icon>
+          {{ data.status }}
+        </span>
       </div>
     </section>
-    <section class="assignment-dialog__block"><h3><mat-icon>person_pin</mat-icon> Responsable</h3>
-      <div class="assignment-dialog__grid"><div><span>Destinatario</span><strong>{{data.recipientName}}</strong></div><div><span>Fecha</span><strong>{{data.assignedAt | date:'dd/MM/yyyy HH:mm'}}</strong></div></div>
-      <p class="assignment-dialog__notes">{{data.observation || 'Sin observaciones'}}</p>
-      <img *ngIf="evidenceUrl" [src]="evidenceUrl" alt="Evidencia de entrega" style="max-width:100%;max-height:240px;object-fit:contain;border-radius:9px;margin-top:10px" />
-      <p *ngIf="evidenceStatus" class="evidence-status" role="status">{{evidenceStatus}}</p>
 
-      <div *ngIf="canManageEvidence" class="evidence-update">
-        <input
-          #evidenceInput
-          type="file"
-          accept=".jpg,.jpeg,.png,.webp"
-          hidden
-          (change)="onEvidenceSelected($event)"
-        />
+    <!-- RESPONSABLE -->
+    <section class="assignment-dialog__block custody-card">
+      <h3>
+        <mat-icon>person_pin</mat-icon>
+        Responsable de la custodia
+      </h3>
+
+      <div class="custody-info-grid">
+        <div class="custody-info-item">
+          <span>Destinatario</span>
+          <strong>{{ data.recipientName }}</strong>
+        </div>
+
+        <div class="custody-info-item">
+          <span>Fecha de asignación</span>
+          <strong>
+            {{ data.assignedAt | date:'dd/MM/yyyy HH:mm' }}
+          </strong>
+        </div>
+      </div>
+
+      <div class="custody-observation">
+        <span>Motivo / observaciones</span>
+        <p>{{ data.observation || 'Sin observaciones registradas.' }}</p>
+      </div>
+    </section>
+
+    <!-- EVIDENCIA -->
+    <section
+      *ngIf="evidenceUrl || evidenceStatus || canManageEvidence"
+      class="assignment-dialog__block custody-card">
+
+      <h3>
+        <mat-icon>photo_camera</mat-icon>
+        Evidencia fotográfica
+      </h3>
+
+      <div class="custody-evidence-layout">
+        <div class="custody-evidence-preview">
+
+          <img
+            *ngIf="evidenceUrl; else noEvidence"
+            class="custody-evidence-image"
+            [src]="evidenceUrl"
+            alt="Evidencia fotográfica de la custodia" />
+
+          <ng-template #noEvidence>
+            <div class="custody-evidence-empty">
+              <mat-icon>image_not_supported</mat-icon>
+              <span>Sin fotografía disponible</span>
+            </div>
+          </ng-template>
+
+        </div>
+
+        <div class="custody-evidence-details">
+          <strong>Fotografía de entrega</strong>
+
+          <p>
+            {{
+              evidenceUrl
+                ? 'Evidencia registrada para esta asignación.'
+                : 'No hay una imagen disponible para mostrar.'
+            }}
+          </p>
+
+          <div *ngIf="canManageEvidence" class="custody-evidence-actions">
+            <input
+              #evidenceInput
+              type="file"
+              accept=".jpg,.jpeg,.png,.webp"
+              hidden
+              (change)="onEvidenceSelected($event)" />
+
+            <button
+              type="button"
+              class="evidence-update-button"
+              [disabled]="evidenceUploading"
+              (click)="evidenceInput.click()">
+
+              <mat-icon>
+                {{ evidenceUrl ? 'sync' : 'add_photo_alternate' }}
+              </mat-icon>
+
+              {{
+                evidenceUploading
+                  ? 'Guardando fotografía...'
+                  : (data.hasEvidence
+                    ? 'Cambiar fotografía'
+                    : 'Agregar fotografía')
+              }}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <p
+        *ngIf="evidenceStatus"
+        class="evidence-status"
+        role="status">
+        {{ evidenceStatus }}
+      </p>
+    </section>
+
+    <!-- HISTORIAL -->
+    <section class="assignment-dialog__block custody-card">
+      <h3>
+        <mat-icon>history</mat-icon>
+        Historial de eventos
+      </h3>
+
+      <p *ngIf="loading" class="custody-empty-message">
+        Cargando movimientos...
+      </p>
+
+      <p
+        *ngIf="!loading && events.length === 0"
+        class="custody-empty-message">
+        No hay eventos registrados.
+      </p>
+
+      <div class="custody-timeline">
+        <div
+          *ngFor="let e of events"
+          class="custody-timeline-item">
+
+          <div class="custody-timeline-icon">
+            <mat-icon>history</mat-icon>
+          </div>
+
+          <div class="custody-timeline-content">
+            <div class="custody-timeline-heading">
+              <strong>
+                {{ e.kind }} · {{ e.quantity | number:'1.0-2' }}
+              </strong>
+
+              <span>
+                {{ e.occurredAt | date:'dd/MM/yyyy HH:mm' }}
+              </span>
+            </div>
+
+            <small>Movimiento #{{ e.movementId }}</small>
+
+            <p>{{ e.observation || 'Sin observaciones' }}</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- DEVOLUCIÓN -->
+    <section
+      *ngIf="data.remainingQuantity > 0"
+      class="assignment-dialog__block custody-card">
+
+      <h3>
+        <mat-icon>assignment_return</mat-icon>
+        Registrar devolución
+      </h3>
+
+      <div *ngIf="isSerialized" class="assigned-serials">
+        <strong>Selecciona las series que se devolverán</strong>
+
+        <label *ngFor="let unit of assignedSerials">
+          <input
+            type="checkbox"
+            [checked]="selectedSerialIds.includes(unit.id)"
+            (change)="toggleSerial(
+              unit.id,
+              $any($event.target).checked
+            )" />
+
+          {{ unit.serialNumber }}
+        </label>
+      </div>
+
+      <div class="custody-return-grid">
+        <label>
+          Cantidad a devolver
+          <input
+            [(ngModel)]="amount"
+            type="number"
+            min="0.01"
+            [max]="data.remainingQuantity"
+            step="0.01" />
+        </label>
+
+        <label>
+          Motivo / observación
+          <input
+            [(ngModel)]="observation"
+            maxlength="2000"
+            placeholder="Observación opcional" />
+        </label>
+      </div>
+
+      <div class="custody-return-actions">
+        <span class="custody-return-available">
+          Pendiente:
+          <strong>
+            {{ data.remainingQuantity | number:'1.0-2' }}
+            {{ data.measurementUnit }}
+          </strong>
+        </span>
 
         <button
           type="button"
-          class="evidence-update-button"
-          [disabled]="evidenceUploading"
-          (click)="evidenceInput.click()">
-          {{ evidenceUploading
-              ? 'Guardando fotografía...'
-              : (data.hasEvidence
-                  ? 'Cambiar fotografía'
-                  : 'Agregar fotografía') }}
+          class="assignment-return-submit"
+          [disabled]="!canReturn"
+          (click)="returnArticle()">
+
+          <mat-icon>check_circle</mat-icon>
+
+          {{
+            isSaving
+              ? 'Registrando...'
+              : 'Confirmar devolución'
+          }}
         </button>
       </div>
+    </section>
 
-    </section>
-    <section class="assignment-dialog__block"><h3><mat-icon>history</mat-icon> Historial de eventos</h3>
-      <p *ngIf="loading">Cargando movimientos…</p>
-      <div *ngFor="let e of events" class="assignment-event"><strong>{{e.kind}} · {{e.quantity | number:'1.0-2'}}</strong><small>{{e.occurredAt | date:'dd/MM/yyyy HH:mm'}} · Movimiento #{{e.movementId}}</small><span>{{e.observation || 'Sin observaciones'}}</span></div>
-    </section>
-    <section *ngIf="data.remainingQuantity > 0" class="assignment-dialog__block"><h3><mat-icon>assignment_return</mat-icon> Registrar devolución</h3>
-      <div class="assigned-serials" *ngIf="isSerialized"><strong>Elige las series que se devolverán:</strong>
-        <label *ngFor="let unit of assignedSerials"><input type="checkbox" [checked]="selectedSerialIds.includes(unit.id)" (change)="toggleSerial(unit.id,$any($event.target).checked)" /> {{unit.serialNumber}}</label>
-      </div>
-      <div class="assignment-return"><label>Cantidad <input [(ngModel)]="amount" type="number" min="0.01" [max]="data.remainingQuantity" step="0.01" /></label><label>Motivo <input [(ngModel)]="observation" maxlength="2000" placeholder="Observación opcional" /></label></div>
-      <button type="button" class="assignment-return-submit" (click)="returnArticle()" [disabled]="!canReturn">{{isSaving ? 'Registrando...' : 'Confirmar devolución'}}</button>
-    </section>
-    <p *ngIf="errorMessage" role="alert" class="assignment-dialog__notice">{{errorMessage}}</p>
+    <p
+      *ngIf="errorMessage"
+      role="alert"
+      class="assignment-dialog__notice">
+      {{ errorMessage }}
+    </p>
+
   </mat-dialog-content>
-  <mat-dialog-actions class="assignment-dialog__footer"><button type="button" (click)="dialogRef.close()">Cerrar</button></mat-dialog-actions>
+
+  <mat-dialog-actions class="assignment-dialog__footer">
+    <button
+      type="button"
+      class="custody-footer-close"
+      (click)="dialogRef.close()">
+      Cerrar
+    </button>
+  </mat-dialog-actions>
+
 </div>

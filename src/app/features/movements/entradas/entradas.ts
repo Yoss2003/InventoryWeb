@@ -96,9 +96,9 @@ export class EntradasComponent implements OnInit {
     const ref=this.dialog.open(MovementForm,{width:'min(600px,calc(100vw - 24px))',data:{actionId:1}});
     ref.afterClosed().subscribe(ok=>{if(ok)this.loadRealData();});
   }
-  showArticle(id:number):void{this.dialog.open(ArticleDetailDialogComponent,{data:{id},width:'min(780px,calc(100vw - 24px))'});}
+  showArticle(id:number):void{this.dialog.open(ArticleDetailDialogComponent,{panelClass:'inv-seven-modal',enterAnimationDuration:260,exitAnimationDuration:220,data:{id},width:'min(780px,calc(100vw - 24px))'});}
   showMovement(m:Movement):void{
-    this.dialog.open(MovementDetailDialogComponent,{data:{movement:m,articleName:this.articleName(m.articleId),articleCode:this.articleCode(m.articleId)},width:'min(650px,calc(100vw - 24px))'});
+    this.dialog.open(MovementDetailDialogComponent,{panelClass:'inv-seven-modal',enterAnimationDuration:260,exitAnimationDuration:220,data:{movement:m,articleName:this.articleName(m.articleId),articleCode:this.articleCode(m.articleId)},width:'min(650px,calc(100vw - 24px))'});
   }
   deleteArticle(a:Article,event:Event):void{
     event.stopPropagation();

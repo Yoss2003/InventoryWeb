@@ -81,15 +81,15 @@ export class SalidasComponent implements OnInit {
   }
   isCancelled(m:Movement):boolean{return this.cancelledIds.has(Number(m.id))||(this.saleId(m)!==null&&this.cancelledSaleIds.has(this.saleId(m)!));}
   newTransfer():void{
-    const ref=this.dialog.open(TraspasoFormComponent,{width:'min(710px,calc(100vw - 24px))',maxWidth:'calc(100vw - 24px)',disableClose:true});
+    const ref=this.dialog.open(TraspasoFormComponent,{panelClass:'inv-seven-modal',enterAnimationDuration:260,exitAnimationDuration:220,width:'min(710px,calc(100vw - 24px))',maxWidth:'calc(100vw - 24px)',disableClose:true});
     ref.afterClosed().subscribe(ok=>{if(ok)this.loadRealData();});
   }
   newSale():void{
-    const ref=this.dialog.open(QuickSaleFormComponent,{width:'min(640px,calc(100vw - 24px))',maxWidth:'calc(100vw - 24px)',disableClose:true});
+    const ref=this.dialog.open(QuickSaleFormComponent,{panelClass:'inv-seven-modal',enterAnimationDuration:260,exitAnimationDuration:220,width:'min(640px,calc(100vw - 24px))',maxWidth:'calc(100vw - 24px)',disableClose:true});
     ref.afterClosed().subscribe(ok=>{if(ok)this.loadRealData();});
   }
   showDetail(m:Movement):void{
-    this.dialog.open(MovementDetailDialogComponent,{data:{movement:m,articleName:this.articleName(m.articleId),articleCode:this.articleCode(m.articleId)},width:'min(650px,calc(100vw - 24px))'});
+    this.dialog.open(MovementDetailDialogComponent,{panelClass:'inv-seven-modal',enterAnimationDuration:260,exitAnimationDuration:220,data:{movement:m,articleName:this.articleName(m.articleId),articleCode:this.articleCode(m.articleId)},width:'min(650px,calc(100vw - 24px))'});
   }
   openAssignments(event:Event):void{event.stopPropagation();void this.router.navigate(['/dashboard/asignaciones']);}
   cancelMovement(m:Movement,event:Event):void{

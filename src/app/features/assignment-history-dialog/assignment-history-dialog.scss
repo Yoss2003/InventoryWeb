@@ -59,3 +59,624 @@
   opacity: 0.55;
   cursor: not-allowed;
 }
+
+
+/* ============================================
+   DETALLE DE CUSTODIA - ORGANIZACIÓN VISUAL
+   ============================================ */
+
+.assignment-dialog {
+  background: #11161d;
+  max-height: calc(100dvh - 28px);
+}
+
+/* CUERPO Y SCROLL */
+.assignment-dialog .assignment-dialog__body.mat-mdc-dialog-content {
+  flex: 0 1 auto;
+  min-height: 0;
+  padding: 20px 22px !important;
+  overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior: contain;
+
+  scrollbar-width: thin;
+  scrollbar-color:
+    color-mix(
+      in srgb,
+      var(--inv-company-accent, #a2d149) 65%,
+      #607080
+    )
+    transparent;
+}
+
+.assignment-dialog__body::-webkit-scrollbar {
+  width: 7px;
+}
+
+.assignment-dialog__body::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.assignment-dialog__body::-webkit-scrollbar-thumb {
+  background: color-mix(
+    in srgb,
+    var(--inv-company-accent, #a2d149) 65%,
+    #607080
+  );
+  border-radius: 10px;
+}
+
+/* TARJETAS */
+.assignment-dialog .custody-card {
+  padding: 17px 19px;
+  margin: 0 0 14px;
+  background: #17232f;
+  border: 1px solid #425668;
+  border-radius: 13px;
+}
+
+.assignment-dialog .custody-card:last-of-type {
+  margin-bottom: 0;
+}
+
+.assignment-dialog .custody-card h3 {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin: 0 0 17px;
+  padding-bottom: 13px;
+  color: #e9f1f8;
+  font-size: 13px;
+  font-weight: 750;
+  border-bottom: 1px solid #394f64;
+}
+
+.assignment-dialog .custody-card h3 mat-icon {
+  color: var(--inv-company-accent, #a2d149);
+  width: 19px;
+  height: 19px;
+  font-size: 19px;
+}
+
+/* INFORMACIÓN GENERAL */
+.assignment-dialog .custody-info-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: 22px;
+  row-gap: 16px;
+}
+
+.assignment-dialog .custody-info-item {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 0;
+}
+
+.assignment-dialog .custody-info-item span,
+.assignment-dialog .custody-observation > span {
+  color: #a3b5c6;
+  font-size: 11px;
+}
+
+.assignment-dialog .custody-info-item strong {
+  color: #edf4fa;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
+/* RESUMEN DE CANTIDADES */
+.assignment-dialog .custody-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 11px;
+  margin-top: 20px;
+}
+
+.assignment-dialog .custody-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  min-width: 0;
+
+  padding: 12px 14px;
+  border: 1px solid #43586a;
+  border-radius: 10px;
+  background: #111c26;
+}
+
+.assignment-dialog .custody-stat span {
+  font-size: 11px;
+  color: #a8bacb;
+}
+
+.assignment-dialog .custody-stat strong {
+  font-size: 20px;
+  font-weight: 800;
+  color: #edf4fa;
+  font-variant-numeric: tabular-nums;
+}
+
+.assignment-dialog .custody-stat--pending {
+  border-color: color-mix(
+    in srgb,
+    var(--inv-company-accent, #a2d149) 52%,
+    #43586a
+  );
+
+  background: color-mix(
+    in srgb,
+    var(--inv-company-accent, #a2d149) 8%,
+    #111c26
+  );
+}
+
+.assignment-dialog .custody-stat--pending strong {
+  color: var(--inv-company-accent, #a2d149);
+}
+
+/* ESTADO */
+.assignment-dialog .custody-status-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+
+  padding-top: 16px;
+  margin-top: 16px;
+  border-top: 1px solid #394f64;
+}
+
+.assignment-dialog .custody-status-row > span:first-child {
+  font-size: 11px;
+  color: #a8bacb;
+}
+
+.assignment-dialog .custody-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+
+  padding: 6px 11px;
+  border-radius: 20px;
+
+  background: color-mix(
+    in srgb,
+    var(--inv-company-accent, #a2d149) 15%,
+    #17232f
+  );
+
+  border: 1px solid color-mix(
+    in srgb,
+    var(--inv-company-accent, #a2d149) 50%,
+    #425668
+  );
+
+  color: var(--inv-company-accent, #a2d149);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.assignment-dialog .custody-status.is-complete {
+  background: #1e382a;
+  border-color: #3c7955;
+  color: #a7e8b8;
+}
+
+.assignment-dialog .custody-status mat-icon {
+  width: 15px;
+  height: 15px;
+  font-size: 15px;
+}
+
+/* OBSERVACIONES */
+.assignment-dialog .custody-observation {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+
+  margin-top: 18px;
+  padding-top: 15px;
+  border-top: 1px solid #394f64;
+}
+
+.assignment-dialog .custody-observation p {
+  margin: 0;
+  color: #e1ebf3;
+  font-size: 12px;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+
+/* EVIDENCIA FOTOGRÁFICA */
+.assignment-dialog .custody-evidence-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 260px) minmax(0, 1fr);
+  gap: 18px;
+  align-items: start;
+}
+
+.assignment-dialog .custody-evidence-preview {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  min-height: 150px;
+  padding: 8px;
+
+  border: 1px solid #43586a;
+  border-radius: 10px;
+  background: #0d151d;
+}
+
+.assignment-dialog .custody-evidence-image {
+  display: block;
+  width: auto;
+  max-width: 100%;
+  max-height: 270px;
+  height: auto;
+
+  object-fit: contain;
+  border-radius: 7px;
+}
+
+.assignment-dialog .custody-evidence-empty {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  justify-content: center;
+  gap: 9px;
+
+  min-height: 130px;
+  color: #8ea4b6;
+  font-size: 11px;
+  text-align: center;
+}
+
+.assignment-dialog .custody-evidence-empty mat-icon {
+  width: 28px;
+  height: 28px;
+  font-size: 28px;
+}
+
+.assignment-dialog .custody-evidence-details {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 9px;
+  min-width: 0;
+}
+
+.assignment-dialog .custody-evidence-details > strong {
+  color: #edf4fa;
+  font-size: 13px;
+}
+
+.assignment-dialog .custody-evidence-details > p {
+  margin: 0;
+  color: #a8bacb;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.assignment-dialog .custody-evidence-actions {
+  margin-top: 7px;
+}
+
+.assignment-dialog .evidence-update-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+
+  min-height: 39px;
+  padding: 9px 13px;
+
+  background: #243340;
+  color: #e5edf6;
+  border: 1px solid #607586;
+  border-radius: 9px;
+
+  font-size: 12px;
+  font-weight: 650;
+  cursor: pointer;
+}
+
+.assignment-dialog .evidence-update-button mat-icon {
+  width: 17px;
+  height: 17px;
+  font-size: 17px;
+}
+
+.assignment-dialog .evidence-update-button:hover:not(:disabled) {
+  border-color: var(--inv-company-accent, #a2d149);
+  background: #304251;
+}
+
+.assignment-dialog .evidence-update-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.assignment-dialog .evidence-status {
+  margin: 13px 0 0;
+  padding: 10px 12px;
+  font-size: 11px;
+}
+
+/* HISTORIAL */
+.assignment-dialog .custody-timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.assignment-dialog .custody-timeline-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+
+  padding: 12px 0;
+  border-bottom: 1px solid #354a5b;
+}
+
+.assignment-dialog .custody-timeline-item:first-child {
+  padding-top: 0;
+}
+
+.assignment-dialog .custody-timeline-item:last-child {
+  padding-bottom: 0;
+  border-bottom: 0;
+}
+
+.assignment-dialog .custody-timeline-icon {
+  display: grid;
+  place-items: center;
+  flex: 0 0 32px;
+
+  width: 32px;
+  height: 32px;
+
+  border-radius: 9px;
+  background: color-mix(
+    in srgb,
+    var(--inv-company-accent, #a2d149) 12%,
+    #19232e
+  );
+  color: var(--inv-company-accent, #a2d149);
+}
+
+.assignment-dialog .custody-timeline-icon mat-icon {
+  width: 17px;
+  height: 17px;
+  font-size: 17px;
+}
+
+.assignment-dialog .custody-timeline-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.assignment-dialog .custody-timeline-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.assignment-dialog .custody-timeline-heading strong {
+  color: #edf4fa;
+  font-size: 12px;
+}
+
+.assignment-dialog .custody-timeline-heading span {
+  color: #9cafc0;
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+.assignment-dialog .custody-timeline-content small {
+  display: block;
+  margin-top: 4px;
+  color: var(--inv-company-accent, #a2d149);
+  font-size: 10px;
+}
+
+.assignment-dialog .custody-timeline-content p {
+  margin: 8px 0 0;
+  color: #c4d2df;
+  font-size: 12px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.assignment-dialog .custody-empty-message {
+  margin: 0;
+  color: #a8bacb;
+  font-size: 12px;
+}
+
+/* DEVOLUCIONES */
+.assignment-dialog .custody-return-grid {
+  display: grid;
+  grid-template-columns: 170px minmax(0, 1fr);
+  gap: 12px;
+}
+
+.assignment-dialog .custody-return-grid label {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+
+  color: #bdcbd8;
+  font-size: 11px;
+  font-weight: 650;
+}
+
+.assignment-dialog .custody-return-grid input {
+  width: 100%;
+  min-width: 0;
+  height: 42px;
+
+  padding: 10px 12px;
+  border: 1px solid #62788b;
+  border-radius: 8px;
+
+  background: #0f1821;
+  color: #edf4fa;
+  font: inherit;
+  font-size: 13px;
+}
+
+.assignment-dialog .custody-return-grid input:focus {
+  outline: none;
+  border-color: var(--inv-company-accent, #a2d149);
+}
+
+.assignment-dialog .custody-return-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+
+  margin-top: 17px;
+}
+
+.assignment-dialog .custody-return-available {
+  color: #a8bacb;
+  font-size: 11px;
+}
+
+.assignment-dialog .custody-return-available strong {
+  color: #edf4fa;
+}
+
+/* BOTÓN DE DEVOLUCIÓN: COLOR EMPRESARIAL */
+.assignment-dialog .assignment-return-submit {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+
+  min-height: 42px;
+  margin: 0;
+  padding: 11px 19px;
+
+  border: 0;
+  border-radius: 24px;
+
+  background: var(--inv-company-accent, #a2d149);
+  color: var(--inv-company-on-accent, #12202b);
+
+  font-size: 12px;
+  font-weight: 750;
+  cursor: pointer;
+
+  transition: filter 140ms ease;
+}
+
+.assignment-dialog .assignment-return-submit mat-icon {
+  width: 18px;
+  height: 18px;
+  font-size: 18px;
+}
+
+.assignment-dialog .assignment-return-submit:hover:not(:disabled) {
+  filter: brightness(1.09);
+}
+
+.assignment-dialog .assignment-return-submit:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* PIE INFERIOR */
+.assignment-dialog .assignment-dialog__footer.mat-mdc-dialog-actions {
+  flex: none;
+  min-height: 0;
+  justify-content: flex-end;
+
+  padding: 14px 22px;
+  margin: 0;
+  gap: 12px;
+
+  background: #151e27;
+  border-top: 1px solid #344353;
+}
+
+.assignment-dialog .assignment-dialog__footer .custody-footer-close {
+  padding: 10px 14px;
+
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: transparent;
+  color: #b1bbca;
+
+  font-size: 12px;
+  font-weight: 750;
+  cursor: pointer;
+}
+
+.assignment-dialog
+.assignment-dialog__footer
+.custody-footer-close:hover {
+  background: #24303a;
+  color: #fff;
+}
+
+/* RESPONSIVE */
+@media (max-width: 650px) {
+  .assignment-dialog .custody-evidence-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .assignment-dialog .custody-evidence-preview {
+    min-height: 130px;
+  }
+}
+
+@media (max-width: 540px) {
+  .assignment-dialog .assignment-dialog__body.mat-mdc-dialog-content {
+    padding: 14px !important;
+  }
+
+  .assignment-dialog .custody-card {
+    padding: 14px;
+  }
+
+  .assignment-dialog .custody-info-grid {
+    grid-template-columns: 1fr;
+    gap: 13px;
+  }
+
+  .assignment-dialog .custody-stats {
+    gap: 7px;
+  }
+
+  .assignment-dialog .custody-stat {
+    padding: 10px;
+  }
+
+  .assignment-dialog .custody-stat strong {
+    font-size: 17px;
+  }
+
+  .assignment-dialog .custody-return-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .assignment-dialog .custody-timeline-heading {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+
+  .assignment-dialog .assignment-dialog__footer.mat-mdc-dialog-actions {
+    padding: 11px 14px;
+  }
+}

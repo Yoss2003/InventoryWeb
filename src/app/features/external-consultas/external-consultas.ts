@@ -31,7 +31,7 @@ export class ExternalConsultasComponent implements OnInit {
   openAdvancedFilters():void {
     if (!this.fxHistoryTemplate || this.fxHistoryRef) return;
     const ref=this.matDialog.open(this.fxHistoryTemplate,{
-      panelClass:'fx-history-modal',
+      panelClass:['fx-history-modal','inv-seven-modal'],enterAnimationDuration:260,exitAnimationDuration:220,
       width:'min(620px, calc(100vw - 24px))',maxWidth:'calc(100vw - 24px)',
       maxHeight:'calc(100dvh - 24px)',autoFocus:false,restoreFocus:true
     });

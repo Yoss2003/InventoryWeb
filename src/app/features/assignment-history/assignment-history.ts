@@ -50,8 +50,9 @@ export class AssignmentHistoryComponent implements OnInit {
   }
   openDetail(row:AssignedArticle):void{
     const ref=this.dialog.open(AssignmentHistoryDialogComponent,{
+      panelClass:['assignment-history-dialog-panel','inv-seven-modal'],enterAnimationDuration:260,exitAnimationDuration:220,
       data:row,width:'min(710px, calc(100vw - 24px))',maxWidth:'calc(100vw - 24px)',
-      maxHeight:'calc(100dvh - 24px)',autoFocus:false,panelClass:'assignment-history-dialog-panel'
+      maxHeight:'calc(100dvh - 24px)',autoFocus:false
     });
     ref.afterClosed().subscribe(changed=>{if(changed)this.loadHistory();});
   }
