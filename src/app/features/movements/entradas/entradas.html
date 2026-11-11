@@ -21,7 +21,7 @@
   </mat-tab-group>
 </section>
 <ng-template #articleRows let-items><div class="entries-table inv-core-table-wrap"><table><thead><tr><th>Código</th><th>Artículo</th><th>Modelo</th><th>Stock</th><th>Unidad</th><th>Costo</th><th>Precio</th><th>Acciones</th></tr></thead>
-  <tbody><tr *ngFor="let a of items" tabindex="0" (click)="showArticle(a.id)" (keydown.enter)="showArticle(a.id)"><td>{{a.code}}</td><td><strong>{{a.name}}</strong></td><td>{{a.model}}</td><td>{{a.stock|number:'1.0-2'}}</td><td>{{a.measurementUnit}}</td><td>{{a.acquisitionPrice??0|number:'1.2-2'}}</td><td>{{a.salePrice??0|number:'1.2-2'}}</td>
+  <tbody><tr *ngFor="let a of items" tabindex="0" (click)="showArticle(a.id)" (keydown.enter)="showArticle(a.id)"><td>{{a.code}}</td><td><strong>{{a.name}}</strong></td><td>{{a.model}}</td><td>{{a.stock|number:'1.0-2'}}</td><td>{{a.measurementUnit}}</td><td>{{(a.acquisitionPrice ?? 0) | money:a.acquisitionCurrency}}</td><td>{{(a.salePrice ?? 0) | money:a.saleCurrency}}</td>
     <td class="inv-core-action-cell"><button type="button" (click)="$event.stopPropagation();editArticle(a.id)" aria-label="Editar artículo" appUiTableAction="normal"><mat-icon>edit</mat-icon></button><button type="button" class="danger" (click)="deleteArticle(a,$event)" aria-label="Dar de baja artículo" appUiTableAction="danger"><mat-icon>delete_outline</mat-icon></button></td></tr></tbody></table><app-ui-empty-state *ngIf="!items.length && !loading" [message]="search ? 'No hay coincidencias con la búsqueda.' : 'Sin artículos registrados.'"></app-ui-empty-state></div></ng-template>
 
 <!-- /* FASE 4.1 */ -->
