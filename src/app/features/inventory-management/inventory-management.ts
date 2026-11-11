@@ -70,7 +70,10 @@ export class InventoryManagementComponent implements OnInit {
   load(): void {
     this.loading = true;
     const members = this.isManager ? this.usersApi.users() : of([] as ManagedUser[]);
-    forkJoin({ inventories: this.api.getInventories(), users: members }).subscribe({
+    // La administración ve metadatos de la empresa, sin otorgar acceso
+    // implícito a los artículos/stock privado de cada empleado.
+    const inventories = this.isManager ? this.api.companyInventories() : this.api.getInventories();
+    forkJoin({ inventories, users: members }).subscribe({
       next: ({inventories, users}) => {
         this.rows = (inventories || []).filter(i => i.isActive);
         this.users = (users || []).filter(u => u.isActive && u.statusId === 1);
