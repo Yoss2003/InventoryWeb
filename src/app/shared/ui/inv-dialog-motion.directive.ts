@@ -1,3 +1,4 @@
+import { isPlatformBrowser } from '@angular/common';
 import {
   AfterViewInit,
   Directive,
@@ -10,108 +11,144 @@ import {
   SimpleChanges,
   inject
 } from '@angular/core';
-import { isPlatformBrowser } from '@angular/common';
+import { MatDialogRef } from '@angular/material/dialog';
+import { Subscription } from 'rxjs';
 
 /**
- * Anima el cambio real de altura de los diálogos sin modificar su contenido
- * ni imponer una altura fija que oculte campos en pantallas pequeñas.
- * El ancho opcional se aplica al pane de CDK, no a otros diálogos.
+ * INV_DIALOG_LIFECYCLE_2026_V2
+ * Movimiento compartido de los dos formularios: apertura/cierre del host,
+ * ancho en el pane de CDK y altura natural al cambiar de panel.
+ * No modifica los formularios ni guarda datos.
  */
 @Directive({ selector: '[invDialogMotion]', standalone: true })
 export class InventoryDialogMotionDirective implements AfterViewInit, OnChanges, OnDestroy {
   @Input() invDialogMotion: string | number | null = null;
   @Input() invDialogMotionWidth: string | null = null;
 
-  private readonly host = inject(ElementRef<HTMLElement>).nativeElement;
+  private readonly host: HTMLElement = inject(ElementRef<HTMLElement>).nativeElement;
+  private readonly dialogRef = inject(MatDialogRef, { optional: true });
   private readonly zone = inject(NgZone);
   private readonly browser = isPlatformBrowser(inject(PLATFORM_ID));
+  private pane: HTMLElement | null = null;
+  private opened = false;
   private initialized = false;
-  private knownHeight = 0;
-  private nextFrame = 0;
-  private animation: Animation | null = null;
+  private currentHeight = 0;
+  private pendingOldHeight: number | null = null;
+  private pendingFrame = 0;
+  private heightAnimation: Animation | null = null;
   private resizeObserver: ResizeObserver | null = null;
+  private readonly subscriptions = new Subscription();
+
+  constructor() {
+    // Este marcador se aplica al crear la vista, antes de su primer fotograma.
+    if (this.browser) this.host.classList.add('inv-dialog-motion-root');
+  }
 
   ngAfterViewInit(): void {
     if (!this.browser) return;
-    this.knownHeight = this.host.getBoundingClientRect().height;
-    this.initialized = true;
-    // No crear una animación de entrada para el ancho inicial de Artículos.
-    if (this.invDialogMotionWidth) {
-      this.updatePaneWidth(this.invDialogMotionWidth, false);
+    this.pane = this.host.closest('.cdk-overlay-pane') as HTMLElement | null;
+    this.pane?.classList.add('inv-dialog-motion-pane');
+
+    // Fijar el ancho inicial ANTES de activar transiciones; nunca animar
+    // el ancho que otro modal tenía antes de ser cerrado.
+    if (this.invDialogMotionWidth && this.pane) {
+      this.pane.style.width = this.invDialogMotionWidth;
     }
-    if (typeof ResizeObserver !== 'undefined') {
-      this.resizeObserver = new ResizeObserver(() => {
-        if (!this.animation && !this.nextFrame) {
-          this.knownHeight = this.host.getBoundingClientRect().height;
+    this.currentHeight = this.host.getBoundingClientRect().height;
+    this.initialized = true;
+
+    if (this.dialogRef) {
+      this.subscriptions.add(this.dialogRef.afterOpened().subscribe(() => {
+        if (!this.host.isConnected) return;
+        this.opened = true;
+        this.currentHeight = this.host.getBoundingClientRect().height;
+        // Desde ahora sí se animan los cambios de ancho entre secciones.
+        this.pane?.classList.add('inv-dialog-size-ready');
+        if (typeof ResizeObserver !== 'undefined') {
+          this.resizeObserver = new ResizeObserver(() => this.onMeasuredSizeChange());
+          this.resizeObserver.observe(this.host);
         }
-      });
-      this.resizeObserver.observe(this.host);
+      }));
+      this.subscriptions.add(this.dialogRef.beforeClosed().subscribe(() => {
+        this.opened = false;
+        this.pane?.classList.remove('inv-dialog-size-ready');
+        this.host.classList.add('inv-dialog-closing');
+        this.heightAnimation?.cancel();
+        this.heightAnimation = null;
+      }));
     }
   }
 
   ngOnChanges(changes: SimpleChanges): void {
     if (!this.browser || !this.initialized) return;
     if (changes['invDialogMotion'] && !changes['invDialogMotion'].firstChange) {
-      this.animateNewHeight();
+      this.scheduleHeightAnimation();
     }
-    if (changes['invDialogMotionWidth'] && !changes['invDialogMotionWidth'].firstChange && this.invDialogMotionWidth) {
-      this.updatePaneWidth(this.invDialogMotionWidth, true);
-    }
-  }
-
-  private updatePaneWidth(width: string, animated: boolean): void {
-    const pane = (this.host as HTMLElement).closest('.cdk-overlay-pane') as HTMLElement | null;
-
-    if (!pane) return;
-    // Mantener el máximo definido por el propio MatDialog.
-    if (!animated) {
-      pane.style.width = width;
-      window.requestAnimationFrame(() => {
-        if (pane.isConnected) pane.classList.add('inv-article-motion-width');
-      });
-    } else {
-      pane.classList.add('inv-article-motion-width');
-      pane.style.width = width;
+    if (changes['invDialogMotionWidth'] && this.invDialogMotionWidth && this.pane) {
+      // El CSS desactiva la transición mientras se completa la apertura.
+      this.pane.style.width = this.invDialogMotionWidth;
     }
   }
 
-  private animateNewHeight(): void {
-    // Capturamos la altura anterior antes de que Angular actualice el nuevo panel.
-    const start = this.animation
+  private reduceMotion(): boolean {
+    return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  }
+
+  private scheduleHeightAnimation(): void {
+    if (!this.opened || this.reduceMotion()) return;
+    this.pendingOldHeight = this.heightAnimation
       ? this.host.getBoundingClientRect().height
-      : (this.knownHeight || this.host.getBoundingClientRect().height);
-    if (this.nextFrame) window.cancelAnimationFrame(this.nextFrame);
-
+      : (this.currentHeight || this.host.getBoundingClientRect().height);
+    if (this.pendingFrame) window.cancelAnimationFrame(this.pendingFrame);
     this.zone.runOutsideAngular(() => {
-      this.nextFrame = window.requestAnimationFrame(() => {
-        this.nextFrame = 0;
-        if (!this.host.isConnected) return;
-        this.animation?.cancel();
-        this.animation = null;
-        const end = this.host.getBoundingClientRect().height;
-        this.knownHeight = end;
-        if (!Number.isFinite(start) || !Number.isFinite(end) || Math.abs(end - start) < 3 ||
-            window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-
-        const animation = this.host.animate(
-          [{ height: `${start}px` }, { height: `${end}px` }],
-          { duration: 310, easing: 'cubic-bezier(.22, 1, .36, 1)' }
-        );
-        this.animation = animation;
-        animation.finished.then(() => {
-          if (this.animation === animation) {
-            this.animation = null;
-            this.knownHeight = this.host.getBoundingClientRect().height;
-          }
-        }).catch(() => { /* Una navegación rápida puede cancelar la animación anterior. */ });
+      this.pendingFrame = window.requestAnimationFrame(() => {
+        this.pendingFrame = 0;
+        if (!this.opened || !this.host.isConnected) return;
+        const from = this.pendingOldHeight;
+        this.pendingOldHeight = null;
+        if (from == null) return;
+        this.heightAnimation?.cancel();
+        this.heightAnimation = null;
+        // Tras cancelar, vuelve a medirse la altura natural del contenido.
+        const to = this.host.getBoundingClientRect().height;
+        this.animateHeight(from, to);
       });
     });
   }
 
+  private onMeasuredSizeChange(): void {
+    if (!this.opened || this.pendingFrame || this.heightAnimation || this.reduceMotion()) return;
+    const to = this.host.getBoundingClientRect().height;
+    if (Math.abs(to - this.currentHeight) > 3) {
+      this.animateHeight(this.currentHeight, to);
+    }
+  }
+
+  private animateHeight(from: number, to: number): void {
+    if (!Number.isFinite(from) || !Number.isFinite(to) || Math.abs(to - from) < 3) {
+      this.currentHeight = to;
+      return;
+    }
+    this.currentHeight = to;
+    // Animación de altura real: sin scaleY (los controles no se deforman).
+    const animation = this.host.animate(
+      [{ height: `${from}px` }, { height: `${to}px` }],
+      { duration: 290, easing: 'cubic-bezier(.22, 1, .36, 1)' }
+    );
+    this.heightAnimation = animation;
+    animation.finished.then(() => {
+      if (this.heightAnimation !== animation) return;
+      this.heightAnimation = null;
+      if (this.host.isConnected) this.currentHeight = this.host.getBoundingClientRect().height;
+    }).catch(() => { /* Navegación rápida: la animación anterior se canceló. */ });
+  }
+
   ngOnDestroy(): void {
+    this.subscriptions.unsubscribe();
     if (!this.browser) return;
-    if (this.nextFrame) window.cancelAnimationFrame(this.nextFrame);
-    this.animation?.cancel();
+    if (this.pendingFrame) window.cancelAnimationFrame(this.pendingFrame);
+    this.heightAnimation?.cancel();
     this.resizeObserver?.disconnect();
+    this.pane?.classList.remove('inv-dialog-size-ready', 'inv-dialog-motion-pane');
   }
 }

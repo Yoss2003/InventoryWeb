@@ -84,7 +84,7 @@ export class EntradasComponent implements OnInit {
   articleCode(id:number):string{return this.articleMap.get(id)?.code||'—';}
   newArticle():void{this.editArticle(null);}
   editArticle(id:number|null):void{
-    const ref=this.dialog.open(ArticleFormComponent,{width:'1080px',maxWidth:'calc(100vw - 24px)',maxHeight:'calc(100dvh - 24px)',disableClose:true,data:{id}});
+    const ref=this.dialog.open(ArticleFormComponent,{enterAnimationDuration:220,exitAnimationDuration:180,width:'1080px',maxWidth:'calc(100vw - 24px)',maxHeight:'calc(100dvh - 24px)',disableClose:true,data:{id}});
     ref.afterClosed().subscribe((result: boolean | { created: boolean; tracking: number } | undefined)=>{
       if (!result) return;
       if (typeof result === 'object' && result.created)

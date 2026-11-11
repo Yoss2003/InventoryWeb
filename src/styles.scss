@@ -169,3 +169,19 @@ select:not([multiple]):focus-visible{outline:2px solid var(--inv-company-accent,
   .cdk-overlay-pane.inv-article-motion-width,
   .cdk-overlay-pane.inv-category-width-transition { transition: none !important; }
 }
+
+/* INV_DIALOG_LIFECYCLE_2026_V2
+   Mientras se abre un diálogo NO se permite transición de ancho: así no
+   aparece con el tamaño de la sección anterior ni de otro modal. */
+.cdk-overlay-pane.inv-dialog-motion-pane:not(.inv-dialog-size-ready) {
+  transition: none !important;
+}
+.cdk-overlay-pane.inv-dialog-motion-pane.inv-dialog-size-ready {
+  transition: width 290ms cubic-bezier(.22, 1, .36, 1) !important;
+}
+@media (prefers-reduced-motion: reduce) {
+  .cdk-overlay-pane.inv-dialog-motion-pane,
+  .cdk-overlay-pane.inv-dialog-motion-pane.inv-dialog-size-ready {
+    transition: none !important;
+  }
+}

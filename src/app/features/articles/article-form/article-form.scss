@@ -899,3 +899,36 @@ button:focus-visible { outline: 2px solid $lime; outline-offset: 2px; }
   .custom-modal .step-content,
   .custom-modal .form-container > form > .card-section { animation: none !important; }
 }
+
+/* INV_DIALOG_LIFECYCLE_2026_V2: alta/edición de artículo; altura al contenido. */
+.custom-modal.inv-dialog-motion-root {
+  height: auto;
+  max-height: calc(100dvh - 28px);
+  min-height: 0;
+  transform-origin: center center;
+  animation: inv-article-modal-enter 220ms cubic-bezier(.22, 1, .36, 1) both;
+}
+.custom-modal.inv-dialog-motion-root .modal-body {
+  flex: 0 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+.custom-modal.inv-dialog-motion-root.inv-dialog-closing {
+  pointer-events: none;
+  animation: inv-article-modal-exit 180ms ease-in both !important;
+}
+@keyframes inv-article-modal-enter {
+  from { opacity: 0; transform: translateY(8px) scale(.976); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes inv-article-modal-exit {
+  from { opacity: 1; transform: translateY(0) scale(1); }
+  to { opacity: 0; transform: translateY(5px) scale(.985); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .custom-modal.inv-dialog-motion-root,
+  .custom-modal.inv-dialog-motion-root.inv-dialog-closing {
+    animation: none !important;
+  }
+}
