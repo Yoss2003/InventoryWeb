@@ -49,34 +49,53 @@
           </div>
           <p class="registered-suppliers__state" *ngIf="suppliersLoading" role="status">Consultando proveedores registrados...</p>
           <p class="registered-suppliers__error" *ngIf="suppliersError" role="alert">{{ suppliersError }}</p>
-          <div class="registered-suppliers__items" *ngIf="!suppliersLoading && !suppliersError">
-            <article class="registered-suppliers__item" *ngFor="let supplier of filteredSuppliers">
-              <div class="registered-suppliers__identity">
-                <strong>{{ supplier.businessName || 'Proveedor sin razón social' }}</strong>
-                <small>RUC {{ supplier.ruc || 'no registrado' }}</small>
-                <span *ngIf="supplier.contactName">Contacto: {{ supplier.contactName }}</span>
-              </div>
-              <div class="registered-suppliers__actions">
-                <button type="button" (click)="consultSupplierRuc(supplier)"
-                        [disabled]="loadingRuc || !supplier.ruc || supplier.ruc.length !== 11"
-                        title="Consultar RUC ante SUNAT" [attr.aria-label]="'Consultar RUC de ' + supplier.businessName">
-                  <mat-icon aria-hidden="true">manage_search</mat-icon><span>RUC</span>
-                </button>
-                <a *ngIf="supplierEmailLink(supplier.email) as emailLink" [href]="emailLink"
-                   title="Escribir correo" [attr.aria-label]="'Enviar correo a ' + supplier.businessName">
-                  <mat-icon aria-hidden="true">mail_outline</mat-icon><span>Correo</span>
-                </a>
-                <a *ngIf="supplierPhoneLink(supplier.phone) as phoneLink" [href]="phoneLink"
-                   title="Llamar" [attr.aria-label]="'Llamar a ' + supplier.businessName">
-                  <mat-icon aria-hidden="true">phone</mat-icon><span>Llamar</span>
-                </a>
-              </div>
-              <small class="registered-suppliers__no-contact" *ngIf="!supplierEmailLink(supplier.email) && !supplierPhoneLink(supplier.phone)">Sin correo ni teléfono registrado</small>
-            </article>
-            <p class="registered-suppliers__state" *ngIf="suppliersLoaded && !filteredSuppliers.length">
-              {{ supplierSearch ? 'No hay proveedores que coincidan con tu búsqueda.' : 'No tienes proveedores activos registrados.' }}
-            </p>
+          <div class="registered-suppliers__table-viewport inv-core-table-wrap"
+               *ngIf="!suppliersLoading && !suppliersError && filteredSuppliers.length">
+            <table class="registered-suppliers__table">
+              <thead>
+                <tr>
+                  <th scope="col">Proveedor</th>
+                  <th scope="col" class="registered-suppliers__contact-col">Contacto</th>
+                  <th scope="col" class="registered-suppliers__actions-col">Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let supplier of filteredSuppliers">
+                  <td class="registered-suppliers__business-cell">
+                    <strong [title]="supplier.businessName || ''">{{ supplier.businessName || 'Proveedor sin razón social' }}</strong>
+                    <small>RUC {{ supplier.ruc || 'no registrado' }}</small>
+                  </td>
+                  <td class="registered-suppliers__contact-col">
+                    <span [title]="supplier.contactName || ''">{{ supplier.contactName || '—' }}</span>
+                  </td>
+                  <td class="registered-suppliers__actions-col">
+                    <div class="registered-suppliers__action-group">
+                      <button type="button" appUiTableAction="normal"
+                              (click)="consultSupplierRuc(supplier)"
+                              [disabled]="loadingRuc || !supplier.ruc || supplier.ruc.length !== 11"
+                              title="Consultar RUC ante SUNAT"
+                              [attr.aria-label]="'Consultar RUC de ' + supplier.businessName">
+                        <mat-icon aria-hidden="true">manage_search</mat-icon>
+                      </button>
+                      <a *ngIf="supplierEmailLink(supplier.email) as emailLink"
+                         [href]="emailLink" class="ui-v2-table-action" title="Enviar correo"
+                         [attr.aria-label]="'Enviar correo a ' + supplier.businessName">
+                        <mat-icon aria-hidden="true">mail_outline</mat-icon>
+                      </a>
+                      <a *ngIf="supplierPhoneLink(supplier.phone) as phoneLink"
+                         [href]="phoneLink" class="ui-v2-table-action" title="Llamar"
+                         [attr.aria-label]="'Llamar a ' + supplier.businessName">
+                        <mat-icon aria-hidden="true">phone</mat-icon>
+                      </a>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
           </div>
+          <p class="registered-suppliers__state" *ngIf="!suppliersLoading && !suppliersError && suppliersLoaded && !filteredSuppliers.length">
+            {{ supplierSearch ? 'No hay proveedores que coincidan con tu búsqueda.' : 'No tienes proveedores activos registrados.' }}
+          </p>
           <p class="registered-suppliers__footnote">Contactar o buscar aquí no modifica el proveedor. La edición se realiza desde Catálogo general.</p>
         </div>
       </div>
