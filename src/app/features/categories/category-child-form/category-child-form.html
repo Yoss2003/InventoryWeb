@@ -58,11 +58,6 @@
               </div>
             </div>
           </section>
-          <div class="step-actions">
-            <button type="button" class="action-button action-next" matStepperNext [disabled]="identityForm.invalid">
-              Siguiente: Reglas <mat-icon>arrow_forward</mat-icon>
-            </button>
-          </div>
         </form>
       </mat-step>
 
@@ -78,7 +73,7 @@
                 <p>Define el seguimiento y la forma de nombrar los productos</p>
               </div>
             </div>
-                        <div class="rules-grid">
+            <div class="rules-grid">
               <div class="category-field rules-tracking-field">
                 <label for="child-category-tracking">Modo de tracking <span class="required">*</span></label>
                 <mat-form-field appearance="outline" class="inventory-select">
@@ -147,15 +142,6 @@
               </div>
             </div>
           </section>
-          <div class="step-actions split-actions">
-            <button type="button" class="action-button action-secondary" matStepperPrevious>
-              <mat-icon>arrow_back</mat-icon> Anterior
-            </button>
-            <button *ngIf="showAttributesStep && rulesForm.get('isNamingLibre')?.value" type="button"
-              class="action-button action-next" matStepperNext [disabled]="rulesForm.invalid">
-              Siguiente: Atributos <mat-icon>arrow_forward</mat-icon>
-            </button>
-          </div>
         </form>
       </mat-step>
 
@@ -269,23 +255,70 @@
               </p>
             </section>
           </div>
-          <div class="step-actions split-actions">
-            <button type="button" class="action-button action-secondary" matStepperPrevious>
-              <mat-icon>arrow_back</mat-icon> Anterior
-            </button>
-          </div>
         </form>
       </mat-step>
     </mat-stepper>
   </mat-dialog-content>
+  
+  <footer class="category-footer">
 
-  <mat-dialog-actions class="category-footer">
-    <button type="button" class="action-button action-secondary" (click)="dialogRef.close()">Cancelar</button>
-    <button type="button" class="action-button action-next action-submit" [disabled]="!isFormComplete || stepper.selectedIndex <
-              (showAttributesStep && rulesForm.get('isNamingLibre')?.value ? 2 : 1)" || (isEdit && !hasEditChanges)
-      (click)="onSubmit()">
-      <mat-icon>save</mat-icon> {{ isEdit ? 'Actualizar categoría' : 'Guardar categoría' }}
+    <button
+      *ngIf="stepper.selectedIndex > 0"
+      type="button"
+      class="btn-text back"
+      (click)="stepper.previous()">
+      <mat-icon>arrow_back</mat-icon>
+      Atrás
     </button>
-  </mat-dialog-actions>
+
+    <span class="footer-spacer"></span>
+
+    <button
+      type="button"
+      class="btn-text"
+      (click)="dialogRef.close()">
+      Cancelar
+    </button>
+
+    <!-- Identidad -> Reglas -->
+    <button
+      *ngIf="stepper.selectedIndex === 0"
+      type="button"
+      class="btn-pill-green"
+      [disabled]="identityForm.invalid"
+      (click)="stepper.next()">
+      Siguiente: Reglas
+      <mat-icon>arrow_forward</mat-icon>
+    </button>
+
+    <!-- Reglas -> Atributos -->
+    <button
+      *ngIf="stepper.selectedIndex === 1 &&
+            showAttributesStep &&
+            rulesForm.get('isNamingLibre')?.value"
+      type="button"
+      class="btn-pill-green"
+      [disabled]="rulesForm.invalid"
+      (click)="stepper.next()">
+      Siguiente: Atributos
+      <mat-icon>arrow_forward</mat-icon>
+    </button>
+
+    <!-- Guardar en el último paso -->
+    <button
+      *ngIf="stepper.selectedIndex === 2 ||
+            (stepper.selectedIndex === 1 &&
+              !(showAttributesStep &&
+                rulesForm.get('isNamingLibre')?.value))"
+      type="button"
+      class="btn-pill-green"
+      [disabled]="!isFormComplete || (isEdit && !hasEditChanges)"
+      (click)="onSubmit()">
+      <mat-icon>save</mat-icon>
+      {{ isEdit ? 'Actualizar categoría' : 'Guardar categoría' }}
+    </button>
+
+  </footer>
+
 </div>
 <!-- WEBINV_CATEGORIA_VISUAL_2026_V1 -->
