@@ -405,7 +405,7 @@ export class DevManagementComponent implements OnInit, OnDestroy {
     this.newCompany();
     this.toasts.success(wasEditing
       ? (logoUploaded ? 'Empresa y logo actualizados sin renovar la licencia.' : 'Datos de empresa actualizados sin renovar la licencia.')
-      : (logoUploaded ? 'Empresa, licencia y logo guardados correctamente.' : 'Empresa y licencia creadas correctamente.'));
+      : (logoUploaded ? 'Empresa, licencia, inventario general y logo creados correctamente.' : 'Empresa, licencia e inventario general creados correctamente.'));
     this.loadCompanies();
     this.cdr.markForCheck();
   }
