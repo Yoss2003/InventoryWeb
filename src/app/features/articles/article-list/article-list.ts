@@ -5,6 +5,7 @@ import { UiButtonDirective } from '../../../shared/ui/v2/ui-button.directive';
 import { UiPageHeadingComponent } from '../../../shared/ui/v2/ui-page-heading.component';
 import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { MoneyPipe } from '../../../shared/money.pipe';
 import { FormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDialog } from '@angular/material/dialog';
@@ -24,7 +25,7 @@ interface ArticleRow extends Article { categoryName: string; brandName: string; 
 import { UiSearchComponent } from '../../../shared/ui/ui-search.component';
 
 @Component({selector:'app-article-list',standalone:true,
-  imports:[UiEmptyStateComponent, UiStatusComponent, UiTableActionDirective, UiButtonDirective, UiPageHeadingComponent, CommonModule,FormsModule,MatIconModule,LoadingIndicatorComponent,UiSearchComponent],
+  imports:[MoneyPipe, UiEmptyStateComponent, UiStatusComponent, UiTableActionDirective, UiButtonDirective, UiPageHeadingComponent, CommonModule,FormsModule,MatIconModule,LoadingIndicatorComponent,UiSearchComponent],
   templateUrl:'./article-list.html',styleUrl:'./article-list.scss'})
 export class ArticleListComponent implements OnInit {
   private readonly articles=inject(ArticleService);
