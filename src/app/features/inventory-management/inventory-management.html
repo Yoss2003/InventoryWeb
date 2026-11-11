@@ -26,6 +26,12 @@
             <td>{{ownerName(row.userId)}}</td>
             <td><span class="inv-manage-active">Activo</span></td>
             <td class="inv-core-action-cell">
+              <button *ngIf="canManageAccess" type="button" appUiTableAction="normal"
+                (click)="manageShares(row)" [disabled]="!isManager && row.userId !== selfId"
+                [attr.aria-label]="'Gestionar acceso al inventario ' + row.id"
+                title="Compartir inventario y administrar accesos">
+                <mat-icon aria-hidden="true">group_add</mat-icon>
+              </button>
               <button type="button" appUiTableAction="normal" (click)="edit(row)"
                 [disabled]="!canCreate || (!isManager && row.userId !== selfId)"
                 [attr.aria-label]="'Editar inventario ' + row.id" title="Editar inventario">
@@ -77,6 +83,53 @@
         </button>
       </div>
     </form>
+  </section>
+
+  <section *ngIf="sharing as target" class="inv-manage-card">
+    <div class="inv-manage-heading">
+      <div>
+        <h2>Accesos compartidos · {{target.alias || target.inventoryName}}</h2>
+        <p>Compartir un inventario no cambia su propietario ni autoriza otras empresas.</p>
+      </div>
+      <button type="button" class="inv-manage-secondary" (click)="sharing = null">
+        Cerrar
+      </button>
+    </div>
+    <div class="inv-manage-form">
+      <label>Usuario o correo de tu empresa *
+        <input [(ngModel)]="shareWith" maxlength="254" placeholder="Usuario o correo" />
+      </label>
+      <label>Nivel de acceso
+        <select [(ngModel)]="shareMode">
+          <option [ngValue]="1">Lector: consultar</option>
+          <option [ngValue]="2">Editor: consultar y modificar</option>
+        </select>
+      </label>
+      <div class="inv-manage-actions">
+        <button type="button" class="inv-manage-primary" (click)="saveShare()"
+          [disabled]="sharingBusy || !shareWith.trim()">
+          <mat-icon aria-hidden="true">person_add</mat-icon>
+          {{sharingBusy ? 'Compartiendo...' : 'Conceder acceso'}}
+        </button>
+      </div>
+    </div>
+    <div class="inv-core-table-wrap inv-manage-table inv-manage-shares" *ngIf="shares.length">
+      <table>
+        <thead><tr><th>Usuario</th><th>Permiso</th><th>Acciones</th></tr></thead>
+        <tbody><tr *ngFor="let share of shares">
+          <td>{{share.username || ('Usuario #' + share.userId)}}</td>
+          <td>{{share.accessLevel === 2 ? 'Editor' : 'Lector'}}</td>
+          <td class="inv-core-action-cell">
+            <button type="button" appUiTableAction="danger" (click)="revokeShare(share)"
+              [attr.aria-label]="'Revocar acceso de ' + (share.username || share.userId)"
+              title="Revocar acceso">
+              <mat-icon aria-hidden="true">person_remove</mat-icon>
+            </button>
+          </td>
+        </tr></tbody>
+      </table>
+    </div>
+    <p *ngIf="!shares.length" class="inv-manage-note">No hay accesos compartidos registrados.</p>
   </section>
 
   <section *ngIf="editId !== null" class="inv-manage-card">
