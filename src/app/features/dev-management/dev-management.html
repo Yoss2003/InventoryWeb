@@ -49,6 +49,13 @@
             </td>
             <td><span class="status-pill" [class.status-muted]="!c.isActive" [class.status-warning]="c.isActive && (!c.license || c.license.isEnabled === false)" [class.status-danger]="c.isActive && c.license?.isEnabled !== false && (daysRemaining(c) ?? 1) < 0">{{!c.isActive ? 'Inactiva' : !c.license ? 'Sin licencia' : c.license.isEnabled === false ? 'Suspendida' : (daysRemaining(c) ?? 1) < 0 ? 'Vencida' : 'Activa'}}</span></td>
             <td class="action-cell"><div class="table-actions">
+              <button *ngIf="c.isActive && c.adminCount === 0" type="button"
+                class="action-first-admin" (click)="registerFirstAdmin(c)"
+                [disabled]="saving || renewing || workingRequestId !== null"
+                [attr.aria-label]="'Registrar primer administrador de ' + c.businessName"
+                title="Registrar primer administrador y su inventario personal">
+                <mat-icon aria-hidden="true">person_add</mat-icon>Primer administrador
+              </button>
               <button type="button" class="action-edit" (click)="select(c)" [disabled]="saving || renewing"><mat-icon>edit</mat-icon>Editar</button>
               <button *ngIf="c.isActive" type="button" class="danger-button" (click)="deactivate(c)" [disabled]="isProtectedCompany(c) || workingRequestId !== null || saving || renewing" [title]="isProtectedCompany(c) ? 'Empresa administradora protegida' : 'Desactivar empresa si no tiene registros asociados'">
                 <mat-icon>{{workingRequestId === c.id ? 'hourglass_top' : 'block'}}</mat-icon>{{workingRequestId === c.id ? 'Procesando...' : 'Desactivar'}}

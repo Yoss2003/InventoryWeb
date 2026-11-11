@@ -6,7 +6,7 @@
 
       <ng-container *ngFor="let group of menuGroups">
 
-        <section class="sidebar-group" *ngIf="!group.developerOnly || isDeveloper">
+        <section class="sidebar-group" *ngIf="groupVisible(group)">
 
           <button
             type="button"
@@ -33,7 +33,7 @@
 
             <ng-container *ngFor="let item of group.items">
               <a
-                *ngIf="!item.adminOnly || isAdmin"
+                *ngIf="canAccessItem(item)"
                 mat-list-item
                 [routerLink]="item.route"
                 routerLinkActive="active-link"

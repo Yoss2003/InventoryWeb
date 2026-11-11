@@ -1,0 +1,27 @@
+:host{display:block;color:#edf4fc;width:100%}
+:host *{box-sizing:border-box}
+.first-admin-modal{display:flex;flex-direction:column;max-height:calc(100dvh - 24px);border-radius:16px;background:#14222d;overflow:hidden}
+.first-admin-header{flex:none;display:flex;align-items:center;justify-content:space-between;gap:12px;background:#1e303d;padding:16px 20px;border-bottom:1px solid #465c6d}
+.first-admin-heading{display:flex;align-items:center;gap:12px;min-width:0}
+.first-admin-symbol{display:grid;place-items:center;flex:0 0 44px;width:44px;height:44px;border:1px solid #586f82;border-radius:12px;color:var(--inv-company-accent,#a2d149)}
+.first-admin-symbol mat-icon{width:24px;height:24px;font-size:24px}
+.first-admin-heading h2{margin:0;padding:0;color:#f0f7fc;font-size:18px;font-weight:750}
+.first-admin-heading p{margin:4px 0 0;font-size:11px;color:#adc3d2}
+.first-admin-close{display:grid;place-items:center;width:35px;height:35px;border-radius:9px;background:#243a4a;border:1px solid #607c90;color:#eaf5fb;cursor:pointer}
+.first-admin-close mat-icon{width:20px;height:20px;font-size:20px}
+.first-admin-body{overflow:auto;min-height:0;padding:19px 20px!important}
+.first-admin-help{color:#b5c9d7;font-size:12px;line-height:1.5;margin:0 0 14px}
+.first-admin-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px;margin-bottom:14px}
+.first-admin-fields label{display:grid;gap:6px;font-size:12px;font-weight:700;min-width:0}
+.first-admin-fields label span{color:#ffb2b9}
+.first-admin-fields input{width:100%;min-height:39px;min-width:0;padding:8px 11px;border-radius:9px;border:1px solid #587284;background:#111e29;color:#eaf3fa;font:inherit;font-weight:400}
+.first-admin-fields input:focus-visible{outline:2px solid var(--inv-company-accent,#a2d149);outline-offset:1px}
+.first-admin-spacer{display:block}
+.first-admin-error{color:#ffb1b9;font-size:12px}
+.first-admin-actions{display:flex;justify-content:flex-end;gap:9px;flex:none;padding:13px 20px!important;margin:0;background:#1e303d;border-top:1px solid #465c6d}
+.first-admin-actions button{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:39px;padding:8px 13px;border-radius:9px;font-weight:750;cursor:pointer}
+.first-admin-cancel{background:#294051;border:1px solid #617b8e;color:#ebf4fb}
+.first-admin-submit{background:var(--inv-company-accent,#a2d149);border:1px solid var(--inv-company-accent,#a2d149);color:#10202a}
+.first-admin-actions button:disabled{opacity:.45;cursor:not-allowed}
+.first-admin-actions mat-icon{width:18px;height:18px;font-size:18px}
+@media(max-width:570px){.first-admin-fields{grid-template-columns:1fr}.first-admin-spacer{display:none}.first-admin-body{padding:14px!important}}

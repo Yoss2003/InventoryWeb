@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth.guard';
+import { permissionGuard } from './core/guards/permission.guard';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' },
@@ -12,7 +13,14 @@ export const routes: Routes = [
     canActivate: [authGuard],
     children: [
       { path: '', redirectTo: 'articulos', pathMatch: 'full' },
-      { path: 'gestion-dev', loadComponent: () => import('./features/dev-management/dev-management').then(m => m.DevManagementComponent) },
+      { path: 'gestion-dev', canActivate: [permissionGuard], data: {developerOnly: true},
+        loadComponent: () => import('./features/dev-management/dev-management').then(m => m.DevManagementComponent) },
+      { path: 'usuarios', canActivate: [permissionGuard], data: {permission: 'MANAGE_USERS'},
+        loadComponent: () => import('./features/user-management/user-management').then(m => m.UserManagementComponent) },
+      { path: 'inventarios-maestros', canActivate: [permissionGuard], data: {permission: 'VIEW_MASTER_INVENTORY'},
+        loadComponent: () => import('./features/master-inventories/master-inventories').then(m => m.MasterInventoriesComponent) },
+      { path: 'inventarios', canActivate: [permissionGuard], data: {permission: 'CREATE_INVENTORIES'},
+        loadComponent: () => import('./features/inventory-management/inventory-management').then(m => m.InventoryManagementComponent) },
       { path: 'consultas', loadComponent: () => import('./features/external-consultas/external-consultas').then(m => m.ExternalConsultasComponent) },
       { path: 'articulos', loadComponent: () => import('./features/articles/article-list/article-list').then(m => m.ArticleListComponent) },
       { path: 'categorias', loadComponent: () => import('./features/categories/category-list/category-list').then(m => m.CategoryListComponent) },

@@ -10,6 +10,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDialog } from '@angular/material/dialog';
 import { DevConfirmDialogComponent, DevConfirmDialogData } from '../../shared/confirm-dialog/dev-confirm-dialog';
+import { FirstAdminDialogComponent, FirstAdminCreated } from './first-admin-dialog';
 import { Observable } from 'rxjs';
 import {
   DevManagementService, DevCompany, CompanyEdit, ResetPending, LicensePlan, RucLookupResult
@@ -408,6 +409,32 @@ export class DevManagementComponent implements OnInit, OnDestroy {
       : (logoUploaded ? 'Empresa, licencia, inventario general y logo creados correctamente.' : 'Empresa, licencia e inventario general creados correctamente.'));
     this.loadCompanies();
     this.cdr.markForCheck();
+  }
+
+  /** Sólo el desarrollador puede aprovisionar el primer administrador empresarial. */
+  registerFirstAdmin(company: DevCompany): void {
+    if (!this.developer || !company.isActive || (company.adminCount ?? 0) > 0) return;
+    this.dialog.open<FirstAdminDialogComponent, { companyId: number; companyName: string }, FirstAdminCreated>(
+      FirstAdminDialogComponent, {
+        data: { companyId: company.id, companyName: company.businessName },
+        panelClass: 'inv-seven-modal',
+        enterAnimationDuration: 260,
+        exitAnimationDuration: 220,
+        width: 'min(680px, calc(100vw - 24px))',
+        maxWidth: 'calc(100vw - 24px)',
+        maxHeight: 'calc(100dvh - 24px)',
+        autoFocus: false,
+        restoreFocus: true,
+        disableClose: true
+      }
+    ).afterClosed().subscribe(result => {
+      if (!result) return;
+      this.toasts.success(
+        `Administrador creado. Inventario personal #${result.personalInventoryId} aprovisionado.`
+      );
+      this.loadCompanies();
+      this.cdr.markForCheck();
+    });
   }
 
   /** Confirmación coherente con el tema oscuro, con soporte de Escape y foco del teclado. */

@@ -1,0 +1,177 @@
+<section class="users-page inv-core-page">
+  <header class="inv-core-header">
+    <app-ui-page-heading icon="manage_accounts" title="Gestión de usuarios"
+      subtitle="Cuentas, inventarios personales, roles y permisos de la empresa de tu sesión."></app-ui-page-heading>
+    <div class="inv-core-header-actions">
+      <button type="button" appUiButton="secondary" (click)="reload()" [disabled]="loading">
+        <mat-icon aria-hidden="true">refresh</mat-icon> Actualizar
+      </button>
+      <button type="button" appUiButton="primary" (click)="createExpanded = !createExpanded"
+              [attr.aria-expanded]="createExpanded">
+        <mat-icon aria-hidden="true">{{createExpanded ? 'close' : 'person_add'}}</mat-icon>
+        {{createExpanded ? 'Cerrar registro' : 'Nuevo usuario'}}
+      </button>
+    </div>
+  </header>
+
+  <section class="users-panel" *ngIf="createExpanded">
+    <div class="users-panel__head">
+      <div><h2>Registrar usuario</h2><p>Se creará automáticamente un inventario personal. El maestro de la empresa se conserva.</p></div>
+    </div>
+    <form (ngSubmit)="register()" class="users-form">
+      <label>Nombre *<input name="firstName" [(ngModel)]="newUser.firstName" maxlength="100" required /></label>
+      <label>Apellido *<input name="lastName" [(ngModel)]="newUser.lastName" maxlength="100" required /></label>
+      <label>Usuario *<input name="username" [(ngModel)]="newUser.username" maxlength="80" required autocomplete="off" /></label>
+      <label>Correo *<input name="email" [(ngModel)]="newUser.email" type="email" maxlength="254" required autocomplete="off" /></label>
+      <label>DNI (opcional)<input name="dni" [(ngModel)]="newUser.dni" maxlength="8" inputmode="numeric" /></label>
+      <label>Rol *
+        <select name="roleId" [(ngModel)]="newUser.roleId" required>
+          <option *ngFor="let role of roles" [ngValue]="role.id">{{role.name}}</option>
+        </select>
+      </label>
+      <label>Contraseña inicial *<input name="initialPassword" [(ngModel)]="newUser.initialPassword"
+        type="password" minlength="12" maxlength="128" autocomplete="new-password" required /></label>
+      <label>Confirmar contraseña *<input name="repeatPassword" [(ngModel)]="passwordRepeat"
+        type="password" maxlength="128" autocomplete="new-password" required /></label>
+      <p class="users-form-note">Usa al menos 12 caracteres. No se envía la contraseña por correo: entrégala por un canal seguro.</p>
+      <div class="users-actions">
+        <button type="button" class="users-secondary" (click)="createExpanded = false" [disabled]="saving">Cancelar</button>
+        <button type="submit" class="users-primary" [disabled]="!canCreate">
+          <mat-icon aria-hidden="true">person_add</mat-icon>
+          {{saving ? 'Registrando...' : 'Crear usuario e inventario'}}
+        </button>
+      </div>
+    </form>
+  </section>
+
+  <section class="users-panel">
+    <div class="users-panel__head">
+      <div><h2>Usuarios registrados <span class="users-count">{{users.length}}</span></h2>
+        <p>Desactivar una cuenta no elimina su inventario ni su historial.</p></div>
+      <label class="users-filter">
+        <mat-icon aria-hidden="true">search</mat-icon>
+        <input type="search" [(ngModel)]="filter" placeholder="Buscar usuario o correo" aria-label="Buscar usuarios"/>
+      </label>
+    </div>
+    <p *ngIf="loading" class="users-message" role="status">Cargando usuarios y roles...</p>
+    <p *ngIf="error" class="users-error" role="alert">{{error}}</p>
+    <div class="inv-core-table-wrap users-table" *ngIf="!loading && users.length">
+      <table>
+        <thead><tr>
+          <th>Usuario</th><th>Rol</th><th>Inventario</th><th>Estado</th><th>Acciones</th>
+        </tr></thead>
+        <tbody>
+          <tr *ngFor="let item of filtered" [class.users-selected]="selected?.id === item.id">
+            <td><strong>{{item.firstName}} {{item.lastName}}</strong>
+              <small>{{item.username}} · {{item.email}}</small></td>
+            <td>{{roleName(item.roleId)}}</td>
+            <td><span *ngIf="item.personalInventoryId as inventory; else missingInventory">Personal #{{inventory}}</span>
+              <ng-template #missingInventory><span class="users-warning">Sin inventario activo</span></ng-template></td>
+            <td><span class="users-status" [class.users-status--inactive]="!item.isActive">
+              {{item.isActive ? 'Activo' : 'Inactivo'}}</span></td>
+            <td class="inv-core-action-cell">
+              <button type="button" appUiTableAction="normal" (click)="edit(item)"
+                [disabled]="item.roleId === 1 || (item.roleId === 2 && !isDeveloper)"
+                [attr.aria-label]="'Editar usuario ' + item.username" title="Detalles y permisos">
+                <mat-icon aria-hidden="true">edit</mat-icon>
+              </button>
+              <button type="button" appUiTableAction="danger" (click)="toggleActive(item)"
+                [disabled]="item.id === currentUserId || item.roleId <= 2"
+                [attr.aria-label]="(item.isActive ? 'Desactivar ' : 'Reactivar ') + item.username"
+                [title]="item.isActive ? 'Desactivar usuario' : 'Reactivar usuario'">
+                <mat-icon aria-hidden="true">{{item.isActive ? 'block' : 'check_circle'}}</mat-icon>
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <p class="users-message" *ngIf="!filtered.length">Sin resultados para tu búsqueda.</p>
+    </div>
+    <p class="users-message" *ngIf="!loading && !users.length && !error">
+      Aún no se han registrado usuarios para esta empresa. Crea el primer administrador desde Gestión Dev.
+    </p>
+  </section>
+
+  <section class="users-panel users-editor" *ngIf="selected as user">
+    <div class="users-panel__head">
+      <div><h2>Usuario: {{user.username}}</h2>
+        <p>Administración individual sin modificar las demás empresas.</p></div>
+      <button type="button" class="users-secondary" (click)="closeEditing()">Cerrar</button>
+    </div>
+    <h3>Información personal</h3>
+    <div class="users-form users-form--readonly">
+      <label>Nombre <input [(ngModel)]="editing.firstName" maxlength="100"/></label>
+      <label>Apellido <input [(ngModel)]="editing.lastName" maxlength="100"/></label>
+      <label>Usuario <input [(ngModel)]="editing.username" maxlength="80"/></label>
+      <label>Correo <input type="email" [(ngModel)]="editing.email" maxlength="254"/></label>
+      <label>DNI <input [(ngModel)]="editing.dni" maxlength="8" inputmode="numeric"/></label>
+      <div class="users-actions">
+        <button type="button" class="users-primary" (click)="saveDetails()" [disabled]="!canEdit || saving">
+          Guardar datos
+        </button>
+      </div>
+    </div>
+
+    <h3>Rol y acceso</h3>
+    <div class="users-form users-form--role">
+      <label>Rol del usuario
+        <select [(ngModel)]="selectedRole">
+          <option *ngFor="let role of roles" [ngValue]="role.id">{{role.name}}</option>
+        </select>
+      </label>
+      <div class="users-actions">
+        <button type="button" class="users-primary" (click)="saveRole()"
+          [disabled]="saving || user.id === currentUserId || user.roleId <= 2 ||
+            selectedRole === user.roleId || !roles.length">
+          Actualizar rol
+        </button>
+      </div>
+    </div>
+    <p class="users-message" *ngIf="effectiveRoleCodes.length">
+      Permisos del rol: {{effectiveRoleCodes.join(', ')}}
+    </p>
+
+    <h3>Permisos individuales de operación</h3>
+    <p *ngIf="loadingPermissions" class="users-message">Consultando permisos...</p>
+    <div *ngIf="!loadingPermissions" class="users-flags">
+      <label><input type="checkbox" [(ngModel)]="selectedPermissions.canApplyDiscounts" [disabled]="!canManageIndividualPermissions || user.id === currentUserId || user.roleId <= 2"/> Aplicar descuentos</label>
+      <label><input type="checkbox" [(ngModel)]="selectedPermissions.canViewPurchaseCosts" [disabled]="!canManageIndividualPermissions || user.id === currentUserId || user.roleId <= 2"/> Ver costos de compra</label>
+      <label><input type="checkbox" [(ngModel)]="selectedPermissions.canCancelSales" [disabled]="!canManageIndividualPermissions || user.id === currentUserId || user.roleId <= 2"/> Anular ventas</label>
+      <label><input type="checkbox" [(ngModel)]="selectedPermissions.canEditProducts" [disabled]="!canManageIndividualPermissions || user.id === currentUserId || user.roleId <= 2"/> Editar artículos</label>
+      <label><input type="checkbox" [(ngModel)]="selectedPermissions.canViewProfits" [disabled]="!canManageIndividualPermissions || user.id === currentUserId || user.roleId <= 2"/> Ver ganancias</label>
+    </div>
+    <div class="users-actions">
+      <button type="button" class="users-primary" (click)="savePermissions()"
+        [disabled]="loadingPermissions || saving || !canManageIndividualPermissions || user.id === currentUserId || user.roleId <= 2">
+        Guardar permisos individuales
+      </button>
+    </div>
+  </section>
+
+  <section class="users-panel" *ngIf="isDeveloper">
+    <div class="users-panel__head">
+      <div><h2>Permisos de roles</h2>
+        <p>Solo desarrollador: los cambios se aplican a todos los usuarios del rol seleccionado.</p></div>
+      <button type="button" class="users-secondary" (click)="policyExpanded = !policyExpanded"
+        [attr.aria-expanded]="policyExpanded">{{policyExpanded ? 'Ocultar' : 'Configurar'}}</button>
+    </div>
+    <div *ngIf="policyExpanded" class="users-role-policy">
+      <label>Rol
+        <select [(ngModel)]="policyRoleId" (ngModelChange)="changePolicyRole($event)">
+          <option *ngFor="let role of policyRoles" [ngValue]="role.id">{{role.name}}</option>
+        </select>
+      </label>
+      <div class="users-flags">
+        <label *ngFor="let item of policyItems">
+          <input type="checkbox" [checked]="hasPolicyPermission(item.id)"
+            (change)="setPolicyPermission(item.id, $any($event.target).checked)"/>
+          <span><strong>{{item.name}}</strong><small>{{item.systemCode}}</small></span>
+        </label>
+      </div>
+      <div class="users-actions">
+        <button type="button" class="users-primary" (click)="saveRolePolicy()"
+          [disabled]="savingPolicy || !policyRoleId">Guardar permisos del rol</button>
+      </div>
+    </div>
+  </section>
+</section>

@@ -1,0 +1,148 @@
+<section class="inventory-manage-page inv-core-page">
+  <header class="inv-core-header">
+    <app-ui-page-heading icon="warehouse" title="Gestión de inventarios"
+      subtitle="Inventarios operativos para artículos y existencias. Los maestros se mantienen separados."></app-ui-page-heading>
+    <button type="button" appUiButton="secondary" (click)="load()" [disabled]="loading">
+      <mat-icon aria-hidden="true">refresh</mat-icon> Actualizar
+    </button>
+  </header>
+
+  <section class="inv-manage-card">
+    <div class="inv-manage-heading">
+      <div><h2>Inventarios disponibles</h2><p>Propios y compartidos de tu empresa, según tus permisos.</p></div>
+      <a *ngIf="canManageAccess" routerLink="/dashboard/compartir-inventario" class="inv-manage-link">
+        <mat-icon aria-hidden="true">group_add</mat-icon> Gestionar accesos
+      </a>
+    </div>
+    <p *ngIf="loading" class="inv-manage-note" role="status">Cargando inventarios...</p>
+    <p *ngIf="error" class="inv-manage-error" role="alert">{{error}}</p>
+    <div class="inv-core-table-wrap inv-manage-table" *ngIf="operational.length">
+      <table>
+        <thead><tr><th>Inventario</th><th>Propietario</th><th>Estado</th><th>Acciones</th></tr></thead>
+        <tbody>
+          <tr *ngFor="let row of operational">
+            <td><strong>{{row.alias || row.inventoryName}}</strong>
+              <small>{{row.inventoryName}} · ID {{row.id}}</small></td>
+            <td>{{ownerName(row.userId)}}</td>
+            <td><span class="inv-manage-active">Activo</span></td>
+            <td class="inv-core-action-cell">
+              <button *ngIf="canManageAccess" type="button" appUiTableAction="normal"
+                (click)="manageShares(row)" [disabled]="!isManager && row.userId !== selfId"
+                [attr.aria-label]="'Gestionar acceso al inventario ' + row.id"
+                title="Compartir inventario y administrar accesos">
+                <mat-icon aria-hidden="true">group_add</mat-icon>
+              </button>
+              <button type="button" appUiTableAction="normal" (click)="edit(row)"
+                [disabled]="!canCreate || (!isManager && row.userId !== selfId)"
+                [attr.aria-label]="'Editar inventario ' + row.id" title="Editar inventario">
+                <mat-icon aria-hidden="true">edit</mat-icon>
+              </button>
+              <button type="button" appUiTableAction="danger" (click)="deactivate(row)"
+                [disabled]="!canCreate || (!isManager && row.userId !== selfId)"
+                [attr.aria-label]="'Desactivar inventario ' + row.id" title="Desactivar inventario">
+                <mat-icon aria-hidden="true">block</mat-icon>
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="inv-manage-note" *ngIf="!loading && !operational.length && !error">
+      No hay inventarios operativos. El inventario general no aparece aquí porque no almacena stock.
+    </p>
+  </section>
+
+  <section *ngIf="canCreate" class="inv-manage-card">
+    <div class="inv-manage-heading">
+      <div><h2>Crear inventario adicional</h2>
+        <p>El permiso CREATE_INVENTORIES controla esta operación desde la API.</p></div>
+    </div>
+    <form class="inv-manage-form" (ngSubmit)="create()">
+      <label>Nombre del inventario *
+        <input name="inventoryName" [(ngModel)]="name" maxlength="255"
+          placeholder="Ej. Almacén de herramientas" required />
+      </label>
+      <label>Alias (opcional)
+        <input name="alias" [(ngModel)]="alias" maxlength="120"
+          placeholder="Ej. Herramientas"/>
+      </label>
+      <label *ngIf="isManager">Propietario *
+        <select name="ownerId" [(ngModel)]="ownerId" required>
+          <option *ngFor="let user of users" [ngValue]="user.id">
+            {{user.username}} · {{user.firstName}} {{user.lastName}}
+          </option>
+        </select>
+      </label>
+      <p *ngIf="isManager && !users.length" class="inv-manage-note">
+        No hay usuarios activos en esta empresa. Registra primero su administrador desde Gestión Dev.
+      </p>
+      <div class="inv-manage-actions">
+        <button type="submit" class="inv-manage-primary" [disabled]="!canSubmit">
+          <mat-icon aria-hidden="true">add</mat-icon>
+          {{saving ? 'Creando...' : 'Crear inventario'}}
+        </button>
+      </div>
+    </form>
+  </section>
+
+  <section *ngIf="sharing as target" class="inv-manage-card">
+    <div class="inv-manage-heading">
+      <div>
+        <h2>Accesos compartidos · {{target.alias || target.inventoryName}}</h2>
+        <p>Compartir un inventario no cambia su propietario ni autoriza otras empresas.</p>
+      </div>
+      <button type="button" class="inv-manage-secondary" (click)="sharing = null">
+        Cerrar
+      </button>
+    </div>
+    <div class="inv-manage-form">
+      <label>Usuario o correo de tu empresa *
+        <input [(ngModel)]="shareWith" maxlength="254" placeholder="Usuario o correo" />
+      </label>
+      <label>Nivel de acceso
+        <select [(ngModel)]="shareMode">
+          <option [ngValue]="1">Lector: consultar</option>
+          <option [ngValue]="2">Editor: consultar y modificar</option>
+        </select>
+      </label>
+      <div class="inv-manage-actions">
+        <button type="button" class="inv-manage-primary" (click)="saveShare()"
+          [disabled]="sharingBusy || !shareWith.trim()">
+          <mat-icon aria-hidden="true">person_add</mat-icon>
+          {{sharingBusy ? 'Compartiendo...' : 'Conceder acceso'}}
+        </button>
+      </div>
+    </div>
+    <div class="inv-core-table-wrap inv-manage-table inv-manage-shares" *ngIf="shares.length">
+      <table>
+        <thead><tr><th>Usuario</th><th>Permiso</th><th>Acciones</th></tr></thead>
+        <tbody><tr *ngFor="let share of shares">
+          <td>{{share.username || ('Usuario #' + share.userId)}}</td>
+          <td>{{share.accessLevel === 2 ? 'Editor' : 'Lector'}}</td>
+          <td class="inv-core-action-cell">
+            <button type="button" appUiTableAction="danger" (click)="revokeShare(share)"
+              [attr.aria-label]="'Revocar acceso de ' + (share.username || share.userId)"
+              title="Revocar acceso">
+              <mat-icon aria-hidden="true">person_remove</mat-icon>
+            </button>
+          </td>
+        </tr></tbody>
+      </table>
+    </div>
+    <p *ngIf="!shares.length" class="inv-manage-note">No hay accesos compartidos registrados.</p>
+  </section>
+
+  <section *ngIf="editId !== null" class="inv-manage-card">
+    <div class="inv-manage-heading"><h2>Editar inventario #{{editId}}</h2></div>
+    <div class="inv-manage-form">
+      <label>Nombre<input [(ngModel)]="editName" maxlength="255" /></label>
+      <label>Alias<input [(ngModel)]="editAlias" maxlength="120" /></label>
+      <div class="inv-manage-actions">
+        <button type="button" class="inv-manage-secondary" (click)="editId = null">Cancelar</button>
+        <button type="button" class="inv-manage-primary" (click)="saveEdit()" [disabled]="saving || !editName.trim()">
+          Guardar
+        </button>
+      </div>
+    </div>
+  </section>
+</section>

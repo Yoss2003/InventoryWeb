@@ -14,6 +14,7 @@ import { CompanyPublicService } from '../../services/companies';
 import { CompanyThemeService } from '../../../shared/ui/v3/company-theme.service';
 import { InventoryService, InventorySummary } from '../../services/inventories';
 import { InventoryContextService } from '../../services/inventory-context';
+import { AccessService } from '../../services/access';
 import { ToastService } from '../../../shared/toast/toast.service';
 
 interface SidebarGroup {
@@ -26,6 +27,8 @@ interface SidebarGroup {
     icon: string;
     route: string;
     adminOnly?: boolean;
+    developerOnly?: boolean;
+    permission?: string;
   }[];
 }
 @Component({
@@ -39,6 +42,8 @@ export class MainLayoutComponent {
   private readonly companyTheme=inject(CompanyThemeService);
   private readonly inventoryApi=inject(InventoryService);
   private readonly inventoryContext=inject(InventoryContextService);
+  private readonly accessApi=inject(AccessService);
+  permissionCodes:string[]=[];
   private readonly toast=inject(ToastService);
   inventories: InventorySummary[]=[];
   selectedInventoryId: number | null = null;
@@ -51,6 +56,18 @@ export class MainLayoutComponent {
   private readonly platform=inject(PLATFORM_ID);
   get isDeveloper(): boolean { if(!isPlatformBrowser(this.platform))return false;try{return Number(JSON.parse(localStorage.getItem('userSession')||'{}').roleId)===1;}catch{return false;} }
   get isAdmin(): boolean { if(!isPlatformBrowser(this.platform))return false;try{return [1,2].includes(Number(JSON.parse(localStorage.getItem('userSession')||'{}').roleId));}catch{return false;} }
+  canPermission(code: string): boolean {
+    return this.isAdmin || this.permissionCodes.includes(code);
+  }
+  canAccessItem(item: SidebarGroup['items'][number]): boolean {
+    return (!item.adminOnly || this.isAdmin) &&
+      (!item.developerOnly || this.isDeveloper) &&
+      (!item.permission || this.canPermission(item.permission));
+  }
+  groupVisible(group: SidebarGroup): boolean {
+    return (!group.developerOnly || this.isDeveloper) &&
+      group.items.some(item => this.canAccessItem(item));
+  }
   private readonly router=inject(Router);
   private readonly destroyRef=inject(DestroyRef);
   readonly isSidebarOpen=signal(false);
@@ -82,6 +99,8 @@ export class MainLayoutComponent {
       title: 'Herramientas',
       icon: 'build',
       items: [
+        { label: 'Mis inventarios', icon: 'warehouse', route: '/dashboard/inventarios',
+          permission: 'CREATE_INVENTORIES' },
         { label: 'Compartir', icon: 'group_add', route: '/dashboard/compartir-inventario' },
         { label: 'Consultas', icon: 'currency_exchange', route: '/dashboard/consultas' }
       ]
@@ -90,9 +109,13 @@ export class MainLayoutComponent {
       id: 'administracion',
       title: 'Administración',
       icon: 'admin_panel_settings',
-      developerOnly: true,
       items: [
-        { label: 'Gestión Dev', icon: 'admin_panel_settings', route: '/dashboard/gestion-dev' }
+        { label: 'Gestión de usuarios', icon: 'manage_accounts',
+          route: '/dashboard/usuarios', permission: 'MANAGE_USERS' },
+        { label: 'Inventarios maestros', icon: 'inventory_2',
+          route: '/dashboard/inventarios-maestros', permission: 'VIEW_MASTER_INVENTORY' },
+        { label: 'Gestión Dev', icon: 'admin_panel_settings',
+          route: '/dashboard/gestion-dev', developerOnly: true }
       ]
     }
   ];
@@ -131,6 +154,10 @@ export class MainLayoutComponent {
   ngOnInit():void {
     const session = isPlatformBrowser(this.platform) ? JSON.parse(localStorage.getItem('userSession') || '{}') : {};
     this.companyTheme.reset();
+    this.accessApi.me().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: access => { this.permissionCodes = access.permissions || []; },
+      error: () => { this.permissionCodes = []; }
+    });
     this.publicCompanies.getActiveCompanies().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: companies => {
         const company = companies.find(c => Number(c.id) === Number(session.companyId));
@@ -163,7 +190,7 @@ export class MainLayoutComponent {
   }
   private resolveTitle(url:string):string {
     const segment=url.split('?')[0].split('/').filter(Boolean).pop() ?? '';
-    const titles:Record<string,string>={articulos:'Maestro de artículos',categorias:'Categorías',entradas:'Entradas de stock',salidas:'Salidas y ventas',asignaciones:'Artículos asignados','compartir-inventario':'Compartir inventario','gestion-dev':'Gestión Dev','consultas':'Consultas SUNAT y cambio','historial-general':'Historial general','catalogo-general':'Catálogo general'};
+    const titles:Record<string,string>={articulos:'Maestro de artículos',categorias:'Categorías',entradas:'Entradas de stock',salidas:'Salidas y ventas',asignaciones:'Artículos asignados','compartir-inventario':'Compartir inventario','gestion-dev':'Gestión Dev','usuarios':'Gestión de usuarios','inventarios-maestros':'Inventarios maestros','inventarios':'Gestión de inventarios','consultas':'Consultas SUNAT y cambio','historial-general':'Historial general','catalogo-general':'Catálogo general'};
     return titles[segment] ?? 'Panel de gestión';
   }
   toggleSidebar():void {this.isSidebarOpen.update(open=>!open);}
