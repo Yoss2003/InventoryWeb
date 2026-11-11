@@ -11,6 +11,10 @@ export interface QuickSaleRequest {
   notes: string;
   operationKey: string;
   detailIds?: number[];
+  installmentFrequency?: string;
+  installmentCount?: number;
+  downPayment?: number;
+
 }
 @Injectable({providedIn:'root'})
 export class SalesService {

@@ -75,12 +75,15 @@ export class QuickSaleFormComponent implements OnInit, OnDestroy {
   readonly paymentMethods = [
     'Efectivo',
     'Tarjeta',
-    'Yape',
-    'Plin',
-    'Bim',
+    'Billetera digital',
     'Transferencia',
     'Cuotas'
   ];
+
+  readonly wallets = ['Yape', 'Plin', 'Bim'];
+  readonly installmentFrequencies = ['Diario', 'Semanal', 'Mensual'];
+
+  readonly creditApiReady = false;
 
   readonly form = this.fb.group({
     articleId: [null as number | null, Validators.required],
@@ -88,7 +91,11 @@ export class QuickSaleFormComponent implements OnInit, OnDestroy {
     unitPrice: [0, [Validators.required, Validators.min(0)]],
     customerName: ['Público general'],
     paymentMethod: ['Efectivo', Validators.required],
-    notes: ['']
+    notes: [''],
+    walletProvider: [''],
+    installmentFrequency: ['Mensual'],
+    installmentCount: [3],
+    downPayment: [0],
   });
 
   get chosen(): Article | undefined {
@@ -125,12 +132,14 @@ export class QuickSaleFormComponent implements OnInit, OnDestroy {
   get canAdvanceCustomer(): boolean {
     return !!this.form.controls.customerName.value?.trim();
   }
-
+  
   get canSubmit(): boolean {
     return !this.submitting &&
       this.form.valid &&
       this.canAdvanceArticle &&
-      this.canAdvanceCustomer;
+      this.canAdvanceCustomer &&
+      this.paymentConfigurationValid &&
+      (!this.isInstallmentSale || this.creditApiReady);
   }
 
   get total(): number {
@@ -149,6 +158,140 @@ export class QuickSaleFormComponent implements OnInit, OnDestroy {
       /^(a granel|bulk|2)$/i.test(String(article.trackingMode ?? ''))
       ? 'A granel'
       : 'Estándar';
+  }
+
+  get selectedPaymentMethod(): string {
+    return this.form.controls.paymentMethod.value || 'Efectivo';
+  }
+
+  get isDigitalWallet(): boolean {
+    return this.selectedPaymentMethod === 'Billetera digital';
+  }
+
+  get isInstallmentSale(): boolean {
+    return this.selectedPaymentMethod === 'Cuotas';
+  }
+
+  get effectivePaymentMethod(): string {
+    return this.isDigitalWallet
+      ? this.form.controls.walletProvider.value || ''
+      : this.selectedPaymentMethod;
+  }
+
+  onPaymentTypeChanged(): void {
+    this.form.controls.walletProvider.setValue('');
+
+    if (!this.isInstallmentSale) {
+      this.form.controls.installmentFrequency.setValue('Mensual');
+      this.form.controls.installmentCount.setValue(3);
+      this.form.controls.downPayment.setValue(0);
+    }
+  }
+
+  get installmentCount(): number {
+    return Number(this.form.controls.installmentCount.value);
+  }
+
+  get downPayment(): number {
+    return Number(this.form.controls.downPayment.value);
+  }
+
+  get financedAmount(): number {
+    return Math.max(
+      0,
+      (Math.round(this.total * 100) -
+        Math.round(this.downPayment * 100)) / 100
+    );
+  }
+
+  get paymentConfigurationValid(): boolean {
+    if (this.isDigitalWallet) {
+      return this.wallets.includes(
+        this.form.controls.walletProvider.value || ''
+      );
+    }
+
+    if (!this.isInstallmentSale) return true;
+
+    const count = this.installmentCount;
+    const advance = this.downPayment;
+    const customer = (
+      this.form.controls.customerName.value || ''
+    ).trim();
+
+    return Number.isInteger(count) &&
+      count >= 1 &&
+      count <= 60 &&
+      Number.isFinite(advance) &&
+      advance >= 0 &&
+      Math.round(advance * 100) === advance * 100 &&
+      advance < this.total &&
+      Math.round(this.financedAmount * 100) >= count &&
+      ['Diario', 'Semanal', 'Mensual'].includes(
+        this.form.controls.installmentFrequency.value || ''
+      ) &&
+      !!customer &&
+      customer.toLocaleLowerCase('es') !== 'público general';
+  }
+
+  get installmentSchedule(): Array<{
+    number: number;
+    date: Date;
+    amount: number;
+  }> {
+    if (!this.isInstallmentSale) return [];
+
+    const count = this.installmentCount;
+    const totalCents = Math.round(this.financedAmount * 100);
+
+    if (
+      !Number.isInteger(count) ||
+      count < 1 ||
+      count > 60 ||
+      totalCents < count
+    ) return [];
+
+    const frequency =
+      this.form.controls.installmentFrequency.value;
+
+    const baseCents = Math.floor(totalCents / count);
+    const initialDate = new Date();
+    initialDate.setHours(12, 0, 0, 0);
+
+    return Array.from({ length: count }, (_, index) => {
+      const installmentNumber = index + 1;
+      let date: Date;
+
+      if (frequency === 'Mensual') {
+        const year = initialDate.getFullYear();
+        const month = initialDate.getMonth() + installmentNumber;
+        const lastDay = new Date(year, month + 1, 0).getDate();
+
+        date = new Date(
+          year,
+          month,
+          Math.min(initialDate.getDate(), lastDay),
+          12
+        );
+      } else {
+        date = new Date(initialDate);
+
+        date.setDate(
+          date.getDate() +
+          installmentNumber * (frequency === 'Semanal' ? 7 : 1)
+        );
+      }
+
+      const cents = index === count - 1
+        ? totalCents - baseCents * (count - 1)
+        : baseCents;
+
+      return {
+        number: installmentNumber,
+        date,
+        amount: cents / 100
+      };
+    });
   }
 
   ngOnInit(): void {
@@ -319,10 +462,22 @@ export class QuickSaleFormComponent implements OnInit, OnDestroy {
       quantity: Number(data.quantity),
       unitPrice: Number(data.unitPrice),
       customerName: data.customerName || '',
-      paymentMethod: data.paymentMethod || 'Efectivo',
+      paymentMethod: this.effectivePaymentMethod,
       notes: data.notes || '',
       operationKey: crypto.randomUUID(),
-      detailIds: this.isSerialized ? this.selectedSerialIds : []
+      detailIds: this.isSerialized ? this.selectedSerialIds : [],
+      
+      installmentFrequency: this.isInstallmentSale
+      ? this.form.controls.installmentFrequency.value || 'Mensual'
+      : undefined,
+
+      installmentCount: this.isInstallmentSale
+        ? this.installmentCount
+        : undefined,
+
+      downPayment: this.isInstallmentSale
+        ? this.downPayment
+        : undefined
     }).subscribe({
       next: ({ saleId }) => {
         this.submitting = false;

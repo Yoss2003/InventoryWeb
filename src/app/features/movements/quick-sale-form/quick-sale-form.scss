@@ -906,3 +906,160 @@
     animation: none !important;
   }
 }
+
+
+/* Billeteras y financiamiento POS */
+
+.sale-dialog .sale-credit-config {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+
+  padding: 17px;
+  border: 1px solid #455b70;
+  border-radius: 12px;
+  background: #101c26;
+}
+
+.sale-dialog .sale-credit-title,
+.sale-dialog .sale-credit-preview-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.sale-dialog .sale-credit-title mat-icon,
+.sale-dialog .sale-credit-preview-title mat-icon {
+  color: var(--inv-company-accent, #a2d149);
+}
+
+.sale-dialog .sale-credit-title strong,
+.sale-dialog .sale-credit-preview-title strong {
+  display: block;
+  color: #ecf3fa;
+  font-size: 13px;
+}
+
+.sale-dialog .sale-credit-title small {
+  display: block;
+  margin-top: 4px;
+  color: #a8bacb;
+  font-size: 11px;
+}
+
+.sale-dialog .sale-credit-fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.sale-dialog .sale-credit-fields .wide {
+  grid-column: 1 / -1;
+}
+
+.sale-dialog .sale-credit-summary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.sale-dialog .sale-credit-summary > div {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  min-width: 0;
+
+  padding: 12px;
+  border: 1px solid #43586a;
+  border-radius: 9px;
+  background: #172630;
+}
+
+.sale-dialog .sale-credit-summary span {
+  color: #a8bacb;
+  font-size: 11px;
+}
+
+.sale-dialog .sale-credit-summary strong {
+  color: #edf4fa;
+  font-size: 16px;
+}
+
+.sale-dialog .sale-credit-summary .sale-credit-financed {
+  border-color: var(--inv-company-accent, #a2d149);
+}
+
+.sale-dialog .sale-credit-financed strong {
+  color: var(--inv-company-accent, #a2d149);
+}
+
+.sale-dialog .sale-credit-preview {
+  padding-top: 14px;
+  border-top: 1px solid #405668;
+}
+
+.sale-dialog .sale-credit-preview-title {
+  margin-bottom: 12px;
+}
+
+.sale-dialog .sale-credit-table-wrap {
+  max-height: 230px;
+  overflow-y: auto;
+  border: 1px solid #43586a;
+  border-radius: 9px;
+  scrollbar-width: thin;
+  scrollbar-color:
+    var(--inv-company-accent, #a2d149) transparent;
+}
+
+.sale-dialog .sale-credit-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.sale-dialog .sale-credit-table th,
+.sale-dialog .sale-credit-table td {
+  padding: 11px 13px;
+  text-align: left;
+  font-size: 12px;
+  border-bottom: 1px solid #344a5c;
+}
+
+.sale-dialog .sale-credit-table th {
+  position: sticky;
+  top: 0;
+  background: #223443;
+  color: #c8d8e5;
+}
+
+.sale-dialog .sale-credit-table td {
+  color: #e5eff8;
+}
+
+.sale-dialog .sale-credit-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.sale-dialog .sale-credit-warning {
+  margin: 0;
+  padding: 11px 13px;
+
+  background: #362a22;
+  border: 1px solid #765a3a;
+  border-radius: 8px;
+
+  color: #f1cfa6;
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+@media (max-width: 550px) {
+  .sale-dialog .sale-credit-fields,
+  .sale-dialog .sale-credit-summary {
+    grid-template-columns: 1fr;
+  }
+
+  .sale-dialog .sale-credit-config {
+    padding: 13px;
+  }
+}

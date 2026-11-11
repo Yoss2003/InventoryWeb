@@ -300,6 +300,7 @@
       </div>
 
       <div class="sale-grid">
+        
         <div class="sale-field wide">
           <label class="sale-field__label">
             Método de pago <span class="required">*</span>
@@ -308,15 +309,172 @@
           <mat-form-field appearance="outline">
             <mat-select
               formControlName="paymentMethod"
-              panelClass="inventory-select-options">
+              panelClass="inventory-select-options"
+              (selectionChange)="onPaymentTypeChanged()">
+
               <mat-option
                 *ngFor="let method of paymentMethods"
                 [value]="method">
-                {{ method }}
+                {{ method === 'Cuotas' ? 'Venta a cuotas' : method }}
               </mat-option>
+
             </mat-select>
           </mat-form-field>
         </div>
+
+        <!-- BILLETERA DIGITAL -->
+        <div class="sale-field wide" *ngIf="isDigitalWallet">
+          <label class="sale-field__label">
+            Seleccionar billetera
+            <span class="required">*</span>
+          </label>
+
+          <mat-form-field appearance="outline">
+            <mat-select
+              formControlName="walletProvider"
+              placeholder="Seleccionar billetera"
+              panelClass="inventory-select-options">
+
+              <mat-option
+                *ngFor="let wallet of wallets"
+                [value]="wallet">
+                {{ wallet }}
+              </mat-option>
+
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        <!-- CONFIGURACIÓN DE CUOTAS -->
+        <div class="sale-credit-config wide" *ngIf="isInstallmentSale">
+
+          <div class="sale-credit-title">
+            <mat-icon>calendar_month</mat-icon>
+            <div>
+              <strong>Configuración de cuotas</strong>
+              <small>Define el financiamiento de esta venta</small>
+            </div>
+          </div>
+
+          <div class="sale-credit-fields">
+
+            <div class="sale-field">
+              <label class="sale-field__label">
+                Frecuencia <span class="required">*</span>
+              </label>
+
+              <mat-form-field appearance="outline">
+                <mat-select
+                  formControlName="installmentFrequency"
+                  panelClass="inventory-select-options">
+
+                  <mat-option
+                    *ngFor="let frequency of installmentFrequencies"
+                    [value]="frequency">
+                    {{ frequency }}
+                  </mat-option>
+
+                </mat-select>
+              </mat-form-field>
+            </div>
+
+            <div class="sale-field">
+              <label class="sale-field__label">
+                Número de cuotas <span class="required">*</span>
+              </label>
+
+              <input
+                type="number"
+                formControlName="installmentCount"
+                min="1"
+                max="60"
+                step="1" />
+            </div>
+
+            <div class="sale-field wide">
+              <label class="sale-field__label">
+                Adelanto (S/)
+                <span class="optional">(opcional)</span>
+              </label>
+
+              <input
+                type="number"
+                formControlName="downPayment"
+                min="0"
+                [max]="total"
+                step="0.01" />
+            </div>
+
+          </div>
+
+          <div class="sale-credit-summary">
+            <div>
+              <span>Total de venta</span>
+              <strong>S/ {{ total | number:'1.2-2' }}</strong>
+            </div>
+
+            <div>
+              <span>Adelanto</span>
+              <strong>S/ {{ downPayment | number:'1.2-2' }}</strong>
+            </div>
+
+            <div class="sale-credit-financed">
+              <span>Saldo a financiar</span>
+              <strong>
+                S/ {{ financedAmount | number:'1.2-2' }}
+              </strong>
+            </div>
+          </div>
+
+          <div
+            class="sale-credit-preview"
+            *ngIf="installmentSchedule.length">
+
+            <div class="sale-credit-preview-title">
+              <mat-icon>event_note</mat-icon>
+              <strong>Cronograma proyectado</strong>
+            </div>
+
+            <div class="sale-credit-table-wrap">
+              <table class="sale-credit-table">
+                <thead>
+                  <tr>
+                    <th>Cuota</th>
+                    <th>Vencimiento</th>
+                    <th>Importe</th>
+                  </tr>
+                </thead>
+
+                <tbody>
+                  <tr *ngFor="let installment of installmentSchedule">
+                    <td>#{{ installment.number }}</td>
+                    <td>
+                      {{ installment.date | date:'dd/MM/yyyy' }}
+                    </td>
+                    <td>
+                      S/ {{ installment.amount | number:'1.2-2' }}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <p
+            class="sale-credit-warning"
+            *ngIf="!paymentConfigurationValid">
+            Revisa las cuotas, el adelanto y la identificación
+            del comprador. El saldo debe cubrir todas las cuotas.
+          </p>
+
+          <p class="sale-credit-warning" *ngIf="!creditApiReady">
+            El cronograma es una simulación. Para registrar ventas
+            a cuotas, primero debe habilitarse el almacenamiento
+            de la deuda en la API.
+          </p>
+
+        </div>
+
 
         <div class="sale-field wide">
           <label class="sale-field__label" for="pos-notes">
