@@ -235,8 +235,8 @@
                     <tr *ngFor="let rate of historyRates">
                       <td>{{ rate.date.slice(0,10) | date:'dd/MM/yyyy':'UTC' }}</td>
                       <td>{{ rate.baseCurrency }} / PEN</td>
-                      <td>{{ rate.buyPrice | number:'1.3-3' }}</td>
-                      <td>{{ rate.sellPrice | number:'1.3-3' }}</td>
+                      <td>{{ rate.buyPrice | money:'PEN':3 }}</td>
+                      <td>{{ rate.sellPrice | money:'PEN':3 }}</td>
                     </tr>
 
                     <tr *ngIf="historyRates.length === 0">
