@@ -11,7 +11,7 @@ import { UiTableActionDirective } from '../../shared/ui/v2/ui-table-action.direc
 import { ConfirmationDialogService } from '../../shared/confirm-dialog/confirmation-dialog.service';
 import { ToastService } from '../../shared/toast/toast.service';
 import { AccessService } from '../../core/services/access';
-import { InventoryService, InventorySummary } from '../../core/services/inventories';
+import { InventoryService, InventorySummary, InventoryShare } from '../../core/services/inventories';
 import { UserManagementService, ManagedUser } from '../../core/services/user-management';
 
 @Component({
@@ -31,6 +31,7 @@ export class InventoryManagementComponent implements OnInit {
 
   isManager = false;
   canCreate = false;
+  canManageAccess = false;
   selfId = 0;
   loading = false;
   saving = false;
@@ -44,6 +45,11 @@ export class InventoryManagementComponent implements OnInit {
   editId: number | null = null;
   editName = '';
   editAlias = '';
+  sharing: InventorySummary | null = null;
+  shares: InventoryShare[] = [];
+  shareWith = '';
+  shareMode: 1 | 2 = 1;
+  sharingBusy = false;
 
   get operational(): InventorySummary[] {
     return this.rows.filter(r => !r.isMaster);
@@ -60,6 +66,7 @@ export class InventoryManagementComponent implements OnInit {
         this.selfId = a.userId;
         this.isManager = a.isDeveloper || a.isAdministrator;
         this.canCreate = (a.permissions || []).includes('CREATE_INVENTORIES');
+        this.canManageAccess = (a.permissions || []).includes('MANAGE_INVENTORY_ACCESS');
         this.ownerId = a.userId;
         this.load();
       },
@@ -109,6 +116,51 @@ export class InventoryManagementComponent implements OnInit {
       error: e => { this.saving = false; this.toast.error(String(e?.error?.error || 'No se pudo crear el inventario.')); }
     });
   }
+  manageShares(row: InventorySummary): void {
+    if (!this.canManageAccess) return;
+    this.sharing = row;
+    this.shares = [];
+    this.shareWith = '';
+    this.loadShares();
+  }
+  loadShares(): void {
+    if (!this.sharing) return;
+    this.api.getShares(this.sharing.id).subscribe({
+      next: result => { this.shares = result || []; },
+      error: err => this.toast.error(String(err?.error?.error || 'No se pudieron consultar los accesos.'))
+    });
+  }
+  saveShare(): void {
+    if (!this.sharing || !this.canManageAccess || this.sharingBusy || !this.shareWith.trim()) return;
+    this.sharingBusy = true;
+    this.api.share(this.sharing.id, this.shareWith.trim(), this.shareMode).subscribe({
+      next: () => {
+        this.sharingBusy = false;
+        this.shareWith = '';
+        this.toast.success('Acceso compartido correctamente.');
+        this.loadShares();
+      },
+      error: err => {
+        this.sharingBusy = false;
+        this.toast.error(String(err?.error?.error || 'No se pudo compartir el inventario.'));
+      }
+    });
+  }
+  revokeShare(item: InventoryShare): void {
+    if (!this.sharing || !this.canManageAccess) return;
+    this.confirms.confirm({
+      title: 'Revocar acceso',
+      message: `¿Revocar el acceso de ${item.username || 'este usuario'}? El inventario y su historial se conservarán.`,
+      confirmLabel: 'Revocar acceso', tone: 'danger', icon: 'person_remove'
+    }).subscribe(ok => {
+      if (!ok) return;
+      this.api.revoke(item.id).subscribe({
+        next: () => { this.toast.success('Acceso revocado.'); this.loadShares(); },
+        error: err => this.toast.error(String(err?.error?.error || 'No se pudo revocar el acceso.'))
+      });
+    });
+  }
+
   edit(row: InventorySummary): void {
     if (!this.canCreate) return;
     this.editId = row.id;
