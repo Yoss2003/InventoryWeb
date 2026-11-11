@@ -19,6 +19,8 @@ export const routes: Routes = [
         loadComponent: () => import('./features/user-management/user-management').then(m => m.UserManagementComponent) },
       { path: 'inventarios-maestros', canActivate: [permissionGuard], data: {permission: 'VIEW_MASTER_INVENTORY'},
         loadComponent: () => import('./features/master-inventories/master-inventories').then(m => m.MasterInventoriesComponent) },
+      { path: 'inventarios', canActivate: [permissionGuard], data: {permission: 'CREATE_INVENTORIES'},
+        loadComponent: () => import('./features/inventory-management/inventory-management').then(m => m.InventoryManagementComponent) },
       { path: 'consultas', loadComponent: () => import('./features/external-consultas/external-consultas').then(m => m.ExternalConsultasComponent) },
       { path: 'articulos', loadComponent: () => import('./features/articles/article-list/article-list').then(m => m.ArticleListComponent) },
       { path: 'categorias', loadComponent: () => import('./features/categories/category-list/category-list').then(m => m.CategoryListComponent) },
