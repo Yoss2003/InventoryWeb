@@ -1,10 +1,15 @@
 :host { display: block; width: 100%; color: #edf4fc; }
 :host * { box-sizing: border-box; }
 .confirm-shell {
-  display: flex; flex-direction: column;
-  width: 100%; max-height: calc(100dvh - 28px);
-  overflow: hidden; border-radius: 17px; background: #11161d;
-  color: #edf4fc; font: 13px Roboto, "Segoe UI", Arial, sans-serif;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-height: calc(100dvh - 28px);
+  overflow: hidden;
+  border-radius: 17px;
+  background: #162634;
+  color: #edf4fc;
+  font: 13px Roboto, "Segoe UI", Arial, sans-serif;
 }
 .confirm-header {
   display: flex; align-items: center; justify-content: space-between; gap: 12px;
@@ -31,7 +36,7 @@
   color: #e8f1f8; cursor: pointer;
 }
 .confirm-close mat-icon { width: 21px; height: 21px; font-size: 21px; }
-.confirm-body { display: block; padding: 19px 20px !important; overflow-y: auto; }
+.confirm-body { display: block; padding: 19px 20px !important; overflow-y: auto;   background: #132230;}
 .confirm-description { margin: 0; color: #cad9e6; line-height: 1.6; overflow-wrap: anywhere; }
 .confirm-reason { display: grid; gap: 8px; margin-top: 16px; }
 .confirm-reason label { font-weight: 700; font-size: 12px; color: #dceaf4; }
