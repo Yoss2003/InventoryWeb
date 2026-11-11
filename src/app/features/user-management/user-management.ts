@@ -31,6 +31,8 @@ export class UserManagementComponent implements OnInit {
   private readonly confirms = inject(ConfirmationDialogService);
 
   isDeveloper = false;
+  isAdministrator = false;
+  get canManageIndividualPermissions(): boolean { return this.isDeveloper || this.isAdministrator; }
   loading = false;
   saving = false;
   error = '';
@@ -99,6 +101,7 @@ export class UserManagementComponent implements OnInit {
     this.access.me().subscribe({
       next: snapshot => {
         this.isDeveloper = snapshot.isDeveloper;
+        this.isAdministrator = snapshot.isAdministrator;
         this.currentUserId = snapshot.userId;
         this.reload();
         if (snapshot.isDeveloper) this.loadPolicyDefinitions();
@@ -223,7 +226,8 @@ export class UserManagementComponent implements OnInit {
 
   savePermissions(): void {
     const user = this.selected;
-    if (!user || this.saving || user.id === this.currentUserId || user.roleId <= 2) return;
+    if (!user || !this.canManageIndividualPermissions || this.saving ||
+        user.id === this.currentUserId || user.roleId <= 2) return;
     this.saving = true;
     this.api.saveUserPermissions(user.id, this.selectedPermissions).subscribe({
       next: () => { this.saving = false; this.toast.success('Permisos individuales actualizados.'); },
