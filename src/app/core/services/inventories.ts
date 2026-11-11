@@ -26,6 +26,9 @@ export class InventoryService {
   getInventories(): Observable<InventorySummary[]> {
     return this.http.get<InventorySummary[]>(this.url);
   }
+  companyInventories(): Observable<InventorySummary[]> {
+    return this.http.get<InventorySummary[]>(`${this.url}/company-operational`);
+  }
   create(name: string, alias: string | null): Observable<InventorySummary> {
     return this.http.post<InventorySummary>(this.url, { inventoryName: name, alias });
   }
