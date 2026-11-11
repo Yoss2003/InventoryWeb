@@ -69,7 +69,7 @@ export class UserManagementComponent implements OnInit {
       this.newUser.firstName.trim().length > 0 &&
       this.newUser.lastName.trim().length > 0 &&
       /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.newUser.email.trim()) &&
-      (this.newUser.dni === null || /^\d{8}$/.test(this.newUser.dni)) &&
+      (!this.newUser.dni || /^\d{8}$/.test(this.newUser.dni)) &&
       this.newUser.initialPassword.length >= 12 &&
       this.newUser.initialPassword === this.passwordRepeat &&
       this.roles.some(r => r.id === this.newUser.roleId);
@@ -162,6 +162,7 @@ export class UserManagementComponent implements OnInit {
   }
 
   edit(user: ManagedUser): void {
+    if (user.roleId === 1 || (user.roleId === 2 && !this.isDeveloper)) return;
     this.selected = user;
     this.editing = {
       username: user.username, email: user.email,
@@ -208,7 +209,7 @@ export class UserManagementComponent implements OnInit {
 
   saveRole(): void {
     const user = this.selected;
-    if (!user || this.saving || user.id === this.currentUserId ||
+    if (!user || this.saving || user.id === this.currentUserId || user.roleId <= 2 ||
         !this.roles.some(r => r.id === this.selectedRole)) return;
     this.saving = true;
     this.api.updateAccess(user.id, user.isActive, this.selectedRole).subscribe({
