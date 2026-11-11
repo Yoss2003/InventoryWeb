@@ -1,4 +1,5 @@
 import { Component, inject } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
@@ -19,7 +20,7 @@ export interface DevConfirmDialogData {
 @Component({
   selector: 'app-dev-confirm-dialog',
   standalone: true,
-  imports: [MatDialogModule, MatIconModule, FormsModule],
+  imports: [CommonModule, MatDialogModule, MatIconModule, FormsModule],
   templateUrl: './dev-confirm-dialog.html',
   styleUrl: './dev-confirm-dialog.scss'
 })
