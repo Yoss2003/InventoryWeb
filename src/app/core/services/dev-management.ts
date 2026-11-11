@@ -32,7 +32,11 @@ export interface DevCompany {
   primaryColorHex: string | null;
   userCount: number; // Cálculo de la API: nunca se envía al guardar.
   totalUsers: number;
+  /** Cantidad de almacenes operativos de usuarios; excluye el maestro. */
   inventoryCount: number;
+  /** Inventario general / maestro de catálogos, separado del stock de usuarios. */
+  masterInventoryId?: number | null;
+  masterInventoryActive?: boolean;
   license: CompanyLicenseInfo | null;
 }
 
