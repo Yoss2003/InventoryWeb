@@ -474,7 +474,7 @@
                       {{ installment.date | date:'dd/MM/yyyy' }}
                     </td>
                     <td>
-                      S/ {{ installment.amount | number:'1.2-2' }}
+                      {{ installment.amount | money:'PEN' }}
                     </td>
                   </tr>
                 </tbody>
