@@ -23,7 +23,6 @@ export interface ManagedRole {
 export interface ManagedUserInput {
   username: string;
   email: string;
-  initialPassword: string;
   firstName: string;
   lastName: string;
   dni: string | null;
@@ -56,8 +55,14 @@ export class UserManagementService {
   users() { return this.http.get<ManagedUser[]>(`${this.root}/UserManagement/users`); }
   roles() { return this.http.get<ManagedRole[]>(`${this.root}/UserManagement/roles`); }
   create(input: ManagedUserInput) {
-    return this.http.post<ManagedUser & { personalInventoryId: number }>(
-      `${this.root}/UserManagement/users`, input);
+    return this.http.post<ManagedUser & {
+      personalInventoryId: number; emailSent: boolean; message: string
+    }>(`${this.root}/UserManagement/users`, input);
+  }
+  resendCredentials(id: number, correctedEmail: string) {
+    return this.http.post<{ emailSent: boolean; message: string; email: string }>(
+      `${this.root}/UserManagement/users/${id}/resend-credentials`,
+      { correctedEmail });
   }
   updateDetails(id: number, input: ManagedUserDetails) {
     return this.http.patch<void>(`${this.root}/UserManagement/users/${id}/details`, input);
