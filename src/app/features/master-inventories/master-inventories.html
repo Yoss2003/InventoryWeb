@@ -1,0 +1,87 @@
+<section class="master-page inv-core-page">
+  <header class="inv-core-header">
+    <app-ui-page-heading icon="inventory_2" title="Inventarios maestros"
+      subtitle="Catálogos generales por empresa. No almacenan existencias ni movimientos."></app-ui-page-heading>
+    <button type="button" appUiButton="secondary" (click)="load()" [disabled]="loading">
+      <mat-icon aria-hidden="true">refresh</mat-icon> Actualizar
+    </button>
+  </header>
+
+  <section class="master-section">
+    <div class="master-section__heading">
+      <div>
+        <h2>{{isDeveloper ? 'Todas las empresas' : 'Mi empresa'}}</h2>
+        <p>El desarrollador consulta todos los maestros; los demás usuarios, solo los autorizados.</p>
+      </div>
+      <span class="master-count">{{masters.length}} maestros</span>
+    </div>
+    <label class="master-filter">
+      <mat-icon aria-hidden="true">search</mat-icon>
+      <input type="search" [(ngModel)]="query" placeholder="Filtrar empresa o inventario"
+        aria-label="Buscar inventario maestro"/>
+    </label>
+    <p class="master-message" *ngIf="loading" role="status">Cargando inventarios maestros...</p>
+    <p class="master-error" *ngIf="error" role="alert">{{error}}</p>
+    <div class="inv-core-table-wrap master-table" *ngIf="!loading && masters.length">
+      <table>
+        <thead><tr><th>Empresa</th><th>Inventario</th><th>Estado</th><th>Acciones</th></tr></thead>
+        <tbody>
+          <tr *ngFor="let item of filtered" [class.master-row-selected]="selected?.id === item.id">
+            <td><strong>{{item.companyName}}</strong><small>Empresa #{{item.companyId}}</small></td>
+            <td><strong>{{item.alias || item.inventoryName}}</strong><small>ID {{item.id}} · {{item.inventoryName}}</small></td>
+            <td><span class="master-active"><mat-icon aria-hidden="true">check_circle</mat-icon>Activo</span></td>
+            <td class="inv-core-action-cell"><button type="button" appUiTableAction="normal"
+                (click)="inspect(item)" [attr.aria-label]="'Ver catálogo de ' + item.companyName"
+                title="Consultar catálogos">
+                <mat-icon aria-hidden="true">visibility</mat-icon>
+              </button></td>
+          </tr>
+        </tbody>
+      </table>
+      <p *ngIf="!filtered.length" class="master-message">No hay resultados para ese filtro.</p>
+    </div>
+    <p *ngIf="!loading && !masters.length && !error" class="master-message">
+      No se encontraron inventarios maestros disponibles.
+    </p>
+  </section>
+
+  <section class="master-section master-catalog" *ngIf="selected">
+    <div class="master-section__heading">
+      <div>
+        <h2>Catálogo de {{selected.companyName}}</h2>
+        <p>Solo lectura · Inventario #{{selected.id}} · {{selected.inventoryName}}</p>
+      </div>
+      <a *ngIf="sameCompany" routerLink="/dashboard/catalogo-general" class="master-link">
+        <mat-icon aria-hidden="true">edit_note</mat-icon> Abrir catálogo general
+      </a>
+    </div>
+    <p *ngIf="!sameCompany" class="master-message">
+      Para editar los catálogos de esta empresa, inicia una sesión en el contexto de esa empresa.
+      Esta consulta global nunca permite modificar datos de otras organizaciones.
+    </p>
+    <p *ngIf="loadingCatalog" class="master-message" role="status">Consultando categorías, marcas y proveedores...</p>
+    <div class="master-catalog-grid" *ngIf="catalog && !loadingCatalog">
+      <article class="master-catalog-group">
+        <h3>Categorías <span>{{catalog.categories.length}}</span></h3>
+        <div class="master-catalog-scroll">
+          <p *ngFor="let item of catalog.categories">{{item.name}}</p>
+          <p *ngIf="!catalog.categories.length">Sin categorías registradas.</p>
+        </div>
+      </article>
+      <article class="master-catalog-group">
+        <h3>Marcas <span>{{catalog.brands.length}}</span></h3>
+        <div class="master-catalog-scroll">
+          <p *ngFor="let item of catalog.brands">{{item.name}}</p>
+          <p *ngIf="!catalog.brands.length">Sin marcas registradas.</p>
+        </div>
+      </article>
+      <article class="master-catalog-group">
+        <h3>Proveedores <span>{{catalog.suppliers.length}}</span></h3>
+        <div class="master-catalog-scroll">
+          <p *ngFor="let item of catalog.suppliers">{{item.businessName}} <small>{{item.ruc}}</small></p>
+          <p *ngIf="!catalog.suppliers.length">Sin proveedores registrados.</p>
+        </div>
+      </article>
+    </div>
+  </section>
+</section>
