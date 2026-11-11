@@ -7,9 +7,48 @@
     <div><label>Cantidad</label><strong>{{data.movement.amount | number:'1.0-2'}}</strong></div>
     <div><label>Destinatario</label><strong>{{data.movement.recipient || '—'}}</strong></div>
     <div><label>Precio unitario</label><strong>{{data.movement.salePrice ?? '—'}}</strong></div>
-    <div><label>Pago</label><strong>{{data.movement.paymentMethod || '—'}}</strong></div>
+    <div><label>Tipo de venta / pago</label><strong>{{ isCreditSale ? 'Venta a cuotas' : (data.movement.paymentMethod || '—') }}</strong></div>
     <div><label>Documento</label><strong>{{data.movement.documentNumber || '—'}}</strong></div>
     <div><label>Responsable</label><strong>{{ responsibleName }}</strong></div>
-  </div><section><label>Observaciones</label><p>{{data.movement.observation || 'Sin observaciones'}}</p></section>
+  </div><section class="credit-details" *ngIf="isCreditSale">
+      <h3>Financiamiento y cronograma de cuotas</h3>
+      <p *ngIf="creditLoading">Consultando saldos y vencimientos…</p>
+      <p class="credit-error" *ngIf="creditError" role="alert">{{creditError}}</p>
+      <ng-container *ngIf="credit as details">
+        <div class="credit-summary-grid">
+          <div><span>Total de la venta</span><strong>S/ {{details.totalAmount | number:'1.2-2'}}</strong></div>
+          <div><span>Cuota inicial</span><strong>S/ {{(details.downPayment || 0) | number:'1.2-2'}}</strong></div>
+          <div><span>Pagado en total</span><strong>S/ {{(details.amountReceived || 0) | number:'1.2-2'}}</strong></div>
+          <div><span>Saldo pendiente</span><strong>S/ {{details.balance | number:'1.2-2'}}</strong></div>
+          <div><span>Número de cuotas</span><strong>{{details.installments.length}}</strong></div>
+          <div><span>Frecuencia</span><strong>{{details.installments[0]?.frequency || '—'}}</strong></div>
+        </div>
+        <div class="credit-table-scroll">
+          <table class="credit-table">
+            <thead><tr><th>Cuota</th><th>Vencimiento</th><th>Importe</th><th>Abonado</th><th>Saldo</th><th>Estado</th></tr></thead>
+            <tbody>
+              <tr *ngFor="let row of details.installments">
+                <td>#{{row.installmentNumber}}</td>
+                <td>{{row.dueDate | date:'dd/MM/yyyy'}}</td>
+                <td>S/ {{row.installmentAmount | number:'1.2-2'}}</td>
+                <td>S/ {{row.paidAmount | number:'1.2-2'}}</td>
+                <td>S/ {{row.balance | number:'1.2-2'}}</td>
+                <td>{{creditStatusLabel(row.status)}}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="credit-receipts" *ngIf="(details.amountReceived || 0) > (details.downPayment || 0)">
+          <strong>Abonos registrados</strong>
+          <ng-container *ngFor="let row of details.installments">
+            <p *ngFor="let receipt of row.receipts">
+              Cuota #{{row.installmentNumber}} · {{receipt.paidAt | date:'dd/MM/yyyy HH:mm'}} ·
+              S/ {{receipt.amount | number:'1.2-2'}} · {{receipt.paymentMethod}}
+            </p>
+          </ng-container>
+        </div>
+      </ng-container>
+    </section>
+    <section><label>Observaciones</label><p>{{data.movement.observation || 'Sin observaciones'}}</p></section>
   </main><footer><button type="button" (click)="dialogRef.close()">Cerrar</button></footer>
 </div>

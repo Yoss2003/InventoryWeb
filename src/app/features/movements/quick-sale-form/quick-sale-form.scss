@@ -465,7 +465,7 @@
 
 /* Altura natural para la directiva de animación */
 .sale-dialog.ui-v2-dialog--special {
-  height: auto !important;
+  height: auto;
   min-height: 0 !important;
   max-height: calc(100dvh - 28px);
   overflow: hidden;
@@ -1063,3 +1063,9 @@
     padding: 13px;
   }
 }
+
+/* Selector de documento DNI/RUC con el acento del resto del modal. */
+.sale-dialog .sale-document-switch { display: flex; gap: 8px; margin: 0 0 15px; }
+.sale-dialog .sale-document-switch button { flex: 1; padding: 9px 12px; background: #172630; color: #b5c6d3; border: 1px solid #43586a; border-radius: 9px; cursor: pointer; font-weight: 700; }
+.sale-dialog .sale-document-switch button.is-active { border-color: var(--inv-company-accent, #a2d149); color: var(--inv-company-accent, #a2d149); background: color-mix(in srgb, var(--inv-company-accent, #a2d149) 12%, #172630); }
+.sale-dialog .sale-document-switch button:focus-visible { outline: 2px solid var(--inv-company-accent, #a2d149); outline-offset: 2px; }

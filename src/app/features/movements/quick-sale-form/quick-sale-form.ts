@@ -25,7 +25,8 @@ import {
 import { SalesService } from '../../../core/services/sales';
 import {
   ExternalConsultasService,
-  SunatRuc
+  SunatRuc,
+  ReniecDni
 } from '../../../core/services/external-consultas';
 import {
   InventoryDialogMotionDirective
@@ -65,12 +66,28 @@ export class QuickSaleFormComponent implements OnInit, OnDestroy {
   selectedSerialIds: number[] = [];
   serialError = '';
 
-  // Consulta SUNAT
+  // Consulta optativa de identidad: no crea automáticamente un cliente.
+  documentType: 'RUC' | 'DNI' = 'RUC';
+  dniResult: ReniecDni | null = null;
   rucQuery = '';
   loadingRuc = false;
   sunatResult: SunatRuc | null = null;
   sunatError = '';
   private rucRequest?: Subscription;
+
+  get documentLength(): number { return this.documentType === 'DNI' ? 8 : 11; }
+
+  setDocumentType(type: 'RUC' | 'DNI'): void {
+    if (this.documentType === type) return;
+    this.documentType = type;
+    this.rucRequest?.unsubscribe();
+    this.rucQuery = '';
+    this.loadingRuc = false;
+    this.sunatResult = null;
+    this.dniResult = null;
+    this.sunatError = '';
+    this.cdr.markForCheck();
+  }
 
   readonly paymentMethods = [
     'Efectivo',
@@ -82,8 +99,6 @@ export class QuickSaleFormComponent implements OnInit, OnDestroy {
 
   readonly wallets = ['Yape', 'Plin', 'Bim'];
   readonly installmentFrequencies = ['Diario', 'Semanal', 'Mensual'];
-
-  readonly creditApiReady = false;
 
   readonly form = this.fb.group({
     articleId: [null as number | null, Validators.required],
@@ -138,8 +153,7 @@ export class QuickSaleFormComponent implements OnInit, OnDestroy {
       this.form.valid &&
       this.canAdvanceArticle &&
       this.canAdvanceCustomer &&
-      this.paymentConfigurationValid &&
-      (!this.isInstallmentSale || this.creditApiReady);
+      this.paymentConfigurationValid;
   }
 
   get total(): number {
@@ -220,8 +234,8 @@ export class QuickSaleFormComponent implements OnInit, OnDestroy {
     ).trim();
 
     return Number.isInteger(count) &&
-      count >= 1 &&
-      count <= 60 &&
+      count >= 2 &&
+      count <= 120 &&
       Number.isFinite(advance) &&
       advance >= 0 &&
       Math.round(advance * 100) === advance * 100 &&
@@ -246,8 +260,8 @@ export class QuickSaleFormComponent implements OnInit, OnDestroy {
 
     if (
       !Number.isInteger(count) ||
-      count < 1 ||
-      count > 60 ||
+      count < 2 ||
+      count > 120 ||
       totalCents < count
     ) return [];
 
@@ -255,6 +269,7 @@ export class QuickSaleFormComponent implements OnInit, OnDestroy {
       this.form.controls.installmentFrequency.value;
 
     const baseCents = Math.floor(totalCents / count);
+    const remainder = totalCents % count;
     const initialDate = new Date();
     initialDate.setHours(12, 0, 0, 0);
 
@@ -282,9 +297,7 @@ export class QuickSaleFormComponent implements OnInit, OnDestroy {
         );
       }
 
-      const cents = index === count - 1
-        ? totalCents - baseCents * (count - 1)
-        : baseCents;
+      const cents = baseCents + (index < remainder ? 1 : 0);
 
       return {
         number: installmentNumber,
@@ -292,6 +305,14 @@ export class QuickSaleFormComponent implements OnInit, OnDestroy {
         amount: cents / 100
       };
     });
+  }
+
+  get creditBuyerMissing(): boolean {
+    const customer = (
+      this.form.controls.customerName.value || ''
+    ).trim().toLocaleLowerCase('es');
+
+    return !customer || customer === 'público general';
   }
 
   ngOnInit(): void {
@@ -386,7 +407,7 @@ export class QuickSaleFormComponent implements OnInit, OnDestroy {
   // Mantener el RUC como texto para no perder ceros iniciales.
   onRucInput(event: Event): void {
     const input = event.target as HTMLInputElement;
-    const value = input.value.replace(/\D/g, '').slice(0, 11);
+    const value = input.value.replace(/\D/g, '').slice(0, this.documentLength);
 
     input.value = value;
     this.rucQuery = value;
@@ -396,59 +417,60 @@ export class QuickSaleFormComponent implements OnInit, OnDestroy {
 
     this.loadingRuc = false;
     this.sunatResult = null;
+    this.dniResult = null;
     this.sunatError = '';
 
     this.cdr.markForCheck();
   }
 
   consultarRuc(): void {
-    const ruc = this.rucQuery.trim();
-
+    const type = this.documentType;
+    const document = this.rucQuery.trim();
     if (this.loadingRuc) return;
-
-    if (!/^\d{11}$/.test(ruc)) {
-      this.sunatError = 'El RUC debe contener 11 dígitos.';
+    if (!new RegExp('^\\d{' + this.documentLength + '}$').test(document)) {
+      this.sunatError = 'El ' + type + ' debe contener ' + this.documentLength + ' dígitos.';
+      this.cdr.markForCheck();
       return;
     }
-
     this.loadingRuc = true;
     this.sunatError = '';
     this.sunatResult = null;
+    this.dniResult = null;
     this.cdr.markForCheck();
 
-    this.rucRequest = this.sunatApi.ruc(ruc)
-      .pipe(timeout(20000))
-      .subscribe({
+    const onFailure = (err: { error?: { error?: string }; status?: number }) => {
+      if (this.rucQuery !== document || this.documentType !== type) return;
+      this.loadingRuc = false;
+      this.sunatError = String(err?.error?.error ||
+        (err?.status === 0 ? 'No se pudo conectar con la API.' : 'No fue posible consultar el ' + type + '.'));
+      this.cdr.markForCheck();
+    };
+    if (type === 'RUC') {
+      this.rucRequest = this.sunatApi.ruc(document).pipe(timeout(20000)).subscribe({
         next: result => {
-          if (this.rucQuery !== ruc) return;
-
+          if (this.rucQuery !== document || this.documentType !== type) return;
           this.loadingRuc = false;
           this.sunatResult = result;
-
-          if (result.businessName?.trim()) {
-            this.form.controls.customerName.setValue(
-              result.businessName.trim()
-            );
-          }
-
+          if (result.businessName?.trim()) this.form.controls.customerName.setValue(result.businessName.trim());
           this.cdr.markForCheck();
         },
-        error: err => {
-          if (this.rucQuery !== ruc) return;
-
-          this.loadingRuc = false;
-          this.sunatError = String(
-            err?.error?.error ||
-            (
-              err?.status === 0
-                ? 'No se pudo conectar con la API.'
-                : 'No fue posible consultar el RUC.'
-            )
-          );
-
-          this.cdr.markForCheck();
-        }
+        error: onFailure
       });
+    } else {
+      this.rucRequest = this.sunatApi.dni(document).pipe(timeout(20000)).subscribe({
+        next: result => {
+          if (this.rucQuery !== document || this.documentType !== type) return;
+          this.loadingRuc = false;
+          this.dniResult = result;
+          const name = [result.first_name, result.first_last_name, result.second_last_name]
+            .map(p => String(p ?? '').trim()).filter(Boolean).join(' ');
+          if (name) this.form.controls.customerName.setValue(name);
+          else this.sunatError = 'RENIEC no devolvió un nombre completo. Puedes ingresarlo manualmente.';
+          this.cdr.markForCheck();
+        },
+        error: onFailure
+      });
+    }
   }
 
   onSubmit(): void {

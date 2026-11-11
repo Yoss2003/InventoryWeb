@@ -1,7 +1,7 @@
 import { UiControlDirective } from '../../shared/ui/v2/ui-control.directive';
 import { UiPageHeadingComponent } from '../../shared/ui/v2/ui-page-heading.component';
 import { CommonModule } from '@angular/common';
-import { ChangeDetectorRef, Component, OnInit, TemplateRef, ViewChild, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, ElementRef, OnInit, TemplateRef, ViewChild, inject } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { MatDatepickerModule } from '@angular/material/datepicker';
@@ -10,7 +10,7 @@ import { MatInputModule } from '@angular/material/input';
 import { provideNativeDateAdapter, MAT_DATE_LOCALE } from '@angular/material/core';
 import { finalize, timeout } from 'rxjs';
 import { FormsModule } from '@angular/forms';
-import { ExternalConsultasService, SunatRuc, ExchangeRate } from '../../core/services/external-consultas';
+import { ExternalConsultasService, SupplierContact, SunatRuc, ExchangeRate } from '../../core/services/external-consultas';
 import { LoadingIndicatorComponent } from '../../shared/loading/loading-indicator';
 import { ToastService } from '../../shared/toast/toast.service';
 
@@ -28,6 +28,73 @@ export class ExternalConsultasComponent implements OnInit {
   private pendingRates=0;
   ratesFrom=''; ratesTo=''; loadingHistory=false; historyRequested=false;
   historyError=''; historyRates:ExchangeRate[]=[];
+  // PROVEEDORES_CONSULTAS_V1: catálogo de lectura dentro de Consultas SUNAT.
+  @ViewChild('rucLookupPanel') private rucLookupPanel?: ElementRef<HTMLElement>;
+  suppliersOpen = false;
+  suppliersLoaded = false;
+  suppliersLoading = false;
+  suppliersError = '';
+  supplierSearch = '';
+  suppliers: SupplierContact[] = [];
+
+  get filteredSuppliers(): SupplierContact[] {
+    const search = this.supplierSearch.trim().toLocaleLowerCase('es');
+    const visible = this.suppliers.filter(item => item?.isActive !== false);
+    const filtered = !search ? visible : visible.filter(item =>
+      [item.ruc, item.businessName, item.contactName, item.email, item.phone]
+        .some(value => String(value ?? '').toLocaleLowerCase('es').includes(search)));
+    return filtered.sort((a, b) => String(a.businessName ?? '')
+      .localeCompare(String(b.businessName ?? ''), 'es'));
+  }
+
+  toggleSuppliers(): void {
+    this.suppliersOpen = !this.suppliersOpen;
+    if (this.suppliersOpen && !this.suppliersLoaded && !this.suppliersLoading)
+      this.loadSuppliers();
+  }
+
+  loadSuppliers(): void {
+    if (this.suppliersLoading) return;
+    this.suppliersLoading = true;
+    this.suppliersError = '';
+    this.api.suppliers().pipe(
+      timeout(20000),
+      finalize(() => { this.suppliersLoading = false; this.cdr.markForCheck(); })
+    ).subscribe({
+      next: list => {
+        this.suppliers = Array.isArray(list) ? list.filter(item => item && item.isActive !== false) : [];
+        this.suppliersLoaded = true;
+        this.cdr.markForCheck();
+      },
+      error: () => {
+        this.suppliersError = 'No se pudieron cargar los proveedores de tu empresa. Intenta nuevamente.';
+        this.cdr.markForCheck();
+      }
+    });
+  }
+
+  consultSupplierRuc(supplier: SupplierContact): void {
+    const ruc = String(supplier.ruc ?? '').trim();
+    if (!/^\d{11}$/.test(ruc)) {
+      this.toast.warning('Este proveedor no tiene un RUC válido para consultar.');
+      return;
+    }
+    if (this.loadingRuc) return;
+    this.ruc = ruc;
+    this.searchRuc(); // Reutiliza la consulta SUNAT existente, sin guardar datos.
+    this.rucLookupPanel?.nativeElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  supplierEmailLink(value?: string | null): string | null {
+    const email = String(value ?? '').trim();
+    return /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(email) ? `mailto:${email}` : null;
+  }
+
+  supplierPhoneLink(value?: string | null): string | null {
+    const phone = String(value ?? '').trim().replace(/[\s().-]/g, '');
+    return /^\+?\d{6,15}$/.test(phone) ? `tel:${phone}` : null;
+  }
+
   openAdvancedFilters():void {
     if (!this.fxHistoryTemplate || this.fxHistoryRef) return;
     const ref=this.matDialog.open(this.fxHistoryTemplate,{

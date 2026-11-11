@@ -1,7 +1,14 @@
 
 <div
   class="sale-dialog ui-v2-dialog ui-v2-dialog--special"
-  [invDialogMotion]="step">
+  [invDialogMotion]="step + '-' + selectedPaymentMethod + '-' + documentType"
+  [invDialogMotionWidth]="
+    step === 1
+      ? 'min(640px, calc(100vw - 24px))'
+      : step === 2
+        ? 'min(720px, calc(100vw - 24px))'
+        : 'min(850px, calc(100vw - 24px))'
+  ">
 
   <header class="sale-header">
     <div class="sale-header__identity">
@@ -192,7 +199,7 @@
         <mat-icon>badge</mat-icon>
         <div>
           <strong>Datos del comprador</strong>
-          <small>Consulta SUNAT o registra los datos manualmente.</small>
+          <small>Consulta DNI o RUC, o registra al comprador manualmente.</small>
         </div>
       </div>
 
@@ -200,24 +207,31 @@
         <div class="sale-ruc-panel__heading">
           <mat-icon>manage_search</mat-icon>
           <div>
-            <strong>Consulta SUNAT</strong>
-            <small>Buscar una empresa por RUC</small>
+            <strong>Consulta de identidad</strong>
+            <small>{{ documentType === 'RUC' ? 'Buscar empresa en SUNAT' : 'Buscar persona por DNI' }}</small>
           </div>
+        </div>
+
+        <div class="sale-document-switch" role="group" aria-label="Tipo de documento">
+          <button type="button" [class.is-active]="documentType === 'DNI'"
+            [attr.aria-pressed]="documentType === 'DNI'" (click)="setDocumentType('DNI')">DNI</button>
+          <button type="button" [class.is-active]="documentType === 'RUC'"
+            [attr.aria-pressed]="documentType === 'RUC'" (click)="setDocumentType('RUC')">RUC</button>
         </div>
 
         <div class="sale-ruc-row">
           <div class="sale-field">
-            <label class="sale-field__label" for="pos-ruc">
-              RUC <span class="optional">(opcional)</span>
+            <label class="sale-field__label" for="pos-document">
+              {{ documentType }} <span class="optional">(opcional)</span>
             </label>
 
             <input
-              id="pos-ruc"
+              id="pos-document"
               type="text"
               inputmode="numeric"
               autocomplete="off"
-              maxlength="11"
-              placeholder="11 dígitos"
+              [attr.maxlength]="documentLength"
+              [placeholder]="documentLength + ' dígitos'"
               [value]="rucQuery"
               (input)="onRucInput($event)" />
           </div>
@@ -225,7 +239,7 @@
           <button
             type="button"
             class="sale-ruc-search"
-            [disabled]="loadingRuc || rucQuery.length !== 11"
+            [disabled]="loadingRuc || rucQuery.length !== documentLength"
             (click)="consultarRuc()">
             <mat-icon>search</mat-icon>
             {{ loadingRuc ? 'Consultando...' : 'Consultar' }}
@@ -266,9 +280,18 @@
           </div>
         </div>
 
+        <div class="sale-ruc-result" *ngIf="dniResult as persona">
+          <div class="sale-ruc-result__title"><mat-icon>check_circle</mat-icon> <strong>Resultado DNI</strong></div>
+          <div class="sale-ruc-result__grid">
+            <div><span>DNI</span><strong>{{ persona.document_number || rucQuery }}</strong></div>
+            <div><span>Nombre completo</span><strong>{{ form.controls.customerName.value }}</strong></div>
+          </div>
+        </div>
+
         <small class="sale-ruc-note">
-          La razón social se completa automáticamente.
-          Esta venta registra el nombre del comprador, no el RUC.
+          El RUC es opcional. Para ventas en cuotas, debes
+          identificar al comprador mediante su nombre o razón social.
+          Las demás ventas pueden registrarse como Público general.
         </small>
       </div>
 
@@ -386,8 +409,7 @@
               <input
                 type="number"
                 formControlName="installmentCount"
-                min="1"
-                max="60"
+                min="2" max="120"
                 step="1" />
             </div>
 
@@ -462,17 +484,23 @@
 
           <p
             class="sale-credit-warning"
-            *ngIf="!paymentConfigurationValid">
-            Revisa las cuotas, el adelanto y la identificación
-            del comprador. El saldo debe cubrir todas las cuotas.
+            *ngIf="isInstallmentSale && creditBuyerMissing">
+            Para registrar una venta en cuotas debes identificar
+            al comprador. Regresa a la sección Comprador e ingresa
+            su nombre o razón social en lugar de "Público general".
+            No es necesario ingresar un RUC.
           </p>
 
-          <p class="sale-credit-warning" *ngIf="!creditApiReady">
-            El cronograma es una simulación. Para registrar ventas
-            a cuotas, primero debe habilitarse el almacenamiento
-            de la deuda en la API.
+          <p
+            class="sale-credit-warning"
+            *ngIf="isInstallmentSale &&
+                  !creditBuyerMissing &&
+                  !paymentConfigurationValid">
+            Revisa la configuración de cuotas:
+            la cantidad y la frecuencia deben ser válidas,
+            el adelanto debe ser menor al total y el saldo
+            financiado debe alcanzar para cubrir todas las cuotas.
           </p>
-
         </div>
 
 

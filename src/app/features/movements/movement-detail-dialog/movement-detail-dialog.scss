@@ -4,3 +4,22 @@
 .movement-dialog main {overflow:auto;padding:18px 20px}.record-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px;}.record-grid>div{display:flex;flex-direction:column;gap:4px;min-width:0}.record-grid label,.movement-dialog section label{color:#aab9ca;font-size:11px}.record-grid strong{font-size:13px;overflow-wrap:anywhere}.movement-dialog section{border-top:1px solid #445668;margin-top:15px;padding-top:12px}.movement-dialog section p{color:#dce7ef;font-size:13px}
 .movement-dialog footer{background:#20303e;padding:11px 20px;display:flex;justify-content:flex-end}.movement-dialog footer button{background:#253745;border:1px solid #5b7284;border-radius:8px;color:#f3f7fa;padding:8px 15px;cursor:pointer}
 @media(max-width:520px){.record-grid{grid-template-columns:1fr}}
+
+
+/* Detalle financiero de ventas financiadas; no altera el resto de movimientos. */
+.movement-dialog .credit-details { margin-top: 18px; padding-top: 16px; border-top: 1px solid #445668; }
+.movement-dialog .credit-details h3 { font-size: 14px; color: #edf4fa; margin: 0 0 14px; }
+.movement-dialog .credit-details .credit-error { color: #ffb7bd; }
+.movement-dialog .credit-summary-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin-bottom: 14px; }
+.movement-dialog .credit-summary-grid > div { display: flex; flex-direction: column; gap: 6px; min-width: 0; padding: 10px; border-radius: 9px; border: 1px solid #40556a; background: #192a36; }
+.movement-dialog .credit-summary-grid span { color: #aab9ca; font-size: 11px; }
+.movement-dialog .credit-summary-grid strong { color: #edf4fa; font-size: 13px; overflow-wrap: anywhere; }
+.movement-dialog .credit-table-scroll { max-height: 260px; overflow: auto; border: 1px solid #40556a; border-radius: 9px; scrollbar-width: thin; }
+.movement-dialog .credit-table { width: 100%; border-collapse: collapse; font-size: 11px; white-space: nowrap; }
+.movement-dialog .credit-table th, .movement-dialog .credit-table td { padding: 10px; text-align: left; border-bottom: 1px solid #344a5c; }
+.movement-dialog .credit-table th { background: #203544; color: #d5e1ef; position: sticky; top: 0; }
+.movement-dialog .credit-table td { color: #e4eef8; }
+.movement-dialog .credit-receipts { margin-top: 15px; }
+.movement-dialog .credit-receipts > strong { color: #dce8f2; font-size: 12px; }
+.movement-dialog .credit-receipts p { margin: 7px 0 0; font-size: 11px; color: #c4d3df; }
+@media(max-width: 650px) { .movement-dialog .credit-summary-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
