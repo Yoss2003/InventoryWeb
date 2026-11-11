@@ -1,5 +1,6 @@
 import { ChangeDetectorRef, DestroyRef, Component, OnDestroy, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { MoneyPipe } from '../../../shared/money.pipe';
 import { FormsModule } from '@angular/forms';
 import { MatDialogModule, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
@@ -8,7 +9,7 @@ import { Article } from '../../../core/models/article.model';
 import { SerialUnitsService } from '../../../core/services/serial-units';
 
 @Component({ selector: 'app-article-detail-dialog', standalone: true,
-  imports: [CommonModule, FormsModule, MatDialogModule, MatIconModule],
+  imports: [MoneyPipe, CommonModule, FormsModule, MatDialogModule, MatIconModule],
   templateUrl: './article-detail-dialog.html', styleUrl: './article-detail-dialog.scss' })
 export class ArticleDetailDialogComponent implements OnInit, OnDestroy {
   readonly dialogRef = inject(MatDialogRef<ArticleDetailDialogComponent>);

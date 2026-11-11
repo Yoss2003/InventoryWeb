@@ -20,8 +20,8 @@
         <div><span>Unidad</span><strong>{{a.measurementUnit}}</strong></div>
         <div><span>Compra / Venta</span><strong>{{a.acquisitionUnit || '—'}} / {{a.saleUnit || '—'}}</strong></div>
         <div><span>Conversión</span><strong>{{a.conversionFactor ?? '—'}}</strong></div>
-        <div><span>Costo</span><strong>{{a.acquisitionPrice ?? '—'}} {{a.acquisitionCurrency}}</strong></div>
-        <div><span>Precio</span><strong>{{a.salePrice ?? '—'}} {{a.saleCurrency}}</strong></div>
+        <div><span>Costo</span><strong>{{a.acquisitionPrice | money:a.acquisitionCurrency}}</strong></div>
+        <div><span>Precio</span><strong>{{a.salePrice | money:a.saleCurrency}}</strong></div>
       </div></section>
       <section *ngIf="characteristics.length || a.details?.length"><h3>Atributos y unidades serializadas</h3>
         <div class="record-grid"><div *ngFor="let row of characteristics"><span>{{row.name}}</span><strong>{{row.value}}</strong></div></div>

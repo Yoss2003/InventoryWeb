@@ -6,7 +6,7 @@
     <div><label>Fecha</label><strong>{{data.movement.movementDate | date:'dd/MM/yyyy HH:mm'}}</strong></div>
     <div><label>Cantidad</label><strong>{{data.movement.amount | number:'1.0-2'}}</strong></div>
     <div><label>Destinatario</label><strong>{{data.movement.recipient || '—'}}</strong></div>
-    <div><label>Precio unitario</label><strong>{{data.movement.salePrice ?? '—'}}</strong></div>
+    <div><label>Precio unitario</label><strong>{{data.movement.salePrice | money:'PEN'}}</strong></div>
     <div><label>Tipo de venta / pago</label><strong>{{ isCreditSale ? 'Venta a cuotas' : (data.movement.paymentMethod || '—') }}</strong></div>
     <div><label>Documento</label><strong>{{data.movement.documentNumber || '—'}}</strong></div>
     <div><label>Responsable</label><strong>{{ responsibleName }}</strong></div>
@@ -30,9 +30,9 @@
               <tr *ngFor="let row of details.installments">
                 <td>#{{row.installmentNumber}}</td>
                 <td>{{row.dueDate | date:'dd/MM/yyyy'}}</td>
-                <td>S/ {{row.installmentAmount | number:'1.2-2'}}</td>
-                <td>S/ {{row.paidAmount | number:'1.2-2'}}</td>
-                <td>S/ {{row.balance | number:'1.2-2'}}</td>
+                <td>{{row.installmentAmount | money:'PEN'}}</td>
+                <td>{{row.paidAmount | money:'PEN'}}</td>
+                <td>{{row.balance | money:'PEN'}}</td>
                 <td>{{creditStatusLabel(row.status)}}</td>
               </tr>
             </tbody>

@@ -14,7 +14,7 @@
     <table><thead><tr><th>Código</th><th>Artículo</th><th>Categoría</th><th>Marca</th><th>Modelo</th><th>Stock</th><th>Unidad</th><th>Precio</th><th>Estado</th><th>Acciones</th></tr></thead>
       <tbody><tr *ngFor="let a of visible" tabindex="0" (click)="showDetail(a)" (keydown.enter)="showDetail(a)">
         <td>{{a.code}}</td><td><strong>{{a.name}}</strong></td><td>{{a.categoryName}}</td><td>{{a.brandName}}</td><td>{{a.model}}</td>
-        <td>{{a.stock | number:'1.0-2'}}</td><td>{{a.measurementUnit}}</td><td>{{a.salePrice ?? 0 | number:'1.2-2'}} {{a.saleCurrency}}</td><td><app-ui-status [tone]="a.isActive ? 'success' : 'danger'" [label]="a.isActive ? 'Activo' : 'Inactivo'"></app-ui-status></td>
+        <td>{{a.stock | number:'1.0-2'}}</td><td>{{a.measurementUnit}}</td><td>{{(a.salePrice ?? 0) | money:a.saleCurrency}}</td><td><app-ui-status [tone]="a.isActive ? 'success' : 'danger'" [label]="a.isActive ? 'Activo' : 'Inactivo'"></app-ui-status></td>
         <td class="inv-core-action-cell"><button type="button" title="Editar artículo" [disabled]="!a.isActive" (click)="edit(a,$event)" appUiTableAction="normal"><mat-icon>edit</mat-icon></button><button type="button" class="danger" title="Dar de baja artículo" [disabled]="!a.isActive" (click)="delete(a,$event)" appUiTableAction="danger"><mat-icon>delete_outline</mat-icon></button></td>
       </tr></tbody></table>
     <app-ui-empty-state *ngIf="visible.length===0" message="No hay registros que coincidan con los filtros."></app-ui-empty-state>
