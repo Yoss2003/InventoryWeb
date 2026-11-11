@@ -10,7 +10,7 @@
   <section class="inv-manage-card">
     <div class="inv-manage-heading">
       <div><h2>Inventarios disponibles</h2><p>Propios y compartidos de tu empresa, según tus permisos.</p></div>
-      <a routerLink="/dashboard/compartir-inventario" class="inv-manage-link">
+      <a *ngIf="canManageAccess" routerLink="/dashboard/compartir-inventario" class="inv-manage-link">
         <mat-icon aria-hidden="true">group_add</mat-icon> Gestionar accesos
       </a>
     </div>
