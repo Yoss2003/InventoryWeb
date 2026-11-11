@@ -29,7 +29,10 @@
           <tr *ngFor="let item of filtered" [class.master-row-selected]="selected?.id === item.id">
             <td><strong>{{item.companyName}}</strong><small>Empresa #{{item.companyId}}</small></td>
             <td><strong>{{item.alias || item.inventoryName}}</strong><small>ID {{item.id}} · {{item.inventoryName}}</small></td>
-            <td><span class="master-active"><mat-icon aria-hidden="true">check_circle</mat-icon>Activo</span></td>
+            <td><span class="master-active" [class.master-inactive]="!item.isActive">
+              <mat-icon aria-hidden="true">{{item.isActive ? 'check_circle' : 'warning_amber'}}</mat-icon>
+              {{item.isActive ? 'Activo' : 'Inactivo'}}
+            </span></td>
             <td class="inv-core-action-cell"><button type="button" appUiTableAction="normal"
                 (click)="inspect(item)" [attr.aria-label]="'Ver catálogo de ' + item.companyName"
                 title="Consultar catálogos">
