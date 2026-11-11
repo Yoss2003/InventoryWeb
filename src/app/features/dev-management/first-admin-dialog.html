@@ -1,0 +1,41 @@
+<div class="first-admin-modal ui-v2-dialog ui-v2-dialog--simple" role="document">
+  <header class="first-admin-header">
+    <div class="first-admin-heading">
+      <span class="first-admin-symbol"><mat-icon aria-hidden="true">admin_panel_settings</mat-icon></span>
+      <div><h2 mat-dialog-title>Primer administrador</h2>
+      <p>{{data.companyName}} · Empresa #{{data.companyId}}</p></div>
+    </div>
+    <button type="button" class="first-admin-close" (click)="close()" [disabled]="saving"
+      aria-label="Cerrar"><mat-icon aria-hidden="true">close</mat-icon></button>
+  </header>
+  <mat-dialog-content class="first-admin-body">
+    <p class="first-admin-help">
+      Esta cuenta administrará los catálogos de su empresa y recibirá un inventario personal
+      automáticamente. El inventario maestro existente no se duplicará.
+    </p>
+    <div class="first-admin-fields">
+      <label>Nombre <span>*</span><input [(ngModel)]="firstName" maxlength="100" autocomplete="off" /></label>
+      <label>Apellido <span>*</span><input [(ngModel)]="lastName" maxlength="100" autocomplete="off" /></label>
+      <label>Usuario <span>*</span><input [(ngModel)]="username" maxlength="80" autocomplete="off" /></label>
+      <label>Correo <span>*</span><input [(ngModel)]="email" type="email" maxlength="254" autocomplete="off" /></label>
+      <label>DNI (opcional)<input [(ngModel)]="dni" maxlength="8" inputmode="numeric" autocomplete="off" /></label>
+      <span class="first-admin-spacer"></span>
+      <label>Contraseña inicial <span>*</span>
+        <input [(ngModel)]="initialPassword" type="password" autocomplete="new-password" maxlength="128" />
+      </label>
+      <label>Confirmar contraseña <span>*</span>
+        <input [(ngModel)]="confirmPassword" type="password" autocomplete="new-password" maxlength="128" />
+      </label>
+    </div>
+    <p class="first-admin-help">Mínimo 12 caracteres. La contraseña se almacena con hash y no se envía por correo.
+      Entrégala al administrador mediante un canal seguro.</p>
+    <p class="first-admin-error" *ngIf="error" role="alert">{{error}}</p>
+  </mat-dialog-content>
+  <mat-dialog-actions class="first-admin-actions">
+    <button type="button" class="first-admin-cancel" (click)="close()" [disabled]="saving">Cancelar</button>
+    <button type="button" class="first-admin-submit" (click)="save()" [disabled]="!valid || saving">
+      <mat-icon aria-hidden="true">person_add</mat-icon>
+      {{saving ? 'Registrando...' : 'Crear administrador'}}
+    </button>
+  </mat-dialog-actions>
+</div>
