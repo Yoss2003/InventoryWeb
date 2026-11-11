@@ -1,13 +1,14 @@
 <section class="catalog-page inv-core-page">
   <header class="inv-core-header"><app-ui-page-heading icon="inventory_2" title="Maestro de artículos" subtitle="Información relevante de productos e inventarios. Pulsa una fila para abrir su ficha completa."></app-ui-page-heading>
-    <div class="inv-core-header-actions"><button type="button" class="create-item" (click)="create()" appUiButton="primary"><mat-icon>add</mat-icon>Nuevo artículo</button>
-      <button type="button" class="reload" (click)="load()" [disabled]="loading" appUiButton="secondary">
+    <div class="inv-core-header-actions"><button type="button" class="create-item" (click)="create()" [disabled]="!hasOperationalInventory" [title]="hasOperationalInventory ? 'Registrar artículo' : 'Primero debe existir un inventario personal'" appUiButton="primary"><mat-icon>add</mat-icon>Nuevo artículo</button>
+      <button type="button" class="reload" (click)="load()" [disabled]="loading || !hasOperationalInventory" appUiButton="secondary">
         <app-loading-indicator *ngIf="loading; else articleRefresh" [compact]="true" message="Cargando..." />
         <ng-template #articleRefresh><mat-icon>refresh</mat-icon>Actualizar</ng-template>
       </button>
     </div>
   </header>
   <div class="inv-core-toolbar"><app-ui-search [(value)]="search" placeholder="Buscar artículo, marca, código…" label="Buscar artículos" /><label class="check"><input type="checkbox" [(ngModel)]="showInactive" /> Mostrar inactivos</label></div>
+  <app-ui-empty-state *ngIf="!hasOperationalInventory" message="No hay inventario operativo para mostrar artículos. El inventario general almacena catálogos, no existencias. Registra un usuario en esta empresa para generar su inventario personal." />
   <div class="catalog-state" *ngIf="loading && !hasLoaded"><app-loading-indicator message="Cargando artículos y catálogos..." /></div>
   <div class="catalog-state err" *ngIf="error" role="alert">{{error}}</div>
   <div class="inv-core-table-wrap catalog-table-wrap" *ngIf="hasLoaded && (!error || dataSource.length)">
