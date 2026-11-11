@@ -26,6 +26,22 @@ export class InventoryService {
   getInventories(): Observable<InventorySummary[]> {
     return this.http.get<InventorySummary[]>(this.url);
   }
+  create(name: string, alias: string | null): Observable<InventorySummary> {
+    return this.http.post<InventorySummary>(this.url, { inventoryName: name, alias });
+  }
+  assign(ownerUserId: number, inventoryName: string, alias: string | null): Observable<InventorySummary> {
+    return this.http.post<InventorySummary>(`${this.url}/assign`, {
+      ownerUserId, inventoryName, alias
+    });
+  }
+  update(item: InventorySummary, name: string, alias: string | null): Observable<void> {
+    return this.http.put<void>(`${this.url}/${item.id}`, {
+      id: item.id, inventoryName: name, alias
+    });
+  }
+  deactivate(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.url}/${id}`);
+  }
   getShares(inventoryId: number): Observable<InventoryShare[]> {
     return this.http.get<InventoryShare[]>(`${this.url}/${inventoryId}/Shared`);
   }
