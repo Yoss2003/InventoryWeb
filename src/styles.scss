@@ -8,147 +8,236 @@
 @use './app/shared/ui/core-pages/two-admin-pages';
 @use './app/shared/ui/table-overlay-scrollbar';
 
-html { height: 100%; color-scheme: dark; @include mat.theme((color: (theme-type: dark, primary: mat.$azure-palette, tertiary: mat.$blue-palette), typography: Roboto, density: 0)); }
-body { background-color: var(--mat-sys-surface); color: var(--mat-sys-on-surface); font: var(--mat-sys-body-medium); margin: 0; height: 100%; }
-html, body { height: 100%; margin: 0; padding: 0; background-color: #1e1e1e; }
-.dashboard-card { margin-bottom: 20px; border-radius: 8px; background-color: #2b2b2b !important; color: white !important; }
-.dashboard-card-header { display: flex !important; justify-content: space-between !important; align-items: center !important; width: 100%; height: 60px; padding: 0 16px; box-sizing: border-box; }
-.dashboard-table { width: 100%; background-color: #2b2b2b !important; }
-.mat-mdc-header-cell { background-color: #1a1a1a !important; font-weight: 600 !important; color: #a0a0a0 !important; text-transform: uppercase; font-size: 12px; border-bottom: 1px solid #444 !important; }
-.mat-mdc-cell { color: #e0e0e0 !important; border-bottom: 1px solid #444 !important; }
-.mat-mdc-dialog-container .mdc-dialog__surface { transition: height 0.3s ease-out, min-height 0.3s ease-out, max-height 0.3s ease-out !important; overflow: hidden; }
+html {
+  height: 100%;
+  color-scheme: dark;
+  @include mat.theme((color: (theme-type: dark, primary: mat.$azure-palette, tertiary: mat.$blue-palette), typography: Roboto, density: 0));
+}
+
+body {
+  background-color: var(--mat-sys-surface);
+  color: var(--mat-sys-on-surface);
+  font: var(--mat-sys-body-medium);
+  margin: 0;
+  height: 100%;
+}
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  background-color: #1e1e1e;
+}
+
+.dashboard-card {
+  margin-bottom: 20px;
+  border-radius: 8px;
+  background-color: #2b2b2b !important;
+  color: white !important;
+}
+
+.dashboard-card-header {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  width: 100%;
+  height: 60px;
+  padding: 0 16px;
+  box-sizing: border-box;
+}
+
+.dashboard-table {
+  width: 100%;
+  background-color: #2b2b2b !important;
+}
+
+.mat-mdc-header-cell {
+  background-color: #1a1a1a !important;
+  font-weight: 600 !important;
+  color: #a0a0a0 !important;
+  text-transform: uppercase;
+  font-size: 12px;
+  border-bottom: 1px solid #444 !important;
+}
+
+.mat-mdc-cell {
+  color: #e0e0e0 !important;
+  border-bottom: 1px solid #444 !important;
+}
+
+.mat-mdc-dialog-container .mdc-dialog__surface {
+  transition: height 0.3s ease-out, min-height 0.3s ease-out, max-height 0.3s ease-out !important;
+  overflow: hidden;
+}
 
 // Dropdown de alta de artículo: oscurecer y separar las opciones, sin resalte azul nativo.
 .mat-mdc-select-panel.inventory-select-options {
   background: #21313f !important;
   border: 1px solid #8ba2b8;
   border-radius: 9px !important;
-  box-shadow: 0 18px 40px rgba(0,0,0,.62) !important;
+  box-shadow: 0 18px 40px rgba(0, 0, 0, .62) !important;
   padding: 6px !important;
   max-height: 310px !important;
   --mat-option-label-text-color: #eff5fa;
   --mat-option-selected-state-label-text-color: var(--inv-company-accent, #A2D149);
-  --mat-option-hover-state-layer-color: rgba(168,215,61,.14);
-  --mat-option-focus-state-layer-color: rgba(168,215,61,.14);
-  --mat-option-selected-state-layer-color: rgba(168,215,61,.2);
+  --mat-option-hover-state-layer-color: rgba(168, 215, 61, .14);
+  --mat-option-focus-state-layer-color: rgba(168, 215, 61, .14);
+  --mat-option-selected-state-layer-color: rgba(168, 215, 61, .2);
 }
+
 .mat-mdc-select-panel.inventory-select-options .mat-mdc-option {
   color: #eff5fa !important;
   min-height: 45px;
   border-radius: 6px;
   margin: 2px 0;
-  border-bottom: 1px solid rgba(185,204,223,.1);
+  border-bottom: 1px solid rgba(185, 204, 223, .1);
 }
+
 .mat-mdc-select-panel.inventory-select-options .mat-mdc-option:hover,
 .mat-mdc-select-panel.inventory-select-options .mat-mdc-option.mdc-list-item--selected {
   background: var(--inv-v3-brand-soft) !important;
   color: #dcffa5 !important;
 }
-.mat-mdc-select-panel.inventory-select-options .mdc-list-item__primary-text { color: inherit !important; }
+
+.mat-mdc-select-panel.inventory-select-options .mdc-list-item__primary-text {
+  color: inherit !important;
+}
 
 /* UX_FINAL_SELECTS_NATIVOS */
-select:not([multiple]){color-scheme:dark;accent-color:var(--inv-company-accent, #A2D149)}
-select:not([multiple]) option{background:#21313f;color:#eaf3fa}
-select:not([multiple]):focus-visible{outline:2px solid var(--inv-company-accent, #A2D149);outline-offset:2px}
-#active-inventory-select,.master-history .filters select{background-color:#1b2c39;border-color:#687e90;color:#edf5fa;border-radius:9px;cursor:pointer;transition:border-color .15s,box-shadow .15s}
-#active-inventory-select:hover,.master-history .filters select:hover{border-color:#94bd57}
-#active-inventory-select:focus,.master-history .filters select:focus{box-shadow:0 0 0 2px rgba(168,215,61,.18);outline:none}
+select:not([multiple]) {
+  color-scheme: dark;
+  accent-color: var(--inv-company-accent, #A2D149)
+}
+
+select:not([multiple]) option {
+  background: #21313f;
+  color: #eaf3fa
+}
+
+select:not([multiple]):focus-visible {
+  outline: 2px solid var(--inv-company-accent, #A2D149);
+  outline-offset: 2px
+}
+
+#active-inventory-select,
+.master-history .filters select {
+  background-color: #1b2c39;
+  border-color: #687e90;
+  color: #edf5fa;
+  border-radius: 9px;
+  cursor: pointer;
+  transition: border-color .15s, box-shadow .15s
+}
+
+#active-inventory-select:hover,
+.master-history .filters select:hover {
+  border-color: #94bd57
+}
+
+#active-inventory-select:focus,
+.master-history .filters select:focus {
+  box-shadow: 0 0 0 2px rgba(168, 215, 61, .18);
+  outline: none
+}
 
 
 /* Scroll compartido para las tablas */
-:is(
-  .inv-core-table-wrap,
+:is(.inv-core-table-wrap,
   .parameter-table-viewport,
   .supplier-table-viewport,
   .table-wrapper,
   .companies-table,
   .recovery-table,
-  .history-rates-scroll
-) {
+  .history-rates-scroll) {
   scrollbar-width: thin;
   scrollbar-color:
-    var(--inv-company-accent, #9226e8)
-    transparent;
+    var(--inv-company-accent, #9226e8) transparent;
 }
 
 /* Ancho del scroll */
-:is(
-  .inv-core-table-wrap,
+:is(.inv-core-table-wrap,
   .parameter-table-viewport,
   .supplier-table-viewport,
   .table-wrapper,
   .companies-table,
   .recovery-table,
-  .history-rates-scroll
-)::-webkit-scrollbar {
+  .history-rates-scroll)::-webkit-scrollbar {
   width: 8px;
   height: 8px;
 }
 
 /* Fondo del scroll */
-:is(
-  .inv-core-table-wrap,
+:is(.inv-core-table-wrap,
   .parameter-table-viewport,
   .supplier-table-viewport,
   .table-wrapper,
   .companies-table,
   .recovery-table,
-  .history-rates-scroll
-)::-webkit-scrollbar-track {
+  .history-rates-scroll)::-webkit-scrollbar-track {
   background: transparent;
 }
 
 /* Barra deslizante */
-:is(
-  .inv-core-table-wrap,
+:is(.inv-core-table-wrap,
   .parameter-table-viewport,
   .supplier-table-viewport,
   .table-wrapper,
   .companies-table,
   .recovery-table,
-  .history-rates-scroll
-)::-webkit-scrollbar-thumb {
+  .history-rates-scroll)::-webkit-scrollbar-thumb {
   background: var(--inv-company-accent, #9226e8);
   border-radius: 10px;
 }
 
 /* Al pasar el cursor */
-:is(
-  .inv-core-table-wrap,
+:is(.inv-core-table-wrap,
   .parameter-table-viewport,
   .supplier-table-viewport,
   .table-wrapper,
   .companies-table,
   .recovery-table,
-  .history-rates-scroll
-)::-webkit-scrollbar-thumb:hover {
-  background: color-mix(
-    in srgb,
-    var(--inv-company-accent, #9226e8) 80%,
-    white
-  );
+  .history-rates-scroll)::-webkit-scrollbar-thumb:hover {
+  background: color-mix(in srgb,
+      var(--inv-company-accent, #9226e8) 80%,
+      white);
 }
+
 /* MODAL_ARTICULOS_MEJORA_2026: halo corporativo para el modal de artículo (sin modificar otros diálogos). */
-.cdk-overlay-pane:has(app-article-form) { overflow: visible; filter: drop-shadow(0 0 9px color-mix(in srgb, var(--inv-company-accent, #A2D149) 20%, transparent)); }
+.cdk-overlay-pane:has(app-article-form) {
+  overflow: visible;
+  filter: drop-shadow(0 0 9px color-mix(in srgb, var(--inv-company-accent, #A2D149) 20%, transparent));
+}
+
 .cdk-overlay-pane:has(app-article-form) .mat-mdc-dialog-surface {
   overflow: hidden;
   border: 1px solid color-mix(in srgb, var(--inv-company-accent, #A2D149) 75%, white);
   border-radius: 18px;
   background: #11161d;
-  box-shadow: 0 18px 70px rgba(0,0,0,.76),
+  box-shadow: 0 18px 70px rgba(0, 0, 0, .76),
     0 0 0 1px color-mix(in srgb, var(--inv-company-accent, #A2D149) 50%, transparent),
     0 0 24px color-mix(in srgb, var(--inv-company-accent, #A2D149) 34%, transparent);
   animation: article-modal-glow-open 220ms ease-out both;
 }
+
 @keyframes article-modal-glow-open {
-  from { box-shadow: 0 18px 70px rgba(0,0,0,.76), 0 0 0 1px transparent, 0 0 0 transparent; }
-  to { box-shadow: 0 18px 70px rgba(0,0,0,.76),
-    0 0 0 1px color-mix(in srgb, var(--inv-company-accent, #A2D149) 50%, transparent),
-    0 0 24px color-mix(in srgb, var(--inv-company-accent, #A2D149) 34%, transparent); }
+  from {
+    box-shadow: 0 18px 70px rgba(0, 0, 0, .76), 0 0 0 1px transparent, 0 0 0 transparent;
+  }
+
+  to {
+    box-shadow: 0 18px 70px rgba(0, 0, 0, .76),
+      0 0 0 1px color-mix(in srgb, var(--inv-company-accent, #A2D149) 50%, transparent),
+      0 0 24px color-mix(in srgb, var(--inv-company-accent, #A2D149) 34%, transparent);
+  }
 }
+
 @media (prefers-reduced-motion: reduce) {
-  .cdk-overlay-pane:has(app-article-form) .mat-mdc-dialog-surface { animation: none; }
+  .cdk-overlay-pane:has(app-article-form) .mat-mdc-dialog-surface {
+    animation: none;
+  }
 }
+
 /* WEBINV_CATEGORIA_VISUAL_2026_V1 */
 
 /* Solo el modal Categorías hijas: crecimiento/reducción horizontal del panel. */
@@ -156,8 +245,12 @@ select:not([multiple]):focus-visible{outline:2px solid var(--inv-company-accent,
   transition: width 290ms cubic-bezier(.22, 1, .36, 1);
   will-change: width;
 }
+
 @media (prefers-reduced-motion: reduce) {
-  .cdk-overlay-pane.inv-category-width-transition { transition: none; will-change: auto; }
+  .cdk-overlay-pane.inv-category-width-transition {
+    transition: none;
+    will-change: auto;
+  }
 }
 
 /* INV_DIALOG_MOTION_2026_V1 - ancho animado de ambos modales especiales. */
@@ -165,9 +258,13 @@ select:not([multiple]):focus-visible{outline:2px solid var(--inv-company-accent,
 .cdk-overlay-pane.inv-category-width-transition {
   transition: width 310ms cubic-bezier(.22, 1, .36, 1);
 }
+
 @media (prefers-reduced-motion: reduce) {
+
   .cdk-overlay-pane.inv-article-motion-width,
-  .cdk-overlay-pane.inv-category-width-transition { transition: none !important; }
+  .cdk-overlay-pane.inv-category-width-transition {
+    transition: none !important;
+  }
 }
 
 /* INV_DIALOG_LIFECYCLE_2026_V2
@@ -176,10 +273,13 @@ select:not([multiple]):focus-visible{outline:2px solid var(--inv-company-accent,
 .cdk-overlay-pane.inv-dialog-motion-pane:not(.inv-dialog-size-ready) {
   transition: none !important;
 }
+
 .cdk-overlay-pane.inv-dialog-motion-pane.inv-dialog-size-ready {
   transition: width 290ms cubic-bezier(.22, 1, .36, 1) !important;
 }
+
 @media (prefers-reduced-motion: reduce) {
+
   .cdk-overlay-pane.inv-dialog-motion-pane,
   .cdk-overlay-pane.inv-dialog-motion-pane.inv-dialog-size-ready {
     transition: none !important;
@@ -192,8 +292,9 @@ select:not([multiple]):focus-visible{outline:2px solid var(--inv-company-accent,
 .cdk-overlay-pane:has(app-category-child-form) {
   overflow: visible;
   filter: drop-shadow(0 0 9px color-mix(in srgb,
-    var(--inv-company-accent, #A2D149) 20%, transparent));
+        var(--inv-company-accent, #A2D149) 20%, transparent));
 }
+
 .cdk-overlay-pane:has(app-article-form) .mat-mdc-dialog-container .mat-mdc-dialog-surface,
 .cdk-overlay-pane:has(app-category-child-form) .mat-mdc-dialog-container .mat-mdc-dialog-surface {
   box-sizing: border-box;
@@ -208,13 +309,15 @@ select:not([multiple]):focus-visible{outline:2px solid var(--inv-company-accent,
   opacity: 0;
   animation: none !important;
   transition: transform var(--mat-dialog-transition-duration, 260ms) cubic-bezier(.22, 1, .36, 1),
-              opacity var(--mat-dialog-transition-duration, 260ms) ease-out !important;
+    opacity var(--mat-dialog-transition-duration, 260ms) ease-out !important;
 }
+
 .cdk-overlay-pane:has(app-article-form) .mat-mdc-dialog-container.mdc-dialog--open .mat-mdc-dialog-surface,
 .cdk-overlay-pane:has(app-category-child-form) .mat-mdc-dialog-container.mdc-dialog--open .mat-mdc-dialog-surface {
   transform: scale(1) !important;
   opacity: 1;
 }
+
 /* Angular Material quita mdc-dialog--open al cerrar. Restauramos escala menor
    incluso después de que se añada mdc-dialog--closing. */
 .cdk-overlay-pane:has(app-article-form) .mat-mdc-dialog-container.mdc-dialog--closing .mat-mdc-dialog-surface,
@@ -223,20 +326,32 @@ select:not([multiple]):focus-visible{outline:2px solid var(--inv-company-accent,
   opacity: 0;
   transition-timing-function: cubic-bezier(.4, 0, .9, .55), ease-in !important;
 }
+
 /* Evitar transiciones decorativas si Angular Material desactiva animaciones. */
 .cdk-overlay-pane:has(app-article-form) .mat-mdc-dialog-container._mat-animation-noopable .mat-mdc-dialog-surface,
 .cdk-overlay-pane:has(app-category-child-form) .mat-mdc-dialog-container._mat-animation-noopable .mat-mdc-dialog-surface {
   transition: none !important;
 }
+
 @keyframes inv-ui-panel-reveal {
-  from { opacity: 0; transform: translateY(7px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(7px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
+
 @media (prefers-reduced-motion: reduce) {
+
   .cdk-overlay-pane:has(app-article-form) .mat-mdc-dialog-container .mat-mdc-dialog-surface,
   .cdk-overlay-pane:has(app-category-child-form) .mat-mdc-dialog-container .mat-mdc-dialog-surface {
     transition: none !important;
   }
+
   .cdk-overlay-pane:has(app-article-form) .mat-mdc-dialog-container.mdc-dialog--open .mat-mdc-dialog-surface,
   .cdk-overlay-pane:has(app-category-child-form) .mat-mdc-dialog-container.mdc-dialog--open .mat-mdc-dialog-surface {
     transform: none !important;
@@ -250,6 +365,7 @@ select:not([multiple]):focus-visible{outline:2px solid var(--inv-company-accent,
   overflow: visible !important;
   filter: drop-shadow(0 0 9px color-mix(in srgb, var(--inv-company-accent, #a2d149) 20%, transparent));
 }
+
 .cdk-overlay-pane.inv-seven-modal .mat-mdc-dialog-surface {
   border: 1px solid color-mix(in srgb, var(--inv-company-accent, #a2d149) 75%, white) !important;
   border-radius: 18px !important;
@@ -263,41 +379,40 @@ select:not([multiple]):focus-visible{outline:2px solid var(--inv-company-accent,
   opacity: 0;
   animation: none !important;
   transition: transform var(--mat-dialog-transition-duration, 260ms) cubic-bezier(.22, 1, .36, 1),
-              opacity var(--mat-dialog-transition-duration, 260ms) ease-out !important;
+    opacity var(--mat-dialog-transition-duration, 260ms) ease-out !important;
 }
+
 .cdk-overlay-pane.inv-seven-modal .mat-mdc-dialog-container.mdc-dialog--open .mat-mdc-dialog-surface {
   transform: scale(1) !important;
   opacity: 1;
 }
+
 .cdk-overlay-pane.inv-seven-modal .mat-mdc-dialog-container.mdc-dialog--closing .mat-mdc-dialog-surface {
   transform: scale(.82) !important;
   opacity: 0;
   transition-timing-function: cubic-bezier(.4, 0, .9, .55), ease-in !important;
 }
+
 /* La línea exterior del diálogo es la única línea; las internas se eliminan. */
-.cdk-overlay-pane.inv-seven-modal :is(
-  .parent-modal,.transfer-dialog,.sale-dialog,.assignment-dialog,
-  .movement-dialog,.record-dialog,.fx-history-dialog
-) {
+.cdk-overlay-pane.inv-seven-modal :is(.parent-modal, .transfer-dialog, .sale-dialog, .assignment-dialog,
+  .movement-dialog, .record-dialog, .fx-history-dialog) {
   border: 0 !important;
   box-shadow: none !important;
   border-radius: 0 !important;
   background: #111820;
   max-height: calc(100dvh - 28px);
 }
+
 /* Cabecera homogénea. Los bloques internos conservan sus propias divisiones. */
-.cdk-overlay-pane.inv-seven-modal :is(
-  .parent-header,.transfer-header,.sale-dialog > header,
-  .assignment-dialog__header,.movement-dialog > header,
-  .record-dialog > header,.fx-modal-head
-) {
+.cdk-overlay-pane.inv-seven-modal :is(.parent-header, .transfer-header, .sale-dialog > header,
+  .assignment-dialog__header, .movement-dialog > header,
+  .record-dialog > header, .fx-modal-head) {
   background: #1b2936 !important;
   border-bottom: 1px solid #405265 !important;
 }
-.cdk-overlay-pane.inv-seven-modal :is(
-  .header-symbol,.transfer-icon,.sale-header-icon,
-  .assignment-dialog__icon,.inv-seven-title-icon
-) {
+
+.cdk-overlay-pane.inv-seven-modal :is(.header-symbol, .transfer-icon, .sale-header-icon,
+  .assignment-dialog__icon, .inv-seven-title-icon) {
   display: inline-grid;
   place-items: center;
   flex: none;
@@ -310,16 +425,19 @@ select:not([multiple]):focus-visible{outline:2px solid var(--inv-company-accent,
   border-radius: 12px !important;
   color: var(--inv-company-accent, #a2d149) !important;
 }
-.cdk-overlay-pane.inv-seven-modal :is(
-  .header-symbol,.transfer-icon,.sale-header-icon,
-  .assignment-dialog__icon,.inv-seven-title-icon
-) mat-icon {color: inherit !important; width:24px;height:24px;font-size:24px;}
-.cdk-overlay-pane.inv-seven-modal :is(
-  .parent-header .close-button,.transfer-header .close-button,
-  .sale-dialog > header > button,.assignment-dialog__close,
-  .movement-dialog > header > button,.record-dialog > header > button,
-  .fx-close-button
-) {
+
+.cdk-overlay-pane.inv-seven-modal :is(.header-symbol, .transfer-icon, .sale-header-icon,
+  .assignment-dialog__icon, .inv-seven-title-icon) mat-icon {
+  color: inherit !important;
+  width: 24px;
+  height: 24px;
+  font-size: 24px;
+}
+
+.cdk-overlay-pane.inv-seven-modal :is(.parent-header .close-button, .transfer-header .close-button,
+  .sale-dialog > header > button, .assignment-dialog__close,
+  .movement-dialog > header > button, .record-dialog > header > button,
+  .fx-close-button) {
   width: 35px !important;
   height: 35px !important;
   flex: none;
@@ -330,36 +448,41 @@ select:not([multiple]):focus-visible{outline:2px solid var(--inv-company-accent,
   border-radius: 9px !important;
   cursor: pointer;
 }
-.cdk-overlay-pane.inv-seven-modal :is(
-  .parent-header .close-button,.transfer-header .close-button,
-  .sale-dialog > header > button,.assignment-dialog__close,
-  .movement-dialog > header > button,.record-dialog > header > button,
-  .fx-close-button
-):hover {border-color:var(--inv-company-accent, #a2d149)!important;}
-.cdk-overlay-pane.inv-seven-modal :is(.movement-dialog > header,.record-dialog > header,.fx-modal-head) {
-  display:flex;
-  align-items:center;
-  gap:12px;
+
+.cdk-overlay-pane.inv-seven-modal :is(.parent-header .close-button, .transfer-header .close-button,
+  .sale-dialog > header > button, .assignment-dialog__close,
+  .movement-dialog > header > button, .record-dialog > header > button,
+  .fx-close-button):hover {
+  border-color: var(--inv-company-accent, #a2d149) !important;
 }
-.cdk-overlay-pane.inv-seven-modal :is(.movement-dialog > header h2,.record-dialog > header h2,.fx-modal-head h2) {
+
+.cdk-overlay-pane.inv-seven-modal :is(.movement-dialog > header, .record-dialog > header, .fx-modal-head) {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.cdk-overlay-pane.inv-seven-modal :is(.movement-dialog > header h2, .record-dialog > header h2, .fx-modal-head h2) {
   margin: 0;
   min-width: 0;
 }
-.cdk-overlay-pane.inv-seven-modal :is(.movement-dialog > header,.record-dialog > header,.fx-modal-head) {
-  justify-content:flex-start !important;
+
+.cdk-overlay-pane.inv-seven-modal :is(.movement-dialog > header, .record-dialog > header, .fx-modal-head) {
+  justify-content: flex-start !important;
 }
-.cdk-overlay-pane.inv-seven-modal :is(.movement-dialog > header > button,.record-dialog > header > button,.fx-modal-head > button) {
-  margin-left:auto !important;
+
+.cdk-overlay-pane.inv-seven-modal :is(.movement-dialog > header > button, .record-dialog > header > button, .fx-modal-head > button) {
+  margin-left: auto !important;
 }
-.cdk-overlay-pane.inv-seven-modal :is(.sale-dialog .step-heading > mat-icon,.transfer-dialog .card-heading > mat-icon) {
-  color:var(--inv-company-accent, #a2d149) !important;
-  background:color-mix(in srgb, var(--inv-company-accent, #a2d149) 14%, #19232e) !important;
+
+.cdk-overlay-pane.inv-seven-modal :is(.sale-dialog .step-heading > mat-icon, .transfer-dialog .card-heading > mat-icon) {
+  color: var(--inv-company-accent, #a2d149) !important;
+  background: color-mix(in srgb, var(--inv-company-accent, #a2d149) 14%, #19232e) !important;
 }
+
 /* Botoneras: un solo nivel, secundarios transparentes, principales en píldora. */
-.cdk-overlay-pane.inv-seven-modal :is(
-  .parent-footer,.transfer-footer,.sale-dialog > footer,
-  .assignment-dialog__footer,.movement-dialog > footer,.record-dialog > footer
-) {
+.cdk-overlay-pane.inv-seven-modal :is(.parent-footer, .transfer-footer, .sale-dialog > footer,
+  .assignment-dialog__footer, .movement-dialog > footer, .record-dialog > footer) {
   flex: none;
   min-height: 0;
   display: flex;
@@ -371,12 +494,11 @@ select:not([multiple]):focus-visible{outline:2px solid var(--inv-company-accent,
   border-top: 1px solid #344353 !important;
   margin: 0;
 }
-.cdk-overlay-pane.inv-seven-modal :is(
-  .parent-footer .button-secondary,.transfer-footer .outline-btn,
+
+.cdk-overlay-pane.inv-seven-modal :is(.parent-footer .button-secondary, .transfer-footer .outline-btn,
   .sale-dialog > footer > button:not(.confirm),
-  .assignment-dialog__footer > button,.movement-dialog > footer > button,
-  .record-dialog > footer > button
-) {
+  .assignment-dialog__footer > button, .movement-dialog > footer > button,
+  .record-dialog > footer > button) {
   background: transparent !important;
   border: 1px solid transparent !important;
   color: #b1bbca !important;
@@ -386,35 +508,42 @@ select:not([multiple]):focus-visible{outline:2px solid var(--inv-company-accent,
   font-weight: 700;
   box-shadow: none !important;
 }
-.cdk-overlay-pane.inv-seven-modal :is(
-  .parent-footer .button-secondary,.transfer-footer .outline-btn,
+
+.cdk-overlay-pane.inv-seven-modal :is(.parent-footer .button-secondary, .transfer-footer .outline-btn,
   .sale-dialog > footer > button:not(.confirm),
-  .assignment-dialog__footer > button,.movement-dialog > footer > button,
-  .record-dialog > footer > button
-):hover {background:#24303a !important;color:#fff !important;}
-.cdk-overlay-pane.inv-seven-modal :is(
-  .parent-footer .button-primary,.transfer-footer .submit-btn,
-  .sale-dialog > footer > button.confirm,
-  .fx-history-controls > button
-) {
-  background:var(--inv-company-accent, #a2d149) !important;
-  border:0 !important;
-  color:var(--inv-company-on-accent, #12202b) !important;
-  border-radius:24px !important;
-  padding:11px 19px !important;
-  font-size:12px;
-  font-weight:750;
-  cursor:pointer;
+  .assignment-dialog__footer > button, .movement-dialog > footer > button,
+  .record-dialog > footer > button):hover {
+  background: #24303a !important;
+  color: #fff !important;
 }
-.cdk-overlay-pane.inv-seven-modal :is(
-  .parent-footer .button-primary,.transfer-footer .submit-btn,
+
+.cdk-overlay-pane.inv-seven-modal :is(.parent-footer .button-primary, .transfer-footer .submit-btn,
   .sale-dialog > footer > button.confirm,
-  .fx-history-controls > button
-):hover:not(:disabled) {filter:brightness(1.09);}
-.cdk-overlay-pane.inv-seven-modal button:disabled {opacity:.45;cursor:not-allowed;}
+  .fx-history-controls > button) {
+  background: var(--inv-company-accent, #a2d149) !important;
+  border: 0 !important;
+  color: var(--inv-company-on-accent, #12202b) !important;
+  border-radius: 24px !important;
+  padding: 11px 19px !important;
+  font-size: 12px;
+  font-weight: 750;
+  cursor: pointer;
+}
+
+.cdk-overlay-pane.inv-seven-modal :is(.parent-footer .button-primary, .transfer-footer .submit-btn,
+  .sale-dialog > footer > button.confirm,
+  .fx-history-controls > button):hover:not(:disabled) {
+  filter: brightness(1.09);
+}
+
+.cdk-overlay-pane.inv-seven-modal button:disabled {
+  opacity: .45;
+  cursor: not-allowed;
+}
+
 /* Las medidas de contenido pequeñas reducen el alto del diálogo. */
-.cdk-overlay-pane.inv-seven-modal :is(.transfer-body,.sale-dialog > main,.record-dialog > main,
-  .movement-dialog > main,.assignment-dialog__body,.fx-history-filters) {
+.cdk-overlay-pane.inv-seven-modal :is(.transfer-body, .sale-dialog > main, .record-dialog > main,
+  .movement-dialog > main, .assignment-dialog__body, .fx-history-filters) {
   flex: 0 1 auto;
   min-height: 0 !important;
   overflow-y: auto;
@@ -422,38 +551,91 @@ select:not([multiple]):focus-visible{outline:2px solid var(--inv-company-accent,
   scrollbar-width: thin;
   scrollbar-color: var(--inv-company-accent, #a2d149) transparent;
 }
-.cdk-overlay-pane.inv-seven-modal :is(.transfer-body,.sale-dialog > main,.record-dialog > main,
-  .movement-dialog > main,.assignment-dialog__body,.fx-history-filters)::-webkit-scrollbar {width:7px;}
-.cdk-overlay-pane.inv-seven-modal :is(.transfer-body,.sale-dialog > main,.record-dialog > main,
-  .movement-dialog > main,.assignment-dialog__body,.fx-history-filters)::-webkit-scrollbar-thumb {
-  background:var(--inv-company-accent, #a2d149);border-radius:10px;
+
+.cdk-overlay-pane.inv-seven-modal :is(.transfer-body, .sale-dialog > main, .record-dialog > main,
+  .movement-dialog > main, .assignment-dialog__body, .fx-history-filters)::-webkit-scrollbar {
+  width: 7px;
 }
-.cdk-overlay-pane.inv-seven-modal .sale-dialog > main {max-height:calc(100dvh - 235px);}
-.cdk-overlay-pane.inv-seven-modal .assignment-dialog__body {max-height:calc(100dvh - 165px);}
-.cdk-overlay-pane.inv-seven-modal .record-dialog > main {max-height:calc(100dvh - 165px);}
-.cdk-overlay-pane.inv-seven-modal .parent-form {max-height:calc(100dvh - 125px);overflow:auto;}
-.cdk-overlay-pane.inv-seven-modal :is(.sale-steps button.active span,.wizard-nav button.active span) {
-  background:var(--inv-company-accent, #a2d149) !important;
-  color:var(--inv-company-on-accent, #12202b) !important;
+
+.cdk-overlay-pane.inv-seven-modal :is(.transfer-body, .sale-dialog > main, .record-dialog > main,
+  .movement-dialog > main, .assignment-dialog__body, .fx-history-filters)::-webkit-scrollbar-thumb {
+  background: var(--inv-company-accent, #a2d149);
+  border-radius: 10px;
 }
+
+.cdk-overlay-pane.inv-seven-modal .sale-dialog>main {
+  max-height: calc(100dvh - 235px);
+}
+
+.cdk-overlay-pane.inv-seven-modal .assignment-dialog__body {
+  max-height: calc(100dvh - 165px);
+}
+
+.cdk-overlay-pane.inv-seven-modal .record-dialog>main {
+  max-height: calc(100dvh - 165px);
+}
+
+.cdk-overlay-pane.inv-seven-modal .parent-form {
+  max-height: calc(100dvh - 125px);
+  overflow: auto;
+}
+
+.cdk-overlay-pane.inv-seven-modal :is(.sale-steps button.active span, .wizard-nav button.active span) {
+  background: var(--inv-company-accent, #a2d149) !important;
+  color: var(--inv-company-on-accent, #12202b) !important;
+}
+
 /* La misma aparición suave para Venta y Traspaso, sin deslizamiento lateral. */
-.cdk-overlay-pane.inv-seven-modal :is(.wizard-page,.sale-step) {
-  animation:inv-ui-panel-reveal 230ms cubic-bezier(.22, 1, .36, 1) both !important;
+.cdk-overlay-pane.inv-seven-modal :is(.wizard-page, .sale-step) {
+  animation: inv-ui-panel-reveal 230ms cubic-bezier(.22, 1, .36, 1) both !important;
 }
-.cdk-overlay-pane.inv-seven-modal .fx-history-dialog {display:flex;flex-direction:column;}
-.cdk-overlay-pane.inv-seven-modal .fx-history-filters {padding:18px 20px;}
+
+.cdk-overlay-pane.inv-seven-modal .fx-history-dialog {
+  display: flex;
+  flex-direction: column;
+}
+
+.cdk-overlay-pane.inv-seven-modal .fx-history-filters {
+  padding: 18px 20px;
+}
+
 @media (max-width:600px) {
-  .cdk-overlay-pane.inv-seven-modal :is(.parent-footer,.transfer-footer,.sale-dialog > footer,
-    .assignment-dialog__footer,.movement-dialog > footer,.record-dialog > footer) {padding:11px 12px;gap:6px;}
-  .cdk-overlay-pane.inv-seven-modal :is(.header-symbol,.transfer-icon,.sale-header-icon,
-    .assignment-dialog__icon,.inv-seven-title-icon) {width:38px;height:38px;}
-  .cdk-overlay-pane.inv-seven-modal .fx-history-controls {display:grid;grid-template-columns:1fr 1fr;}
-  .cdk-overlay-pane.inv-seven-modal .fx-history-controls > button {grid-column:1/-1;}
+
+  .cdk-overlay-pane.inv-seven-modal :is(.parent-footer, .transfer-footer, .sale-dialog > footer,
+    .assignment-dialog__footer, .movement-dialog > footer, .record-dialog > footer) {
+    padding: 11px 12px;
+    gap: 6px;
+  }
+
+  .cdk-overlay-pane.inv-seven-modal :is(.header-symbol, .transfer-icon, .sale-header-icon,
+    .assignment-dialog__icon, .inv-seven-title-icon) {
+    width: 38px;
+    height: 38px;
+  }
+
+  .cdk-overlay-pane.inv-seven-modal .fx-history-controls {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .cdk-overlay-pane.inv-seven-modal .fx-history-controls>button {
+    grid-column: 1/-1;
+  }
 }
+
 @media (prefers-reduced-motion:reduce) {
-  .cdk-overlay-pane.inv-seven-modal .mat-mdc-dialog-container .mat-mdc-dialog-surface {transition:none!important;}
-  .cdk-overlay-pane.inv-seven-modal .mat-mdc-dialog-container.mdc-dialog--open .mat-mdc-dialog-surface {transform:none!important;opacity:1;}
-  .cdk-overlay-pane.inv-seven-modal :is(.wizard-page,.sale-step) {animation:none!important;}
+  .cdk-overlay-pane.inv-seven-modal .mat-mdc-dialog-container .mat-mdc-dialog-surface {
+    transition: none !important;
+  }
+
+  .cdk-overlay-pane.inv-seven-modal .mat-mdc-dialog-container.mdc-dialog--open .mat-mdc-dialog-surface {
+    transform: none !important;
+    opacity: 1;
+  }
+
+  .cdk-overlay-pane.inv-seven-modal :is(.wizard-page, .sale-step) {
+    animation: none !important;
+  }
 }
 
 
@@ -642,8 +824,7 @@ select:not([multiple]):focus-visible{outline:2px solid var(--inv-company-accent,
 }
 
 /* Botón principal */
-.cdk-overlay-pane.fx-history-modal
-.fx-history-controls > .fx-search-button {
+.cdk-overlay-pane.fx-history-modal .fx-history-controls>.fx-search-button {
   display: inline-flex;
   align-items: center;
   justify-content: center;

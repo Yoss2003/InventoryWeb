@@ -938,43 +938,118 @@ $muted: #a8b5c2;
 
 /* UX_FINAL_REGLAS_CATEGORIA */
 @media (min-width: 761px) {
-  .category-stepper .rules-grid {grid-template-columns:repeat(2,minmax(0,1fr)) !important; gap:14px 16px;align-items:stretch;}
-  .category-stepper .rules-grid>.category-field,.category-stepper .rules-grid>.toggle-tile{min-width:0;align-self:stretch;}
-  .category-stepper .rules-grid .toggle-tile{min-height:66px;padding:12px 14px;}
-  .category-stepper .naming-config{grid-column:1/-1;display:grid;grid-template-columns:repeat(2,minmax(0,1fr)) !important;gap:14px 16px;align-items:stretch;}
-  .category-stepper .naming-config:has(>.naming-toggle:only-child){grid-template-columns:minmax(0,1fr) !important;}
-  .category-stepper .naming-config>.naming-toggle{height:auto;min-height:66px;}
-  .category-stepper .rules-grid .toggle-tile small{white-space:normal;}
+  .category-stepper .rules-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 14px 16px;
+    align-items: stretch;
+  }
+
+  .category-stepper .rules-grid>.category-field,
+  .category-stepper .rules-grid>.toggle-tile {
+    min-width: 0;
+    align-self: stretch;
+  }
+
+  .category-stepper .rules-grid .toggle-tile {
+    min-height: 66px;
+    padding: 12px 14px;
+  }
+
+  .category-stepper .naming-config {
+    grid-column: 1/-1;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 14px 16px;
+    align-items: stretch;
+  }
+
+  .category-stepper .naming-config:has(>.naming-toggle:only-child) {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  .category-stepper .naming-config>.naming-toggle {
+    height: auto;
+    min-height: 66px;
+  }
+
+  .category-stepper .rules-grid .toggle-tile small {
+    white-space: normal;
+  }
 }
-@media (max-width:760px){.category-stepper .rules-grid,.category-stepper .naming-config{grid-template-columns:minmax(0,1fr) !important;}}
+
+@media (max-width:760px) {
+
+  .category-stepper .rules-grid,
+  .category-stepper .naming-config {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+}
 
 .rules-grid .units-selection {
   grid-column: 1 / -1;
 }
+
 /* WEBINVENTORY_UNIDADES_INGRESOS_2026_V1: categoryScss */
 
-.units-helper { color: #a8b5c2; font-size: 11px; line-height: 1.4; }
+.units-helper {
+  color: #a8b5c2;
+  font-size: 11px;
+  line-height: 1.4;
+}
 
 /* WEBINVENTORY_UNIDADES_UX_V1 */
 
 /* Selector resumido: el campo enseña solo abreviaturas. */
 .category-modal .unit-selection-trigger {
-  display: flex; align-items: center; gap: 10px; width: 100%; height: 43px;
-  min-width: 0; padding: 0 11px; border: 1px solid #6c8094; border-radius: 8px;
-  background: #111922; color: #f2f8fc; cursor: pointer; text-align: left;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  height: 43px;
+  min-width: 0;
+  padding: 0 11px;
+  border: 1px solid #6c8094;
+  border-radius: 8px;
+  background: #111922;
+  color: #f2f8fc;
+  cursor: pointer;
+  text-align: left;
 }
+
 .category-modal .unit-selection-trigger:hover:not(:disabled),
 .category-modal .unit-selection-trigger:focus-visible {
-  outline: none; border-color: var(--inv-company-accent, #a2d149);
+  outline: none;
+  border-color: var(--inv-company-accent, #a2d149);
 }
-.category-modal .unit-selection-trigger:disabled { opacity: .55; cursor: default; }
+
+.category-modal .unit-selection-trigger:disabled {
+  opacity: .55;
+  cursor: default;
+}
+
 .category-modal .unit-selection-trigger__value {
-  flex: 1; min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis;
-  font-size: 13px; letter-spacing: .15px;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-size: 13px;
+  letter-spacing: .15px;
 }
-.category-modal .unit-selection-trigger__value.is-empty { color: #9eb0bf; }
-.category-modal .unit-selection-trigger mat-icon { color: var(--inv-company-accent, #a2d149); flex: none; }
-.category-modal .units-helper--error { color: #ff9c9c; }
+
+.category-modal .unit-selection-trigger__value.is-empty {
+  color: #9eb0bf;
+}
+
+.category-modal .unit-selection-trigger mat-icon {
+  color: var(--inv-company-accent, #a2d149);
+  flex: none;
+}
+
+.category-modal .units-helper--error {
+  color: #ff9c9c;
+}
+
 /* WEBINV_CATEGORIA_VISUAL_2026_V1 */
 
 /* Reglas visuales de Categorías hijas: mismo acento dinámico que Artículos. */
@@ -984,22 +1059,28 @@ $muted: #a8b5c2;
     0 0 19px color-mix(in srgb, var(--inv-company-accent, #a2d149) 14%, transparent),
     inset 0 0 0 1px color-mix(in srgb, var(--inv-company-accent, #a2d149) 16%, transparent);
 }
+
 :host ::ng-deep .category-stepper .mat-step-icon-selected,
 :host ::ng-deep .category-stepper .mat-step-icon-state-edit,
 :host ::ng-deep .category-stepper .mat-step-icon-state-done {
   background-color: var(--inv-company-accent, #a2d149) !important;
   color: var(--inv-company-on-accent, #12202b) !important;
 }
+
 :host ::ng-deep .category-stepper .mat-step-header[aria-selected="true"] {
   border-color: color-mix(in srgb, var(--inv-company-accent, #a2d149) 58%, #556a7a);
   background: color-mix(in srgb, var(--inv-company-accent, #a2d149) 13%, #19232e);
 }
+
 :host ::ng-deep .category-stepper .mat-step-header[aria-selected="true"] .mat-step-label {
   color: var(--inv-company-accent, #a2d149);
 }
+
 :host ::ng-deep .category-stepper .mat-step-icon:not(.mat-step-icon-selected):not(.mat-step-icon-state-done):not(.mat-step-icon-state-edit) {
-  background: #283440; color: #c1cfdf;
+  background: #283440;
+  color: #c1cfdf;
 }
+
 /* Fila 1: tracking + unidades; fila 2: ambos interruptores. */
 .category-stepper .rules-grid {
   display: grid;
@@ -1007,37 +1088,74 @@ $muted: #a8b5c2;
   align-items: start;
   gap: 13px 16px;
 }
-.category-stepper .rules-grid > .rules-tracking-field,
-.category-stepper .rules-grid > .units-selection,
-.category-stepper .rules-grid > .rules-returnable,
-.category-stepper .rules-grid > .rules-custom-formula {
+
+.category-stepper .rules-grid>.rules-tracking-field,
+.category-stepper .rules-grid>.units-selection,
+.category-stepper .rules-grid>.rules-returnable,
+.category-stepper .rules-grid>.rules-custom-formula {
   grid-column: auto !important;
   min-width: 0;
 }
-.category-stepper .rules-grid > .rules-naming-field,
-.category-stepper .rules-grid > .rules-bulk-note {
+
+.category-stepper .rules-grid>.rules-naming-field,
+.category-stepper .rules-grid>.rules-bulk-note {
   grid-column: 1 / -1 !important;
   min-width: 0;
 }
-.category-stepper .rules-grid > .toggle-tile {
+
+.category-stepper .rules-grid>.toggle-tile {
   min-height: 62px;
   height: 100%;
   padding: 11px 13px;
   gap: 12px;
 }
-.rules-toggle-copy { flex: 1 1 auto; min-width: 0; }
-.rules-inline-title { display: inline-flex; gap: 6px; align-items: center; min-width: 0; }
-.rules-inline-title strong { color: #e7eff8; font-size: 12px; }
-.rules-naming-field { max-width: 100%; }
-.rules-naming-field > .rules-inline-title { min-height: 22px; }
-.rules-naming-field .rules-inline-title label { font-size: 12px; font-weight: 700; color: #d3deea; }
-.rules-bulk-note { display: flex; align-items: center; gap: 8px; font-size: 12px; color: #adbdca; }
+
+.rules-toggle-copy {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.rules-inline-title {
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+  min-width: 0;
+}
+
+.rules-inline-title strong {
+  color: #e7eff8;
+  font-size: 12px;
+}
+
+.rules-naming-field {
+  max-width: 100%;
+}
+
+.rules-naming-field>.rules-inline-title {
+  min-height: 22px;
+}
+
+.rules-naming-field .rules-inline-title label {
+  font-size: 12px;
+  font-weight: 700;
+  color: #d3deea;
+}
+
+.rules-bulk-note {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: #adbdca;
+}
+
 .category-info-button,
 .category-modal .formula-info-button {
   display: inline-grid;
   place-items: center;
   flex: none;
-  width: 28px; height: 28px;
+  width: 28px;
+  height: 28px;
   min-width: 28px;
   padding: 0;
   border: 1px solid color-mix(in srgb, var(--inv-company-accent, #a2d149) 58%, #536678);
@@ -1046,8 +1164,15 @@ $muted: #a8b5c2;
   color: var(--inv-company-accent, #a2d149);
   cursor: help;
 }
+
 .category-info-button mat-icon,
-.category-modal .formula-info-button mat-icon { width: 18px; height: 18px; font-size: 18px; color: inherit; }
+.category-modal .formula-info-button mat-icon {
+  width: 18px;
+  height: 18px;
+  font-size: 18px;
+  color: inherit;
+}
+
 .category-info-button:hover,
 .category-info-button:focus-visible,
 .category-modal .formula-info-button:hover,
@@ -1056,14 +1181,31 @@ $muted: #a8b5c2;
   outline-color: var(--inv-company-accent, #a2d149);
   background: color-mix(in srgb, var(--inv-company-accent, #a2d149) 20%, #1a2733);
 }
-.attributes-title-row { display: flex; align-items: center; gap: 9px; min-width: 0; }
-.attributes-title-row h3 { margin: 0; min-width: 0; }
-.category-modal .attributes-info-button { width: 26px; height: 26px; min-width: 26px; }
+
+.attributes-title-row {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-width: 0;
+}
+
+.attributes-title-row h3 {
+  margin: 0;
+  min-width: 0;
+}
+
+.category-modal .attributes-info-button {
+  width: 26px;
+  height: 26px;
+  min-width: 26px;
+}
+
 /* Angular Material: casillas e interruptores activos respetan el tema empresarial. */
 :host ::ng-deep .category-modal .mat-mdc-checkbox-checked .mdc-checkbox__background {
   background-color: var(--inv-company-accent, #a2d149) !important;
   border-color: var(--inv-company-accent, #a2d149) !important;
 }
+
 .category-modal .mat-mdc-slide-toggle {
   --mdc-switch-selected-handle-color: var(--inv-company-accent, #a2d149);
   --mdc-switch-selected-track-color: color-mix(in srgb, var(--inv-company-accent, #a2d149) 52%, #17222d);
@@ -1071,51 +1213,92 @@ $muted: #a8b5c2;
   --mdc-switch-selected-hover-handle-color: var(--inv-company-accent, #a2d149);
   --mdc-switch-selected-pressed-handle-color: var(--inv-company-accent, #a2d149);
 }
+
 .category-modal .tag-btn.active {
   border-color: var(--inv-company-accent, #a2d149);
   background: color-mix(in srgb, var(--inv-company-accent, #a2d149) 23%, #121b25);
   color: var(--inv-company-accent, #a2d149);
 }
-.category-modal .tag-btn:hover:not(:disabled) { border-color: var(--inv-company-accent, #a2d149); }
+
+.category-modal .tag-btn:hover:not(:disabled) {
+  border-color: var(--inv-company-accent, #a2d149);
+}
+
 .category-modal .preview-text,
-.category-modal .default-naming { color: var(--inv-company-accent, #a2d149); }
-.category-modal .preview-box { margin-top: 12px; padding: 10px 12px; }
-.category-modal .preview-header { margin-bottom: 7px; }
+.category-modal .default-naming {
+  color: var(--inv-company-accent, #a2d149);
+}
+
+.category-modal .preview-box {
+  margin-top: 12px;
+  padding: 10px 12px;
+}
+
+.category-modal .preview-header {
+  margin-bottom: 7px;
+}
+
 /* Interacción familiar: thumb discreto y dinámico, como en las tablas. */
 .category-content.mat-mdc-dialog-content {
   scrollbar-width: thin;
   scrollbar-color: var(--inv-company-accent, #a2d149) transparent;
 }
-.category-content.mat-mdc-dialog-content::-webkit-scrollbar { width: 7px; }
-.category-content.mat-mdc-dialog-content::-webkit-scrollbar-track { background: transparent; }
+
+.category-content.mat-mdc-dialog-content::-webkit-scrollbar {
+  width: 7px;
+}
+
+.category-content.mat-mdc-dialog-content::-webkit-scrollbar-track {
+  background: transparent;
+}
+
 .category-content.mat-mdc-dialog-content::-webkit-scrollbar-thumb {
   background: var(--inv-company-accent, #a2d149);
   border-radius: 9px;
 }
+
 @media(max-width:760px) {
-  .category-stepper .rules-grid { grid-template-columns: minmax(0, 1fr) !important; }
-  .category-stepper .rules-grid > .rules-tracking-field,
-  .category-stepper .rules-grid > .units-selection,
-  .category-stepper .rules-grid > .rules-returnable,
-  .category-stepper .rules-grid > .rules-custom-formula,
-  .category-stepper .rules-grid > .rules-naming-field,
-  .category-stepper .rules-grid > .rules-bulk-note { grid-column: 1 !important; }
+  .category-stepper .rules-grid {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  .category-stepper .rules-grid>.rules-tracking-field,
+  .category-stepper .rules-grid>.units-selection,
+  .category-stepper .rules-grid>.rules-returnable,
+  .category-stepper .rules-grid>.rules-custom-formula,
+  .category-stepper .rules-grid>.rules-naming-field,
+  .category-stepper .rules-grid>.rules-bulk-note {
+    grid-column: 1 !important;
+  }
 }
 
 /* INV_DIALOG_MOTION_2026_V1 - fade del stepper y expansión vertical fluida. */
 @keyframes inv-category-content-fade {
-  from { opacity: 0; transform: translateY(7px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(7px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
+
 .category-modal .category-stepper .mat-horizontal-stepper-content[aria-expanded="true"] .step-form {
   animation: inv-category-content-fade 260ms cubic-bezier(.22, 1, .36, 1) both;
 }
+
 .category-modal .preview-inputs {
   animation: inv-category-content-fade 220ms ease-out both;
 }
+
 @media (prefers-reduced-motion: reduce) {
+
   .category-modal .category-stepper .mat-horizontal-stepper-content[aria-expanded="true"] .step-form,
-  .category-modal .preview-inputs { animation: none !important; }
+  .category-modal .preview-inputs {
+    animation: none !important;
+  }
 }
 
 /* INV_DIALOG_UNIFIED_ZOOM_2026_V3 - aspecto y contenido de Categorías hijas. */
@@ -1132,20 +1315,25 @@ $muted: #a8b5c2;
   min-height: 0;
   max-height: calc(100dvh - 28px);
 }
+
 .category-modal .category-content.mat-mdc-dialog-content {
   flex: 0 1 auto;
   min-height: 0;
   overflow-y: auto;
   overscroll-behavior: contain;
 }
+
 /* El stepper no desliza lateralmente; el contenido entra como en Artículos. */
 :host ::ng-deep .category-modal .category-stepper .mat-horizontal-stepper-content-current .step-form {
   animation: inv-ui-panel-reveal 230ms cubic-bezier(.22, 1, .36, 1) both !important;
 }
+
 .category-modal .preview-inputs {
   animation: inv-ui-panel-reveal 230ms cubic-bezier(.22, 1, .36, 1) both !important;
 }
+
 @media (prefers-reduced-motion: reduce) {
+
   :host ::ng-deep .category-modal .category-stepper .mat-horizontal-stepper-content-current .step-form,
   .category-modal .preview-inputs {
     animation: none !important;

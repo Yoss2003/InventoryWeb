@@ -1,20 +1,174 @@
-:host { display:block; color:#e8eef6; font-family:Roboto,'Segoe UI',sans-serif; }
-.record-dialog { background:#111920; border:1px solid #526677; border-radius:18px; display:flex; flex-direction:column; max-height:min(760px,calc(100dvh - 26px)); overflow:hidden; }
-.record-dialog header { background:#20303d; padding:16px 20px; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #415263; }
-.record-dialog h2 { margin:0; font-size:18px; } .record-dialog header small { color:#a8b9c6; }
-.record-dialog header button { background:#13212c; color:#dfeaf4; border:1px solid #677b8d; border-radius:8px; width:35px; height:35px; cursor:pointer; }
-.record-dialog main { min-height:0; flex:1; overflow:auto; padding:17px 20px; scrollbar-width:thin; }
-.record-dialog section { border:1px solid #455b70; border-radius:12px; padding:13px 15px; margin-bottom:12px; background:#19242f; }
-.record-dialog h3 { margin:0 0 11px; font-size:13px; color:#c4ed8c; }
-.record-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:13px; }
-.record-grid div { min-width:0; display:flex; flex-direction:column; gap:4px; }
-.record-grid span { color:#a3b1c0; font-size:11px; }
-.record-grid strong { font-size:13px; overflow-wrap:anywhere; }
-.record-series { border-top:1px solid #364858; display:flex; justify-content:space-between; gap:10px; padding:9px 0; font-size:12px; }
-.record-media { display:flex; gap:15px; flex-wrap:wrap; } .record-media a { color:#c7f18d; display:flex; flex-direction:column; gap:5px; font-size:12px; }
-.record-media img { max-width:200px; max-height:150px; object-fit:contain; border-radius:7px; }
-.record-dialog footer { flex:none; display:flex; justify-content:flex-end; padding:12px 20px; background:#21303c; border-top:1px solid #405568; }
-.record-dialog footer button { border:1px solid #5c7285; color:#eef4fc; background:#253746; padding:8px 15px; border-radius:8px; cursor:pointer; }
-@media (max-width:600px) { .record-grid { grid-template-columns:1fr; } }
+:host {
+    display: block;
+    color: #e8eef6;
+    font-family: Roboto, 'Segoe UI', sans-serif;
+}
 
-.serial-register{display:flex;gap:10px;align-items:center}.serial-register input{flex:1;background:#111c25;border:1px solid #567084;color:#e6f4fa;padding:10px;border-radius:8px}.serial-register button{background:#5e801d;color:#f1f8e8;border:0;border-radius:9px;padding:10px 15px;cursor:pointer}.serial-register button:disabled{opacity:.5}.record-hint{color:#a8c0d0}
+.record-dialog {
+    background: #111920;
+    border: 1px solid #526677;
+    border-radius: 18px;
+    display: flex;
+    flex-direction: column;
+    max-height: min(760px, calc(100dvh - 26px));
+    overflow: hidden;
+}
+
+.record-dialog header {
+    background: #20303d;
+    padding: 16px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #415263;
+}
+
+.record-dialog h2 {
+    margin: 0;
+    font-size: 18px;
+}
+
+.record-dialog header small {
+    color: #a8b9c6;
+}
+
+.record-dialog header button {
+    background: #13212c;
+    color: #dfeaf4;
+    border: 1px solid #677b8d;
+    border-radius: 8px;
+    width: 35px;
+    height: 35px;
+    cursor: pointer;
+}
+
+.record-dialog main {
+    min-height: 0;
+    flex: 1;
+    overflow: auto;
+    padding: 17px 20px;
+    scrollbar-width: thin;
+}
+
+.record-dialog section {
+    border: 1px solid #455b70;
+    border-radius: 12px;
+    padding: 13px 15px;
+    margin-bottom: 12px;
+    background: #19242f;
+}
+
+.record-dialog h3 {
+    margin: 0 0 11px;
+    font-size: 13px;
+    color: #c4ed8c;
+}
+
+.record-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 13px;
+}
+
+.record-grid div {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.record-grid span {
+    color: #a3b1c0;
+    font-size: 11px;
+}
+
+.record-grid strong {
+    font-size: 13px;
+    overflow-wrap: anywhere;
+}
+
+.record-series {
+    border-top: 1px solid #364858;
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 9px 0;
+    font-size: 12px;
+}
+
+.record-media {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.record-media a {
+    color: #c7f18d;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    font-size: 12px;
+}
+
+.record-media img {
+    max-width: 200px;
+    max-height: 150px;
+    object-fit: contain;
+    border-radius: 7px;
+}
+
+.record-dialog footer {
+    flex: none;
+    display: flex;
+    justify-content: flex-end;
+    padding: 12px 20px;
+    background: #21303c;
+    border-top: 1px solid #405568;
+}
+
+.record-dialog footer button {
+    border: 1px solid #5c7285;
+    color: #eef4fc;
+    background: #253746;
+    padding: 8px 15px;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+@media (max-width:600px) {
+    .record-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.serial-register {
+    display: flex;
+    gap: 10px;
+    align-items: center
+}
+
+.serial-register input {
+    flex: 1;
+    background: #111c25;
+    border: 1px solid #567084;
+    color: #e6f4fa;
+    padding: 10px;
+    border-radius: 8px
+}
+
+.serial-register button {
+    background: #5e801d;
+    color: #f1f8e8;
+    border: 0;
+    border-radius: 9px;
+    padding: 10px 15px;
+    cursor: pointer
+}
+
+.serial-register button:disabled {
+    opacity: .5
+}
+
+.record-hint {
+    color: #a8c0d0
+}
