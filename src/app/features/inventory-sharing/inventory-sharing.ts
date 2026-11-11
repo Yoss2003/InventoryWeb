@@ -5,6 +5,7 @@ import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { ConfirmationDialogService } from '../../shared/confirm-dialog/confirmation-dialog.service';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
 import { InventoryService, InventoryShare, InventorySummary } from '../../core/services/inventories';
@@ -18,6 +19,7 @@ import { LoadingIndicatorComponent } from '../../shared/loading/loading-indicato
 export class InventorySharingComponent implements OnInit {
   private readonly api = inject(InventoryService);
   private readonly snack = inject(MatSnackBar);
+  private readonly confirms = inject(ConfirmationDialogService);
   private readonly cdr = inject(ChangeDetectorRef);
   private readonly platform = inject(PLATFORM_ID);
   myUserId = 0;
@@ -142,10 +144,16 @@ export class InventorySharingComponent implements OnInit {
   }
 
   revoke(item: InventoryShare): void {
-    if (!confirm(`¿Revocar el acceso de ${item.username || 'este usuario'}?`)) return;
-    this.api.revoke(item.id).subscribe({
-      next: () => {this.snack.open('Acceso revocado.', 'Cerrar', {duration: 3000});this.loadShares();},
-      error: err => this.snack.open(String(err?.error?.error ?? 'No se pudo revocar.'), 'Cerrar', {duration: 6000})
+    this.confirms.confirm({
+      title:'Revocar acceso',
+      message:`¿Revocar el acceso de «${item.username || 'este usuario'}» al inventario compartido?`,
+      confirmLabel:'Revocar acceso',tone:'danger',icon:'person_remove'
+    }).subscribe(confirmed=>{
+      if(!confirmed)return;
+      this.api.revoke(item.id).subscribe({
+        next: () => {this.snack.open('Acceso revocado.', 'Cerrar', {duration: 3000});this.loadShares();},
+        error: err => this.snack.open(String(err?.error?.error ?? 'No se pudo revocar.'), 'Cerrar', {duration: 6000})
+      });
     });
   }
 }

@@ -2,10 +2,14 @@
 <div class="supplier-detail-modal ui-v2-dialog ui-v2-dialog--simple" role="document">
   <header class="detail-head">
     <div class="detail-heading">
-      <div class="detail-symbol"><mat-icon aria-hidden="true">storefront</mat-icon></div>
-      <div><h2>Detalle del proveedor</h2><p>Datos registrados y consulta fiscal disponible</p></div>
+      <span class="detail-symbol"><mat-icon aria-hidden="true">storefront</mat-icon></span>
+      <div class="detail-title">
+        <h2>Detalle del proveedor</h2>
+        <p>Datos comerciales y situación fiscal registrada</p>
+      </div>
     </div>
-    <button type="button" class="close-icon" (click)="close()" aria-label="Cerrar detalle de proveedor" title="Cerrar">
+    <button type="button" class="close-icon" (click)="close()"
+            aria-label="Cerrar detalle de proveedor" title="Cerrar">
       <mat-icon aria-hidden="true">close</mat-icon>
     </button>
   </header>
@@ -60,6 +64,17 @@
         <div class="detail-entry"><span>Contacto</span><strong>{{item.contactName || 'No registrado'}}</strong></div>
         <div class="detail-entry"><span>Teléfono</span><strong>{{item.phone || 'No registrado'}}</strong></div>
         <div class="detail-entry wide"><span>Correo</span><strong>{{item.email || 'No registrado'}}</strong></div>
+        <div class="detail-entry wide detail-contact-actions" *ngIf="phoneLink || emailLink">
+          <span>Contacto directo</span>
+          <div class="detail-contact-buttons">
+            <a *ngIf="emailLink as link" [href]="link" aria-label="Enviar correo al proveedor">
+              <mat-icon aria-hidden="true">mail_outline</mat-icon> Correo
+            </a>
+            <a *ngIf="phoneLink as link" [href]="link" aria-label="Llamar al proveedor">
+              <mat-icon aria-hidden="true">phone</mat-icon> Llamar
+            </a>
+          </div>
+        </div>
       </div>
     </section>
 
@@ -76,5 +91,8 @@
       Este proveedor todavía no tiene una instantánea fiscal avanzada guardada. Puedes consultar su RUC desde el formulario de edición y guardar los cambios.
     </p>
   </div>
-  <footer class="detail-footer"><button type="button" (click)="close()">Cerrar</button></footer>
+  <footer class="detail-footer">
+    <span class="detail-footer-note"><mat-icon aria-hidden="true">lock_outline</mat-icon> Solo lectura</span>
+    <button type="button" (click)="close()">Cerrar</button>
+  </footer>
 </div>

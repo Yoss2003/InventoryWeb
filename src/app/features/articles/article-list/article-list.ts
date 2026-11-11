@@ -9,6 +9,7 @@ import { FormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDialog } from '@angular/material/dialog';
 import { forkJoin, filter, take } from 'rxjs';
+import { ConfirmationDialogService } from '../../../shared/confirm-dialog/confirmation-dialog.service';
 import { ArticleService } from '../../../core/services/articles';
 import { InventoryContextService } from '../../../core/services/inventory-context';
 import { CategoryService } from '../../categories/services/category';
@@ -31,6 +32,7 @@ export class ArticleListComponent implements OnInit {
   private readonly categories=inject(CategoryService);
   private readonly brands=inject(BrandService);
   private readonly dialog=inject(MatDialog);
+  private readonly confirms=inject(ConfirmationDialogService);
   private readonly cdr=inject(ChangeDetectorRef);
   private readonly snack=inject(MatSnackBar);
   dataSource:ArticleRow[]=[];
@@ -67,10 +69,17 @@ export class ArticleListComponent implements OnInit {
   }
   delete(row:ArticleRow,event:Event):void {
     event.stopPropagation();
-    if(!row.isActive||!confirm(`¿Desactivar el artículo "${row.name}"? Se conservará su historial.`))return;
-    this.articles.deleteArticle(row.id).subscribe({
-      next:()=>{this.snack.open('Artículo desactivado.','Cerrar',{duration:3000});this.load();},
-      error:err=>this.snack.open(String(err?.error?.error||'No se pudo desactivar el artículo. Verifica el stock y sus asignaciones.'),'Cerrar',{duration:6000})
+    if(!row.isActive)return;
+    this.confirms.confirm({
+      title:'Desactivar artículo',
+      message:`¿Desactivar «${row.name}»? Se conservará su historial. Comprueba el stock y las asignaciones pendientes.`,
+      confirmLabel:'Desactivar',tone:'danger',icon:'inventory_2'
+    }).subscribe(confirmed=>{
+      if(!confirmed || !row.isActive)return;
+      this.articles.deleteArticle(row.id).subscribe({
+        next:()=>{this.snack.open('Artículo desactivado.','Cerrar',{duration:3000});this.load();},
+        error:err=>this.snack.open(String(err?.error?.error||'No se pudo desactivar el artículo. Verifica el stock y sus asignaciones.'),'Cerrar',{duration:6000})
+      });
     });
   }
 }

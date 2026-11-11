@@ -19,6 +19,15 @@ export class SupplierDetailDialogComponent {
   readonly item = inject<SupplierRecord>(MAT_DIALOG_DATA);
   private readonly dialogRef = inject<MatDialogRef<SupplierDetailDialogComponent>>(MatDialogRef);
   readonly fiscalRows = this.readFiscalRows();
+  get emailLink(): string | null {
+    const email = String(this.item.email ?? '').trim();
+    return /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(email)
+      ? `mailto:${email}` : null;
+  }
+  get phoneLink(): string | null {
+    const phone = String(this.item.phone ?? '').trim().replace(/[\s().-]/g, '');
+    return /^\+?\d{6,15}$/.test(phone) ? `tel:${phone}` : null;
+  }
 
   close(): void { this.dialogRef.close(); }
 

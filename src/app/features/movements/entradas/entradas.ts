@@ -11,6 +11,7 @@ import { TabViewTransitionDirective } from '../../../shared/ui/tab-view-transiti
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { forkJoin, filter, take } from 'rxjs';
+import { ConfirmationDialogService } from '../../../shared/confirm-dialog/confirmation-dialog.service';
 import { ArticleService } from '../../../core/services/articles';
 import { InventoryContextService } from '../../../core/services/inventory-context';
 import { MovementService } from '../../../core/services/movement';
@@ -27,6 +28,7 @@ import { UiSearchComponent } from '../../../shared/ui/ui-search.component';
 @Component({selector:'app-entradas',standalone:true,imports:[UiEmptyStateComponent, UiTableActionDirective, UiButtonDirective, UiPageHeadingComponent, CommonModule,MatIconModule,MatTabsModule,TabViewTransitionDirective,LoadingIndicatorComponent,UiSearchComponent],templateUrl:'./entradas.html',styleUrl:'./entradas.scss'})
 export class EntradasComponent implements OnInit {
   private readonly dialog=inject(MatDialog);
+  private readonly confirms=inject(ConfirmationDialogService);
   private readonly articles=inject(ArticleService);
   private readonly inventoryContext=inject(InventoryContextService);
   private readonly movementsApi=inject(MovementService);
@@ -102,10 +104,16 @@ export class EntradasComponent implements OnInit {
   }
   deleteArticle(a:Article,event:Event):void{
     event.stopPropagation();
-    if(!confirm(`¿Dar de baja el artículo "${a.name}"? Solo es posible con stock 0 y sin asignaciones pendientes.`))return;
-    this.articles.deleteArticle(a.id).subscribe({
-      next:()=>{this.snackbar.open('Artículo dado de baja.','Cerrar',{duration:3200});this.loadRealData();},
-      error:err=>this.snackbar.open(String(err?.error?.error??'No se puede dar de baja el artículo.'),'Cerrar',{duration:5500})
+    this.confirms.confirm({
+      title:'Dar de baja artículo',
+      message:`¿Dar de baja «${a.name}»? Solo se permite con stock 0 y sin asignaciones pendientes.`,
+      confirmLabel:'Dar de baja',tone:'danger',icon:'block'
+    }).subscribe(confirmed=>{
+      if(!confirmed)return;
+      this.articles.deleteArticle(a.id).subscribe({
+        next:()=>{this.snackbar.open('Artículo dado de baja.','Cerrar',{duration:3200});this.loadRealData();},
+        error:err=>this.snackbar.open(String(err?.error?.error??'No se puede dar de baja el artículo.'),'Cerrar',{duration:5500})
+      });
     });
   }
 }

@@ -16,6 +16,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { MatDialog } from '@angular/material/dialog';
+import { ConfirmationDialogService } from '../../../shared/confirm-dialog/confirmation-dialog.service';
 import { CategoryService } from '../../../features/categories/services/category';
 import { Category } from '../../../core/models/category.model';
 import { CategoryParentFormComponent } from '../category-parent-form/category-parent-form';
@@ -42,6 +43,7 @@ export class CategoryListComponent implements OnInit {
     try{return [1,2].includes(Number(JSON.parse(localStorage.getItem('userSession')||'{}').roleId));}catch{return false;}
   }
   private readonly dialog=inject(MatDialog);
+  private readonly confirms=inject(ConfirmationDialogService);
   private readonly cdr=inject(ChangeDetectorRef);
   private readonly snackbar=inject(MatSnackBar);
   columnsToDisplay=['expand','name','description','isActive','actions'];
@@ -90,10 +92,16 @@ export class CategoryListComponent implements OnInit {
   }
   eliminarCategoria(id:number,event:Event):void{
     event.stopPropagation();
-    if(!confirm('¿Desactivar esta categoría? Sus artículos e historial se conservarán.'))return;
-    this.categoryService.deleteCategory(id).subscribe({
-      next:()=>{this.snackbar.open('Categoría desactivada.','Cerrar',{duration:3000});this.loadData();},
-      error:err=>this.snackbar.open(String(err?.error?.error??'No se pudo desactivar la categoría.'),'Cerrar',{duration:5500})
+    this.confirms.confirm({
+      title:'Desactivar categoría',
+      message:'¿Desactivar esta categoría? Sus artículos y movimientos históricos se conservarán.',
+      confirmLabel:'Desactivar',tone:'danger',icon:'category'
+    }).subscribe(confirmed=>{
+      if(!confirmed)return;
+      this.categoryService.deleteCategory(id).subscribe({
+        next:()=>{this.snackbar.open('Categoría desactivada.','Cerrar',{duration:3000});this.loadData();},
+        error:err=>this.snackbar.open(String(err?.error?.error??'No se pudo desactivar la categoría.'),'Cerrar',{duration:5500})
+      });
     });
   }
 }

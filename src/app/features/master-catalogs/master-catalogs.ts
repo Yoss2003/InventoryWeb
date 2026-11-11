@@ -10,6 +10,7 @@ import type { Observable } from 'rxjs';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDialog } from '@angular/material/dialog';
 import { SupplierDetailDialogComponent } from './supplier-detail-dialog';
+import { ConfirmationDialogService } from '../../shared/confirm-dialog/confirmation-dialog.service';
 import { InventoryContextService } from '../../core/services/inventory-context';
 import { ToastService } from '../../shared/toast/toast.service';
 
@@ -46,6 +47,7 @@ export class MasterCatalogsComponent implements OnInit {
   private readonly inventories = inject(InventoryContextService);
   private readonly toast = inject(ToastService);
   private readonly dialog = inject(MatDialog);
+  private readonly confirms = inject(ConfirmationDialogService);
   private readonly cdr = inject(ChangeDetectorRef);
   /* FASE 4.1 */
   private readonly platformId = inject(PLATFORM_ID);
@@ -144,10 +146,14 @@ export class MasterCatalogsComponent implements OnInit {
   showSupplierDetail(item: SupplierRecord): void {
     this.dialog.open(SupplierDetailDialogComponent, {
       data: {...item},
+      panelClass: 'inv-seven-modal',
+      enterAnimationDuration: 260,
+      exitAnimationDuration: 220,
       width: 'min(760px, calc(100vw - 24px))',
       maxWidth: 'calc(100vw - 24px)',
       maxHeight: 'calc(100dvh - 24px)',
-      autoFocus: false
+      autoFocus: false,
+      restoreFocus: true
     });
   }
   editSupplier(item: SupplierRecord): void {if (!this.canManage) return;this.advancedInfo=null;this.supplier={...item};this.editingSupplierId=item.id;this.tab='suppliers';}
@@ -174,10 +180,19 @@ export class MasterCatalogsComponent implements OnInit {
     });
   }
   disableSupplier(item: SupplierRecord): void {
-    if (!this.canManage || !confirm(`¿Desactivar al proveedor ${item.businessName}?`))return;
-    this.http.delete<void>(`${this.apiRoot}/Suppliers/${item.id}`).subscribe({
-      next:()=>{this.toast.success('Proveedor desactivado.');this.refresh();},
-      error:err=>this.toast.error(String(err?.error?.error||'No se pudo desactivar el proveedor.'))
+    if (!this.canManage || !item.isActive) return;
+    this.confirms.confirm({
+      title: 'Desactivar proveedor',
+      message: `¿Desactivar «${item.businessName}»? Sus datos e historial se conservarán.`,
+      confirmLabel: 'Desactivar',
+      tone: 'danger',
+      icon: 'block'
+    }).subscribe(confirmed => {
+      if (!confirmed || !this.canManage || !item.isActive) return;
+      this.http.delete<void>(`${this.apiRoot}/Suppliers/${item.id}`).subscribe({
+        next:()=>{this.toast.success('Proveedor desactivado.');this.refresh();},
+        error:err=>this.toast.error(String(err?.error?.error||'No se pudo desactivar el proveedor.'))
+      });
     });
   }
   newParameter(): void {this.parameter=this.emptyParameter();this.editingParameterId=null;}
@@ -205,10 +220,19 @@ export class MasterCatalogsComponent implements OnInit {
     });
   }
   deleteParameter(item: ParameterRecord): void {
-    if(!this.canManage || !confirm(`¿Eliminar el parámetro ${item.name}?`))return;
-    this.http.delete<void>(`${this.apiRoot}/Parameters/${item.id}`).subscribe({
-      next:()=>{this.toast.success('Parámetro eliminado.');this.refresh();},
-      error:err=>this.toast.error(String(err?.error?.error||'No se pudo eliminar el parámetro.'))
+    if (!this.canManage) return;
+    this.confirms.confirm({
+      title: 'Eliminar parámetro',
+      message: `¿Eliminar «${item.name}»? Comprueba que ningún proceso dependa de este parámetro.`,
+      confirmLabel: 'Eliminar',
+      tone: 'danger',
+      icon: 'delete_outline'
+    }).subscribe(confirmed => {
+      if (!confirmed || !this.canManage) return;
+      this.http.delete<void>(`${this.apiRoot}/Parameters/${item.id}`).subscribe({
+        next:()=>{this.toast.success('Parámetro eliminado.');this.refresh();},
+        error:err=>this.toast.error(String(err?.error?.error||'No se pudo eliminar el parámetro.'))
+      });
     });
   }
 

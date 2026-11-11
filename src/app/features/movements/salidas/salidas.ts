@@ -14,6 +14,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
 import { forkJoin, filter, take } from 'rxjs';
 import { MovementService } from '../../../core/services/movement';
+import { ConfirmationDialogService } from '../../../shared/confirm-dialog/confirmation-dialog.service';
 import { SalesService } from '../../../core/services/sales';
 import { ArticleService } from '../../../core/services/articles';
 import { InventoryContextService } from '../../../core/services/inventory-context';
@@ -33,6 +34,7 @@ export class SalidasComponent implements OnInit {
   private readonly articlesApi=inject(ArticleService);
   private readonly inventoryContext=inject(InventoryContextService);
   private readonly dialog=inject(MatDialog);
+  private readonly confirms=inject(ConfirmationDialogService);
   private readonly cdr=inject(ChangeDetectorRef);
   private readonly toast = inject(ToastService);
   private readonly router=inject(Router);
@@ -96,22 +98,36 @@ export class SalidasComponent implements OnInit {
     event.stopPropagation();if(!m.id||this.isCancelled(m))return;
     if(m.actionId===3){this.openAssignments(event);return;}
     if(this.saleId(m)!==null){this.cancelSale(m,event);return;}
-    const reason=prompt('Motivo para anular el retiro y revertir el stock:');
-    if(!reason?.trim())return;
-    this.movementsApi.cancelMovement(m.id,reason.trim()).subscribe({
-      next:()=>{this.toast.success('Movimiento revertido y stock actualizado.');this.loadRealData();},
-      error:err=>this.toast.error(String(err?.error?.error??'No se pudo anular el movimiento.'))
+    this.confirms.requestReason({
+      title:'Anular salida',
+      message:'Se revertirá el movimiento y se actualizará el stock. Indica el motivo para continuar.',
+      confirmLabel:'Anular salida',tone:'danger',icon:'undo',
+      reasonLabel:'Motivo de la anulación',
+      reasonPlaceholder:'Describe por qué se anula esta salida...'
+    }).subscribe(reason=>{
+      if(!reason)return;
+      this.movementsApi.cancelMovement(m.id!,reason).subscribe({
+        next:()=>{this.toast.success('Movimiento revertido y stock actualizado.');this.loadRealData();},
+        error:err=>this.toast.error(String(err?.error?.error??'No se pudo anular el movimiento.'))
+      });
     });
   }
   cancelSale(m:Movement,event:Event):void{
     event.stopPropagation();const id=this.saleId(m);
     if(!id){this.toast.warning('La venta antigua no tiene identificador para anularla desde esta pantalla.');return;}
     if(this.cancelledSaleIds.has(id))return;
-    const reason=prompt(`Motivo para anular la venta #${id}:`);
-    if(!reason?.trim())return;
-    this.salesApi.cancelSale(id,reason.trim()).subscribe({
-      next:()=>{this.toast.success('Venta anulada; stock devuelto.');this.loadRealData();},
-      error:err=>this.toast.error(String(err?.error?.error??'No se pudo anular la venta.'))
+    this.confirms.requestReason({
+      title:`Anular venta #${id}`,
+      message:'Esta operación revertirá el stock si el servidor permite la anulación. Indica el motivo para continuar.',
+      confirmLabel:'Anular venta',tone:'danger',icon:'receipt_long',
+      reasonLabel:'Motivo de la anulación',
+      reasonPlaceholder:'Describe por qué se anula esta venta...'
+    }).subscribe(reason=>{
+      if(!reason || this.cancelledSaleIds.has(id))return;
+      this.salesApi.cancelSale(id,reason).subscribe({
+        next:()=>{this.toast.success('Venta anulada; stock devuelto.');this.loadRealData();},
+        error:err=>this.toast.error(String(err?.error?.error??'No se pudo anular la venta.'))
+      });
     });
   }
 }
