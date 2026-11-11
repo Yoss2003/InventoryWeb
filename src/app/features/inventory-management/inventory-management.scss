@@ -1,0 +1,27 @@
+:host{display:block;color:#e8f3fa;min-width:0}
+.inventory-manage-page{display:grid;gap:17px;min-width:0}
+.inv-manage-card{min-width:0;padding:17px;border:1px solid #526d80;background:#172630;border-radius:15px}
+.inv-manage-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:13px}
+.inv-manage-heading h2{margin:0;color:#eaf4fa;font-size:17px;font-weight:750}
+.inv-manage-heading p,.inv-manage-note{margin:4px 0 0;color:#aac2d1;font-size:12px;line-height:1.55}
+.inv-manage-error{color:#ffb8bf;font-size:12px}
+.inv-manage-link{display:inline-flex;align-items:center;gap:7px;min-height:35px;border-radius:9px;padding:6px 11px;border:1px solid #688397;background:#274050;color:#e9f4fb;text-decoration:none;font-size:12px;font-weight:700}
+.inv-manage-link mat-icon{font-size:18px;width:18px;height:18px}
+.inv-manage-table{max-height:295px;overflow:auto;scrollbar-width:thin}
+.inv-manage-table table{min-width:610px;width:100%;border-collapse:collapse}
+.inv-manage-table th{position:sticky;top:0;background:#233a49;padding:11px;font-size:12px;border-bottom:1px solid #557183;text-align:left}
+.inv-manage-table td{padding:10px;font-size:12px;border-bottom:1px solid #3e5567}
+.inv-manage-table td strong,.inv-manage-table td small{display:block}
+.inv-manage-table td small{font-size:11px;margin-top:3px;color:#a9c2d1}
+.inv-manage-active{color:#b1e4c0;font-weight:700}
+.inv-manage-form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.inv-manage-form label{min-width:0;display:grid;gap:6px;font-size:12px;font-weight:720}
+.inv-manage-form input,.inv-manage-form select{min-height:40px;min-width:0;box-sizing:border-box;width:100%;padding:7px 11px;border:1px solid #628095;border-radius:9px;background:#111f29;color:#edf5fc;font:inherit;font-weight:400}
+.inv-manage-form input:focus-visible,.inv-manage-form select:focus-visible{outline:2px solid var(--inv-company-accent,#a2d149);outline-offset:1px}
+.inv-manage-actions{display:flex;align-items:center;justify-content:flex-end;gap:8px;grid-column:1/-1}
+.inv-manage-actions button{min-height:38px;border-radius:9px;padding:7px 13px;font-weight:750;cursor:pointer}
+.inv-manage-primary{border:1px solid var(--inv-company-accent,#a2d149);color:#12202a;background:var(--inv-company-accent,#a2d149);display:inline-flex;align-items:center;gap:6px}
+.inv-manage-primary mat-icon{width:18px;height:18px;font-size:18px}
+.inv-manage-secondary{border:1px solid #678396;background:#2b4453;color:#eaf4fb}
+.inv-manage-actions button:disabled{opacity:.45;cursor:not-allowed}
+@media(max-width:650px){.inv-manage-form{grid-template-columns:1fr}.inv-manage-card{padding:12px}}
