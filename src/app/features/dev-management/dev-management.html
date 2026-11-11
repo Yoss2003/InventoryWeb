@@ -22,7 +22,7 @@
     <app-loading-indicator *ngIf="loadingCompanies && !companies.length" message="Cargando empresas..." />
     <div class="overflow companies-table inv-core-table-wrap" *ngIf="companies.length">
       <table>
-        <thead><tr><th>Empresa</th><th>Usuarios</th><th>Almacenes</th><th>Licencia</th><th>Vencimiento</th><th>Estado</th><th>Acciones</th></tr></thead>
+        <thead><tr><th>Empresa</th><th>Usuarios</th><th>Inventarios</th><th>Licencia</th><th>Vencimiento</th><th>Estado</th><th>Acciones</th></tr></thead>
         <tbody>
           <tr *ngFor="let c of filteredCompanies; trackBy: trackCompany" [class.selected-row]="selectedId === c.id">
             <td class="company-cell"><div class="company-identity"><span class="company-mark" [style.borderColor]="c.primaryColorHex || '#54687b'">
@@ -32,7 +32,16 @@
               <ng-template #companyFallbackIcon><mat-icon [title]="c.logoUrl ? 'No se pudo mostrar el logo de la empresa' : 'Empresa sin logo'">domain</mat-icon></ng-template>
             </span><div><strong>{{c.businessName}}</strong><small>RUC {{c.ruc}}</small><small class="subtle">ID {{c.id}} · {{c.contactEmail || 'Sin correo'}}</small></div></div></td>
             <td class="company-user-count"><span>Registrados: <strong>{{c.totalUsers}}</strong></span><span>Máximo: <strong>{{displayLimit(c.license?.plan, c.license?.maxUsers)}}</strong></span></td>
-            <td class="number-cell">{{c.inventoryCount}}</td>
+            <td class="company-inventories">
+              <span class="company-master-status"
+                    [class.company-master-status--missing]="c.masterInventoryId === null"
+                    [class.company-master-status--inactive]="c.masterInventoryId != null && c.masterInventoryActive === false"
+                    [title]="c.masterInventoryId != null ? 'Inventario general #' + c.masterInventoryId + ': catálogo compartido, no almacena stock' : 'La API no confirmó el inventario general'">
+                <mat-icon aria-hidden="true">{{c.masterInventoryId === undefined ? 'help_outline' : c.masterInventoryId === null ? 'error_outline' : c.masterInventoryActive ? 'check_circle_outline' : 'warning_amber'}}</mat-icon>
+                {{c.masterInventoryId === undefined ? 'General: por verificar' : c.masterInventoryId === null ? 'General: faltante' : c.masterInventoryActive ? 'General: activo' : 'General: inactivo'}}
+              </span>
+              <small>Personales: <strong>{{c.inventoryCount}}</strong></small>
+            </td>
             <td><span class="plan-tag" [class.plan-max]="c.license?.plan === 'Max'">{{c.license?.plan || 'Sin licencia'}}</span></td>
             <td>
               <ng-container *ngIf="c.license?.expiresAt; else noExpiry">{{c.license?.expiresAt | date:'dd/MM/yyyy'}}<small class="days-left" [class.expired]="(daysRemaining(c) ?? 0) < 0">{{daysRemaining(c)}} días restantes</small></ng-container>
