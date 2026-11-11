@@ -134,15 +134,15 @@
     <h3>Permisos individuales de operación</h3>
     <p *ngIf="loadingPermissions" class="users-message">Consultando permisos...</p>
     <div *ngIf="!loadingPermissions" class="users-flags">
-      <label><input type="checkbox" [(ngModel)]="selectedPermissions.canApplyDiscounts"/> Aplicar descuentos</label>
-      <label><input type="checkbox" [(ngModel)]="selectedPermissions.canViewPurchaseCosts"/> Ver costos de compra</label>
-      <label><input type="checkbox" [(ngModel)]="selectedPermissions.canCancelSales"/> Anular ventas</label>
-      <label><input type="checkbox" [(ngModel)]="selectedPermissions.canEditProducts"/> Editar artículos</label>
-      <label><input type="checkbox" [(ngModel)]="selectedPermissions.canViewProfits"/> Ver ganancias</label>
+      <label><input type="checkbox" [(ngModel)]="selectedPermissions.canApplyDiscounts" [disabled]="!canManageIndividualPermissions || user.id === currentUserId || user.roleId <= 2"/> Aplicar descuentos</label>
+      <label><input type="checkbox" [(ngModel)]="selectedPermissions.canViewPurchaseCosts" [disabled]="!canManageIndividualPermissions || user.id === currentUserId || user.roleId <= 2"/> Ver costos de compra</label>
+      <label><input type="checkbox" [(ngModel)]="selectedPermissions.canCancelSales" [disabled]="!canManageIndividualPermissions || user.id === currentUserId || user.roleId <= 2"/> Anular ventas</label>
+      <label><input type="checkbox" [(ngModel)]="selectedPermissions.canEditProducts" [disabled]="!canManageIndividualPermissions || user.id === currentUserId || user.roleId <= 2"/> Editar artículos</label>
+      <label><input type="checkbox" [(ngModel)]="selectedPermissions.canViewProfits" [disabled]="!canManageIndividualPermissions || user.id === currentUserId || user.roleId <= 2"/> Ver ganancias</label>
     </div>
     <div class="users-actions">
       <button type="button" class="users-primary" (click)="savePermissions()"
-        [disabled]="loadingPermissions || saving || user.id === currentUserId || user.roleId <= 2">
+        [disabled]="loadingPermissions || saving || !canManageIndividualPermissions || user.id === currentUserId || user.roleId <= 2">
         Guardar permisos individuales
       </button>
     </div>
