@@ -1,18 +1,38 @@
 <section class="confirm-shell ui-v2-dialog ui-v2-dialog--special" role="document">
-  <div class="confirm-heading">
-    <span class="confirm-icon" [class.confirm-icon--danger]="data.tone === 'danger'">
-      <mat-icon aria-hidden="true">{{data.icon}}</mat-icon>
-    </span>
-    <div class="confirm-heading__text">
-      <h2 mat-dialog-title id="dev-confirm-title">{{data.title}}</h2>
-      <p>Confirma la operación antes de continuar.</p>
+  <header class="confirm-header">
+    <div class="confirm-heading">
+      <span class="confirm-icon" [class.confirm-icon--danger]="data.tone === 'danger'">
+        <mat-icon aria-hidden="true">{{data.icon}}</mat-icon>
+      </span>
+      <div class="confirm-heading__text">
+        <h2 mat-dialog-title>{{data.title}}</h2>
+        <p>Verifica los detalles antes de continuar.</p>
+      </div>
     </div>
-  </div>
-  <mat-dialog-content class="confirm-description">{{data.message}}</mat-dialog-content>
-  <mat-dialog-actions align="end" class="confirm-actions">
-    <button type="button" mat-dialog-close class="confirm-cancel">Cancelar</button>
-    <button type="button" [mat-dialog-close]="true" class="confirm-accept" [class.confirm-accept--danger]="data.tone === 'danger'">
-      <mat-icon aria-hidden="true">check</mat-icon>{{data.confirmLabel}}
+    <button type="button" class="confirm-close" aria-label="Cerrar confirmación"
+            (click)="dialogRef.close()">
+      <mat-icon aria-hidden="true">close</mat-icon>
+    </button>
+  </header>
+  <mat-dialog-content class="confirm-body">
+    <p class="confirm-description">{{data.message}}</p>
+    <div *ngIf="data.requiresReason" class="confirm-reason">
+      <label for="confirm-reason-input">{{data.reasonLabel || 'Motivo de la operación'}}</label>
+      <textarea id="confirm-reason-input"
+                [(ngModel)]="reason"
+                [attr.maxlength]="maxLength"
+                rows="3"
+                [placeholder]="data.reasonPlaceholder || 'Escribe el motivo...'"
+                autocomplete="off"></textarea>
+      <span class="confirm-counter">{{reason.length}} / {{maxLength}}</span>
+    </div>
+  </mat-dialog-content>
+  <mat-dialog-actions class="confirm-actions">
+    <button type="button" class="confirm-cancel" (click)="dialogRef.close()">Cancelar</button>
+    <button type="button" class="confirm-accept" [class.confirm-accept--danger]="data.tone === 'danger'"
+            [disabled]="!canConfirm" (click)="accept()">
+      <mat-icon aria-hidden="true">{{data.tone === 'danger' ? 'block' : 'check'}}</mat-icon>
+      {{data.confirmLabel}}
     </button>
   </mat-dialog-actions>
 </section>
