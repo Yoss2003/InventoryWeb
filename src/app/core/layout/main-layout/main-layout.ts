@@ -99,6 +99,8 @@ export class MainLayoutComponent {
       title: 'Herramientas',
       icon: 'build',
       items: [
+        { label: 'Mis inventarios', icon: 'warehouse', route: '/dashboard/inventarios',
+          permission: 'CREATE_INVENTORIES' },
         { label: 'Compartir', icon: 'group_add', route: '/dashboard/compartir-inventario' },
         { label: 'Consultas', icon: 'currency_exchange', route: '/dashboard/consultas' }
       ]
@@ -188,7 +190,7 @@ export class MainLayoutComponent {
   }
   private resolveTitle(url:string):string {
     const segment=url.split('?')[0].split('/').filter(Boolean).pop() ?? '';
-    const titles:Record<string,string>={articulos:'Maestro de artículos',categorias:'Categorías',entradas:'Entradas de stock',salidas:'Salidas y ventas',asignaciones:'Artículos asignados','compartir-inventario':'Compartir inventario','gestion-dev':'Gestión Dev','usuarios':'Gestión de usuarios','inventarios-maestros':'Inventarios maestros','consultas':'Consultas SUNAT y cambio','historial-general':'Historial general','catalogo-general':'Catálogo general'};
+    const titles:Record<string,string>={articulos:'Maestro de artículos',categorias:'Categorías',entradas:'Entradas de stock',salidas:'Salidas y ventas',asignaciones:'Artículos asignados','compartir-inventario':'Compartir inventario','gestion-dev':'Gestión Dev','usuarios':'Gestión de usuarios','inventarios-maestros':'Inventarios maestros','inventarios':'Gestión de inventarios','consultas':'Consultas SUNAT y cambio','historial-general':'Historial general','catalogo-general':'Catálogo general'};
     return titles[segment] ?? 'Panel de gestión';
   }
   toggleSidebar():void {this.isSidebarOpen.update(open=>!open);}
