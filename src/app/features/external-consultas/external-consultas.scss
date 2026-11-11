@@ -1,1 +1,172 @@
 /* Estilos de esta vista centralizados en shared/ui/core-pages/_four-secondary-pages.scss. */
+
+
+/* Directorio de proveedores: mismas acciones compactas de las tablas del sistema.
+   El desplazamiento queda dentro del listado, no en toda la página. */
+.registered-suppliers {
+  margin-top: 18px;
+  padding-top: 14px;
+  border-top: 1px solid #43596a;
+  min-width: 0;
+}
+.registered-suppliers__toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 36px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: #e3eef7;
+  text-align: left;
+  font-size: 13px;
+  font-weight: 750;
+  cursor: pointer;
+}
+.registered-suppliers__toggle:hover { background: #213342; }
+.registered-suppliers__toggle > mat-icon:first-child {
+  color: var(--inv-company-accent, #a2d149);
+  width: 19px;
+  height: 19px;
+  font-size: 19px;
+}
+.registered-suppliers__count {
+  border-radius: 999px;
+  background: #263b49;
+  color: #c3d9e8;
+  padding: 4px 9px;
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+.registered-suppliers__chevron { margin-left: auto; }
+.registered-suppliers__content { min-width: 0; }
+.registered-suppliers__hint,
+.registered-suppliers__footnote {
+  margin: 7px 0 12px;
+  color: #a8becf;
+  line-height: 1.45;
+  font-size: 11px;
+}
+.registered-suppliers__footnote { margin: 9px 0 0; }
+.registered-suppliers__toolbar {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin: 0 0 10px;
+  min-width: 0;
+}
+.registered-suppliers__toolbar app-ui-search {
+  flex: 1 1 auto;
+  width: 100%;
+  max-width: none;
+}
+.registered-suppliers__refresh {
+  display: inline-flex;
+  flex: 0 0 37px;
+  width: 37px;
+  height: 37px;
+  align-items: center;
+  justify-content: center;
+}
+.registered-suppliers__refresh mat-icon {
+  width: 18px;
+  height: 18px;
+  font-size: 18px;
+}
+.registered-suppliers__viewport {
+  max-height: min(190px, 27dvh);
+  overflow-y: auto;
+  overflow-x: auto;
+  min-width: 0;
+  border: 1px solid #4a6274;
+  border-radius: 10px;
+  background: #10212c;
+  scrollbar-width: thin;
+  scrollbar-color: var(--inv-company-accent, #a2d149) transparent;
+}
+.registered-suppliers__table {
+  width: 100%;
+  min-width: 400px;
+  border-collapse: separate;
+  border-spacing: 0;
+  table-layout: fixed;
+}
+.registered-suppliers__table th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: #223442;
+  color: #c7d9e7;
+  text-align: left;
+  font-size: 11px;
+  font-weight: 750;
+  padding: 10px 11px;
+  border-bottom: 1px solid #4a6274;
+}
+.registered-suppliers__table td {
+  padding: 9px 11px;
+  border-bottom: 1px solid #334e5e;
+  color: #dfedf7;
+  font-size: 11px;
+  vertical-align: middle;
+  min-width: 0;
+}
+.registered-suppliers__table tbody tr:last-child td { border-bottom: 0; }
+.registered-suppliers__table tbody tr:hover td { background: #1a303e; }
+.registered-suppliers__business strong,
+.registered-suppliers__business span,
+.registered-suppliers__contact span {
+  display: block;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.registered-suppliers__business strong { font-size: 11px; }
+.registered-suppliers__business span {
+  margin-top: 3px;
+  color: #9db8cc;
+  font-size: 10px;
+}
+.registered-suppliers__contact { width: 25%; }
+.registered-suppliers__actions { width: 124px; text-align: center !important; }
+.registered-suppliers__action-group {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+}
+.registered-suppliers__action-group button {
+  display: inline-grid;
+  place-items: center;
+  width: 31px;
+  min-width: 31px;
+  height: 31px;
+  min-height: 31px;
+  padding: 4px;
+  cursor: pointer;
+}
+.registered-suppliers__action-group button mat-icon {
+  font-size: 17px;
+  width: 17px;
+  height: 17px;
+}
+.registered-suppliers__action-group button:disabled {
+  opacity: .35;
+  cursor: not-allowed;
+}
+.registered-suppliers__message,
+.registered-suppliers__error {
+  margin: 8px 0;
+  color: #acc4d4;
+  font-size: 11px;
+}
+.registered-suppliers__error { color: #ffb1b9; }
+@media (max-width: 560px) {
+  .registered-suppliers__contact { display: none; }
+  .registered-suppliers__table { min-width: 310px; }
+  .registered-suppliers__actions { width: 118px; }
+  .registered-suppliers__table th,
+  .registered-suppliers__table td { padding-inline: 7px; }
+}
