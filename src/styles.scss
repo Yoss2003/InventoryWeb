@@ -185,3 +185,61 @@ select:not([multiple]):focus-visible{outline:2px solid var(--inv-company-accent,
     transition: none !important;
   }
 }
+
+/* INV_DIALOG_UNIFIED_ZOOM_2026_V3 - Artículos y Categorías hijas. */
+/* Un único borde y glow: en la superficie externa, no en el formulario interno. */
+.cdk-overlay-pane:has(app-article-form),
+.cdk-overlay-pane:has(app-category-child-form) {
+  overflow: visible;
+  filter: drop-shadow(0 0 9px color-mix(in srgb,
+    var(--inv-company-accent, #A2D149) 20%, transparent));
+}
+.cdk-overlay-pane:has(app-article-form) .mat-mdc-dialog-container .mat-mdc-dialog-surface,
+.cdk-overlay-pane:has(app-category-child-form) .mat-mdc-dialog-container .mat-mdc-dialog-surface {
+  box-sizing: border-box;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--inv-company-accent, #A2D149) 75%, white);
+  border-radius: 18px;
+  box-shadow: 0 18px 70px rgba(0, 0, 0, .76),
+    0 0 24px color-mix(in srgb, var(--inv-company-accent, #A2D149) 34%, transparent);
+  transform-origin: 50% 50%;
+  /* El modal completo crece desde su centro; no es una traslación vertical. */
+  transform: scale(.82) !important;
+  opacity: 0;
+  animation: none !important;
+  transition: transform var(--mat-dialog-transition-duration, 260ms) cubic-bezier(.22, 1, .36, 1),
+              opacity var(--mat-dialog-transition-duration, 260ms) ease-out !important;
+}
+.cdk-overlay-pane:has(app-article-form) .mat-mdc-dialog-container.mdc-dialog--open .mat-mdc-dialog-surface,
+.cdk-overlay-pane:has(app-category-child-form) .mat-mdc-dialog-container.mdc-dialog--open .mat-mdc-dialog-surface {
+  transform: scale(1) !important;
+  opacity: 1;
+}
+/* Angular Material quita mdc-dialog--open al cerrar. Restauramos escala menor
+   incluso después de que se añada mdc-dialog--closing. */
+.cdk-overlay-pane:has(app-article-form) .mat-mdc-dialog-container.mdc-dialog--closing .mat-mdc-dialog-surface,
+.cdk-overlay-pane:has(app-category-child-form) .mat-mdc-dialog-container.mdc-dialog--closing .mat-mdc-dialog-surface {
+  transform: scale(.82) !important;
+  opacity: 0;
+  transition-timing-function: cubic-bezier(.4, 0, .9, .55), ease-in !important;
+}
+/* Evitar transiciones decorativas si Angular Material desactiva animaciones. */
+.cdk-overlay-pane:has(app-article-form) .mat-mdc-dialog-container._mat-animation-noopable .mat-mdc-dialog-surface,
+.cdk-overlay-pane:has(app-category-child-form) .mat-mdc-dialog-container._mat-animation-noopable .mat-mdc-dialog-surface {
+  transition: none !important;
+}
+@keyframes inv-ui-panel-reveal {
+  from { opacity: 0; transform: translateY(7px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .cdk-overlay-pane:has(app-article-form) .mat-mdc-dialog-container .mat-mdc-dialog-surface,
+  .cdk-overlay-pane:has(app-category-child-form) .mat-mdc-dialog-container .mat-mdc-dialog-surface {
+    transition: none !important;
+  }
+  .cdk-overlay-pane:has(app-article-form) .mat-mdc-dialog-container.mdc-dialog--open .mat-mdc-dialog-surface,
+  .cdk-overlay-pane:has(app-category-child-form) .mat-mdc-dialog-container.mdc-dialog--open .mat-mdc-dialog-surface {
+    transform: none !important;
+    opacity: 1;
+  }
+}

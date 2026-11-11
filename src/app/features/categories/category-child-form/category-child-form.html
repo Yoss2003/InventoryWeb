@@ -13,7 +13,7 @@
   </header>
 
   <mat-dialog-content class="category-content">
-    <mat-stepper linear #stepper class="category-stepper" (selectionChange)="setDialogWidth($event.selectedIndex)">
+    <mat-stepper animationDuration="0ms" linear #stepper class="category-stepper" (selectionChange)="setDialogWidth($event.selectedIndex)">
       <ng-template matStepperIcon="edit"><mat-icon>check</mat-icon></ng-template>
       <ng-template matStepperIcon="done"><mat-icon>check</mat-icon></ng-template>
 

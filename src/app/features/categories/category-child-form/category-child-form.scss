@@ -1118,34 +1118,36 @@ $muted: #a8b5c2;
   .category-modal .preview-inputs { animation: none !important; }
 }
 
-/* INV_DIALOG_LIFECYCLE_2026_V2: mismas entradas/salidas que Artículos. */
-.category-modal.inv-dialog-motion-root {
+/* INV_DIALOG_UNIFIED_ZOOM_2026_V3 - aspecto y contenido de Categorías hijas. */
+/* Sin segundo marco/glow: ahora los dibuja la superficie exterior. */
+.category-modal.ui-v2-dialog--special {
+  border: 0 !important;
+  box-shadow: none !important;
+  border-radius: 17px;
+  background: #111820;
+  animation: none !important;
+  transform: none !important;
+  opacity: 1 !important;
   height: auto;
-  max-height: calc(100dvh - 28px);
   min-height: 0;
-  transform-origin: center center;
-  animation: inv-category-modal-enter 220ms cubic-bezier(.22, 1, .36, 1) both;
+  max-height: calc(100dvh - 28px);
 }
-.category-modal.inv-dialog-motion-root .category-content.mat-mdc-dialog-content {
+.category-modal .category-content.mat-mdc-dialog-content {
   flex: 0 1 auto;
   min-height: 0;
   overflow-y: auto;
+  overscroll-behavior: contain;
 }
-.category-modal.inv-dialog-motion-root.inv-dialog-closing {
-  pointer-events: none;
-  animation: inv-category-modal-exit 180ms ease-in both !important;
+/* El stepper no desliza lateralmente; el contenido entra como en Artículos. */
+:host ::ng-deep .category-modal .category-stepper .mat-horizontal-stepper-content-current .step-form {
+  animation: inv-ui-panel-reveal 230ms cubic-bezier(.22, 1, .36, 1) both !important;
 }
-@keyframes inv-category-modal-enter {
-  from { opacity: 0; transform: translateY(8px) scale(.976); }
-  to { opacity: 1; transform: translateY(0) scale(1); }
-}
-@keyframes inv-category-modal-exit {
-  from { opacity: 1; transform: translateY(0) scale(1); }
-  to { opacity: 0; transform: translateY(5px) scale(.985); }
+.category-modal .preview-inputs {
+  animation: inv-ui-panel-reveal 230ms cubic-bezier(.22, 1, .36, 1) both !important;
 }
 @media (prefers-reduced-motion: reduce) {
-  .category-modal.inv-dialog-motion-root,
-  .category-modal.inv-dialog-motion-root.inv-dialog-closing {
+  :host ::ng-deep .category-modal .category-stepper .mat-horizontal-stepper-content-current .step-form,
+  .category-modal .preview-inputs {
     animation: none !important;
   }
 }
