@@ -20,6 +20,91 @@
         <p>Estado: {{sunat.estado || 'Sin información'}} · Condición: {{sunat.condicion || 'Sin información'}}</p>
       </div>
       <div *ngIf="!sunat && !error && !loadingRuc" class="fx-empty lookup-hint">Ingresa un RUC para consultar sus datos fiscales.</div>
+
+      <!-- Consulta compacta del catálogo maestro; sin tarjetas que agranden la página. -->
+      <div class="registered-suppliers">
+        <button type="button" class="registered-suppliers__toggle"
+                [attr.aria-expanded]="suppliersOpen" aria-controls="registered-suppliers-content"
+                (click)="toggleSuppliers()">
+          <mat-icon aria-hidden="true">business</mat-icon>
+          <span>Mis proveedores</span>
+          <span class="registered-suppliers__count">{{ activeSuppliers.length }}</span>
+          <mat-icon class="registered-suppliers__chevron" aria-hidden="true">
+            {{ suppliersOpen ? 'expand_less' : 'expand_more' }}
+          </mat-icon>
+        </button>
+
+        <div id="registered-suppliers-content" class="registered-suppliers__content" *ngIf="suppliersOpen">
+          <p class="registered-suppliers__hint">Consulta los contactos guardados en Catálogo general.</p>
+
+          <div class="inv-core-toolbar registered-suppliers__toolbar">
+            <app-ui-search [(value)]="supplierSearch"
+                           placeholder="Buscar proveedor, RUC o contacto"
+                           label="Buscar proveedores registrados" />
+            <button type="button" appUiTableAction="normal"
+                    class="registered-suppliers__refresh" (click)="loadSuppliers()"
+                    [disabled]="loadingSuppliers" title="Actualizar proveedores"
+                    aria-label="Actualizar proveedores">
+              <mat-icon aria-hidden="true">refresh</mat-icon>
+            </button>
+          </div>
+
+          <p *ngIf="loadingSuppliers" class="registered-suppliers__message" role="status">Cargando proveedores...</p>
+          <p *ngIf="supplierError" class="registered-suppliers__error" role="alert">{{ supplierError }}</p>
+
+          <div class="registered-suppliers__viewport inv-core-table-wrap" *ngIf="filteredSuppliers.length">
+            <table class="registered-suppliers__table">
+              <thead>
+                <tr>
+                  <th scope="col">Proveedor</th>
+                  <th scope="col" class="registered-suppliers__contact">Contacto</th>
+                  <th scope="col" class="registered-suppliers__actions">Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let supplier of filteredSuppliers">
+                  <td class="registered-suppliers__business">
+                    <strong [title]="supplier.businessName">{{ supplier.businessName }}</strong>
+                    <span [title]="supplier.ruc">RUC {{ supplier.ruc }}</span>
+                  </td>
+                  <td class="registered-suppliers__contact">
+                    <span [title]="supplier.contactName || ''">{{ supplier.contactName || '—' }}</span>
+                  </td>
+                  <td class="registered-suppliers__actions">
+                    <div class="registered-suppliers__action-group">
+                      <button type="button" appUiTableAction="normal"
+                              (click)="consultSupplierRuc(supplier)" [disabled]="loadingRuc"
+                              title="Consultar RUC ante SUNAT"
+                              [attr.aria-label]="'Consultar RUC de ' + supplier.businessName">
+                        <mat-icon aria-hidden="true">manage_search</mat-icon>
+                      </button>
+                      <button type="button" appUiTableAction="normal"
+                              (click)="emailSupplier(supplier)"
+                              [disabled]="!canEmailSupplier(supplier)"
+                              [title]="canEmailSupplier(supplier) ? 'Enviar correo a ' + supplier.email : 'Sin correo válido registrado'"
+                              [attr.aria-label]="'Enviar correo a ' + supplier.businessName">
+                        <mat-icon aria-hidden="true">mail_outline</mat-icon>
+                      </button>
+                      <button type="button" appUiTableAction="normal"
+                              (click)="callSupplier(supplier)"
+                              [disabled]="!canCallSupplier(supplier)"
+                              [title]="canCallSupplier(supplier) ? 'Llamar a ' + supplier.phone : 'Sin teléfono válido registrado'"
+                              [attr.aria-label]="'Llamar a ' + supplier.businessName">
+                        <mat-icon aria-hidden="true">call</mat-icon>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <p class="registered-suppliers__message" *ngIf="!loadingSuppliers && !supplierError && !filteredSuppliers.length">
+            {{ supplierSearch ? 'No hay proveedores que coincidan con la búsqueda.' : 'No hay proveedores activos registrados.' }}
+          </p>
+          <p class="registered-suppliers__footnote">La consulta no modifica proveedores. Su edición sigue en Catálogo general.</p>
+        </div>
+      </div>
     </section>
     <section class="fx-dashboard" aria-labelledby="fx-heading">
       <div class="fx-heading"><div><h2 id="fx-heading">Tipo de cambio referencial</h2><p>Última cotización verificada y consulta histórica</p></div><button type="button" class="fx-advanced-trigger" (click)="openAdvancedFilters()"><mat-icon>tune</mat-icon>Filtro avanzado</button></div>
