@@ -117,7 +117,7 @@ export class InventoryManagementComponent implements OnInit {
     });
   }
   manageShares(row: InventorySummary): void {
-    if (!this.canManageAccess) return;
+    if (!this.canManageAccess || (!this.isManager && row.userId !== this.selfId)) return;
     this.sharing = row;
     this.shares = [];
     this.shareWith = '';
@@ -162,7 +162,7 @@ export class InventoryManagementComponent implements OnInit {
   }
 
   edit(row: InventorySummary): void {
-    if (!this.canCreate) return;
+    if (!this.canCreate || (!this.isManager && row.userId !== this.selfId)) return;
     this.editId = row.id;
     this.editName = row.inventoryName;
     this.editAlias = row.alias || '';
@@ -182,7 +182,7 @@ export class InventoryManagementComponent implements OnInit {
     });
   }
   deactivate(row: InventorySummary): void {
-    if (!this.canCreate) return;
+    if (!this.canCreate || (!this.isManager && row.userId !== this.selfId)) return;
     this.confirms.confirm({
       title: 'Desactivar inventario',
       message: `¿Desactivar «${row.alias || row.inventoryName}»? No debe tener artículos, movimientos, asignaciones ni accesos compartidos pendientes.`,
