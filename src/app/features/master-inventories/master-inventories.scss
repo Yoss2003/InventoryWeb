@@ -17,6 +17,7 @@
 .master-table tr.master-row-selected{background:#263a45}
 .master-active{display:inline-flex;gap:5px;align-items:center;color:#a8e7bb;font-size:11px}
 .master-active mat-icon{width:17px;height:17px;font-size:17px}
+.master-active.master-inactive{color:#ffce91}
 .master-message{color:#b3c8d6;font-size:12px;padding:8px 0;line-height:1.5}
 .master-error{color:#ffacb4;font-size:12px}
 .master-link{display:inline-flex;align-items:center;gap:6px;padding:7px 11px;border:1px solid #628195;border-radius:9px;text-decoration:none;color:#d8ebf8;background:#263e4e;font-size:12px;font-weight:700}
