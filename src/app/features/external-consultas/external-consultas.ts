@@ -1,3 +1,5 @@
+import { UiTableActionDirective } from '../../shared/ui/v2/ui-table-action.directive';
+import { UiSearchComponent } from '../../shared/ui/ui-search.component';
 import { UiControlDirective } from '../../shared/ui/v2/ui-control.directive';
 import { UiPageHeadingComponent } from '../../shared/ui/v2/ui-page-heading.component';
 import { CommonModule } from '@angular/common';
@@ -10,11 +12,11 @@ import { MatInputModule } from '@angular/material/input';
 import { provideNativeDateAdapter, MAT_DATE_LOCALE } from '@angular/material/core';
 import { finalize, timeout } from 'rxjs';
 import { FormsModule } from '@angular/forms';
-import { ExternalConsultasService, SunatRuc, ExchangeRate } from '../../core/services/external-consultas';
+import { ExternalConsultasService, SunatRuc, ExchangeRate, RegisteredSupplier } from '../../core/services/external-consultas';
 import { LoadingIndicatorComponent } from '../../shared/loading/loading-indicator';
 import { ToastService } from '../../shared/toast/toast.service';
 
-@Component({selector:'app-external-consultas',standalone:true,imports:[UiControlDirective, UiPageHeadingComponent, CommonModule,FormsModule,LoadingIndicatorComponent,MatIconModule,MatDatepickerModule,MatFormFieldModule,MatInputModule],providers:[provideNativeDateAdapter(),{provide:MAT_DATE_LOCALE,useValue:'es-PE'}],templateUrl:'./external-consultas.html',styleUrl:'./external-consultas.scss'})
+@Component({selector:'app-external-consultas',standalone:true,imports:[UiControlDirective, UiTableActionDirective, UiSearchComponent, UiPageHeadingComponent, CommonModule,FormsModule,LoadingIndicatorComponent,MatIconModule,MatDatepickerModule,MatFormFieldModule,MatInputModule],providers:[provideNativeDateAdapter(),{provide:MAT_DATE_LOCALE,useValue:'es-PE'}],templateUrl:'./external-consultas.html',styleUrl:'./external-consultas.scss'})
 export class ExternalConsultasComponent implements OnInit {
   private readonly api=inject(ExternalConsultasService);
   private readonly cdr=inject(ChangeDetectorRef);
@@ -25,6 +27,69 @@ export class ExternalConsultasComponent implements OnInit {
   ruc=''; sunat:SunatRuc|null=null; usd:ExchangeRate|null=null; eur:ExchangeRate|null=null;
   usdStatus='';eurStatus='';
   error=''; usdError=''; eurError=''; loadingRuc=false; loadingRates=false;
+  // Directorio de solo consulta. Altura limitada: sin crecer con la cantidad de proveedores.
+  suppliersOpen = true;
+  supplierSearch = '';
+  suppliers: RegisteredSupplier[] = [];
+  loadingSuppliers = false;
+  supplierError = '';
+  get activeSuppliers(): RegisteredSupplier[] {
+    return this.suppliers.filter(s => s.isActive);
+  }
+  get filteredSuppliers(): RegisteredSupplier[] {
+    const query = this.supplierSearch.trim().toLocaleLowerCase('es');
+    return this.activeSuppliers
+      .filter(s => !query || [
+        s.businessName, s.ruc, s.contactName, s.phone, s.email
+      ].some(v => String(v ?? '').toLocaleLowerCase('es').includes(query)))
+      .sort((a, b) => (a.businessName || '').localeCompare(b.businessName || '', 'es'));
+  }
+  toggleSuppliers(): void {
+    this.suppliersOpen = !this.suppliersOpen;
+    this.cdr.markForCheck();
+  }
+  loadSuppliers(): void {
+    if (this.loadingSuppliers) return;
+    this.loadingSuppliers = true;
+    this.supplierError = '';
+    this.api.suppliers().pipe(
+      timeout(20000),
+      finalize(() => {
+        this.loadingSuppliers = false;
+        this.cdr.markForCheck();
+      })
+    ).subscribe({
+      next: suppliers => {
+        this.suppliers = Array.isArray(suppliers) ? suppliers : [];
+        this.cdr.markForCheck();
+      },
+      error: () => {
+        this.supplierError = 'No se pudieron cargar los proveedores de la empresa.';
+        this.cdr.markForCheck();
+      }
+    });
+  }
+  consultSupplierRuc(supplier: RegisteredSupplier): void {
+    if (this.loadingRuc || !/^\d{11}$/.test(supplier.ruc || '')) return;
+    this.ruc = supplier.ruc;
+    this.searchRuc();
+  }
+  canEmailSupplier(supplier: RegisteredSupplier): boolean {
+    const email = (supplier.email || '').trim();
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) && !/[?&#]/.test(email);
+  }
+  canCallSupplier(supplier: RegisteredSupplier): boolean {
+    return /^\+?[\d\s()\-]{6,24}$/.test((supplier.phone || '').trim());
+  }
+  emailSupplier(supplier: RegisteredSupplier): void {
+    if (!this.canEmailSupplier(supplier)) return;
+    window.location.href = 'mailto:' + supplier.email!.trim();
+  }
+  callSupplier(supplier: RegisteredSupplier): void {
+    if (!this.canCallSupplier(supplier)) return;
+    const telephone = supplier.phone!.trim().replace(/[^\d+]/g, '');
+    window.location.href = 'tel:' + telephone;
+  }
   private pendingRates=0;
   ratesFrom=''; ratesTo=''; loadingHistory=false; historyRequested=false;
   historyError=''; historyRates:ExchangeRate[]=[];
@@ -40,7 +105,7 @@ export class ExternalConsultasComponent implements OnInit {
   }
   closeAdvancedFilters():void {this.fxHistoryRef?.close();}
   /* Última cotización verificada al entrar a la vista. */
-  ngOnInit():void { this.loadRates(); }
+  ngOnInit():void { this.loadRates(); this.loadSuppliers(); }
   get ratesFromDate():Date|null { return this.ratesFrom ? new Date(this.ratesFrom+'T12:00:00') : null; }
   get ratesToDate():Date|null { return this.ratesTo ? new Date(this.ratesTo+'T12:00:00') : null; }
   setRatesFrom(date:Date|null):void { this.ratesFrom=this.dateOnly(date); }
