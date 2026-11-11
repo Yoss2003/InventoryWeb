@@ -207,6 +207,23 @@
 .inv-admin-page.dev-page .company-user-count strong {font-size:12px;color:#edf5fc;}
 .inv-admin-page.dev-page .company-cell small { display: block; max-width: 280px; margin-top: 4px; color: #9fb2c1; font-size: 11px; overflow-wrap: anywhere; }
 .inv-admin-page.dev-page .number-cell { font-weight: 700; }
+.inv-admin-page.dev-page .company-inventories {
+  min-width: 142px; text-align: left !important;
+  font-size: 11px; white-space: nowrap;
+}
+.inv-admin-page.dev-page .company-inventories small {
+  display: block; margin-top: 6px; color: #aabfce; font-size: 11px;
+}
+.inv-admin-page.dev-page .company-inventories small strong { color: #edf5fc; }
+.inv-admin-page.dev-page .company-master-status {
+  display: inline-flex; align-items: center; gap: 5px; max-width: 100%;
+  color: #afe5bd; font-weight: 700;
+}
+.inv-admin-page.dev-page .company-master-status mat-icon {
+  width: 16px; height: 16px; font-size: 16px; flex: 0 0 16px;
+}
+.inv-admin-page.dev-page .company-master-status--missing { color: #ffb0b7; }
+.inv-admin-page.dev-page .company-master-status--inactive { color: #ffcf92; }
 .inv-admin-page.dev-page .subtle { color: #9fb4c3; }
 .inv-admin-page.dev-page .days-left { display: block; margin-top: 4px; color: #b7c7d6; font-size: 11px; }
 .inv-admin-page.dev-page .days-left.expired { color: #ffb0b5; }
