@@ -200,3 +200,29 @@
 .sidebar-group-trigger[aria-expanded="true"] .group-chevron {
   transform: rotate(90deg);
 }
+/* Estado inicial de una empresa: el maestro existe, pero aún no hay stock personal. */
+.inventory-setup-notice {
+  display: flex; align-items: flex-start; gap: 11px; flex-wrap: wrap;
+  margin-bottom: 15px; padding: 13px 15px;
+  border: 1px solid #5a7484; border-radius: 11px;
+  background: #1d2f3c; color: #e2f0f8;
+  font-size: 12px; line-height: 1.5;
+}
+.inventory-setup-notice > mat-icon {
+  flex: none; width: 19px; height: 19px; font-size: 19px;
+  color: var(--inv-company-accent, #a2d149);
+}
+.inventory-setup-notice > div { flex: 1 1 290px; min-width: 0; }
+.inventory-setup-notice strong { display: block; font-size: 13px; }
+.inventory-setup-notice p { margin: 4px 0 0; color: #bacddb; }
+.inventory-setup-notice a {
+  display: inline-flex; align-items: center;
+  min-height: 32px; padding: 6px 11px;
+  border: 1px solid #698398; border-radius: 8px;
+  color: #f1f9ff; text-decoration: none; font-weight: 700;
+  background: #2c4556;
+}
+.inventory-setup-notice a:hover { border-color: var(--inv-company-accent, #a2d149); }
+.inventory-setup-notice a:focus-visible {
+  outline: 2px solid var(--inv-company-accent, #a2d149); outline-offset: 2px;
+}
