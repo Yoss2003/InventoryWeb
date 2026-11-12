@@ -143,3 +143,22 @@
 :host .login-page .app-mark {background:color-mix(in srgb,var(--company-accent) 16%,#172431);}
 :host .login-company-chooser .selected-company {background:color-mix(in srgb,var(--company-accent) 12%,#131e28);border-color:color-mix(in srgb,var(--company-accent) 40%,#526779);}
 :host .login-page .login-submit {background:var(--company-accent) !important;color:var(--company-on-accent,#0f190c) !important;}
+
+/* Configuración inicial de contraseña, sin exponer una sesión JWT prematura. */
+.initial-password-help {
+  margin: 0; padding: 11px 13px; border: 1px solid #4d6c80;
+  background: #1a303f; color: #c8dbe8; border-radius: 10px;
+  font-size: 12px; line-height: 1.5;
+}
+.initial-password-cancel {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-height: 36px; padding: 8px 13px; border: 1px solid #637a8d;
+  border-radius: 9px; background: #263d4e; color: #e7f3fb;
+  cursor: pointer; font: inherit; font-size: 12px; font-weight: 650;
+}
+.initial-password-cancel:disabled { opacity: .45; cursor: not-allowed; }
+.initial-password-cancel:focus-visible { outline: 2px solid var(--company-accent); outline-offset: 2px; }
+.initial-password-success {
+  border: 1px solid #538469; border-radius: 10px; background: #203e31;
+  color: #b5f0c5; padding: 11px 13px; font-size: 12px; line-height: 1.5;
+}
