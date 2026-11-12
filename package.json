@@ -1,5 +1,5 @@
 {
-  "name": "control-inventario-web",
+  "name": "omnistock-web",
   "version": "0.0.0",
   "scripts": {
     "ng": "ng",
@@ -7,7 +7,7 @@
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
-    "serve:ssr:control-inventario-web": "node dist/control-inventario-web/server/server.mjs"
+    "serve:ssr:omnistock-web": "node dist/omnistock-web/server/server.mjs"
   },
   "private": true,
   "packageManager": "npm@11.19.0",
