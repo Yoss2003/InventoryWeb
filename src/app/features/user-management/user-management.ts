@@ -182,10 +182,10 @@ export class UserManagementComponent implements OnInit {
       autoFocus: 'first-tabbable',
       disableClose: true
     }).afterClosed().subscribe(sent => {
-      if (sent) {
-        this.toast.success('Credenciales nuevas enviadas; la clave anterior ha sido invalidada.');
-        this.reload();
-      }
+      if (sent) this.toast.success(
+        'Credenciales nuevas enviadas; la clave anterior ha sido invalidada.');
+      // Releer aunque el correo haya fallado: el email corregido se pudo guardar.
+      this.reload();
     });
   }
 
