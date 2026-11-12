@@ -40,7 +40,12 @@ export class UserManagementComponent implements OnInit {
   companyId = 0;
   currentUserId = 0;
   loading = false;
-    get canManageIndividualPermissions(): boolean {
+  error = '';
+  filter = '';
+  users: ManagedUser[] = [];
+  roles: ManagedRole[] = [];
+
+  get canManageIndividualPermissions(): boolean {
     return this.canEditUsers && (this.isDeveloper || this.isAdministrator);
   }
   get filtered(): ManagedUser[] {
