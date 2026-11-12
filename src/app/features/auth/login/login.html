@@ -19,8 +19,11 @@
         </div>
       </div><div class="login-side-footer"><mat-icon>verified_user</mat-icon> Sesión vinculada a la empresa</div></aside>
     <section class="login-panel" aria-label="Inicio de sesión">
-      <header class="panel-header"><span class="small-overline">BIENVENIDO</span><h2>Iniciar sesión</h2><p>Selecciona tu empresa e ingresa tus credenciales.</p></header>
-      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form" autocomplete="on">
+      <header class="panel-header"><span class="small-overline">BIENVENIDO</span>
+        <h2>{{initialPasswordToken ? 'Cambia tu contraseña' : 'Iniciar sesión'}}</h2>
+        <p>{{initialPasswordToken ? 'Por seguridad, sustituye tu contraseña temporal antes de ingresar.' : 'Selecciona tu empresa e ingresa tus credenciales.'}}</p>
+      </header>
+      <form *ngIf="!initialPasswordToken" [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form" autocomplete="on">
         <div class="form-field"><label for="login-username">Usuario <span>*</span></label><div class="input-wrap"><mat-icon>person_outline</mat-icon><input id="login-username" type="text" formControlName="username" maxlength="150" autocomplete="username" spellcheck="false" placeholder="Ingresa tu usuario" /></div></div>
         <div class="form-field"><label for="login-password">Contraseña <span>*</span></label><div class="input-wrap"><mat-icon>lock_outline</mat-icon><input id="login-password" [type]="showPassword ? 'text' : 'password'" formControlName="password" autocomplete="current-password" placeholder="Ingresa tu contraseña" /><button type="button" class="password-toggle" (click)="showPassword = !showPassword" [attr.aria-label]="showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'"><mat-icon>{{ showPassword ? 'visibility_off' : 'visibility' }}</mat-icon></button></div></div>
         <div *ngIf="requiresTwoFactor" class="form-field two-factor-field"><label for="login-2fa">Código de verificación <span>*</span></label><div class="input-wrap"><mat-icon>pin</mat-icon><input id="login-2fa" type="text" formControlName="twoFactorCode" maxlength="6" inputmode="numeric" autocomplete="one-time-code" placeholder="000000" /></div><small>Introduce los 6 dígitos generados por tu aplicación de autenticación.</small></div>
@@ -32,6 +35,45 @@
           <mat-icon *ngIf="!submitting">arrow_forward</mat-icon>
         </button>
       </form>
+      <form *ngIf="initialPasswordToken" [formGroup]="initialPasswordForm" (ngSubmit)="completeInitialPassword()"
+            class="login-form initial-password-form" autocomplete="off">
+        <p class="initial-password-help">
+          La contraseña de bienvenida solo sirve para verificar tu identidad.
+          Elige una nueva contraseña privada de al menos 12 caracteres.
+        </p>
+        <div class="form-field">
+          <label for="first-password">Nueva contraseña <span>*</span></label>
+          <div class="input-wrap">
+            <mat-icon aria-hidden="true">lock_reset</mat-icon>
+            <input id="first-password" type="password" formControlName="newPassword"
+              minlength="12" maxlength="128" autocomplete="new-password"
+              placeholder="Mínimo 12 caracteres"/>
+          </div>
+        </div>
+        <div class="form-field">
+          <label for="first-password-confirm">Confirmar contraseña <span>*</span></label>
+          <div class="input-wrap">
+            <mat-icon aria-hidden="true">verified_user</mat-icon>
+            <input id="first-password-confirm" type="password" formControlName="confirmPassword"
+              maxlength="128" autocomplete="new-password" placeholder="Repite la nueva contraseña"/>
+          </div>
+        </div>
+        <p class="login-error" *ngIf="initialPasswordError" role="alert">
+          <mat-icon>error_outline</mat-icon><span>{{initialPasswordError}}</span>
+        </p>
+        <p class="login-error" *ngIf="initialPasswordForm.get('confirmPassword')?.value &&
+           initialPasswordForm.get('newPassword')?.value !== initialPasswordForm.get('confirmPassword')?.value"
+           role="alert"><mat-icon>info_outline</mat-icon><span>Las contraseñas deben coincidir.</span></p>
+        <button type="submit" class="login-submit" [disabled]="!canCompleteInitialPassword">
+          <mat-icon *ngIf="!changingInitialPassword">verified</mat-icon>
+          {{changingInitialPassword ? 'Actualizando...' : 'Establecer contraseña'}}
+        </button>
+        <button type="button" class="initial-password-cancel" (click)="cancelInitialPassword()"
+                [disabled]="changingInitialPassword">Volver al inicio de sesión</button>
+      </form>
+      <p *ngIf="initialPasswordDone" class="initial-password-success" role="status">
+        Contraseña actualizada. Vuelve a iniciar sesión con tu nueva contraseña.
+      </p>
       <p class="forgot-link"><a href="/forgot-password">¿Olvidaste tu contraseña? Solicitar recuperación</a></p><footer class="panel-footer"><mat-icon>shield</mat-icon> Tu empresa define el ámbito de datos de la sesión.</footer>
     </section>
   </main>
