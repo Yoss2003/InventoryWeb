@@ -35,6 +35,51 @@ export class Login implements OnInit {
     password: ['', Validators.required],
     twoFactorCode: ['']
   });
+  readonly initialPasswordForm: FormGroup = this.fb.group({
+    newPassword: ['', [Validators.required, Validators.minLength(12), Validators.maxLength(128)]],
+    confirmPassword: ['', Validators.required]
+  });
+  initialPasswordToken = '';
+  changingInitialPassword = false;
+  initialPasswordError = '';
+  initialPasswordDone = false;
+  get canCompleteInitialPassword(): boolean {
+    const form = this.initialPasswordForm;
+    return !!this.initialPasswordToken && !this.changingInitialPassword &&
+      form.valid && form.get('newPassword')?.value === form.get('confirmPassword')?.value;
+  }
+  completeInitialPassword(): void {
+    if (!this.canCompleteInitialPassword) return;
+    this.changingInitialPassword = true;
+    this.initialPasswordError = '';
+    const newPassword = String(this.initialPasswordForm.get('newPassword')?.value || '');
+    const token = this.initialPasswordToken;
+    this.authService.completeInitialPassword(token, newPassword).subscribe({
+      next: () => {
+        this.changingInitialPassword = false;
+        this.initialPasswordToken = '';
+        this.initialPasswordForm.reset();
+        this.loginForm.get('password')?.reset('');
+        this.initialPasswordDone = true;
+        this.loginError = '';
+        this.snackBar.open('Contraseña actualizada. Ingresa con tu nueva clave.', 'Cerrar', { duration: 5000 });
+        this.cdr.markForCheck();
+      },
+      error: err => {
+        this.changingInitialPassword = false;
+        this.initialPasswordError = String(err?.error?.error ||
+          'No se pudo actualizar la contraseña. El enlace puede haber expirado; vuelve a iniciar sesión con la clave temporal.');
+        this.cdr.markForCheck();
+      }
+    });
+  }
+  cancelInitialPassword(): void {
+    if (this.changingInitialPassword) return;
+    this.initialPasswordToken = '';
+    this.initialPasswordForm.reset();
+    this.initialPasswordError = '';
+    this.cdr.markForCheck();
+  }
 
   companies: CompanyPublic[] = [];
   loadingCompanies = false;
@@ -141,8 +186,13 @@ export class Login implements OnInit {
       next: result => {
         if ('requirePasswordChange' in result && result.requirePasswordChange) {
           this.submitting = false;
-          // El endpoint actual de cambio inicial no autentica por token; no invocarlo desde aquí.
-          this.loginError = 'Tu cuenta necesita cambiar su contraseña inicial. Solicita la actualización al administrador antes de ingresar desde la web.';
+          this.initialPasswordDone = false;
+          this.initialPasswordToken = result.passwordResetToken || '';
+          this.initialPasswordError = this.initialPasswordToken
+            ? '' : 'El servidor no devolvió un desafío de seguridad válido. Reinicia sesión.';
+          this.loginForm.get('password')?.reset('');
+          this.initialPasswordForm.reset();
+          this.loginError = '';
           this.cdr.markForCheck();
           return;
         }

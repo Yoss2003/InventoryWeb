@@ -7,7 +7,8 @@ import { tap } from 'rxjs';
 /** La API puede pedir cambio inicial de contraseña en lugar de emitir un token. */
 export type LoginApiResult = AuthResponse | {
   requirePasswordChange: true;
-  user?: { id: number; companyId?: number };
+  passwordResetToken: string;
+  expiresInMinutes: number;
 };
 
 @Injectable({ providedIn: 'root' })
@@ -31,6 +32,14 @@ export class AuthService {
           localStorage.setItem(this.companyPreference, String(credentials.companyId));
         }
       })
+    );
+  }
+
+  /** Completa el cambio inicial con el reto temporal emitido tras verificar la clave de bienvenida. */
+  completeInitialPassword(resetToken: string, newPassword: string) {
+    return this.http.post<{ message: string }>(
+      'https://localhost:7295/api/password-recovery/complete',
+      { token: resetToken, newPassword }
     );
   }
 

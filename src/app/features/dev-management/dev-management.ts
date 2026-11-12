@@ -429,9 +429,11 @@ export class DevManagementComponent implements OnInit, OnDestroy {
       }
     ).afterClosed().subscribe(result => {
       if (!result) return;
-      this.toasts.success(
-        `Administrador creado. Inventario personal #${result.personalInventoryId} aprovisionado.`
+      if (result.emailSent) this.toasts.success(
+        `Administrador ${result.username} creado. Inventario #${result.personalInventoryId} y credenciales enviadas.`
       );
+      else this.toasts.warning(result.message ||
+        'Administrador creado, pero no se confirmó el correo. Corrige la dirección desde Gestión de usuarios y reenvía las credenciales.');
       this.loadCompanies();
       this.cdr.markForCheck();
     });

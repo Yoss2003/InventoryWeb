@@ -1,0 +1,43 @@
+<div class="roles-modal ui-v2-dialog ui-v2-dialog--simple" role="document">
+  <header class="roles-modal__header">
+    <span class="roles-modal__symbol"><mat-icon aria-hidden="true">admin_panel_settings</mat-icon></span>
+    <div class="roles-modal__heading">
+      <h2 mat-dialog-title>Permisos por rol</h2>
+      <p>Exclusivo del desarrollador · aplica a todas las empresas</p>
+    </div>
+    <button class="roles-modal__close" type="button" (click)="close()" aria-label="Cerrar">
+      <mat-icon aria-hidden="true">close</mat-icon>
+    </button>
+  </header>
+  <mat-dialog-content class="roles-modal__body">
+    <p class="roles-modal__hint">
+      El desarrollador tiene permisos fijos. Puedes configurar la visualización y edición
+      del administrador, así como los permisos del personal.
+    </p>
+    <div *ngIf="loading" class="roles-modal__status" role="status">Cargando permisos...</div>
+    <div *ngIf="error" class="roles-modal__error" role="alert">{{error}}</div>
+    <label *ngIf="!loading" class="roles-modal__selector">
+      <span>Rol a configurar</span>
+      <mat-form-field appearance="outline" class="roles-modal__select">
+        <mat-select [(ngModel)]="roleId" (ngModelChange)="selectRole($event)"
+          [ngModelOptions]="{standalone:true}" panelClass="inventory-select-options">
+          <mat-option *ngFor="let role of roles" [value]="role.id">{{role.name}}</mat-option>
+        </mat-select>
+      </mat-form-field>
+    </label>
+    <div class="roles-modal__grid" *ngIf="!loading">
+      <label class="roles-modal__permission" *ngFor="let item of permissions">
+        <input type="checkbox" [checked]="selectedIds.has(item.id)"
+          (change)="toggle(item.id,$any($event.target).checked)"/>
+        <span><strong>{{item.name}}</strong><small>{{item.systemCode}}</small></span>
+      </label>
+    </div>
+  </mat-dialog-content>
+  <mat-dialog-actions class="roles-modal__actions">
+    <button type="button" class="roles-modal__cancel" (click)="close()">Cancelar</button>
+    <button type="button" class="roles-modal__save" (click)="save()" [disabled]="saving || loading || !roleId">
+      <mat-icon aria-hidden="true">save</mat-icon>
+      {{saving ? 'Guardando...' : 'Guardar permisos'}}
+    </button>
+  </mat-dialog-actions>
+</div>

@@ -111,9 +111,9 @@ export class MainLayoutComponent {
       icon: 'admin_panel_settings',
       items: [
         { label: 'Gestión de usuarios', icon: 'manage_accounts',
-          route: '/dashboard/usuarios', permission: 'MANAGE_USERS' },
+          route: '/dashboard/usuarios', permission: 'VIEW_USERS', adminOnly: true },
         { label: 'Inventarios maestros', icon: 'inventory_2',
-          route: '/dashboard/inventarios-maestros', permission: 'VIEW_MASTER_INVENTORY' },
+          route: '/dashboard/inventarios-maestros', developerOnly: true },
         { label: 'Gestión Dev', icon: 'admin_panel_settings',
           route: '/dashboard/gestion-dev', developerOnly: true }
       ]

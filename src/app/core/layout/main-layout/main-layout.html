@@ -75,15 +75,6 @@
       <button mat-icon-button (click)="logout()" title="Cerrar sesión" aria-label="Cerrar sesión"><mat-icon>logout</mat-icon></button>
     </mat-toolbar>
     <div class="main-content">
-      <div *ngIf="noOperationalInventories" class="inventory-setup-notice" role="status">
-        <mat-icon aria-hidden="true">info_outline</mat-icon>
-        <div>
-          <strong>{{generalInventoryExists ? 'El inventario general está disponible.' : 'Esta empresa aún no dispone de inventarios.'}}</strong>
-          <p *ngIf="generalInventoryExists">El general contiene los catálogos compartidos, pero no almacena artículos ni stock. Registra el primer usuario de esta empresa para generar su inventario personal y comenzar a trabajar.</p>
-          <p *ngIf="!generalInventoryExists">No se encontraron inventarios operativos ni un maestro activo. Revisa Gestión Dev y la configuración de la API.</p>
-        </div>
-        <a *ngIf="isDeveloper" routerLink="/dashboard/gestion-dev">Ir a Gestión Dev</a>
-      </div>
       <router-outlet></router-outlet>
     </div>
   </mat-sidenav-content>

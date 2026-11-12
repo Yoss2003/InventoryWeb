@@ -31,3 +31,18 @@
 .master-catalog-scroll p{margin:0;padding:8px 0;border-bottom:1px solid #2c4453;font-size:12px;overflow-wrap:anywhere}
 .master-catalog-scroll small{display:block;color:#a4c2d2;margin-top:2px}
 @media(max-width:750px){.master-catalog-grid{grid-template-columns:1fr}.master-section{padding:13px}}
+
+/* Mismo botón secundario de las cabeceras del sistema, sin bloque gris nativo. */
+.master-page > .inv-core-header > button.master-refresh[appUiButton] {
+  display:inline-flex; align-items:center;justify-content:center;gap:7px;
+  min-height:40px;padding:8px 14px;border-radius:10px;white-space:nowrap;
+  border:1px solid #617b8b;background:#263d4c;color:#ebf5fb;
+  font:inherit;font-size:12px;font-weight:730;cursor:pointer;
+}
+.master-page > .inv-core-header > button.master-refresh[appUiButton]:hover:not(:disabled) {
+  background:#314b5e;border-color:var(--inv-company-accent,#a2d149);
+}
+.master-page > .inv-core-header > button.master-refresh mat-icon{
+  width:18px;height:18px;font-size:18px;
+}
+.master-page > .inv-core-header > button.master-refresh:disabled{opacity:.48;cursor:not-allowed}
