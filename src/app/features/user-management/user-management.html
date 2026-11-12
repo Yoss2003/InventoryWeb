@@ -3,8 +3,12 @@
     <app-ui-page-heading icon="manage_accounts" title="Gestión de usuarios"
       subtitle="Cuentas, inventarios personales, roles y permisos de la empresa de tu sesión."></app-ui-page-heading>
     <div class="inv-core-header-actions">
-      <button type="button" appUiButton="secondary" (click)="reload()" [disabled]="loading">
-        <mat-icon aria-hidden="true">refresh</mat-icon> Actualizar
+      <button type="button" appUiButton="secondary" (click)="reload()"
+        [disabled]="loading" [attr.aria-busy]="loading">
+        <app-loading-indicator *ngIf="loading; else usersRefreshIcon"
+          [compact]="true" [message]="''" />
+        <ng-template #usersRefreshIcon><mat-icon aria-hidden="true">refresh</mat-icon></ng-template>
+        <span>Actualizar</span>
       </button>
       <button *ngIf="canEditUsers" type="button" appUiButton="primary" (click)="openNewUser()">
         <mat-icon aria-hidden="true">person_add</mat-icon> Nuevo usuario
@@ -21,15 +25,15 @@
         <input type="search" [(ngModel)]="filter" placeholder="Buscar usuario o correo" aria-label="Buscar usuarios"/>
       </label>
     </div>
-    <p *ngIf="loading" class="users-message" role="status">Cargando usuarios y roles...</p>
+    <p *ngIf="loading && !hasLoaded" class="users-message" role="status">Cargando usuarios y roles...</p>
     <p *ngIf="error" class="users-error" role="alert">{{error}}</p>
-    <div class="inv-core-table-wrap users-table" *ngIf="!loading && users.length">
+    <div class="inv-core-table-wrap users-table" *ngIf="users.length">
       <table>
         <thead><tr>
           <th>Usuario</th><th>Rol</th><th>Inventario</th><th>Estado</th><th>Acciones</th>
         </tr></thead>
         <tbody>
-          <tr *ngFor="let item of filtered">
+          <tr *ngFor="let item of filtered; trackBy: trackByUserId">
             <td><strong>{{item.firstName}} {{item.lastName}}</strong>
               <small>{{item.username}} · {{item.email}}</small></td>
             <td>{{roleName(item.roleId)}}</td>
@@ -62,7 +66,7 @@
       </table>
       <p class="users-message" *ngIf="!filtered.length">Sin resultados para tu búsqueda.</p>
     </div>
-    <p class="users-message" *ngIf="!loading && !users.length && !error">
+    <p class="users-message" *ngIf="hasLoaded && !users.length && !error">
       Aún no se han registrado usuarios para esta empresa. Crea el primer administrador desde Gestión Dev.
     </p>
   </section>
