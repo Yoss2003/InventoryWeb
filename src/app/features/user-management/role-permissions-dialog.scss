@@ -18,10 +18,10 @@
 .roles-modal__select{width:min(100%,400px);min-width:0;
   --mdc-outlined-text-field-outline-color:#617b8e;
   --mdc-outlined-text-field-focus-outline-color:var(--inv-company-accent,#a2d149)}
-.roles-modal__select .mat-mdc-text-field-wrapper{min-height:40px;height:40px;background:#0e202c;border-radius:9px}
-.roles-modal__select .mat-mdc-form-field-infix{min-height:40px;height:40px;padding:7px 0}
-.roles-modal__select .mat-mdc-select-value{color:#edf6fb;font-size:12px}
-.roles-modal__select .mat-mdc-form-field-subscript-wrapper{display:none}
+:host ::ng-deep .roles-modal__select .mat-mdc-text-field-wrapper{min-height:40px;height:40px;background:#0e202c;border-radius:9px}
+:host ::ng-deep .roles-modal__select .mat-mdc-form-field-infix{min-height:40px;height:40px;padding:7px 0}
+:host ::ng-deep .roles-modal__select .mat-mdc-select-value{color:#edf6fb;font-size:12px}
+:host ::ng-deep .roles-modal__select .mat-mdc-form-field-subscript-wrapper{display:none}
 .roles-modal__grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
 .roles-modal__permission{display:flex;gap:10px;min-width:0;
   border:1px solid #486174;border-radius:9px;background:#112330;
