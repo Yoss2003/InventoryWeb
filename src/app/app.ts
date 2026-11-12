@@ -17,5 +17,5 @@ export class App {
     this.floatingTableScroll.start();
   }
 
-  protected readonly title = signal('control-inventario-web');
+  protected readonly title = signal('OmniStock');
 }

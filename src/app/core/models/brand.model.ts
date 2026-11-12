@@ -1,4 +1,4 @@
-/** Coincide con ControlInventario.Shared.Models.Brand (JSON camelCase). */
+/** Coincide con el modelo compartido Brand del backend (JSON camelCase). */
 export interface Brand {
   id: number;
   inventoryId: number;
