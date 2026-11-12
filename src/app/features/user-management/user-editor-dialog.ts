@@ -93,6 +93,10 @@ export class UserEditorDialogComponent implements OnInit {
   get roleValid(): boolean {
     return !this.canChangeRole || this.availableRoles.some(role => role.id === this.selectedRole);
   }
+  get roleLabel(): string {
+    if (this.selectedRole === 2) return 'Administrador';
+    return this.availableRoles.find(role => role.id === this.selectedRole)?.name || 'Rol protegido';
+  }
   get canSubmit(): boolean {
     return !this.saving && this.personalValid && this.roleValid && !this.loadingPermissions;
   }
@@ -167,8 +171,8 @@ export class UserEditorDialogComponent implements OnInit {
         if (surnames) this.editing.lastName = surnames;
         if (names || surnames) this.onNamesChanged();
         this.lookingUpDni = false;
-        this.toasts[names && surnames ? 'success' : 'warning'](
-          names && surnames ? 'Datos del DNI consultados.' : 'Completa los datos que faltan manualmente.');
+        if (names && surnames) this.toasts.success('Datos del DNI consultados.');
+        else this.toasts.warning('Completa los datos que faltan manualmente.');
         this.cdr.markForCheck();
       },
       error: () => {
