@@ -93,7 +93,7 @@
         </label>
         <div *ngIf="!canChangeRole" class="user-dialog__fixed-role">
           <span>Rol del usuario</span><strong><mat-icon aria-hidden="true">lock</mat-icon>
-          {{selectedRole === 2 ? 'Administrador' : 'Rol protegido'}}</strong>
+          {{roleLabel}}</strong>
           <small>Este rol no puede modificarse desde esta cuenta.</small>
         </div>
       </div>
