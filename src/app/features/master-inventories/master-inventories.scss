@@ -85,9 +85,6 @@
   font-size: 18px;
   line-height: 18px;
 }
-:host .master-refresh__spinning { animation: masters-refresh-spin .85s linear infinite; }
-@keyframes masters-refresh-spin { to { transform: rotate(360deg); } }
 @media (prefers-reduced-motion: reduce) {
-  :host .master-refresh__spinning { animation: none; }
   :host .master-page > .inv-core-header > button.master-refresh.ui-v2-button { transition: none; }
 }
