@@ -7,7 +7,7 @@
   },
   "newProjectRoot": "projects",
   "projects": {
-    "control-inventario-web": {
+    "omnistock-web": {
       "projectType": "application",
       "schematics": {
         "@schematics/angular:component": {
@@ -74,10 +74,10 @@
           "builder": "@angular/build:dev-server",
           "configurations": {
             "production": {
-              "buildTarget": "control-inventario-web:build:production"
+              "buildTarget": "omnistock-web:build:production"
             },
             "development": {
-              "buildTarget": "control-inventario-web:build:development"
+              "buildTarget": "omnistock-web:build:development"
             }
           },
           "defaultConfiguration": "development"
