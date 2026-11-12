@@ -11,14 +11,10 @@ import { UiTableActionDirective } from '../../shared/ui/v2/ui-table-action.direc
 import { ToastService } from '../../shared/toast/toast.service';
 import { ConfirmationDialogService } from '../../shared/confirm-dialog/confirmation-dialog.service';
 import { AccessService } from '../../core/services/access';
-import { suggestedUsername } from '../../shared/user-name';
 import {
-  ManagedUser, ManagedRole, ManagedUserDetails, UserPermissionFlags,
-  UserManagementService
+  ManagedUser, ManagedRole, UserManagementService
 } from '../../core/services/user-management';
-import {
-  FirstAdminDialogComponent, FirstAdminCreated
-} from '../dev-management/first-admin-dialog';
+import { UserEditorDialogComponent, UserEditorDialogData, UserEditorDialogResult } from './user-editor-dialog';
 import { RolePermissionsDialogComponent } from './role-permissions-dialog';
 import { ResendCredentialsDialogComponent } from './resend-credentials-dialog';
 
@@ -44,20 +40,7 @@ export class UserManagementComponent implements OnInit {
   companyId = 0;
   currentUserId = 0;
   loading = false;
-  saving = false;
-  error = '';
-  filter = '';
-  users: ManagedUser[] = [];
-  roles: ManagedRole[] = [];
-
-  selected: ManagedUser | null = null;
-  editing: ManagedUserDetails = this.emptyDetails();
-  selectedRole = 0;
-  selectedPermissions: UserPermissionFlags = this.emptyPermissions();
-  effectiveRoleCodes: string[] = [];
-  loadingPermissions = false;
-
-  get canManageIndividualPermissions(): boolean {
+    get canManageIndividualPermissions(): boolean {
     return this.canEditUsers && (this.isDeveloper || this.isAdministrator);
   }
   get filtered(): ManagedUser[] {
@@ -66,14 +49,6 @@ export class UserManagementComponent implements OnInit {
       [u.username, u.email, u.firstName, u.lastName, String(u.roleId)]
         .some(v => String(v ?? '').toLocaleLowerCase('es').includes(query)));
   }
-  private emptyDetails(): ManagedUserDetails {
-    return { username: '', email: '', firstName: '', lastName: '', dni: null };
-  }
-  private emptyPermissions(): UserPermissionFlags {
-    return { canApplyDiscounts: false, canViewPurchaseCosts: false,
-      canCancelSales: false, canEditProducts: false, canViewProfits: false };
-  }
-
   ngOnInit(): void {
     this.access.me().subscribe({
       next: info => {
@@ -101,8 +76,6 @@ export class UserManagementComponent implements OnInit {
       next: ({users, roles}) => {
         this.users = users || [];
         this.roles = (roles || []).filter(role => role.id > 2);
-        if (this.selected)
-          this.selected = this.users.find(u => u.id === this.selected?.id) || null;
         this.loading = false;
         this.cdr.markForCheck();
       },
@@ -123,16 +96,16 @@ export class UserManagementComponent implements OnInit {
 
   openNewUser(): void {
     if (!this.canEditUsers) return;
-    this.dialogs.open<FirstAdminDialogComponent, unknown, FirstAdminCreated>(
-      FirstAdminDialogComponent, {
-        data: {
-          companyId: this.companyId,
-          companyName: 'Empresa actual',
-          firstAdministrator: false,
-          roles: this.roles
-        },
+    const data: UserEditorDialogData = {
+      roles: this.roles,
+      currentUserId: this.currentUserId,
+      canManageIndividualPermissions: this.canManageIndividualPermissions
+    };
+    this.dialogs.open<UserEditorDialogComponent, UserEditorDialogData, UserEditorDialogResult>(
+      UserEditorDialogComponent, {
+        data,
         panelClass: 'inv-seven-modal',
-        width: 'min(710px, calc(100vw - 24px))',
+        width: 'min(800px, calc(100vw - 24px))',
         maxWidth: 'calc(100vw - 24px)',
         maxHeight: 'calc(100dvh - 24px)',
         enterAnimationDuration: 260,
@@ -142,9 +115,10 @@ export class UserManagementComponent implements OnInit {
         disableClose: true
       }
     ).afterClosed().subscribe(result => {
-      if (!result) return;
+      if (!result || result.kind !== 'created') return;
       if (result.emailSent) this.toast.success(
-        `Usuario ${result.username} registrado con inventario #${result.personalInventoryId}. Credenciales enviadas.`);
+        'Usuario ' + result.username + ' registrado con inventario #' +
+        result.personalInventoryId + '. Credenciales enviadas.');
       else this.toast.warning(result.message ||
         'Cuenta creada, pero no se confirmó el correo. Corrige la dirección y reenvía las credenciales.');
       this.reload();
@@ -192,106 +166,29 @@ export class UserManagementComponent implements OnInit {
   edit(user: ManagedUser): void {
     if (!this.canEditUsers || user.roleId === 1 ||
         (user.roleId === 2 && !this.isDeveloper)) return;
-    this.selected = user;
-    this.editing = {
-      username: user.username,
-      email: user.email,
-      firstName: user.firstName || '',
-      lastName: user.lastName || '',
-      dni: user.dni || null
+    const data: UserEditorDialogData = {
+      user,
+      roles: this.roles,
+      currentUserId: this.currentUserId,
+      canManageIndividualPermissions: this.canManageIndividualPermissions
     };
-    this.selectedRole = user.roleId;
-    this.selectedPermissions = this.emptyPermissions();
-    this.effectiveRoleCodes = [];
-    this.loadingPermissions = true;
-    this.cdr.markForCheck();
-    this.api.userPermissions(user.id).subscribe({
-      next: flags => {
-        this.selectedPermissions = {
-          canApplyDiscounts: flags.canApplyDiscounts,
-          canViewPurchaseCosts: flags.canViewPurchaseCosts,
-          canCancelSales: flags.canCancelSales,
-          canEditProducts: flags.canEditProducts,
-          canViewProfits: flags.canViewProfits
-        };
-        this.effectiveRoleCodes = flags.rolePermissions || [];
-        this.loadingPermissions = false;
-        this.cdr.markForCheck();
-      },
-      error: () => {
-        this.loadingPermissions = false;
-        this.toast.warning('No se pudieron consultar los permisos individuales.');
-        this.cdr.markForCheck();
+    this.dialogs.open<UserEditorDialogComponent, UserEditorDialogData, UserEditorDialogResult>(
+      UserEditorDialogComponent, {
+        data,
+        panelClass: 'inv-seven-modal',
+        width: 'min(800px, calc(100vw - 24px))',
+        maxWidth: 'calc(100vw - 24px)',
+        maxHeight: 'calc(100dvh - 24px)',
+        enterAnimationDuration: 260,
+        exitAnimationDuration: 220,
+        autoFocus: 'first-tabbable',
+        restoreFocus: true,
+        disableClose: true
       }
-    });
-  }
-  updateUsername(): void {
-    this.editing.username = suggestedUsername(this.editing.firstName, this.editing.lastName);
-  }
-  closeEditing(): void { this.selected = null; this.cdr.markForCheck(); }
-
-  get canEditDetails(): boolean {
-    return this.canEditUsers && !!this.selected && this.editing.username.length >= 3 &&
-      !!this.editing.firstName.trim() && !!this.editing.lastName.trim() &&
-      /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.editing.email.trim()) &&
-      (!this.editing.dni || /^\d{8}$/.test(this.editing.dni));
-  }
-
-  saveDetails(): void {
-    if (!this.selected || !this.canEditDetails || this.saving) return;
-    this.saving = true;
-    this.api.updateDetails(this.selected.id, {
-      ...this.editing,
-      email: this.editing.email.trim(),
-      firstName: this.editing.firstName.trim(),
-      lastName: this.editing.lastName.trim(),
-      dni: this.editing.dni || null
-    }).subscribe({
-      next: () => {
-        this.saving = false;
-        this.toast.success('Datos del usuario actualizados.');
-        this.reload();
-      },
-      error: e => {
-        this.saving = false;
-        this.toast.error(String(e?.error?.error || 'No se pudieron guardar los cambios.'));
-        this.cdr.markForCheck();
-      }
-    });
-  }
-
-  saveRole(): void {
-    const user = this.selected;
-    if (!user || !this.canEditUsers || this.saving ||
-        user.id === this.currentUserId || user.roleId <= 2 ||
-        !this.roles.some(r => r.id === this.selectedRole)) return;
-    this.saving = true;
-    this.api.updateAccess(user.id, user.isActive, this.selectedRole).subscribe({
-      next: () => { this.saving = false; this.selected = null; this.toast.success('Rol actualizado.'); this.reload(); },
-      error: e => {
-        this.saving = false;
-        this.toast.error(String(e?.error?.error || 'No se pudo cambiar el rol.'));
-        this.cdr.markForCheck();
-      }
-    });
-  }
-
-  savePermissions(): void {
-    const user = this.selected;
-    if (!user || !this.canManageIndividualPermissions || this.saving ||
-        user.id === this.currentUserId || user.roleId <= 2) return;
-    this.saving = true;
-    this.api.saveUserPermissions(user.id, this.selectedPermissions).subscribe({
-      next: () => {
-        this.saving = false;
-        this.toast.success('Permisos individuales actualizados.');
-        this.cdr.markForCheck();
-      },
-      error: e => {
-        this.saving = false;
-        this.toast.error(String(e?.error?.error || 'No se pudieron actualizar los permisos.'));
-        this.cdr.markForCheck();
-      }
+    ).afterClosed().subscribe(result => {
+      if (!result || result.kind !== 'updated') return;
+      if (result.changed && !result.partialFailure) this.toast.success('Usuario actualizado correctamente.');
+      if (result.changed) this.reload();
     });
   }
 
