@@ -29,7 +29,7 @@
           <th>Usuario</th><th>Rol</th><th>Inventario</th><th>Estado</th><th>Acciones</th>
         </tr></thead>
         <tbody>
-          <tr *ngFor="let item of filtered" [class.users-selected]="selected?.id === item.id">
+          <tr *ngFor="let item of filtered">
             <td><strong>{{item.firstName}} {{item.lastName}}</strong>
               <small>{{item.username}} · {{item.email}}</small></td>
             <td>{{roleName(item.roleId)}}</td>
@@ -65,62 +65,6 @@
     <p class="users-message" *ngIf="!loading && !users.length && !error">
       Aún no se han registrado usuarios para esta empresa. Crea el primer administrador desde Gestión Dev.
     </p>
-  </section>
-
-  <section class="users-panel users-editor" *ngIf="selected as user">
-    <div class="users-panel__head">
-      <div><h2>Usuario: {{user.username}}</h2>
-        <p>Administración individual sin modificar las demás empresas.</p></div>
-      <button type="button" class="users-secondary" (click)="closeEditing()">Cerrar</button>
-    </div>
-    <h3>Información personal</h3>
-    <div class="users-form users-form--readonly">
-      <label>Nombre <input [(ngModel)]="editing.firstName" (ngModelChange)="updateUsername()" maxlength="100"/></label>
-      <label>Apellido <input [(ngModel)]="editing.lastName" (ngModelChange)="updateUsername()" maxlength="100"/></label>
-      <label>Usuario (automático) <input [value]="editing.username" maxlength="80" readonly/></label>
-      <label>Correo <input type="email" [(ngModel)]="editing.email" maxlength="254"/></label>
-      <label>DNI <input [(ngModel)]="editing.dni" maxlength="8" inputmode="numeric"/></label>
-      <div class="users-actions">
-        <button type="button" class="users-primary" (click)="saveDetails()" [disabled]="!canEditDetails || saving">
-          Guardar datos
-        </button>
-      </div>
-    </div>
-
-    <h3>Rol y acceso</h3>
-    <div class="users-form users-form--role">
-      <label>Rol del usuario
-        <select [(ngModel)]="selectedRole">
-          <option *ngFor="let role of roles" [ngValue]="role.id">{{role.name}}</option>
-        </select>
-      </label>
-      <div class="users-actions">
-        <button type="button" class="users-primary" (click)="saveRole()"
-          [disabled]="saving || user.id === currentUserId || user.roleId <= 2 ||
-            selectedRole === user.roleId || !roles.length">
-          Actualizar rol
-        </button>
-      </div>
-    </div>
-    <p class="users-message" *ngIf="effectiveRoleCodes.length">
-      Permisos del rol: {{effectiveRoleCodes.join(', ')}}
-    </p>
-
-    <h3>Permisos individuales de operación</h3>
-    <p *ngIf="loadingPermissions" class="users-message">Consultando permisos...</p>
-    <div *ngIf="!loadingPermissions" class="users-flags">
-      <label><input type="checkbox" [(ngModel)]="selectedPermissions.canApplyDiscounts" [disabled]="!canManageIndividualPermissions || user.id === currentUserId || user.roleId <= 2"/> Aplicar descuentos</label>
-      <label><input type="checkbox" [(ngModel)]="selectedPermissions.canViewPurchaseCosts" [disabled]="!canManageIndividualPermissions || user.id === currentUserId || user.roleId <= 2"/> Ver costos de compra</label>
-      <label><input type="checkbox" [(ngModel)]="selectedPermissions.canCancelSales" [disabled]="!canManageIndividualPermissions || user.id === currentUserId || user.roleId <= 2"/> Anular ventas</label>
-      <label><input type="checkbox" [(ngModel)]="selectedPermissions.canEditProducts" [disabled]="!canManageIndividualPermissions || user.id === currentUserId || user.roleId <= 2"/> Editar artículos</label>
-      <label><input type="checkbox" [(ngModel)]="selectedPermissions.canViewProfits" [disabled]="!canManageIndividualPermissions || user.id === currentUserId || user.roleId <= 2"/> Ver ganancias</label>
-    </div>
-    <div class="users-actions">
-      <button type="button" class="users-primary" (click)="savePermissions()"
-        [disabled]="loadingPermissions || saving || !canManageIndividualPermissions || user.id === currentUserId || user.roleId <= 2">
-        Guardar permisos individuales
-      </button>
-    </div>
   </section>
 
   <section class="users-panel" *ngIf="isDeveloper">
