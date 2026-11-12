@@ -1,16 +1,19 @@
 <section class="master-page inv-core-page">
   <header class="inv-core-header">
-    <app-ui-page-heading icon="inventory_2" title="Inventarios maestros"
+    <app-ui-page-heading icon="inventory_2" title="Directorio de maestros"
       subtitle="Catálogos generales por empresa. No almacenan existencias ni movimientos."></app-ui-page-heading>
-    <button type="button" appUiButton="secondary" (click)="load()" [disabled]="loading">
-      <mat-icon aria-hidden="true">refresh</mat-icon> Actualizar
+    <button type="button" appUiButton="secondary" class="master-refresh"
+      (click)="load()" [disabled]="loading" [attr.aria-busy]="loading"
+      aria-label="Actualizar inventarios maestros" title="Volver a consultar los inventarios maestros">
+      <mat-icon aria-hidden="true" [class.master-refresh__spinning]="loading">refresh</mat-icon>
+      <span>{{loading ? 'Actualizando...' : 'Actualizar'}}</span>
     </button>
   </header>
 
   <section class="master-section">
     <div class="master-section__heading">
       <div>
-        <h2>Inventarios maestros de todas las empresas</h2>
+        <h2>Maestros por empresa</h2>
         <p>Vista exclusiva del desarrollador · consulta sin modificar existencias.</p>
       </div>
       <span class="master-count">{{masters.length}} maestros</span>
