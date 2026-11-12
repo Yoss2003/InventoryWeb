@@ -1,0 +1,165 @@
+<div class="user-dialog ui-v2-dialog ui-v2-dialog--special"
+  [invDialogMotion]="step" [invDialogMotionWidth]="motionWidth" role="document">
+  <header class="user-dialog__header">
+    <div class="user-dialog__identity">
+      <span class="user-dialog__icon"><mat-icon aria-hidden="true">{{isEdit ? 'manage_accounts' : 'person_add'}}</mat-icon></span>
+      <div>
+        <h2>{{isEdit ? 'Editar usuario' : 'Nuevo usuario'}}</h2>
+        <p>{{isEdit ? 'Actualiza los datos y accesos de esta cuenta.' : 'Registra un usuario y configura su acceso.'}}</p>
+      </div>
+    </div>
+    <button type="button" class="user-dialog__close" (click)="close()" [disabled]="saving"
+      aria-label="Cerrar modal" title="Cerrar"><mat-icon aria-hidden="true">close</mat-icon></button>
+  </header>
+
+  <nav class="user-dialog__steps" aria-label="Secciones de usuario">
+    <button type="button" [class.active]="step === 1"
+      [class.completed]="step > 1 && personalValid" [attr.aria-current]="step === 1 ? 'step' : null"
+      (click)="goStep(1)" [disabled]="saving">
+      <span class="user-dialog__number">
+        <mat-icon *ngIf="step > 1 && personalValid" aria-hidden="true">check</mat-icon>
+        <ng-container *ngIf="step <= 1 || !personalValid">1</ng-container>
+      </span><span>Datos personales</span>
+    </button>
+    <span class="user-dialog__connector"></span>
+    <button type="button" [class.active]="step === 2"
+      [class.completed]="step > 2 && roleValid" [attr.aria-current]="step === 2 ? 'step' : null"
+      (click)="goStep(2)" [disabled]="saving || !personalValid">
+      <span class="user-dialog__number">
+        <mat-icon *ngIf="step > 2 && roleValid" aria-hidden="true">check</mat-icon>
+        <ng-container *ngIf="step <= 2 || !roleValid">2</ng-container>
+      </span><span>Rol y acceso</span>
+    </button>
+    <span class="user-dialog__connector"></span>
+    <button type="button" [class.active]="step === 3" [attr.aria-current]="step === 3 ? 'step' : null"
+      (click)="goStep(3)" [disabled]="saving || !personalValid || !roleValid">
+      <span class="user-dialog__number">3</span><span>{{isEdit ? 'Permisos' : 'Seguridad'}}</span>
+    </button>
+  </nav>
+
+  <main class="user-dialog__body" aria-live="polite">
+    <section class="user-dialog__panel" *ngIf="step === 1" aria-label="Datos personales">
+      <div class="user-dialog__section-title">
+        <mat-icon aria-hidden="true">badge</mat-icon>
+        <div><h3>Información personal</h3><p>Identificación y contacto del usuario.</p></div>
+      </div>
+      <div class="user-dialog__grid">
+        <label>Nombre <span class="required">*</span>
+          <input [(ngModel)]="editing.firstName" (ngModelChange)="onNamesChanged()"
+            maxlength="100" autocomplete="off" placeholder="Nombre(s)"/>
+        </label>
+        <label>Apellidos <span class="required">*</span>
+          <input [(ngModel)]="editing.lastName" (ngModelChange)="onNamesChanged()"
+            maxlength="100" autocomplete="off" placeholder="Apellidos"/>
+        </label>
+        <label>Usuario (automático)
+          <span class="user-dialog__readonly">
+            <input [value]="editing.username" readonly tabindex="-1" aria-label="Usuario generado"
+              placeholder="Se genera automáticamente"/>
+            <mat-icon aria-hidden="true">lock_outline</mat-icon>
+          </span>
+        </label>
+        <label>Correo electrónico <span class="required">*</span>
+          <input type="email" [(ngModel)]="editing.email" maxlength="254"
+            autocomplete="off" placeholder="correo@ejemplo.com"/>
+        </label>
+        <label class="user-dialog__dni">DNI (opcional)
+          <span class="user-dialog__dni-control">
+            <input [(ngModel)]="editing.dni" maxlength="8" inputmode="numeric"
+              autocomplete="off" placeholder="8 dígitos"/>
+            <button type="button" class="user-dialog__lookup" (click)="consultDni()"
+              [disabled]="saving || lookingUpDni || !editing.dni || editing.dni.length !== 8"
+              title="Consultar DNI"><mat-icon aria-hidden="true">manage_search</mat-icon>
+              {{lookingUpDni ? 'Consultando' : 'Consultar'}}
+            </button>
+          </span>
+        </label>
+      </div>
+    </section>
+
+    <section class="user-dialog__panel" *ngIf="step === 2" aria-label="Rol y acceso">
+      <div class="user-dialog__section-title">
+        <mat-icon aria-hidden="true">admin_panel_settings</mat-icon>
+        <div><h3>Rol y acceso</h3><p>El rol determina los permisos generales dentro de la empresa.</p></div>
+      </div>
+      <div class="user-dialog__grid">
+        <label *ngIf="canChangeRole">Rol del usuario <span class="required">*</span>
+          <mat-form-field appearance="outline" class="user-dialog__select">
+            <mat-select [(ngModel)]="selectedRole" [ngModelOptions]="{standalone:true}"
+              panelClass="inventory-select-options" aria-label="Rol del usuario">
+              <mat-option *ngFor="let role of availableRoles" [value]="role.id">{{role.name}}</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </label>
+        <div *ngIf="!canChangeRole" class="user-dialog__fixed-role">
+          <span>Rol del usuario</span><strong><mat-icon aria-hidden="true">lock</mat-icon>
+          {{selectedRole === 2 ? 'Administrador' : 'Rol protegido'}}</strong>
+          <small>Este rol no puede modificarse desde esta cuenta.</small>
+        </div>
+      </div>
+      <p *ngIf="!availableRoles.length && !isEdit" class="user-dialog__hint">
+        Esta empresa no tiene roles de personal disponibles. Configura los roles antes de registrar usuarios.
+      </p>
+      <p *ngIf="isEdit" class="user-dialog__hint">
+        La activación o desactivación de la cuenta se mantiene en las acciones de la tabla de usuarios.
+      </p>
+    </section>
+
+    <section class="user-dialog__panel" *ngIf="step === 3" aria-label="Permisos y seguridad">
+      <div class="user-dialog__section-title">
+        <mat-icon aria-hidden="true">{{isEdit ? 'verified_user' : 'mark_email_read'}}</mat-icon>
+        <div><h3>{{isEdit ? 'Permisos individuales' : 'Credenciales automáticas'}}</h3>
+          <p>{{isEdit ? 'Ajusta los permisos adicionales de operación.' : 'Confirma cómo recibirá el acceso este usuario.'}}</p>
+        </div>
+      </div>
+      <ng-container *ngIf="isEdit; else creationSecurity">
+        <p *ngIf="loadingPermissions" class="user-dialog__hint" role="status">Consultando permisos del usuario...</p>
+        <p *ngIf="permissionLoadFailed" class="user-dialog__hint">No se pudieron leer los permisos. No se modificarán al guardar.</p>
+        <div *ngIf="!loadingPermissions" class="user-dialog__flags">
+          <label><input type="checkbox" [(ngModel)]="permissions.canApplyDiscounts"
+            [disabled]="!canChangePermissions"/> Aplicar descuentos</label>
+          <label><input type="checkbox" [(ngModel)]="permissions.canViewPurchaseCosts"
+            [disabled]="!canChangePermissions"/> Ver costos de compra</label>
+          <label><input type="checkbox" [(ngModel)]="permissions.canCancelSales"
+            [disabled]="!canChangePermissions"/> Anular ventas</label>
+          <label><input type="checkbox" [(ngModel)]="permissions.canEditProducts"
+            [disabled]="!canChangePermissions"/> Editar artículos</label>
+          <label><input type="checkbox" [(ngModel)]="permissions.canViewProfits"
+            [disabled]="!canChangePermissions"/> Ver ganancias</label>
+        </div>
+        <p *ngIf="effectiveRoleCodes.length" class="user-dialog__hint">
+          Permisos generales heredados del rol actual: {{effectiveRoleCodes.join(', ')}}.
+        </p>
+      </ng-container>
+      <ng-template #creationSecurity>
+        <div class="user-dialog__security-note">
+          <mat-icon aria-hidden="true">mark_email_read</mat-icon>
+          <div><strong>La contraseña temporal se genera de forma segura en la API.</strong>
+            <p>Se enviará al correo indicado y el usuario deberá cambiarla en su primer ingreso.
+              No tendrás que generar claves manualmente.</p>
+            <p>También se creará automáticamente su inventario personal, sin modificar el maestro de la empresa.</p>
+          </div>
+        </div>
+        <div class="user-dialog__summary">
+          <span>Usuario</span><strong>{{editing.username}}</strong>
+          <span>Correo de destino</span><strong>{{editing.email}}</strong>
+        </div>
+      </ng-template>
+    </section>
+  </main>
+
+  <footer class="user-dialog__footer">
+    <button type="button" class="user-dialog__secondary" (click)="close()" [disabled]="saving">Cancelar</button>
+    <button type="button" class="user-dialog__secondary" *ngIf="step > 1" (click)="goStep(step - 1)"
+      [disabled]="saving"><mat-icon aria-hidden="true">arrow_back</mat-icon> Anterior</button>
+    <button type="button" class="user-dialog__primary" *ngIf="step < 3"
+      (click)="goStep(step + 1)" [disabled]="saving || (step === 1 && !personalValid) || (step === 2 && !roleValid)">
+      Siguiente <mat-icon aria-hidden="true">arrow_forward</mat-icon>
+    </button>
+    <button type="button" class="user-dialog__primary" *ngIf="step === 3"
+      (click)="save()" [disabled]="!canSubmit">
+      <mat-icon aria-hidden="true">{{saving ? 'hourglass_top' : isEdit ? 'save' : 'person_add'}}</mat-icon>
+      {{saving ? 'Guardando...' : isEdit ? 'Guardar cambios' : 'Crear usuario'}}
+    </button>
+  </footer>
+</div>
