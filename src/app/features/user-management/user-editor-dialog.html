@@ -44,11 +44,11 @@
         <div><h3>Información personal</h3><p>Identificación y contacto del usuario.</p></div>
       </div>
       <div class="user-dialog__grid">
-        <label>Nombre <span class="required">*</span>
+        <label><span class="user-dialog__label">Nombre <span class="required">*</span></span>
           <input [(ngModel)]="editing.firstName" (ngModelChange)="onNamesChanged()"
             maxlength="100" autocomplete="off" placeholder="Nombre(s)"/>
         </label>
-        <label>Apellidos <span class="required">*</span>
+        <label><span class="user-dialog__label">Apellidos <span class="required">*</span></span>
           <input [(ngModel)]="editing.lastName" (ngModelChange)="onNamesChanged()"
             maxlength="100" autocomplete="off" placeholder="Apellidos"/>
         </label>
@@ -59,7 +59,7 @@
             <mat-icon aria-hidden="true">lock_outline</mat-icon>
           </span>
         </label>
-        <label>Correo electrónico <span class="required">*</span>
+        <label><span class="user-dialog__label">Correo electrónico <span class="required">*</span></span>
           <input type="email" [(ngModel)]="editing.email" maxlength="254"
             autocomplete="off" placeholder="correo@ejemplo.com"/>
         </label>
@@ -83,7 +83,7 @@
         <div><h3>Rol y acceso</h3><p>El rol determina los permisos generales dentro de la empresa.</p></div>
       </div>
       <div class="user-dialog__grid">
-        <label *ngIf="canChangeRole">Rol del usuario <span class="required">*</span>
+        <label *ngIf="canChangeRole"><span class="user-dialog__label">Rol del usuario <span class="required">*</span></span>
           <mat-form-field appearance="outline" class="user-dialog__select">
             <mat-select [(ngModel)]="selectedRole" [ngModelOptions]="{standalone:true}"
               panelClass="inventory-select-options" aria-label="Rol del usuario">
@@ -149,9 +149,9 @@
   </main>
 
   <footer class="user-dialog__footer">
-    <button type="button" class="user-dialog__secondary" (click)="close()" [disabled]="saving">Cancelar</button>
-    <button type="button" class="user-dialog__secondary" *ngIf="step > 1" (click)="goStep(step - 1)"
+    <button type="button" class="user-dialog__secondary user-dialog__back" *ngIf="step > 1" (click)="goStep(step - 1)"
       [disabled]="saving"><mat-icon aria-hidden="true">arrow_back</mat-icon> Anterior</button>
+    <button type="button" class="user-dialog__secondary" (click)="close()" [disabled]="saving">Cancelar</button>
     <button type="button" class="user-dialog__primary" *ngIf="step < 3"
       (click)="goStep(step + 1)" [disabled]="saving || (step === 1 && !personalValid) || (step === 2 && !roleValid)">
       Siguiente <mat-icon aria-hidden="true">arrow_forward</mat-icon>

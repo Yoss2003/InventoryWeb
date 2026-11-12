@@ -5,6 +5,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatDialog } from '@angular/material/dialog';
 import { forkJoin } from 'rxjs';
 
+import { LoadingIndicatorComponent } from '../../shared/loading/loading-indicator';
 import { UiPageHeadingComponent } from '../../shared/ui/v2/ui-page-heading.component';
 import { UiButtonDirective } from '../../shared/ui/v2/ui-button.directive';
 import { UiTableActionDirective } from '../../shared/ui/v2/ui-table-action.directive';
@@ -21,7 +22,7 @@ import { ResendCredentialsDialogComponent } from './resend-credentials-dialog';
 @Component({
   selector: 'app-user-management',
   standalone: true,
-  imports: [CommonModule, FormsModule, MatIconModule,
+  imports: [CommonModule, FormsModule, MatIconModule, LoadingIndicatorComponent,
     UiPageHeadingComponent, UiButtonDirective, UiTableActionDirective],
   templateUrl: './user-management.html',
   styleUrl: './user-management.scss'
@@ -40,6 +41,7 @@ export class UserManagementComponent implements OnInit {
   companyId = 0;
   currentUserId = 0;
   loading = false;
+  hasLoaded = false;
   error = '';
   filter = '';
   users: ManagedUser[] = [];
@@ -74,6 +76,7 @@ export class UserManagementComponent implements OnInit {
   }
 
   reload(): void {
+    if (this.loading) return;
     this.loading = true;
     this.error = '';
     this.cdr.markForCheck();
@@ -82,16 +85,20 @@ export class UserManagementComponent implements OnInit {
         this.users = users || [];
         this.roles = (roles || []).filter(role => role.id > 2);
         this.loading = false;
+        this.hasLoaded = true;
         this.cdr.markForCheck();
       },
       error: error => {
         this.loading = false;
+        this.hasLoaded = true;
         this.error = String(error?.error?.error ||
           'No se pudieron cargar los usuarios y roles de esta empresa.');
         this.cdr.markForCheck();
       }
     });
   }
+
+  trackByUserId(_index: number, user: ManagedUser): number { return user.id; }
 
   roleName(roleId: number): string {
     if (roleId === 1) return 'Desarrollador';

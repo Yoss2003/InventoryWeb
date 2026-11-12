@@ -23,7 +23,10 @@
 .user-dialog__steps button.active{background:#273949;color:#f0f7fc;border-color:#63788a}
 .user-dialog__steps button.active .user-dialog__number{background:var(--inv-company-accent,#a2d149);
   color:var(--inv-company-on-accent,#15242d);border-color:transparent}
-.user-dialog__steps button.completed .user-dialog__number{background:#244237;color:#b9efd0;border-color:#659b7e}
+.user-dialog__steps button.completed .user-dialog__number{
+  background:color-mix(in srgb,var(--inv-company-accent,#a2d149) 18%,#223342);
+  color:var(--inv-company-accent,#a2d149);
+  border-color:var(--inv-company-accent,#a2d149)}
 .user-dialog__connector{width:24px;height:1px;background:#5a7080;flex:none}
 .user-dialog__body{flex:0 1 auto;min-height:0;padding:21px 23px;overflow-y:hidden;overflow-x:hidden}
 .user-dialog__panel{animation:user-dialog-panel-enter 250ms cubic-bezier(.22,1,.36,1) both}
@@ -38,7 +41,8 @@
 .user-dialog__grid input:not([type='checkbox']){display:block;width:100%;min-width:0;height:42px;border:1px solid #5c7487;
   border-radius:9px;background:#0d1e29;color:#e9f4fb;padding:9px 11px;font:inherit;font-weight:400}
 .user-dialog__grid input:focus-visible{outline:2px solid var(--inv-company-accent,#a2d149);outline-offset:2px}
-.required{color:#f6a8ab}
+.user-dialog__label{display:inline-flex;align-items:baseline;gap:4px;flex-wrap:nowrap}
+.required{color:#f6a8ab;flex:none}
 .user-dialog__readonly{position:relative}
 .user-dialog__readonly input{padding-right:34px!important;border-style:dashed!important;color:#b8cddd!important}
 .user-dialog__readonly mat-icon{position:absolute;top:12px;right:9px;font-size:17px;width:17px;height:17px;color:#a5bdcc}
@@ -78,6 +82,7 @@
 .user-dialog__footer button{display:inline-flex;align-items:center;justify-content:center;gap:7px;
   min-height:40px;padding:9px 15px;border-radius:9px;font:inherit;font-weight:750;cursor:pointer}
 .user-dialog__footer mat-icon{width:18px;height:18px;font-size:18px}
+.user-dialog__back{margin-right:auto}
 .user-dialog__secondary{background:transparent;border:1px solid transparent;color:#bfcfda}
 .user-dialog__secondary:hover{background:#263b4a;color:#fff}
 .user-dialog__primary{border:1px solid var(--inv-company-accent,#a2d149);border-radius:23px!important;

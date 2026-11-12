@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { MatIconModule } from '@angular/material/icon';
 import { RouterLink } from '@angular/router';
+import { LoadingIndicatorComponent } from '../../shared/loading/loading-indicator';
 import { UiPageHeadingComponent } from '../../shared/ui/v2/ui-page-heading.component';
 import { UiButtonDirective } from '../../shared/ui/v2/ui-button.directive';
 import { UiTableActionDirective } from '../../shared/ui/v2/ui-table-action.directive';
@@ -23,7 +24,7 @@ interface CatalogPreview {
 @Component({
   selector: 'app-master-inventories',
   standalone: true,
-  imports: [CommonModule, FormsModule, MatIconModule, RouterLink,
+  imports: [CommonModule, FormsModule, MatIconModule, RouterLink, LoadingIndicatorComponent,
     UiPageHeadingComponent, UiButtonDirective, UiTableActionDirective],
   templateUrl: './master-inventories.html',
   styleUrl: './master-inventories.scss'
@@ -35,6 +36,7 @@ export class MasterInventoriesComponent implements OnInit {
   private readonly access = inject(AccessService);
   private readonly api = 'https://localhost:7295/api/Inventories';
   loading = false;
+  hasLoaded = false;
   loadingCatalog = false;
   isDeveloper = false;
   companyId = 0;
@@ -71,6 +73,7 @@ export class MasterInventoriesComponent implements OnInit {
   }
 
   load(): void {
+    if (this.loading) return;
     this.loading = true;
     this.error = '';
     this.cdr.markForCheck();
@@ -80,6 +83,7 @@ export class MasterInventoriesComponent implements OnInit {
         this.masters = Array.isArray(items) ? items : [];
         if (!Array.isArray(items)) this.error = 'La API devolvió un listado con formato inesperado.';
         this.loading = false;
+        this.hasLoaded = true;
         if (this.selected) {
           this.selected = this.masters.find(x => x.id === this.selected?.id) || null;
           if (!this.selected) this.catalog = null;
@@ -89,12 +93,15 @@ export class MasterInventoriesComponent implements OnInit {
       },
       error: e => {
         this.loading = false;
+        this.hasLoaded = true;
         this.error = String(e?.error?.error || 'No se pudieron cargar los inventarios maestros.');
         this.toast.error(this.error);
         this.cdr.markForCheck();
       }
     });
   }
+  trackByMasterId(_index: number, master: MasterInventory): number { return master.id; }
+
   inspect(master: MasterInventory): void {
     this.selected = master;
     this.catalog = null;
