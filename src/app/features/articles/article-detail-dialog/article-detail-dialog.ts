@@ -32,7 +32,6 @@ export class ArticleDetailDialogComponent implements OnInit, OnDestroy {
   private readonly serials=inject(SerialUnitsService);
   private readonly categories=inject(CategoryService);
   private readonly confirms=inject(ConfirmationDialogService);
-  savingSerial=false;
   registeringBatch=false;
   decommissioningId:number|null=null;
   serialNotice="";
@@ -49,6 +48,11 @@ export class ArticleDetailDialogComponent implements OnInit, OnDestroy {
   voucher: string | null = null;
   photoIsPdf = false;
   voucherIsPdf = false;
+
+  get canRegisterBatch(): boolean {
+    return !this.registeringBatch && this.batchRows.length > 0 &&
+      this.batchRows.every(row => row.serialNumber.trim().length > 0);
+  }
 
   get characteristics(): Array<{name:string;value:string}> {
     try {
