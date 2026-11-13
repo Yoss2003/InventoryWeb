@@ -2075,3 +2075,42 @@ button:focus-visible {
     animation: none !important;
   }
 }
+
+.article-parameter-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.article-parameter-grid .field-tile {
+  min-width: 0;
+}
+
+.article-parameter-grid .field-tile > label {
+  display: block;
+  margin: 0 0 6px;
+  color: $muted;
+  font-size: 12px;
+  font-weight: 650;
+}
+
+.exchange-rate-note {
+  margin: 10px 0 0;
+  color: #a9c3d0;
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.exchange-rate-warning {
+  margin: 8px 0 0;
+  color: #f0c47c;
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+@media (max-width: 700px) {
+  .article-parameter-grid {
+    grid-template-columns: 1fr;
+  }
+}
