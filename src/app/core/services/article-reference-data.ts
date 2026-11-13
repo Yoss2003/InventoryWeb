@@ -4,9 +4,24 @@ import { Observable } from 'rxjs';
 
 export interface ArticleSupplierReference {
   id: number;
+  inventoryId?: number;
+  companyId?: number;
   ruc: string;
   businessName: string;
   isActive: boolean;
+  contactName?: string | null;
+  phone?: string | null;
+  email?: string | null;
+  address?: string | null;
+  statusId?: number;
+  estado?: string | null;
+  condicion?: string | null;
+  distrito?: string | null;
+  provincia?: string | null;
+  departamento?: string | null;
+  relationshipDescription?: string | null;
+  fiscalDataJson?: string | null;
+  reused?: boolean;
 }
 
 export interface ArticleParameterReference {
@@ -41,6 +56,20 @@ export class ArticleReferenceDataService {
 
   suppliers(): Observable<ArticleSupplierReference[]> {
     return this.http.get<ArticleSupplierReference[]>(`${this.api}/Suppliers`);
+  }
+
+  lookupSupplierRuc(ruc: string): Observable<Partial<ArticleSupplierReference>> {
+    return this.http.get<Partial<ArticleSupplierReference>>(
+      `${this.api}/Suppliers/ruc/${encodeURIComponent(ruc)}`
+    );
+  }
+
+  createSupplier(input: Partial<ArticleSupplierReference> & { inventoryId: number }): Observable<ArticleSupplierReference> {
+    return this.http.post<ArticleSupplierReference>(`${this.api}/Suppliers`, input);
+  }
+
+  updateSupplier(id: number, input: Partial<ArticleSupplierReference>): Observable<void> {
+    return this.http.put<void>(`${this.api}/Suppliers/${id}`, input);
   }
 
   parameters(): Observable<ArticleParameterReference[]> {
