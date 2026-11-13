@@ -1,6 +1,12 @@
 :host{display:block;color:#e8f3fa;min-width:0}
 .inventory-manage-page{display:grid;gap:17px;min-width:0}
 .inv-manage-card{min-width:0;padding:17px;border:1px solid #526d80;background:#172630;border-radius:15px}
+.inv-manage-loading{display:grid;justify-items:center;gap:12px;padding:16px 10px}
+.inv-manage-skeleton{display:grid;gap:8px;width:100%}
+.inv-manage-skeleton span{height:34px;border-radius:8px;background:linear-gradient(90deg,#1c2e39 20%,#2c4351 45%,#1c2e39 70%);background-size:220% 100%;animation:inv-manage-shimmer 1.35s ease-in-out infinite}
+.inv-manage-skeleton span:nth-child(2){width:92%}.inv-manage-skeleton span:nth-child(3){width:84%}
+@keyframes inv-manage-shimmer{to{background-position:-220% 0}}
+@media(prefers-reduced-motion:reduce){.inv-manage-skeleton span{animation:none;background:#263b48}}
 .inv-manage-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:13px}
 .inv-manage-heading h2{margin:0;color:#eaf4fa;font-size:17px;font-weight:750}
 .inv-manage-heading p,.inv-manage-note{margin:4px 0 0;color:#aac2d1;font-size:12px;line-height:1.55}
