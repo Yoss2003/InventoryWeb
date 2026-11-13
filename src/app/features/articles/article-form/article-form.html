@@ -125,14 +125,26 @@
                     {{supplierError || (isLoadingReferences ? 'Cargando proveedores...' : 'Opcional · Catálogo maestro de la empresa')}}
                   </span>
                 </div>
-                <mat-form-field appearance="outline" class="inventory-select">
-                  <mat-select id="article-supplier" formControlName="supplierId" panelClass="inventory-select-options">
-                    <mat-option [value]="null">Sin proveedor asociado</mat-option>
-                    <mat-option *ngFor="let supplier of proveedores" [value]="supplier.id">
-                      {{supplier.businessName}} · RUC {{supplier.ruc}}
-                    </mat-option>
-                  </mat-select>
-                </mat-form-field>
+                <div class="field-with-button supplier-select-row">
+                  <mat-form-field appearance="outline" class="inventory-select">
+                    <mat-select id="article-supplier" formControlName="supplierId" panelClass="inventory-select-options">
+                      <mat-option [value]="null">Sin proveedor asociado</mat-option>
+                      <mat-option *ngFor="let supplier of proveedores" [value]="supplier.id">
+                        {{supplier.businessName}} · RUC {{supplier.ruc}}
+                      </mat-option>
+                    </mat-select>
+                  </mat-form-field>
+                  <button *ngIf="canManageSuppliers" type="button" class="btn-icon btn-green"
+                    (click)="manageSupplier(false)" [disabled]="masterInventoryId <= 0 || isLoadingReferences"
+                    title="Registrar proveedor" aria-label="Registrar proveedor">
+                    <mat-icon>add</mat-icon>
+                  </button>
+                  <button *ngIf="canManageSuppliers" type="button" class="btn-icon btn-dark"
+                    (click)="manageSupplier(true)" [disabled]="masterInventoryId <= 0 || !identityForm.get('supplierId')?.value"
+                    title="Editar proveedor seleccionado" aria-label="Editar proveedor seleccionado">
+                    <mat-icon>edit</mat-icon>
+                  </button>
+                </div>
               </div>
 
               <div class="form-group" *ngIf="currentTrackingMode === 'Estándar'">
