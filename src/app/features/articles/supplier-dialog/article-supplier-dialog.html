@@ -1,0 +1,55 @@
+<div class="supplier-modal ui-v2-dialog ui-v2-dialog--simple">
+  <header class="supplier-modal__header">
+    <span class="supplier-modal__icon"><mat-icon>local_shipping</mat-icon></span>
+    <div class="supplier-modal__heading">
+      <h2>{{editing ? 'Editar proveedor' : 'Nuevo proveedor'}}</h2>
+      <p>Catálogo maestro de la empresa · Los datos de contacto se pueden completar manualmente.</p>
+    </div>
+    <button type="button" class="supplier-modal__close" (click)="close()" aria-label="Cerrar"><mat-icon>close</mat-icon></button>
+  </header>
+
+  <form [formGroup]="form" (ngSubmit)="save()">
+    <main class="supplier-modal__body">
+      <section class="supplier-modal__section">
+        <div class="supplier-modal__section-title"><mat-icon>verified</mat-icon><div><h3>Identificación fiscal</h3><p>Consulta el RUC para completar los datos básicos.</p></div></div>
+        <div class="supplier-modal__ruc-row">
+          <label class="supplier-modal__field">
+            <span>RUC <b>*</b></span>
+            <input formControlName="ruc" maxlength="11" inputmode="numeric" placeholder="11 dígitos" />
+            <small *ngIf="form.controls.ruc.touched && form.controls.ruc.invalid">El RUC debe contener exactamente 11 dígitos.</small>
+          </label>
+          <button type="button" class="supplier-modal__lookup" (click)="lookupRuc()" [disabled]="lookingUpRuc || saving || form.controls.ruc.invalid">
+            <mat-icon>{{lookingUpRuc ? 'hourglass_top' : 'manage_search'}}</mat-icon>{{lookingUpRuc ? 'Consultando…' : 'Consultar RUC'}}
+          </button>
+        </div>
+        <label class="supplier-modal__field">
+          <span>Razón social <b>*</b></span>
+          <input formControlName="businessName" maxlength="250" placeholder="Razón social del proveedor" />
+          <small *ngIf="form.controls.businessName.touched && form.controls.businessName.invalid">Ingresa una razón social de hasta 250 caracteres.</small>
+        </label>
+        <div class="supplier-modal__fiscal" *ngIf="fiscalStatus || fiscalCondition">
+          <span *ngIf="fiscalStatus">Estado: <strong>{{fiscalStatus}}</strong></span>
+          <span *ngIf="fiscalCondition">Condición: <strong>{{fiscalCondition}}</strong></span>
+        </div>
+      </section>
+
+      <section class="supplier-modal__section">
+        <div class="supplier-modal__section-title"><mat-icon>contact_phone</mat-icon><div><h3>Datos de contacto</h3><p>Información para comunicarse con el proveedor.</p></div></div>
+        <div class="supplier-modal__grid">
+          <label class="supplier-modal__field"><span>Contacto</span><input formControlName="contactName" maxlength="150" placeholder="Nombre del vendedor o asesor" /></label>
+          <label class="supplier-modal__field"><span>Teléfono</span><input formControlName="phone" maxlength="50" placeholder="Teléfono de contacto" /></label>
+          <label class="supplier-modal__field"><span>Correo electrónico</span><input formControlName="email" maxlength="100" type="email" placeholder="ventas@proveedor.com" /><small *ngIf="form.controls.email.touched && form.controls.email.invalid">Ingresa un correo válido.</small></label>
+          <label class="supplier-modal__field"><span>Dirección fiscal</span><input formControlName="address" maxlength="500" placeholder="Dirección registrada" /></label>
+        </div>
+        <label class="supplier-modal__field supplier-modal__wide"><span>Descripción de la relación comercial</span><textarea formControlName="relationshipDescription" maxlength="700" rows="3" placeholder="Condiciones, acuerdos u observaciones sobre este proveedor."></textarea></label>
+      </section>
+    </main>
+
+    <footer class="supplier-modal__footer">
+      <button type="button" class="supplier-modal__cancel" (click)="close()" [disabled]="saving">Cancelar</button>
+      <button type="submit" class="supplier-modal__save" [disabled]="saving || lookingUpRuc || form.invalid">
+        <mat-icon>{{saving ? 'hourglass_top' : 'save'}}</mat-icon>{{saving ? 'Guardando…' : editing ? 'Guardar cambios' : 'Registrar proveedor'}}
+      </button>
+    </footer>
+  </form>
+</div>
