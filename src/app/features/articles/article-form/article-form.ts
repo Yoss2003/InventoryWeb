@@ -22,6 +22,8 @@ import { Article, ArticleDetail } from '../../../core/models/article.model';
 import { BrandDialogComponent, BrandDialogData } from '../brand-dialog/brand-dialog';
 import { isMeasuredUnit, isPackUnit, isUnitName, isUnitConversion, fixedUnitFactor, validPieces, validQuantity, quantityStep, quantityLabel } from '../../../shared/inventory/inventory-units';
 import {MeasurementUnitsService, MeasurementUnit} from '../../../core/services/measurement-units';
+import { AccessService } from '../../../core/services/access';
+import { ArticleSupplierDialogComponent } from '../supplier-dialog/article-supplier-dialog';
 import {
   ArticleReferenceDataService, ArticleSupplierReference, ArticleParameterReference,
   CurrencyReference, ExchangeRateReference
@@ -51,6 +53,7 @@ export class ArticleFormComponent implements OnInit, OnDestroy {
   private snackBar = inject(MatSnackBar);
   private readonly measurementUnitsService = inject(MeasurementUnitsService);
   private readonly referenceData = inject(ArticleReferenceDataService);
+  private readonly access = inject(AccessService);
   private todasLasUnidades: MeasurementUnit[] = [];
   public dialogRef = inject(MatDialogRef<ArticleFormComponent>);
   public data = inject(MAT_DIALOG_DATA, { optional: true });
@@ -75,6 +78,8 @@ export class ArticleFormComponent implements OnInit, OnDestroy {
   condiciones: ArticleParameterReference[] = [];
   ubicaciones: ArticleParameterReference[] = [];
   supplierError = '';
+  canManageSuppliers = false;
+  masterInventoryId = 0;
   parameterError = '';
   currencyError = '';
   isLoadingReferences = false;
@@ -293,6 +298,15 @@ export class ArticleFormComponent implements OnInit, OnDestroy {
     this.isEditMode = !!this.data?.id;
     this.initForms();
     this.setupSubscriptions();
+    this.access.me().subscribe({
+      next: snapshot => {
+        this.masterInventoryId = snapshot.masterInventoryId ?? 0;
+        this.canManageSuppliers = snapshot.isDeveloper ||
+          snapshot.permissions.includes('MANAGE_MASTER');
+        this.cdr.markForCheck();
+      },
+      error: () => { this.canManageSuppliers = false; this.cdr.markForCheck(); }
+    });
     this.cargarUnidades();
     this.loadCatalogs();
     this.loadArticleReferences();
@@ -859,6 +873,45 @@ export class ArticleFormComponent implements OnInit, OnDestroy {
     this.actualizarUnidadesPermitidas();
     this.syncUnitConversion(false);
     this.generateAutoName();
+  }
+
+  manageSupplier(editing: boolean): void {
+    const category = this.selectedCategory;
+    if (!this.canManageSuppliers || !category) return;
+    const currentId = Number(this.identityForm.get('supplierId')?.value);
+    const selected = editing
+      ? this.proveedores.find(supplier => Number(supplier.id) === currentId) ?? null
+      : null;
+    if (editing && !selected) return;
+
+    const dialogRef = this.dialog.open(ArticleSupplierDialogComponent, {
+      panelClass: 'inv-seven-modal',
+      enterAnimationDuration: 260,
+      exitAnimationDuration: 220,
+      width: 'min(760px, calc(100vw - 24px))',
+      maxWidth: 'calc(100vw - 24px)',
+      maxHeight: 'calc(100dvh - 24px)',
+      disableClose: true,
+      autoFocus: false,
+      restoreFocus: true,
+      data: { masterInventoryId: this.masterInventoryId, supplier: selected }
+    });
+
+    dialogRef.afterClosed().subscribe((saved?: ArticleSupplierReference) => {
+      if (!saved || !saved.id) return;
+      const exists = this.proveedores.some(item => Number(item.id) === Number(saved.id));
+      this.proveedores = exists
+        ? this.proveedores.map(item => Number(item.id) === Number(saved.id) ? { ...item, ...saved } : item)
+        : [...this.proveedores, saved];
+      this.proveedores.sort((a, b) => a.businessName.localeCompare(b.businessName, 'es'));
+      this.identityForm.get('supplierId')?.setValue(saved.id);
+      this.identityForm.get('supplierId')?.markAsDirty();
+      this.snackBar.open(
+        selected ? 'Proveedor actualizado y asociado al artículo.' : 'Proveedor registrado y asociado al artículo.',
+        'Cerrar', { duration: 3500 }
+      );
+      this.cdr.markForCheck();
+    });
   }
 
   agregarNuevaMarca(): void {
