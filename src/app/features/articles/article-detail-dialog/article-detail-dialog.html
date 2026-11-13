@@ -1,7 +1,7 @@
 <div class="record-dialog ui-v2-dialog ui-v2-dialog--simple">
   <header><span class="inv-seven-title-icon"><mat-icon>inventory_2</mat-icon></span><div><h2>Ficha completa del artículo</h2><small>ID #{{ data.id }}</small></div><button type="button" (click)="dialogRef.close()"><mat-icon>close</mat-icon></button></header>
   <main>
-    <div class="record-loading" *ngIf="loading"><app-loading-indicator message="Consultando artículo y sus detalles..." /></div><p *ngIf="error" role="alert">{{error}}</p>
+    <div class="record-loading" *ngIf="loading" role="status" aria-label="Cargando ficha del artículo"><app-loading-indicator message="Consultando artículo y sus detalles..." /><div class="record-skeleton" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><span></span></div></div><p *ngIf="error" role="alert">{{error}}</p>
     <ng-container *ngIf="article as a">
       <section><h3>Identificación</h3><div class="record-grid">
         <div><span>Nombre</span><strong>{{a.name}}</strong></div>
