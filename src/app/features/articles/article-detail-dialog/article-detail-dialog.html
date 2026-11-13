@@ -23,15 +23,63 @@
         <div><span>Costo</span><strong>{{a.acquisitionPrice | money:a.acquisitionCurrency}}</strong></div>
         <div><span>Precio</span><strong>{{a.salePrice | money:a.saleCurrency}}</strong></div>
       </div></section>
-      <section *ngIf="characteristics.length || a.details?.length"><h3>Atributos y unidades serializadas</h3>
+      <section *ngIf="characteristics.length || a.details?.length || a.articleDetails?.length"><h3>Atributos y unidades serializadas</h3>
         <div class="record-grid"><div *ngFor="let row of characteristics"><span>{{row.name}}</span><strong>{{row.value}}</strong></div></div>
-        <div *ngFor="let d of a.details" class="record-series"><strong>SN: {{d.serialNumber}}</strong><span>{{d.attr1}} {{d.attr2}} {{d.attr3}} {{d.attr4}} {{d.attr5}} {{d.attr6}}</span></div>
+        <div *ngFor="let d of (a.details || a.articleDetails || [])" class="record-series">
+          <div class="record-series-data">
+            <strong>SN: {{d.serialNumber}}</strong>
+            <span>{{[d.attr1,d.attr2,d.attr3,d.attr4,d.attr5,d.attr6].filter(Boolean).join(' · ') || 'Sin atributos adicionales'}}</span>
+            <small [class.record-series-retired]="d.isActive === false">{{d.isActive === false ? 'Retirada' : 'Disponible'}}</small>
+          </div>
+          <button *ngIf="d.isActive !== false && a.isActive" type="button" class="record-series-retire"
+            [disabled]="decommissioningId !== null" (click)="decommission(d)"
+            [title]="'Retirar serie ' + d.serialNumber">
+            <mat-icon>{{decommissioningId === d.id ? 'hourglass_top' : 'remove_circle'}}</mat-icon>
+            {{decommissioningId === d.id ? 'Procesando…' : 'Dar de baja'}}
+          </button>
+        </div>
+        <div class="serial-decommission" *ngIf="a.tracking === 1 && a.isActive && (a.details || a.articleDetails || []).some">
+          <label for="serial-decommission-reason">Motivo de baja definitiva</label>
+          <textarea id="serial-decommission-reason" [(ngModel)]="decommissionReason" maxlength="500"
+            rows="2" placeholder="Describe por qué se retira la unidad (mínimo 5 caracteres)."></textarea>
+          <small>Solo se pueden retirar unidades sin ventas ni asignaciones vigentes. La serie y su historial se conservan.</small>
+        </div>
       </section>
-      <section *ngIf="a.tracking === 1 && a.isActive"><h3>Registrar una unidad serializada</h3>
-        <p class="record-hint">Cada serie registrada incrementa el stock en una unidad y crea su movimiento de entrada.</p>
-        <div class="serial-register"><input [(ngModel)]="newSerial" maxlength="150" placeholder="Serie única" aria-label="Número de serie" />
-          <button type="button" [disabled]="savingSerial || !newSerial.trim()" (click)="addSerial()">{{savingSerial?'Guardando…':'Registrar serie'}}</button>
-        </div><small *ngIf="serialNotice">{{serialNotice}}</small>
+      <section *ngIf="a.tracking === 1 && a.isActive">
+        <div class="serial-batch-title">
+          <div><h3>Registrar unidades serializadas</h3>
+            <p class="record-hint">Agrega una o varias series. Cada unidad generará su detalle y un movimiento de entrada dentro de una sola operación.</p></div>
+          <button type="button" class="serial-add-row" (click)="addBatchRow()" [disabled]="registeringBatch || batchRows.length >= 1000">
+            <mat-icon>add</mat-icon> Añadir unidad
+          </button>
+        </div>
+        <div class="serial-batch-scroll">
+          <div class="serial-batch-header">
+            <strong>Número de serie / IMEI *</strong>
+            <strong *ngFor="let field of batchAttributes">{{field.label}}{{field.required ? ' *' : ''}}</strong>
+            <span></span>
+          </div>
+          <div *ngFor="let row of batchRows; let i = index" class="serial-batch-row">
+            <input [(ngModel)]="row.serialNumber" [name]="'serial-' + i" maxlength="150"
+              placeholder="Serie / IMEI" [attr.aria-label]="'Serie ' + (i + 1)" />
+            <input *ngFor="let field of batchAttributes" [(ngModel)]="row[field.key]"
+              [name]="field.key + '-' + i" [placeholder]="field.label"
+              [attr.aria-label]="field.label + ' de la serie ' + (i + 1)" />
+            <button type="button" class="serial-remove-row" (click)="removeBatchRow(i)"
+              [disabled]="registeringBatch || batchRows.length <= 1" [attr.aria-label]="'Quitar unidad ' + (i + 1)">
+              <mat-icon>close</mat-icon>
+            </button>
+          </div>
+        </div>
+        <div class="serial-batch-footer">
+          <small>{{batchRows.length}} de 1000 unidades preparadas.</small>
+          <button type="button" class="serial-register-batch" [disabled]="registeringBatch || batchRows.some(row => !row.serialNumber.trim())"
+            (click)="registerBatch()">
+            <mat-icon>{{registeringBatch ? 'hourglass_top' : 'save'}}</mat-icon>
+            {{registeringBatch ? 'Registrando lote…' : 'Registrar lote'}}
+          </button>
+        </div>
+        <small *ngIf="serialNotice" class="serial-notice" role="status">{{serialNotice}}</small>
       </section>
       <section *ngIf="photo || voucher"><h3>Archivos asociados</h3><div class="record-media">
         <a *ngIf="photo" [href]="photo" target="_blank" rel="noopener"><img [src]="photo" alt="Foto del artículo" />Ver foto</a>
@@ -39,5 +87,5 @@
       </div></section>
     </ng-container>
   </main>
-  <footer><button type="button" (click)="dialogRef.close(!!serialNotice)">Cerrar</button></footer>
+  <footer><button type="button" (click)="dialogRef.close(hasChanges)">Cerrar</button></footer>
 </div>
