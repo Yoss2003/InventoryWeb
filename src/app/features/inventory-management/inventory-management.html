@@ -3,7 +3,8 @@
     <app-ui-page-heading icon="warehouse" title="Gestión de inventarios"
       subtitle="Inventarios operativos para artículos y existencias. Los maestros se mantienen separados."></app-ui-page-heading>
     <button type="button" appUiButton="secondary" (click)="load()" [disabled]="loading">
-      <mat-icon aria-hidden="true">refresh</mat-icon> Actualizar
+      <app-loading-indicator *ngIf="loading; else inventoryRefreshLabel" [compact]="true" message="Cargando..." />
+      <ng-template #inventoryRefreshLabel><mat-icon aria-hidden="true">refresh</mat-icon> Actualizar</ng-template>
     </button>
   </header>
 
@@ -14,7 +15,7 @@
         <mat-icon aria-hidden="true">group_add</mat-icon> Gestionar accesos
       </a>
     </div>
-    <p *ngIf="loading" class="inv-manage-note" role="status">Cargando inventarios...</p>
+    <div *ngIf="loading" class="inv-manage-loading"><app-loading-indicator message="Cargando inventarios y usuarios..." /></div>
     <p *ngIf="error" class="inv-manage-error" role="alert">{{error}}</p>
     <div class="inv-core-table-wrap inv-manage-table" *ngIf="operational.length">
       <table>
@@ -78,8 +79,8 @@
       </p>
       <div class="inv-manage-actions">
         <button type="submit" class="inv-manage-primary" [disabled]="!canSubmit">
-          <mat-icon aria-hidden="true">add</mat-icon>
-          {{saving ? 'Creando...' : 'Crear inventario'}}
+          <app-loading-indicator *ngIf="saving; else createInventoryLabel" [compact]="true" message="Creando..." />
+          <ng-template #createInventoryLabel><mat-icon aria-hidden="true">add</mat-icon>Crear inventario</ng-template>
         </button>
       </div>
     </form>
@@ -108,12 +109,13 @@
       <div class="inv-manage-actions">
         <button type="button" class="inv-manage-primary" (click)="saveShare()"
           [disabled]="sharingBusy || !shareWith.trim()">
-          <mat-icon aria-hidden="true">person_add</mat-icon>
-          {{sharingBusy ? 'Compartiendo...' : 'Conceder acceso'}}
+          <app-loading-indicator *ngIf="sharingBusy; else grantAccessLabel" [compact]="true" message="Compartiendo..." />
+          <ng-template #grantAccessLabel><mat-icon aria-hidden="true">person_add</mat-icon>Conceder acceso</ng-template>
         </button>
       </div>
     </div>
-    <div class="inv-core-table-wrap inv-manage-table inv-manage-shares" *ngIf="shares.length">
+    <div *ngIf="loadingShares" class="inv-manage-loading"><app-loading-indicator message="Consultando accesos compartidos..." /></div>
+    <div class="inv-core-table-wrap inv-manage-table inv-manage-shares" *ngIf="shares.length && !loadingShares">
       <table>
         <thead><tr><th>Usuario</th><th>Permiso</th><th>Acciones</th></tr></thead>
         <tbody><tr *ngFor="let share of shares">
@@ -135,7 +137,7 @@
         </tr></tbody>
       </table>
     </div>
-    <p *ngIf="!shares.length" class="inv-manage-note">No hay accesos compartidos registrados.</p>
+    <p *ngIf="!loadingShares && !shares.length" class="inv-manage-note">No hay accesos compartidos registrados.</p>
   </section>
 
   <section *ngIf="editId !== null" class="inv-manage-card">
