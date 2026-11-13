@@ -19,7 +19,8 @@
             <small *ngIf="form.controls.ruc.touched && form.controls.ruc.invalid">El RUC debe contener exactamente 11 dígitos.</small>
           </label>
           <button type="button" class="supplier-modal__lookup" (click)="lookupRuc()" [disabled]="lookingUpRuc || saving || form.controls.ruc.invalid">
-            <mat-icon>{{lookingUpRuc ? 'hourglass_top' : 'manage_search'}}</mat-icon>{{lookingUpRuc ? 'Consultando…' : 'Consultar RUC'}}
+            <app-loading-indicator *ngIf="lookingUpRuc; else rucLookupLabel" [compact]="true" message="Consultando..." />
+            <ng-template #rucLookupLabel><mat-icon>manage_search</mat-icon>Consultar RUC</ng-template>
           </button>
         </div>
         <label class="supplier-modal__field">
@@ -48,7 +49,8 @@
     <footer class="supplier-modal__footer">
       <button type="button" class="supplier-modal__cancel" (click)="close()" [disabled]="saving">Cancelar</button>
       <button type="submit" class="supplier-modal__save" [disabled]="saving || lookingUpRuc || form.invalid">
-        <mat-icon>{{saving ? 'hourglass_top' : 'save'}}</mat-icon>{{saving ? 'Guardando…' : editing ? 'Guardar cambios' : 'Registrar proveedor'}}
+        <app-loading-indicator *ngIf="saving; else supplierSaveLabel" [compact]="true" message="Guardando..." />
+        <ng-template #supplierSaveLabel><mat-icon>save</mat-icon>{{editing ? 'Guardar cambios' : 'Registrar proveedor'}}</ng-template>
       </button>
     </footer>
   </form>

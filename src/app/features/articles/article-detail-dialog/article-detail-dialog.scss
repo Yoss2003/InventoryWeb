@@ -32,6 +32,8 @@
     color: #a8b9c6;
 }
 
+ .record-dialog header button {transition:border-color 160ms ease,background-color 160ms ease,transform 160ms ease;}
+.record-dialog header button:hover{border-color:var(--inv-company-accent,#a2d149);transform:translateY(-1px);}
 .record-dialog header button {
     background: #13212c;
     color: #dfeaf4;
@@ -58,10 +60,15 @@
     background: #19242f;
 }
 
+.record-loading{display:grid;justify-items:center;gap:14px;padding:22px 16px;border:1px solid #344858;border-radius:12px;background:#17232d;}
+.record-skeleton{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;width:100%;}
+.record-skeleton span{height:38px;border-radius:8px;background:linear-gradient(90deg,#1b2b37 20%,#2a3d4b 45%,#1b2b37 70%);background-size:220% 100%;animation:record-shimmer 1.35s ease-in-out infinite;}
+@keyframes record-shimmer{to{background-position:-220% 0}}
+@media(prefers-reduced-motion:reduce){.record-skeleton span{animation:none;background:#263744;}}
 .record-dialog h3 {
     margin: 0 0 11px;
     font-size: 13px;
-    color: #c4ed8c;
+    color: var(--inv-company-accent, #a2d149);
 }
 
 .record-grid {
@@ -87,6 +94,8 @@
     overflow-wrap: anywhere;
 }
 
+ .record-series {transition:background-color 160ms ease,border-color 160ms ease;}
+.record-series:hover{background:color-mix(in srgb,var(--inv-company-accent,#a2d149) 5%,transparent);}
 .record-series {
     border-top: 1px solid #364858;
     display: flex;

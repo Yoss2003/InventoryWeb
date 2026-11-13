@@ -13,12 +13,13 @@ import { ToastService } from '../../shared/toast/toast.service';
 import { AccessService } from '../../core/services/access';
 import { InventoryService, InventorySummary, InventoryShare } from '../../core/services/inventories';
 import { UserManagementService, ManagedUser } from '../../core/services/user-management';
+import { LoadingIndicatorComponent } from '../../shared/loading/loading-indicator';
 
 @Component({
   selector: 'app-inventory-management',
   standalone: true,
   imports: [CommonModule, FormsModule, MatIconModule, RouterLink,
-    UiPageHeadingComponent, UiButtonDirective, UiTableActionDirective],
+    UiPageHeadingComponent, UiButtonDirective, UiTableActionDirective, LoadingIndicatorComponent],
   templateUrl: './inventory-management.html',
   styleUrl: './inventory-management.scss'
 })
@@ -47,6 +48,7 @@ export class InventoryManagementComponent implements OnInit {
   editAlias = '';
   sharing: InventorySummary | null = null;
   shares: InventoryShare[] = [];
+  loadingShares = false;
   shareWith = '';
   shareMode: 1 | 2 = 1;
   sharingBusy = false;
@@ -121,14 +123,16 @@ export class InventoryManagementComponent implements OnInit {
     if (!this.canManageAccess || (!this.isManager && row.userId !== this.selfId)) return;
     this.sharing = row;
     this.shares = [];
+    this.loadingShares = false;
     this.shareWith = '';
     this.loadShares();
   }
   loadShares(): void {
     if (!this.sharing) return;
+    this.loadingShares = true;
     this.api.getShares(this.sharing.id).subscribe({
-      next: result => { this.shares = result || []; },
-      error: err => this.toast.error(String(err?.error?.error || 'No se pudieron consultar los accesos.'))
+      next: result => { this.shares = result || []; this.loadingShares = false; },
+      error: err => { this.loadingShares = false; this.toast.error(String(err?.error?.error || 'No se pudieron consultar los accesos.')); }
     });
   }
   saveShare(): void {

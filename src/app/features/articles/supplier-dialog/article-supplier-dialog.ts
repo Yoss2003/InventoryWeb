@@ -7,6 +7,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import {
   ArticleReferenceDataService, ArticleSupplierReference
 } from '../../../core/services/article-reference-data';
+import { LoadingIndicatorComponent } from '../../../shared/loading/loading-indicator';
 
 export interface ArticleSupplierDialogData {
   masterInventoryId: number;
@@ -16,7 +17,7 @@ export interface ArticleSupplierDialogData {
 @Component({
   selector: 'app-article-supplier-dialog',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, MatDialogModule, MatIconModule],
+  imports: [CommonModule, ReactiveFormsModule, MatDialogModule, MatIconModule, LoadingIndicatorComponent],
   templateUrl: './article-supplier-dialog.html',
   styleUrl: './article-supplier-dialog.scss'
 })
