@@ -32,6 +32,8 @@
     color: #a8b9c6;
 }
 
+ .record-dialog header button {transition:border-color 160ms ease,background-color 160ms ease,transform 160ms ease;}
+.record-dialog header button:hover{border-color:var(--inv-company-accent,#a2d149);transform:translateY(-1px);}
 .record-dialog header button {
     background: #13212c;
     color: #dfeaf4;
@@ -58,10 +60,11 @@
     background: #19242f;
 }
 
+.record-loading{display:flex;justify-content:center;padding:22px 10px;border:1px solid #344858;border-radius:12px;background:#17232d;}
 .record-dialog h3 {
     margin: 0 0 11px;
     font-size: 13px;
-    color: #c4ed8c;
+    color: var(--inv-company-accent, #a2d149);
 }
 
 .record-grid {
@@ -87,6 +90,8 @@
     overflow-wrap: anywhere;
 }
 
+ .record-series {transition:background-color 160ms ease,border-color 160ms ease;}
+.record-series:hover{background:color-mix(in srgb,var(--inv-company-accent,#a2d149) 5%,transparent);}
 .record-series {
     border-top: 1px solid #364858;
     display: flex;
