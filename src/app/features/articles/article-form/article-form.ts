@@ -78,7 +78,6 @@ export class ArticleFormComponent implements OnInit, OnDestroy {
   parameterError = '';
   currencyError = '';
   isLoadingReferences = false;
-
   monedas: { id: number; code: string; label: string; rate: number | null; rateDate: string | null }[] = [
     { id: 0, code: 'S/.', label: 'Soles (PEN)', rate: 1, rateDate: null }
   ];
@@ -1324,7 +1323,6 @@ export class ArticleFormComponent implements OnInit, OnDestroy {
     this.supplierError = '';
     this.parameterError = '';
     this.currencyError = '';
-
     forkJoin({
       suppliers: this.referenceData.suppliers().pipe(catchError(() => {
         this.supplierError = 'No se pudieron cargar los proveedores del catálogo maestro.';
@@ -1348,17 +1346,15 @@ export class ArticleFormComponent implements OnInit, OnDestroy {
         .sort((a, b) => a.name.localeCompare(b.name, 'es'));
       this.ubicaciones = available.filter(x => this.normalizeReferenceKey(x.parameterType) === 'ubicacion')
         .sort((a, b) => a.name.localeCompare(b.name, 'es'));
-
       this.monedas = (currencies || [])
         .filter(x => String(x.currencyCode ?? '').trim().length > 0)
         .map(x => ({
           id: x.id,
           code: String(x.currencyCode).trim(),
-          label: `${x.currencyName} (${String(x.currencyCode).trim()})`,
+          label: String(x.currencyName) + ' (' + String(x.currencyCode).trim() + ')',
           rate: this.currencyKind(x.currencyCode) === 'PEN' ? 1 : null,
           rateDate: null
         }));
-
       const baseParameter = available.find(x => this.normalizeReferenceKey(x.parameterType) === 'monedabase');
       const configuredCurrencyId = Number(baseParameter?.name);
       const defaultCurrency = this.monedas.find(x => x.id === configuredCurrencyId)
@@ -1370,7 +1366,6 @@ export class ArticleFormComponent implements OnInit, OnDestroy {
           saleCurrency: defaultCurrency.code
         }, { emitEvent: false });
       }
-
       this.isLoadingReferences = false;
       if (this.currencyError || !this.monedas.length) {
         if (!this.currencyError) this.currencyError = 'El catálogo de monedas no contiene opciones disponibles.';
@@ -1388,8 +1383,7 @@ export class ArticleFormComponent implements OnInit, OnDestroy {
     forkJoin({ usd: usd$, eur: eur$ }).subscribe(({ usd, eur }) => {
       this.monedas = this.monedas.map(currency => {
         const kind = this.currencyKind(currency.code);
-        const quotation: ExchangeRateReference | null =
-          kind === 'USD' ? usd : kind === 'EUR' ? eur : null;
+        const quotation: ExchangeRateReference | null = kind === 'USD' ? usd : kind === 'EUR' ? eur : null;
         if (kind === 'PEN') return { ...currency, rate: 1, rateDate: null };
         return {
           ...currency,
@@ -1397,11 +1391,10 @@ export class ArticleFormComponent implements OnInit, OnDestroy {
           rateDate: quotation?.date ?? null
         };
       });
-
       const describe = (label: string, rate: ExchangeRateReference | null) => {
-        if (!rate || !(Number(rate.sellPrice) > 0)) return `${label}: sin cotización disponible`;
+        if (!rate || !(Number(rate.sellPrice) > 0)) return label + ': sin cotización disponible';
         const date = String(rate.date ?? '').slice(0, 10);
-        return `${label}: S/ ${Number(rate.sellPrice).toFixed(4)}${date ? ` ( ${date} )` : ''}`;
+        return label + ': S/ ' + Number(rate.sellPrice).toFixed(4) + (date ? ' (' + date + ')' : '');
       };
       this.exchangeRateNotice = [
         usd ? describe('USD venta', usd) : 'USD: sin cotización disponible',
