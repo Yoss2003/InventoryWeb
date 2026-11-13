@@ -33,7 +33,7 @@ export class ArticleSupplierDialogComponent {
   fiscalCondition: string | null = null;
 
   readonly form = this.fb.nonNullable.group({
-    ruc: ['', [Validators.required, Validators.pattern(/^\\d{11}$/)]],
+    ruc: ['', [Validators.required, Validators.pattern(/^\d{11}$/)]],
     businessName: ['', [Validators.required, Validators.maxLength(250)]],
     contactName: ['', Validators.maxLength(150)],
     phone: ['', Validators.maxLength(50)],
@@ -63,7 +63,7 @@ export class ArticleSupplierDialogComponent {
 
   lookupRuc(): void {
     const ruc = this.form.controls.ruc.value.trim();
-    if (!/^\\d{11}$/.test(ruc) || this.lookingUpRuc || this.saving) return;
+    if (!/^\d{11}$/.test(ruc) || this.lookingUpRuc || this.saving) return;
     this.lookingUpRuc = true;
     this.api.lookupSupplierRuc(ruc).subscribe({
       next: result => {
