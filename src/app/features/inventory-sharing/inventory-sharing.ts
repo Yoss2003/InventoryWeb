@@ -9,6 +9,7 @@ import { ConfirmationDialogService } from '../../shared/confirm-dialog/confirmat
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
 import { InventoryService, InventoryShare, InventorySummary } from '../../core/services/inventories';
+import { AccessService } from '../../core/services/access';
 import { LoadingIndicatorComponent } from '../../shared/loading/loading-indicator';
 
 @Component({
@@ -18,11 +19,13 @@ import { LoadingIndicatorComponent } from '../../shared/loading/loading-indicato
 })
 export class InventorySharingComponent implements OnInit {
   private readonly api = inject(InventoryService);
+  private readonly access = inject(AccessService);
   private readonly snack = inject(MatSnackBar);
   private readonly confirms = inject(ConfirmationDialogService);
   private readonly cdr = inject(ChangeDetectorRef);
   private readonly platform = inject(PLATFORM_ID);
   myUserId = 0;
+  canManageAccess = false;
   inventories: InventorySummary[] = [];
   currentInventoryId: number | null = null;
   shares: InventoryShare[] = [];
@@ -55,13 +58,18 @@ export class InventorySharingComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    if (isPlatformBrowser(this.platform)) {
-      try {
-        const session = JSON.parse(localStorage.getItem('userSession') || '{}');
-        this.myUserId = Number(session.id || 0);
-      } catch { this.myUserId = 0; }
-    }
-    this.refresh();
+    this.access.me().subscribe({
+      next: snapshot => {
+        this.myUserId = snapshot.userId;
+        this.canManageAccess = (snapshot.permissions || []).includes('MANAGE_INVENTORY_ACCESS');
+        this.refresh();
+        this.cdr.markForCheck();
+      },
+      error: () => {
+        this.error = 'No se pudieron verificar los permisos de la sesión.';
+        this.cdr.markForCheck();
+      }
+    });
   }
 
   refresh(): void {
@@ -125,7 +133,7 @@ export class InventorySharingComponent implements OnInit {
   }
 
   share(): void {
-    if (!this.currentInventoryId || !this.identifier.trim() || this.saving) return;
+    if (!this.canManageAccess || !this.currentInventoryId || !this.identifier.trim() || this.saving) return;
     this.saving = true;
     this.cdr.markForCheck();
     this.api.share(this.currentInventoryId, this.identifier.trim(), this.accessLevel).subscribe({
@@ -145,7 +153,7 @@ export class InventorySharingComponent implements OnInit {
   }
 
   changeAccess(item: InventoryShare): void {
-    if (this.updatingShareId !== null) return;
+    if (!this.canManageAccess || this.updatingShareId !== null) return;
     const nextAccess: 1 | 2 = item.accessLevel === 2 ? 1 : 2;
     const nextLabel = nextAccess === 2 ? 'Editor' : 'Lector';
     this.confirms.confirm({
@@ -153,7 +161,7 @@ export class InventorySharingComponent implements OnInit {
       message: `¿Cambiar el acceso de «${item.username || 'este usuario'}» a ${nextLabel}?`,
       confirmLabel: `Cambiar a ${nextLabel}`, tone: 'primary', icon: 'swap_horiz'
     }).subscribe(confirmed => {
-      if (!confirmed || this.updatingShareId !== null) return;
+      if (!confirmed || !this.canManageAccess || this.updatingShareId !== null) return;
       this.updatingShareId = item.id;
       this.api.updateShareAccess(item.id, nextAccess).subscribe({
         next: () => {
@@ -172,12 +180,13 @@ export class InventorySharingComponent implements OnInit {
   }
 
   revoke(item: InventoryShare): void {
+    if (!this.canManageAccess) return;
     this.confirms.confirm({
       title:'Revocar acceso',
       message:`¿Revocar el acceso de «${item.username || 'este usuario'}» al inventario compartido?`,
       confirmLabel:'Revocar acceso',tone:'danger',icon:'person_remove'
     }).subscribe(confirmed=>{
-      if(!confirmed)return;
+      if(!confirmed || !this.canManageAccess)return;
       this.api.revoke(item.id).subscribe({
         next: () => {this.snack.open('Acceso revocado.', 'Cerrar', {duration: 3000});this.loadShares();},
         error: err => this.snack.open(String(err?.error?.error ?? 'No se pudo revocar.'), 'Cerrar', {duration: 6000})
