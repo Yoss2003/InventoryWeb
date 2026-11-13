@@ -21,6 +21,7 @@ export interface ArticleSupplierReference {
   departamento?: string | null;
   relationshipDescription?: string | null;
   fiscalDataJson?: string | null;
+  lookupFromCache?: boolean;
   reused?: boolean;
 }
 
