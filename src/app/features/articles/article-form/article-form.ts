@@ -302,7 +302,7 @@ export class ArticleFormComponent implements OnInit, OnDestroy {
       next: snapshot => {
         this.masterInventoryId = snapshot.masterInventoryId ?? 0;
         this.canManageSuppliers = snapshot.isDeveloper ||
-          snapshot.permissions.includes('MANAGE_MASTER');
+          snapshot.permissions.includes('MANAGE_MASTER_CATALOG');
         this.cdr.markForCheck();
       },
       error: () => { this.canManageSuppliers = false; this.cdr.markForCheck(); }
