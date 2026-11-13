@@ -405,7 +405,7 @@ export class ArticleFormComponent implements OnInit, OnDestroy {
 
   private normalizeReferenceKey(value: string | null | undefined): string {
     return String(value ?? '').trim().toLocaleLowerCase('es')
-      .normalize('NFD').replace(/[\\u0300-\\u036f]/g, '');
+      .normalize('NFD').replace(/[\u0300-\u036f]/g, '');
   }
 
   private currencyKind(code: string | null | undefined): 'PEN' | 'USD' | 'EUR' | null {
