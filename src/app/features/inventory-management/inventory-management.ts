@@ -50,6 +50,7 @@ export class InventoryManagementComponent implements OnInit {
   shareWith = '';
   shareMode: 1 | 2 = 1;
   sharingBusy = false;
+  updatingShareId: number | null = null;
 
   get operational(): InventorySummary[] {
     return this.rows.filter(r => !r.isMaster);
@@ -146,6 +147,31 @@ export class InventoryManagementComponent implements OnInit {
       }
     });
   }
+  changeShareAccess(item: InventoryShare): void {
+    if (!this.sharing || this.updatingShareId !== null || !this.canManageAccess) return;
+    const nextAccess: 1 | 2 = item.accessLevel === 2 ? 1 : 2;
+    const nextLabel = nextAccess === 2 ? 'Editor' : 'Lector';
+    this.confirms.confirm({
+      title: 'Cambiar permiso',
+      message: `¿Cambiar el acceso de «${item.username || 'este usuario'}» a ${nextLabel}?`,
+      confirmLabel: `Cambiar a ${nextLabel}`, tone: 'primary', icon: 'swap_horiz'
+    }).subscribe(confirmed => {
+      if (!confirmed || this.updatingShareId !== null) return;
+      this.updatingShareId = item.id;
+      this.api.updateShareAccess(item.id, nextAccess).subscribe({
+        next: () => {
+          this.shares = this.shares.map(row => row.id === item.id ? { ...row, accessLevel: nextAccess } : row);
+          this.updatingShareId = null;
+          this.toast.success(`Permiso actualizado a ${nextLabel}.`);
+        },
+        error: e => {
+          this.updatingShareId = null;
+          this.toast.error(String(e?.error?.error || 'No se pudo actualizar el permiso.'));
+        }
+      });
+    });
+  }
+
   revokeShare(item: InventoryShare): void {
     if (!this.sharing || !this.canManageAccess) return;
     this.confirms.confirm({

@@ -172,3 +172,226 @@
 .record-hint {
     color: #a8c0d0
 }
+
+
+.record-series {
+    align-items: center;
+}
+
+.record-series-data {
+    display: flex;
+    flex: 1;
+    min-width: 0;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.record-series-data span {
+    color: #a8bdcb;
+    overflow-wrap: anywhere;
+}
+
+.record-series-data small {
+    width: fit-content;
+    color: #b7e7c5;
+    font-weight: 700;
+}
+
+.record-series-data small.record-series-retired {
+    color: #f2b2b8;
+}
+
+.record-series-retire,
+.serial-add-row,
+.serial-register-batch,
+.serial-remove-row {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    border-radius: 8px;
+    border: 1px solid #60798b;
+    background: #243b4a;
+    color: #e8f1f8;
+    padding: 7px 10px;
+    min-height: 34px;
+    font: inherit;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.record-series-retire {
+    flex: none;
+    border-color: #96616a;
+    background: #452832;
+    color: #ffdce0;
+}
+
+.record-series-retire mat-icon,
+.serial-add-row mat-icon,
+.serial-register-batch mat-icon,
+.serial-remove-row mat-icon {
+    width: 17px;
+    height: 17px;
+    font-size: 17px;
+}
+
+.serial-decommission {
+    display: grid;
+    gap: 7px;
+    margin-top: 14px;
+    padding-top: 12px;
+    border-top: 1px solid #364858;
+}
+
+.serial-decommission label {
+    color: #e5edf4;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.serial-decommission textarea {
+    width: 100%;
+    box-sizing: border-box;
+    resize: vertical;
+    min-height: 58px;
+    border: 1px solid #587287;
+    border-radius: 8px;
+    padding: 9px 11px;
+    background: #111c25;
+    color: #edf4fa;
+    font: inherit;
+    font-size: 12px;
+}
+
+.serial-decommission small,
+.serial-batch-footer small,
+.serial-notice {
+    color: #a8bdcb;
+    font-size: 11px;
+    line-height: 1.5;
+}
+
+.serial-batch-title {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.serial-batch-title h3 {
+    margin-bottom: 5px;
+}
+
+.serial-batch-title .record-hint {
+    margin: 0;
+    max-width: 580px;
+    line-height: 1.45;
+    font-size: 11px;
+}
+
+.serial-add-row {
+    flex: none;
+    border-color: var(--inv-company-accent, #a2d149);
+    color: #e9f5d7;
+    background: #263d32;
+}
+
+.serial-batch-scroll {
+    margin-top: 12px;
+    overflow-x: auto;
+    scrollbar-width: thin;
+}
+
+.serial-batch-header,
+.serial-batch-row {
+    display: grid;
+    grid-template-columns: minmax(150px, 1.3fr) repeat(auto-fit, minmax(115px, 1fr)) 34px;
+    align-items: center;
+    gap: 7px;
+    min-width: 260px;
+}
+
+.serial-batch-header {
+    padding: 0 0 7px;
+    color: #a9c0cf;
+    font-size: 10px;
+}
+
+.serial-batch-row {
+    padding: 6px 0;
+    border-top: 1px solid #344959;
+}
+
+.serial-batch-row input {
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    min-height: 35px;
+    border: 1px solid #506b7f;
+    border-radius: 7px;
+    padding: 6px 8px;
+    background: #111c25;
+    color: #edf4fa;
+    font: inherit;
+    font-size: 11px;
+}
+
+.serial-batch-row input:focus-visible,
+.serial-decommission textarea:focus-visible {
+    outline: 2px solid var(--inv-company-accent, #a2d149);
+    outline-offset: 1px;
+}
+
+.serial-remove-row {
+    width: 30px;
+    min-height: 30px;
+    padding: 4px;
+    background: #39252a;
+    border-color: #875b64;
+    color: #ffdce0;
+}
+
+.serial-remove-row:disabled,
+.serial-add-row:disabled,
+.serial-register-batch:disabled,
+.record-series-retire:disabled {
+    opacity: .45;
+    cursor: not-allowed;
+}
+
+.serial-batch-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 10px;
+}
+
+.serial-register-batch {
+    border-color: var(--inv-company-accent, #a2d149);
+    background: var(--inv-company-accent, #a2d149);
+    color: #17232b;
+}
+
+.serial-notice {
+    display: block;
+    margin-top: 9px;
+    color: #d2edb5;
+}
+
+@media (max-width: 600px) {
+    .record-series {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .serial-batch-header,
+    .serial-batch-row {
+        grid-template-columns: minmax(150px, 1.3fr) repeat(2, minmax(110px, 1fr)) 34px;
+        min-width: 420px;
+    }
+}

@@ -4,7 +4,7 @@ import { InventoryDialogMotionDirective } from '../../../shared/ui/inv-dialog-mo
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { MatDialog, MatDialogRef, MatDialogModule, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { HttpErrorResponse } from '@angular/common/http';
-import { forkJoin, of } from 'rxjs';
+import { catchError, forkJoin, of } from 'rxjs';
 import type { Observable } from 'rxjs';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSelectModule } from '@angular/material/select';
@@ -22,6 +22,12 @@ import { Article, ArticleDetail } from '../../../core/models/article.model';
 import { BrandDialogComponent, BrandDialogData } from '../brand-dialog/brand-dialog';
 import { isMeasuredUnit, isPackUnit, isUnitName, isUnitConversion, fixedUnitFactor, validPieces, validQuantity, quantityStep, quantityLabel } from '../../../shared/inventory/inventory-units';
 import {MeasurementUnitsService, MeasurementUnit} from '../../../core/services/measurement-units';
+import { AccessService } from '../../../core/services/access';
+import { ArticleSupplierDialogComponent } from '../supplier-dialog/article-supplier-dialog';
+import {
+  ArticleReferenceDataService, ArticleSupplierReference, ArticleParameterReference,
+  CurrencyReference, ExchangeRateReference
+} from '../../../core/services/article-reference-data';
 
 interface AttributeField {
   control: string;
@@ -46,6 +52,8 @@ export class ArticleFormComponent implements OnInit, OnDestroy {
   private dialog = inject(MatDialog);
   private snackBar = inject(MatSnackBar);
   private readonly measurementUnitsService = inject(MeasurementUnitsService);
+  private readonly referenceData = inject(ArticleReferenceDataService);
+  private readonly access = inject(AccessService);
   private todasLasUnidades: MeasurementUnit[] = [];
   public dialogRef = inject(MatDialogRef<ArticleFormComponent>);
   public data = inject(MAT_DIALOG_DATA, { optional: true });
@@ -65,8 +73,21 @@ export class ArticleFormComponent implements OnInit, OnDestroy {
   private previousPurchaseUnit = '';
   unitLoadError = '';
 
-  // IMPORTANTE: cotización fija original, no es el tipo de cambio de hoy.
-  monedas = [{ code: 'S/.', rate: 1 }, { code: 'USD', rate: 3.85 }];
+  proveedores: ArticleSupplierReference[] = [];
+  estados: ArticleParameterReference[] = [];
+  condiciones: ArticleParameterReference[] = [];
+  ubicaciones: ArticleParameterReference[] = [];
+  supplierError = '';
+  canManageSuppliers = false;
+  masterInventoryId = 0;
+  parameterError = '';
+  currencyError = '';
+  isLoadingReferences = false;
+  monedas: { id: number; code: string; label: string; rate: number | null; rateDate: string | null }[] = [
+    { id: 0, code: 'S/.', label: 'Soles (PEN)', rate: 1, rateDate: null }
+  ];
+  exchangeRateNotice = '';
+  currencyRateWarning = '';
   currentTrackingMode = '';
 
   utilityPerUnit = 0;
@@ -277,8 +298,18 @@ export class ArticleFormComponent implements OnInit, OnDestroy {
     this.isEditMode = !!this.data?.id;
     this.initForms();
     this.setupSubscriptions();
+    this.access.me().subscribe({
+      next: snapshot => {
+        this.masterInventoryId = snapshot.masterInventoryId ?? 0;
+        this.canManageSuppliers = snapshot.isDeveloper ||
+          snapshot.permissions.includes('MANAGE_MASTER_CATALOG');
+        this.cdr.markForCheck();
+      },
+      error: () => { this.canManageSuppliers = false; this.cdr.markForCheck(); }
+    });
     this.cargarUnidades();
     this.loadCatalogs();
+    this.loadArticleReferences();
     if (this.isEditMode) {
       this.articleService.getArticle(Number(this.data.id)).subscribe({
         next: (article) => {
@@ -302,6 +333,7 @@ export class ArticleFormComponent implements OnInit, OnDestroy {
       id: [this.data?.id || 0],
       categoryId: [null, Validators.required],
       brandId: [null, Validators.required],
+      supplierId: [null],
       barcode: [''],
       sku: [''],
       name: [{ value: '', disabled: true }, Validators.required],
@@ -321,7 +353,10 @@ export class ArticleFormComponent implements OnInit, OnDestroy {
       saleUnit: ['Unidad', Validators.required],
       conversionFactor: [1, [Validators.required, Validators.min(0.01)]],
       initialQuantity: [null],
-      stock: [{ value: 0, disabled: true }, [Validators.required, Validators.min(0)]]
+      stock: [{ value: 0, disabled: true }, [Validators.required, Validators.min(0)]],
+      statusId: [null],
+      conditionId: [null],
+      locationId: [null]
     });
 
     this.financeForm = this.fb.group({
@@ -380,6 +415,106 @@ export class ArticleFormComponent implements OnInit, OnDestroy {
   loadCatalogs(): void {
     this.loadCategories();
     this.loadBrands();
+  }
+
+  private normalizeReferenceKey(value: string | null | undefined): string {
+    return String(value ?? '').trim().toLocaleLowerCase('es')
+      .normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  }
+
+  private currencyKind(code: string | null | undefined): 'PEN' | 'USD' | 'EUR' | null {
+    const value = String(code ?? '').trim().toUpperCase();
+    if (value === 'PEN' || value === 'S/.' || value === 'S/' || value.includes('SOL')) return 'PEN';
+    if (value === 'USD' || value === '$' || value.includes('DOLAR')) return 'USD';
+    if (value === 'EUR' || value === '€' || value.includes('EURO')) return 'EUR';
+    return null;
+  }
+
+  private loadArticleReferences(): void {
+    this.isLoadingReferences = true;
+    this.supplierError = '';
+    this.parameterError = '';
+    this.currencyError = '';
+    forkJoin({
+      suppliers: this.referenceData.suppliers().pipe(catchError(() => {
+        this.supplierError = 'No se pudieron cargar los proveedores del catálogo maestro.';
+        return of([] as ArticleSupplierReference[]);
+      })),
+      parameters: this.referenceData.parameters().pipe(catchError(() => {
+        this.parameterError = 'No se pudieron cargar los parámetros de la empresa.';
+        return of([] as ArticleParameterReference[]);
+      })),
+      currencies: this.referenceData.currencies().pipe(catchError(() => {
+        this.currencyError = 'No se pudieron cargar las monedas disponibles.';
+        return of([] as CurrencyReference[]);
+      }))
+    }).subscribe(({ suppliers, parameters, currencies }) => {
+      this.proveedores = (suppliers || []).filter(x => x.isActive)
+        .sort((a, b) => a.businessName.localeCompare(b.businessName, 'es'));
+      const available = parameters || [];
+      this.estados = available.filter(x => this.normalizeReferenceKey(x.parameterType) === 'estado')
+        .sort((a, b) => a.name.localeCompare(b.name, 'es'));
+      this.condiciones = available.filter(x => this.normalizeReferenceKey(x.parameterType) === 'condicion')
+        .sort((a, b) => a.name.localeCompare(b.name, 'es'));
+      this.ubicaciones = available.filter(x => this.normalizeReferenceKey(x.parameterType) === 'ubicacion')
+        .sort((a, b) => a.name.localeCompare(b.name, 'es'));
+      this.monedas = (currencies || [])
+        .filter(x => String(x.currencyCode ?? '').trim().length > 0)
+        .map(x => ({
+          id: x.id,
+          code: String(x.currencyCode).trim(),
+          label: String(x.currencyName) + ' (' + String(x.currencyCode).trim() + ')',
+          rate: this.currencyKind(x.currencyCode) === 'PEN' ? 1 : null,
+          rateDate: null
+        }));
+      const baseParameter = available.find(x => this.normalizeReferenceKey(x.parameterType) === 'monedabase');
+      const configuredCurrencyId = Number(baseParameter?.name);
+      const defaultCurrency = this.monedas.find(x => x.id === configuredCurrencyId)
+        ?? this.monedas.find(x => this.currencyKind(x.code) === 'PEN')
+        ?? this.monedas[0];
+      if (!this.isEditMode && defaultCurrency) {
+        this.financeForm.patchValue({
+          acqCurrency: defaultCurrency.code,
+          saleCurrency: defaultCurrency.code
+        }, { emitEvent: false });
+      }
+      this.isLoadingReferences = false;
+      if (this.currencyError || !this.monedas.length) {
+        if (!this.currencyError) this.currencyError = 'El catálogo de monedas no contiene opciones disponibles.';
+      } else {
+        this.loadDailyExchangeRates();
+      }
+      this.applyExistingArticle();
+      this.cdr.markForCheck();
+    });
+  }
+
+  private loadDailyExchangeRates(): void {
+    const usd$ = this.referenceData.todayExchangeRate('USD').pipe(catchError(() => of(null)));
+    const eur$ = this.referenceData.todayExchangeRate('EUR').pipe(catchError(() => of(null)));
+    forkJoin({ usd: usd$, eur: eur$ }).subscribe(({ usd, eur }) => {
+      this.monedas = this.monedas.map(currency => {
+        const kind = this.currencyKind(currency.code);
+        const quotation: ExchangeRateReference | null = kind === 'USD' ? usd : kind === 'EUR' ? eur : null;
+        if (kind === 'PEN') return { ...currency, rate: 1, rateDate: null };
+        return {
+          ...currency,
+          rate: quotation && Number(quotation.sellPrice) > 0 ? Number(quotation.sellPrice) : null,
+          rateDate: quotation?.date ?? null
+        };
+      });
+      const describe = (label: string, rate: ExchangeRateReference | null) => {
+        if (!rate || !(Number(rate.sellPrice) > 0)) return label + ': sin cotización disponible';
+        const date = String(rate.date ?? '').slice(0, 10);
+        return label + ': S/ ' + Number(rate.sellPrice).toFixed(4) + (date ? ' (' + date + ')' : '');
+      };
+      this.exchangeRateNotice = [
+        usd ? describe('USD venta', usd) : 'USD: sin cotización disponible',
+        eur ? describe('EUR venta', eur) : 'EUR: sin cotización disponible'
+      ].join(' · ');
+      this.calculateProfit();
+      this.cdr.markForCheck();
+    });
   }
 
   loadCategories(refresh = false): void {
@@ -460,6 +595,7 @@ export class ArticleFormComponent implements OnInit, OnDestroy {
     try { attrs = a.characteristics ? JSON.parse(a.characteristics) : {}; } catch { /* dato legado libre */ }
     this.identityForm.patchValue({
       id: a.id, categoryId: a.categoryId, brandId: a.brandId ?? null,
+      supplierId: a.supplierId ?? null,
       barcode: a.barcode ?? '', sku: a.code ?? '', name: a.name,
       model: a.model ?? '', presentation: a.presentation ?? '',
       serialNumber: a.serialNumber ?? detail?.serialNumber ?? '',
@@ -473,7 +609,10 @@ export class ArticleFormComponent implements OnInit, OnDestroy {
     this.logisticsForm.patchValue({
       acqUnit: a.acquisitionUnit ?? 'Unidad', saleUnit: a.saleUnit ?? a.measurementUnit ?? 'Unidad',
       conversionFactor: a.conversionFactor ?? 1, stock: a.stock,
-      initialQuantity: a.stock / Math.max((fixedUnitFactor(String(a.acquisitionUnit ?? '')) ?? Number(a.conversionFactor)) || 1, 0.01)
+      initialQuantity: a.stock / Math.max((fixedUnitFactor(String(a.acquisitionUnit ?? '')) ?? Number(a.conversionFactor)) || 1, 0.01),
+      statusId: a.statusId ?? null,
+      conditionId: a.conditionId ?? null,
+      locationId: a.locationId ?? null
     }, { emitEvent: false });
     this.actualizarUnidadesPermitidas();
     this.syncUnitConversion(false);
@@ -734,6 +873,45 @@ export class ArticleFormComponent implements OnInit, OnDestroy {
     this.actualizarUnidadesPermitidas();
     this.syncUnitConversion(false);
     this.generateAutoName();
+  }
+
+  manageSupplier(editing: boolean): void {
+    const category = this.selectedCategory;
+    if (!this.canManageSuppliers || !category) return;
+    const currentId = Number(this.identityForm.get('supplierId')?.value);
+    const selected = editing
+      ? this.proveedores.find(supplier => Number(supplier.id) === currentId) ?? null
+      : null;
+    if (editing && !selected) return;
+
+    const dialogRef = this.dialog.open(ArticleSupplierDialogComponent, {
+      panelClass: 'inv-seven-modal',
+      enterAnimationDuration: 260,
+      exitAnimationDuration: 220,
+      width: 'min(760px, calc(100vw - 24px))',
+      maxWidth: 'calc(100vw - 24px)',
+      maxHeight: 'calc(100dvh - 24px)',
+      disableClose: true,
+      autoFocus: false,
+      restoreFocus: true,
+      data: { masterInventoryId: this.masterInventoryId, supplier: selected }
+    });
+
+    dialogRef.afterClosed().subscribe((saved?: ArticleSupplierReference) => {
+      if (!saved || !saved.id) return;
+      const exists = this.proveedores.some(item => Number(item.id) === Number(saved.id));
+      this.proveedores = exists
+        ? this.proveedores.map(item => Number(item.id) === Number(saved.id) ? { ...item, ...saved } : item)
+        : [...this.proveedores, saved];
+      this.proveedores.sort((a, b) => a.businessName.localeCompare(b.businessName, 'es'));
+      this.identityForm.get('supplierId')?.setValue(saved.id);
+      this.identityForm.get('supplierId')?.markAsDirty();
+      this.snackBar.open(
+        selected ? 'Proveedor actualizado y asociado al artículo.' : 'Proveedor registrado y asociado al artículo.',
+        'Cerrar', { duration: 3500 }
+      );
+      this.cdr.markForCheck();
+    });
   }
 
   agregarNuevaMarca(): void {
@@ -1081,8 +1259,20 @@ export class ArticleFormComponent implements OnInit, OnDestroy {
       this.isLoss = false;
       return;
     }
-    const acqRate = this.monedas.find(m => m.code === this.financeForm.get('acqCurrency')?.value)?.rate ?? 1;
-    const saleRate = this.monedas.find(m => m.code === this.financeForm.get('saleCurrency')?.value)?.rate ?? 1;
+    const acqCurrency = this.monedas.find(m => m.code === this.financeForm.get('acqCurrency')?.value);
+    const saleCurrency = this.monedas.find(m => m.code === this.financeForm.get('saleCurrency')?.value);
+    const acqRate = acqCurrency?.rate ?? null;
+    const saleRate = saleCurrency?.rate ?? null;
+    if (acqRate === null || saleRate === null) {
+      this.hasFinancialEstimate = false;
+      this.utilityPerUnit = this.marginPercent = this.profitabilityRatio = 0;
+      this.igvSalePerUnit = this.igvCostPerUnit = this.igvDifferencePerUnit = 0;
+      this.netSalePerUnit = this.netCostPerUnit = 0;
+      this.isLoss = false;
+      this.currencyRateWarning = 'No existe una cotización verificada para la moneda seleccionada. El cálculo de rentabilidad queda deshabilitado.';
+      return;
+    }
+    this.currencyRateWarning = '';
     const costGross = acquisition * acqRate / factor;
     const saleGross = sale * saleRate;
     // Proyección para operaciones gravadas: si el precio incluye impuesto, separa la base.
@@ -1192,7 +1382,11 @@ export class ArticleFormComponent implements OnInit, OnDestroy {
     const payload: Partial<Article> & { id: number } = {
       id: this.existingArticle?.id ?? 0,
       inventoryId: Number(targetInventoryId), categoryId: Number(category.id),
-      brandId: Number(identity.brandId), code, barcode: identity.barcode || null,
+      brandId: Number(identity.brandId), supplierId: identity.supplierId == null ? null : Number(identity.supplierId),
+      statusId: logistics.statusId == null ? null : Number(logistics.statusId),
+      conditionId: logistics.conditionId == null ? null : Number(logistics.conditionId),
+      locationId: logistics.locationId == null ? null : Number(logistics.locationId),
+      code, barcode: identity.barcode || null,
       name: String(identity.name).trim(), model: identity.model || 'Sin modelo',
       presentation: identity.presentation || null, serialNumber: identity.serialNumber || null,
       tracking: mode, stock: requestedStock,
