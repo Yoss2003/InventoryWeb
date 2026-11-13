@@ -31,7 +31,7 @@
       </div>
       <div class="sharing-card" *ngIf="currentInventoryId">
         <h2>Otorgar acceso</h2>
-        <form (ngSubmit)="share()" class="sharing-form">
+        <form *ngIf="canManageAccess" (ngSubmit)="share()" class="sharing-form">
           <div class="recipient-cell"><label for="share-recipient">Usuario, correo o DNI</label><input id="share-recipient" type="text" name="recipient" [(ngModel)]="identifier" maxlength="180" placeholder="Buscar colaborador de tu empresa" required appUiControl /></div>
           <div><label for="share-access">Permiso</label>
             <mat-form-field appearance="outline" class="sharing-select sharing-permission-select" subscriptSizing="dynamic">
@@ -52,7 +52,7 @@
       <h2>Colaboradores autorizados ({{shares.length}})</h2>
       <app-loading-indicator *ngIf="loadingShares && !sharesLoaded" message="Cargando colaboradores..." />
       <div class="sharing-table-wrap inv-core-table-wrap" *ngIf="!loadingShares || sharesLoaded"><table><thead><tr><th>Usuario</th><th>Permiso</th><th>Desde</th><th>Acciones</th></tr></thead><tbody>
-        <tr *ngFor="let item of shares"><td>{{item.username || ('Usuario #' + item.userId)}}</td><td>{{item.accessLevel === 2 ? 'Editor' : 'Lector'}}</td><td>{{item.sharedDate | date:'dd/MM/yyyy'}}</td><td class="sharing-actions"><button type="button" class="sharing-change" (click)="changeAccess(item)" [disabled]="updatingShareId !== null" [title]="item.accessLevel === 2 ? 'Cambiar a lector' : 'Cambiar a editor'" [attr.aria-label]="item.accessLevel === 2 ? 'Cambiar a lector' : 'Cambiar a editor'"><mat-icon>{{updatingShareId === item.id ? 'hourglass_top' : 'swap_horiz'}}</mat-icon></button><button type="button" class="danger" (click)="revoke(item)" title="Revocar acceso" aria-label="Revocar acceso"><mat-icon>person_remove</mat-icon></button></td></tr>
+        <tr *ngFor="let item of shares"><td>{{item.username || ('Usuario #' + item.userId)}}</td><td>{{item.accessLevel === 2 ? 'Editor' : 'Lector'}}</td><td>{{item.sharedDate | date:'dd/MM/yyyy'}}</td><td class="sharing-actions"><button *ngIf="canManageAccess" type="button" class="sharing-change" (click)="changeAccess(item)" [disabled]="updatingShareId !== null" [title]="item.accessLevel === 2 ? 'Cambiar a lector' : 'Cambiar a editor'" [attr.aria-label]="item.accessLevel === 2 ? 'Cambiar a lector' : 'Cambiar a editor'"><mat-icon>{{updatingShareId === item.id ? 'hourglass_top' : 'swap_horiz'}}</mat-icon></button><button *ngIf="canManageAccess" type="button" class="danger" (click)="revoke(item)" title="Revocar acceso" aria-label="Revocar acceso"><mat-icon>person_remove</mat-icon></button></td></tr>
         <tr *ngIf="!shares.length && !loadingShares && !error"><td colspan="4" class="empty">No hay colaboradores autorizados para este inventario.</td></tr>
       </tbody></table></div>
       <div class="sharing-hint" *ngIf="loadingShares && sharesLoaded"><app-loading-indicator [compact]="true" message="Actualizando colaboradores..." /></div>
