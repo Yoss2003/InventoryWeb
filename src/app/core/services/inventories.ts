@@ -51,6 +51,9 @@ export class InventoryService {
   share(inventoryId: number, guestIdentifier: string, accessLevel: 1 | 2): Observable<{ message: string }> {
     return this.http.post<{ message: string }>(`${this.url}/Share`, { inventoryId, guestIdentifier, accessLevel });
   }
+  updateShareAccess(shareId: number, accessLevel: 1 | 2): Observable<InventoryShare> {
+    return this.http.put<InventoryShare>(`${this.url}/Share/${shareId}/Access`, { accessLevel });
+  }
   revoke(shareId: number): Observable<void> {
     return this.http.delete<void>(`${this.url}/Revoke/${shareId}`);
   }
