@@ -28,7 +28,7 @@
         <div *ngFor="let d of (a.details || a.articleDetails || [])" class="record-series">
           <div class="record-series-data">
             <strong>SN: {{d.serialNumber}}</strong>
-            <span>{{[d.attr1,d.attr2,d.attr3,d.attr4,d.attr5,d.attr6].filter(Boolean).join(' · ') || 'Sin atributos adicionales'}}</span>
+            <span>{{d.attr1 || ''}} {{d.attr2 || ''}} {{d.attr3 || ''}} {{d.attr4 || ''}} {{d.attr5 || ''}} {{d.attr6 || ''}}</span>
             <small [class.record-series-retired]="d.isActive === false">{{d.isActive === false ? 'Retirada' : 'Disponible'}}</small>
           </div>
           <button *ngIf="d.isActive !== false && a.isActive" type="button" class="record-series-retire"
@@ -38,7 +38,7 @@
             {{decommissioningId === d.id ? 'Procesando…' : 'Dar de baja'}}
           </button>
         </div>
-        <div class="serial-decommission" *ngIf="a.tracking === 1 && a.isActive && (a.details || a.articleDetails || []).some">
+        <div class="serial-decommission" *ngIf="a.tracking === 1 && a.isActive">
           <label for="serial-decommission-reason">Motivo de baja definitiva</label>
           <textarea id="serial-decommission-reason" [(ngModel)]="decommissionReason" maxlength="500"
             rows="2" placeholder="Describe por qué se retira la unidad (mínimo 5 caracteres)."></textarea>
@@ -73,7 +73,7 @@
         </div>
         <div class="serial-batch-footer">
           <small>{{batchRows.length}} de 1000 unidades preparadas.</small>
-          <button type="button" class="serial-register-batch" [disabled]="registeringBatch || batchRows.some(row => !row.serialNumber.trim())"
+          <button type="button" class="serial-register-batch" [disabled]="!canRegisterBatch"
             (click)="registerBatch()">
             <mat-icon>{{registeringBatch ? 'hourglass_top' : 'save'}}</mat-icon>
             {{registeringBatch ? 'Registrando lote…' : 'Registrar lote'}}
