@@ -118,6 +118,23 @@
                 </div>
               </div>
 
+              <div class="form-group supplier-field">
+                <div class="field-heading">
+                  <label for="article-supplier">Proveedor asociado</label>
+                  <span class="field-feedback" [class.is-error]="!!supplierError" aria-live="polite">
+                    {{supplierError || (isLoadingReferences ? 'Cargando proveedores...' : 'Opcional · Catálogo maestro de la empresa')}}
+                  </span>
+                </div>
+                <mat-form-field appearance="outline" class="inventory-select">
+                  <mat-select id="article-supplier" formControlName="supplierId" panelClass="inventory-select-options">
+                    <mat-option [value]="null">Sin proveedor asociado</mat-option>
+                    <mat-option *ngFor="let supplier of proveedores" [value]="supplier.id">
+                      {{supplier.businessName}} · RUC {{supplier.ruc}}
+                    </mat-option>
+                  </mat-select>
+                </mat-form-field>
+              </div>
+
               <div class="form-group" *ngIf="currentTrackingMode === 'Estándar'">
                 <div class="field-heading"><label for="article-barcode">Código de barras <span class="required">*</span></label><span class="field-feedback" [class.is-error]="isInvalid('identity','barcode')">{{ isInvalid('identity','barcode') ? 'El código de barras es obligatorio.' : '' }}</span></div>
                 <div class="input-with-actions">
@@ -344,6 +361,37 @@
             </label>
           </div>
           <p *ngIf="currentTrackingMode === 'Serializado' && isEditMode" class="helper-note"><mat-icon>info_outline</mat-icon> Para agregar nuevas unidades a un artículo existente usa Gestión de series, que también registra su movimiento. El stock no se cambia aquí.</p>
+
+          <div class="article-parameter-grid">
+            <div class="field-tile">
+              <label for="article-status">Estado</label>
+              <mat-form-field appearance="outline" class="inventory-select">
+                <mat-select id="article-status" formControlName="statusId" panelClass="inventory-select-options">
+                  <mat-option [value]="null">Sin especificar</mat-option>
+                  <mat-option *ngFor="let item of estados" [value]="item.id">{{item.name}}</mat-option>
+                </mat-select>
+              </mat-form-field>
+            </div>
+            <div class="field-tile">
+              <label for="article-condition">Condición física</label>
+              <mat-form-field appearance="outline" class="inventory-select">
+                <mat-select id="article-condition" formControlName="conditionId" panelClass="inventory-select-options">
+                  <mat-option [value]="null">Sin especificar</mat-option>
+                  <mat-option *ngFor="let item of condiciones" [value]="item.id">{{item.name}}</mat-option>
+                </mat-select>
+              </mat-form-field>
+            </div>
+            <div class="field-tile">
+              <label for="article-location">Ubicación</label>
+              <mat-form-field appearance="outline" class="inventory-select">
+                <mat-select id="article-location" formControlName="locationId" panelClass="inventory-select-options">
+                  <mat-option [value]="null">Sin especificar</mat-option>
+                  <mat-option *ngFor="let item of ubicaciones" [value]="item.id">{{item.name}}</mat-option>
+                </mat-select>
+              </mat-form-field>
+            </div>
+          </div>
+          <p class="units-load-error" *ngIf="parameterError" role="alert">{{parameterError}}</p>
         </form>
       </div>
     </section>
@@ -363,7 +411,7 @@
                 <input id="acq-price" type="number" min="0" step="0.01" formControlName="acqPrice" class="custom-input" placeholder="0.00" [class.invalid]="isInvalid('finance', 'acqPrice')" />
                 <mat-form-field appearance="outline" class="inventory-select" aria-label="Moneda de adquisición">
                   <mat-select formControlName="acqCurrency" aria-label="Moneda de adquisición" panelClass="inventory-select-options">
-                    <mat-option *ngFor="let m of monedas" [value]="m.code">{{ m.code }}</mat-option>
+                    <mat-option *ngFor="let m of monedas" [value]="m.code">{{ m.label }}</mat-option>
                   </mat-select>
                 </mat-form-field>
               </div>
@@ -379,10 +427,13 @@
                 </mat-form-field>
               </div>
             </div>
+            <p class="exchange-rate-note" *ngIf="exchangeRateNotice">{{exchangeRateNotice}}</p>
+            <p class="units-load-error" *ngIf="currencyError" role="alert">{{currencyError}}</p>
+            <p class="exchange-rate-warning" *ngIf="currencyRateWarning" role="alert">{{currencyRateWarning}}</p>
           </div>
 
           <div class="profitability-dashboard" [class.is-loss]="isLoss">
-            <div class="dash-header"><mat-icon>calculate</mat-icon><div><strong>Vista de rentabilidad (estimada)</strong><p>Cálculos por unidad de venta, expresados en soles</p></div><button type="button" class="finance-info-button" aria-label="Información y limitaciones del cálculo de rentabilidad" title="Estimación para operaciones gravadas. No determina el impuesto a declarar ni verifica el crédito fiscal. No incluye descuentos ni otros gastos. El USD utiliza un tipo de cambio fijo configurado."><mat-icon>info_outline</mat-icon></button></div>
+            <div class="dash-header"><mat-icon>calculate</mat-icon><div><strong>Vista de rentabilidad (estimada)</strong><p>Cálculos por unidad de venta, expresados en soles</p></div><button type="button" class="finance-info-button" aria-label="Información y limitaciones del cálculo de rentabilidad" title="Estimación para operaciones gravadas. No determina el impuesto a declarar ni verifica el crédito fiscal. No incluye descuentos ni otros gastos. Las cotizaciones provienen del servicio de tipos de cambio y pueden corresponder a la última fecha disponible."><mat-icon>info_outline</mat-icon></button></div>
             <label class="igv-option"><input type="checkbox" [checked]="pricesIncludeIgv" (change)="setPricesIncludeIgv($event)" /><span>Precios ingresados incluyen IGV (18 %)</span></label>
             <div class="dash-metrics" *ngIf="hasFinancialEstimate; else awaitingValues">
               <div class="metric"><mat-icon>paid</mat-icon><span class="label">Utilidad por unidad</span><span class="value">S/ {{ utilityPerUnit | number:'1.2-2' }}</span></div>
