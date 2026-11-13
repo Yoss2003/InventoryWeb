@@ -120,6 +120,12 @@
           <td>{{share.username || ('Usuario #' + share.userId)}}</td>
           <td>{{share.accessLevel === 2 ? 'Editor' : 'Lector'}}</td>
           <td class="inv-core-action-cell">
+            <button type="button" appUiTableAction="normal" (click)="changeShareAccess(share)"
+              [disabled]="updatingShareId !== null"
+              [attr.aria-label]="share.accessLevel === 2 ? 'Cambiar a lector' : 'Cambiar a editor'"
+              [title]="share.accessLevel === 2 ? 'Cambiar a lector' : 'Cambiar a editor'">
+              <mat-icon aria-hidden="true">{{updatingShareId === share.id ? 'hourglass_top' : 'swap_horiz'}}</mat-icon>
+            </button>
             <button type="button" appUiTableAction="danger" (click)="revokeShare(share)"
               [attr.aria-label]="'Revocar acceso de ' + (share.username || share.userId)"
               title="Revocar acceso">
