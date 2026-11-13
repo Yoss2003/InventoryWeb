@@ -33,6 +33,7 @@ export class InventorySharingComponent implements OnInit {
   loadingShares = false;
   sharesLoaded = false;
   saving = false;
+  updatingShareId: number | null = null;
   error = '';
   private requestId = 0;
   private loadedSharesInventoryId: number | null = null;
@@ -140,6 +141,33 @@ export class InventorySharingComponent implements OnInit {
         this.snack.open(String(err?.error?.error ?? 'No se pudo compartir el inventario.'), 'Cerrar', {duration: 6000});
         this.cdr.markForCheck();
       }
+    });
+  }
+
+  changeAccess(item: InventoryShare): void {
+    if (this.updatingShareId !== null) return;
+    const nextAccess: 1 | 2 = item.accessLevel === 2 ? 1 : 2;
+    const nextLabel = nextAccess === 2 ? 'Editor' : 'Lector';
+    this.confirms.confirm({
+      title: 'Cambiar permiso',
+      message: `¿Cambiar el acceso de «${item.username || 'este usuario'}» a ${nextLabel}?`,
+      confirmLabel: `Cambiar a ${nextLabel}`, tone: 'primary', icon: 'swap_horiz'
+    }).subscribe(confirmed => {
+      if (!confirmed || this.updatingShareId !== null) return;
+      this.updatingShareId = item.id;
+      this.api.updateShareAccess(item.id, nextAccess).subscribe({
+        next: () => {
+          this.shares = this.shares.map(row => row.id === item.id ? { ...row, accessLevel: nextAccess } : row);
+          this.updatingShareId = null;
+          this.snack.open(`Permiso actualizado a ${nextLabel}.`, 'Cerrar', { duration: 3000 });
+          this.cdr.markForCheck();
+        },
+        error: err => {
+          this.updatingShareId = null;
+          this.snack.open(String(err?.error?.error ?? 'No se pudo actualizar el permiso.'), 'Cerrar', { duration: 6000 });
+          this.cdr.markForCheck();
+        }
+      });
     });
   }
 
