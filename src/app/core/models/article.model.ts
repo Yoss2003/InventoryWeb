@@ -34,6 +34,14 @@ export interface Article {
   acquisitionCurrency?: string | null;
   salePrice?: number | null;
   saleCurrency?: string | null;
+  supplierId?: number | null;
+  statusId?: number | null;
+  conditionId?: number | null;
+  locationId?: number | null;
+  acquisitionDate?: string | null;
+  usefulLifeMonths?: number | null;
+  warrantyEndDate?: string | null;
+  observation?: string | null;
   characteristics?: string | null;
   mainPhotoPath?: string | null;
   mainVoucherPath?: string | null;
