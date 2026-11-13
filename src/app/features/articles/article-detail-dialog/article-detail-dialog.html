@@ -1,7 +1,7 @@
 <div class="record-dialog ui-v2-dialog ui-v2-dialog--simple">
   <header><span class="inv-seven-title-icon"><mat-icon>inventory_2</mat-icon></span><div><h2>Ficha completa del artículo</h2><small>ID #{{ data.id }}</small></div><button type="button" (click)="dialogRef.close()"><mat-icon>close</mat-icon></button></header>
   <main>
-    <p *ngIf="loading">Consultando artículo…</p><p *ngIf="error" role="alert">{{error}}</p>
+    <div class="record-loading" *ngIf="loading"><app-loading-indicator message="Consultando artículo y sus detalles..." /></div><p *ngIf="error" role="alert">{{error}}</p>
     <ng-container *ngIf="article as a">
       <section><h3>Identificación</h3><div class="record-grid">
         <div><span>Nombre</span><strong>{{a.name}}</strong></div>
@@ -34,8 +34,8 @@
           <button *ngIf="d.isActive !== false && a.isActive" type="button" class="record-series-retire"
             [disabled]="decommissioningId !== null" (click)="decommission(d)"
             [title]="'Retirar serie ' + d.serialNumber">
-            <mat-icon>{{decommissioningId === d.id ? 'hourglass_top' : 'remove_circle'}}</mat-icon>
-            {{decommissioningId === d.id ? 'Procesando…' : 'Dar de baja'}}
+            <app-loading-indicator *ngIf="decommissioningId === d.id; else retireLabel" [compact]="true" message="Procesando..." />
+            <ng-template #retireLabel><mat-icon>remove_circle</mat-icon>Dar de baja</ng-template>
           </button>
         </div>
         <div class="serial-decommission" *ngIf="a.tracking === 1 && a.isActive">
@@ -75,8 +75,8 @@
           <small>{{batchRows.length}} de 1000 unidades preparadas.</small>
           <button type="button" class="serial-register-batch" [disabled]="!canRegisterBatch"
             (click)="registerBatch()">
-            <mat-icon>{{registeringBatch ? 'hourglass_top' : 'save'}}</mat-icon>
-            {{registeringBatch ? 'Registrando lote…' : 'Registrar lote'}}
+            <app-loading-indicator *ngIf="registeringBatch; else batchLabel" [compact]="true" message="Registrando lote..." />
+            <ng-template #batchLabel><mat-icon>save</mat-icon>Registrar lote</ng-template>
           </button>
         </div>
         <small *ngIf="serialNotice" class="serial-notice" role="status">{{serialNotice}}</small>
