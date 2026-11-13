@@ -114,12 +114,13 @@ export class ArticleSupplierDialogComponent {
     };
 
     this.saving = true;
-    if (this.editing && this.data.supplier) {
-      this.api.updateSupplier(this.data.supplier.id, supplier).subscribe({
+    const existing = this.data.supplier;
+    if (this.editing && existing) {
+      this.api.updateSupplier(existing.id, supplier).subscribe({
         next: () => {
           this.saving = false;
           this.snack.open('Proveedor actualizado.', 'Cerrar', { duration: 3000 });
-          this.dialogRef.close({ ...this.data.supplier, ...supplier, id: this.data.supplier.id } as ArticleSupplierReference);
+          this.dialogRef.close({ ...existing, ...supplier, id: existing.id } as ArticleSupplierReference);
         },
         error: error => {
           this.saving = false;
