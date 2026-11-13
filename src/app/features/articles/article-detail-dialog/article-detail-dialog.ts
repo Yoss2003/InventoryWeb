@@ -156,7 +156,8 @@ export class ArticleDetailDialogComponent implements OnInit, OnDestroy {
   decommission(detail: ArticleDetail): void {
     const article = this.article;
     const reason = this.decommissionReason.trim();
-    if (!article || !article.isActive || detail.isActive === false || this.decommissioningId !== null) return;
+    if (!article || !article.isActive || detail.id == null || detail.isActive === false || this.decommissioningId !== null) return;
+    const detailId = detail.id;
     if (reason.length < 5 || reason.length > 500) {
       this.serialNotice = 'Escribe un motivo de baja de entre 5 y 500 caracteres.';
       return;
@@ -167,8 +168,8 @@ export class ArticleDetailDialogComponent implements OnInit, OnDestroy {
       confirmLabel: 'Dar de baja', tone: 'danger', icon: 'remove_circle'
     }).subscribe(confirmed => {
       if (!confirmed || this.decommissioningId !== null) return;
-      this.decommissioningId = detail.id;
-      this.serials.decommission(article.id, detail.id, reason).subscribe({
+      this.decommissioningId = detailId;
+      this.serials.decommission(article.id, detailId, reason).subscribe({
         next: result => {
           this.decommissioningId = null;
           this.hasChanges = true;
