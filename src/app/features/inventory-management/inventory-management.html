@@ -15,7 +15,7 @@
         <mat-icon aria-hidden="true">group_add</mat-icon> Gestionar accesos
       </a>
     </div>
-    <div *ngIf="loading" class="inv-manage-loading"><app-loading-indicator message="Cargando inventarios y usuarios..." /></div>
+    <div *ngIf="loading" class="inv-manage-loading" role="status" aria-label="Cargando inventarios"><app-loading-indicator message="Cargando inventarios y usuarios..." /><div class="inv-manage-skeleton" aria-hidden="true"><span></span><span></span><span></span></div></div>
     <p *ngIf="error" class="inv-manage-error" role="alert">{{error}}</p>
     <div class="inv-core-table-wrap inv-manage-table" *ngIf="operational.length">
       <table>
