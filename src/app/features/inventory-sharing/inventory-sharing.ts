@@ -1,7 +1,7 @@
 import { UiControlDirective } from '../../shared/ui/v2/ui-control.directive';
 import { UiPageHeadingComponent } from '../../shared/ui/v2/ui-page-heading.component';
-import { ChangeDetectorRef, Component, OnInit, PLATFORM_ID, inject } from '@angular/core';
-import { CommonModule, isPlatformBrowser } from '@angular/common';
+import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -23,7 +23,6 @@ export class InventorySharingComponent implements OnInit {
   private readonly snack = inject(MatSnackBar);
   private readonly confirms = inject(ConfirmationDialogService);
   private readonly cdr = inject(ChangeDetectorRef);
-  private readonly platform = inject(PLATFORM_ID);
   myUserId = 0;
   canManageAccess = false;
   inventories: InventorySummary[] = [];
